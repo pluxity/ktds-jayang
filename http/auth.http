@@ -1,0 +1,47 @@
+### Post Request
+# @no-cookie-jar
+POST {{domain}}:{{port}}/auth/sign-up
+Content-Type: application/json
+
+{
+  "userId": "test",
+  "password": "test123",
+  "name": "홍길동"
+}
+
+
+
+### 로그인
+POST {{domain}}:{{port}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "userId": "admin",
+  "password": "user00!"
+}
+
+> {%
+    client.global.set("access-token", response.body.result.accessToken);
+    client.global.set("refresh-token", response.body.result.refreshToken);
+%}
+
+### Refresh Token
+@access-token = client.global.get("acess-token")
+@refresh-token = client.global.get("refresh-token")
+
+### 리프레쉬 토큰
+POST {{domain}}:{{port}}/auth/refresh-token
+Content-Type: application/json
+Authorization: Bearer {{refresh-token}}
+
+> {%
+    client.global.set("access-token", response.body.result.accessToken);
+    client.global.set("refresh-token", response.body.result.refreshToken);
+%}
+
+### Post Request
+# @no-cookie-jar
+POST {{domain}}:{{port}}/auth/api-keys/generate
+Content-Type: application/json
+
+> {% client.global.set("api-key", response.body.result.key);  %}

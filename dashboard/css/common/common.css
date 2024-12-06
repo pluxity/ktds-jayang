@@ -1,3 +1,79 @@
+/* RESET */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video, button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+body {
+  line-height: 1;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+strong {
+  font-weight: 700;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: "";
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* COLOR */
+:root {
+  --color-black:#25232b;
+  --color-black-key:#25262e;
+  --color-grayscale-light:#d9dde3;
+  --color-grayscale01:#b7b7b7;
+  --color-grayscale02:#757680;
+  --color-grayscale03:#676977;
+  --color-grayscale-dark:#3c3d43;
+  --color-navy:#0f2640;
+  --color-navy-dark:#07142c;
+  --color-mint:#00f5bf;
+  --color-mint-dart:#0abf97;
+  --color-blue:#186ae5;
+  --color-blue-dark:#0754c8;
+  --color-danger:#df1344;
+  --color-warning:#ff6444;
+  --color-caution:#00deaa;
+}
+
+/* FONT */
 @font-face {
   font-family: "SUIT";
   font-weight: 100;
@@ -63,6 +139,7 @@
 }
 html {
   font-family: "SUIT", sans-serif;
+  font-size: 16px;
 }
 
 body {
@@ -70,11 +147,17 @@ body {
   height: 100vh;
 }
 
-header {
+.hide {
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
+  border: 0;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+/* GNB */
+header {
   display: flex;
   align-items: center;
   padding: 0 23px 0 30px;

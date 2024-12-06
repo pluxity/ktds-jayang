@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./css/common/reset.css" rel="stylesheet"/>
     <link href="./css/common/common.css" rel="stylesheet"/>
     <link href="./css/main.css" rel="stylesheet"/>
     <title>KT 자양 통합 운영 플랫폼</title>
@@ -13,6 +12,75 @@
         <header>
             <h1 class="header-logo"></h1>
         </header>
+
+        <!-- Badge -->
+         <span class="badge">N</span>
+
+        <!-- Alert -->
+        <div class="alert">
+             <p>등록된 공지가 없습니다.</p>
+            <button type="button" class="button button--solid-upper" disabled>확인</button>
+        </div>
+
+        <!-- Toast -->
+        <!-- [D] toast 노출 시 toast--active 클래스 추가 -->
+        <div class="toast">
+            <div class="inner">
+                <button type="button" class="toast__close"><span class="hide">close                    </span></button>
+                <div class="toast__texts">
+                    <strong>[SMS] 09:34:56 시설관리팀 홍길동길동</strong>
+                    <p>
+                        [엘리베이터 멈춤] 건물A동 1호기 멈춤​<br>
+                        즉시 상황 확인 후 보고 요망​<br>
+                        필수 보고 사항: 인명 피해 여부<br>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 경고 팝업 -->
+        <div class="popup-notice">
+            <h2 class="popup-notice__head">[승강설비] 에스컬레이터 끼임 사고</h2>
+            <div class="popup-notice__content">
+                <table>
+                    <caption class="hide">에스컬레이터 끼임 사고</caption>
+                    <colgroup>
+                        <col style="width:40%">
+                        <col style="width:100%">
+                    </colgroup>
+                     <tbody>
+                        <tr>
+                            <th scope="row">발생 위치</th>
+                            <td>건물A 13F</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">장비명</th>
+                            <td>ES_13F_12345</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">발생 일시</th>
+                            <td>2024-12-31 12:34:56</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">SMS</th>
+                            <td>시설관리팀 홍길동길동 담당자</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="buttons">
+                    <button type="button" class="button button--ghost-middle">이벤트 해제</button>
+                    <button type="button" class="button button--solid-upper">3D Map 이동</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tooltip -->
+        <!-- [D] 오른쪽 방향 Tootip .tooltip--right -->
+        <span class="tooltip__text tooltip__text--right">CCTV</span><br>
+        <!-- [D] 위 방향 Tootip .tooltip--top -->
+        <span class="tooltip__text tooltip__text--top">1인칭 시점</span>
+
     </div>
 </body>
+<script src="../dashboard/js/index.js"></script>
 </html>

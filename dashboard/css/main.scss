@@ -3,15 +3,17 @@
 
 @include button;
 @include badge;
-
+@include table;
 @include alert;
 @include toast;
 @include tooltip;
+@include accordion;
 
 // 팝업 
 @include popup_warning;
 @include popup_notice;
+@include popup_equiplist;
 
 // input
 @include checkbox;
-@include radio;
+@include radio; 

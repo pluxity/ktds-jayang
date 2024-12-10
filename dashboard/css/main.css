@@ -7,11 +7,13 @@
 /* Alert */
 /* Toast */
 /* 경고 팝업 */
+/* 장비 목록 팝업 */
 /* 공지사항 알림 팝업 */
 /* Tooltip */
 /* Checkbox */
 /* Radio */
 /* Table */
+/* Accordion */
 .button {
   display: flex;
   align-items: center;
@@ -79,6 +81,38 @@
   color: #fff;
   font-size: 0.75rem;
   font-weight: 800;
+}
+
+.table {
+  width: 100%;
+}
+.table th, .table td {
+  color: var(--color-grayscale-light);
+}
+.table th {
+  padding: 7px 5px;
+  font-size: 0.875rem;
+}
+.table td {
+  padding: 11px 5px;
+  border-bottom: 1px solid var(--color-grayscale03);
+  font-size: 0.75rem;
+  text-align: center;
+}
+.table thead {
+  position: relative;
+}
+.table thead::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: -1;
+  background-color: var(--color-grayscale03);
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
 }
 
 .alert {
@@ -197,6 +231,108 @@
   transform: translateX(-50%) rotate(30deg);
 }
 
+.accordion {
+  padding-right: 9px;
+  max-height: 455px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.accordion .align-left {
+  text-align: left;
+}
+.accordion::-webkit-scrollbar {
+  width: 6px;
+}
+.accordion::-webkit-scrollbar-thumb {
+  background-color: var(--color-grayscale-dark);
+  border-radius: 3px;
+}
+.accordion::-webkit-scrollbar-track {
+  background-color: var(--color-black-key);
+  border-radius: 3px;
+}
+.accordion table {
+  display: none;
+}
+.accordion table th, .accordion table td {
+  text-align: center;
+  font-size: 0.75rem;
+}
+.accordion table th {
+  padding: 7px 5px;
+  background-color: var(--color-grayscale-dark);
+  color: var(--color-grayscale-light);
+  font-weight: 700;
+}
+.accordion table td {
+  position: relative;
+  padding: 11px 5px;
+  color: var(--color-grayscale01);
+}
+.accordion table td::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  border-bottom: 1px solid var(--color-grayscale-dark);
+}
+.accordion table tbody {
+  display: block;
+  max-height: 185px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--color-black);
+}
+.accordion table tbody::-webkit-scrollbar {
+  width: 6px;
+}
+.accordion table tbody::-webkit-scrollbar-thumb {
+  background-color: var(--color-grayscale-dark);
+  border-radius: 3px;
+}
+.accordion table tbody::-webkit-scrollbar-track {
+  background-color: var(--color-black-key);
+  border-radius: 3px;
+}
+.accordion table thead, .accordion table tbody tr {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+.accordion__button {
+  display: block;
+  position: relative;
+  padding: 10px 24px 10px 10px;
+  background-color: var(--color-black);
+  border-bottom: 1px solid var(--color-grayscale-dark);
+  border-top: 2px solid var(--color-grayscale02);
+  width: 100%;
+  color: var(--color-grayscale01);
+  text-align: left;
+}
+.accordion__button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  background: url("/dashboard/img/icon14/icon14.svg") no-repeat;
+  background-position: -180px -10px;
+  width: 14px;
+  height: 14px;
+}
+.accordion__button--active {
+  background-color: var(--color-grayscale03);
+  color: var(--color-grayscale-light);
+}
+.accordion__button--active::after {
+  background-position-x: -214px;
+}
+.accordion__button--active + table {
+  display: table;
+}
+
 .popup-warning {
   background-color: var(--color-black);
   border: 2px solid var(--color-danger);
@@ -312,6 +448,7 @@
   padding: 0 14px 0 20px;
   max-height: 360px;
   overflow-y: auto;
+  overflow-x: hidden;
   color: var(--color-grayscale01);
   line-height: 1.25rem;
   font-size: 0.875rem;
@@ -362,6 +499,89 @@
   grid-gap: 10px;
 }
 
+.popup-equiplist {
+  padding: 15px;
+  background-color: var(--color-black);
+  border-radius: 10px;
+  box-sizing: border-box;
+  border-top: 2px solid var(--color-mint);
+  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+  width: 17.5rem;
+}
+.popup-equiplist__info {
+  display: flex;
+  grid-gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  margin-top: 10px;
+}
+.popup-equiplist__info a {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 5px;
+  padding: 10px 0;
+  box-sizing: border-box;
+  color: var(--color-grayscale03);
+  letter-spacing: -0.0075rem;
+  font-size: 0.75rem;
+}
+.popup-equiplist__info a::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  -webkit-mask-image: url("/dashboard/img/icon20/icon20.svg");
+  mask-image: url("/dashboard/img/icon20/icon20.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: -20px -20px;
+  mask-position: -20px -20px;
+  background-color: var(--color-grayscale03);
+}
+.popup-equiplist__info a:hover {
+  color: #fff;
+}
+.popup-equiplist__info a:hover::before {
+  background-color: #fff;
+}
+.popup-equiplist__info a.active {
+  color: var(--color-mint);
+}
+.popup-equiplist__info a.active::before {
+  background-color: var(--color-mint);
+}
+.popup-equiplist__info a.shutter::before {
+  -webkit-mask-position: -60px -20px;
+  mask-position: -60px -20px;
+}
+.popup-equiplist__info a.fire::before {
+  -webkit-mask-position: -100px -20px;
+  mask-position: -100px -20px;
+}
+.popup-equiplist__info a.air::before {
+  -webkit-mask-position: -140px -20px;
+  mask-position: -140px -20px;
+}
+.popup-equiplist__info a.alarmbell::before {
+  -webkit-mask-position: -180px -20px;
+  mask-position: -180px -20px;
+}
+.popup-equiplist__info a.invasion::before {
+  -webkit-mask-position: -220px -20px;
+  mask-position: -220px -20px;
+}
+.popup-equiplist__info a.enter::before {
+  -webkit-mask-position: -260px -20px;
+  mask-position: -260px -20px;
+}
+.popup-equiplist__info a.elevator::before {
+  -webkit-mask-position: -300px -20px;
+  mask-position: -300px -20px;
+}
+
 .checkbox-wrap {
   display: flex;
   grid-gap: 3px;
@@ -407,6 +627,7 @@ input[type=checkbox]:disabled::after {
 }
 input[type=checkbox] + label {
   font-size: 0.75rem;
+  color: var(--color-grayscale03);
 }
 
 input[type=radio] {

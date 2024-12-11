@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pluxity.ktds.domains.auth.dto.SignUpRequestDto;
+import com.pluxity.ktds.domains.auth.dto.SignUpRequestDTO;
 import com.pluxity.ktds.domains.auth.service.AuthenticationService;
 import com.pluxity.ktds.domains.user.constant.Role;
-import com.pluxity.ktds.domains.user.dto.PatchDto;
-import com.pluxity.ktds.domains.user.dto.ResponseDto;
+import com.pluxity.ktds.domains.user.dto.PatchDTO;
+import com.pluxity.ktds.domains.user.dto.ResponseDTO;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 
@@ -35,8 +35,8 @@ class UserServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		authService.signUp(new SignUpRequestDto("testId", "testPassword", "홍길동"));
-		authService.signUp(new SignUpRequestDto("k2ngis", "testPassword2", "나동규"));
+		authService.signUp(new SignUpRequestDTO("testId", "testPassword", "홍길동"));
+		authService.signUp(new SignUpRequestDTO("k2ngis", "testPassword2", "나동규"));
 
 		em.clear();
 	}
@@ -47,7 +47,7 @@ class UserServiceTest {
 
 		Long id = userRepository.findAll().getFirst().getId();
 
-		ResponseDto result = userService.findById(id);
+		ResponseDTO result = userService.findById(id);
 
 		assertThat(result.name()).isEqualTo("홍길동");
 		assertThat(result.role()).isEqualTo(Role.USER);
@@ -56,7 +56,7 @@ class UserServiceTest {
 	@Test
 	@DisplayName("회원 정보 전체 조회")
 	void findAll() {
-		List<ResponseDto> result = userService.findAll();
+		List<ResponseDTO> result = userService.findAll();
 
 		assertThat(result.size()).isEqualTo(2);
 		assertThat(result.get(0).name()).isEqualTo("홍길동");
@@ -67,7 +67,7 @@ class UserServiceTest {
 	@DisplayName("회원 정보 수정")
 	void patch() {
 
-		var dto = new PatchDto("홍길동");
+		var dto = new PatchDTO("홍길동");
 		Long id = userRepository.findAll().getFirst().getId();
 
 

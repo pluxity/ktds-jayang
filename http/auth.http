@@ -1,3 +1,5 @@
+###
+###
 ### Post Request
 # @no-cookie-jar
 POST {{domain}}:{{port}}/auth/sign-up
@@ -45,3 +47,4 @@ POST {{domain}}:{{port}}/auth/api-keys/generate
 Content-Type: application/json
 
 > {% client.global.set("api-key", response.body.result.key);  %}
+

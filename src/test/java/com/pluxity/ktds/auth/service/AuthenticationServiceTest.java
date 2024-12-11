@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.pluxity.ktds.domains.auth.dto.SignInRequestDto;
-import com.pluxity.ktds.domains.auth.dto.SignInResponseDto;
-import com.pluxity.ktds.domains.auth.dto.SignUpRequestDto;
+import com.pluxity.ktds.domains.auth.dto.SignInRequestDTO;
+import com.pluxity.ktds.domains.auth.dto.SignInResponseDTO;
+import com.pluxity.ktds.domains.auth.dto.SignUpRequestDTO;
 import com.pluxity.ktds.domains.user.constant.Role;
 import com.pluxity.ktds.domains.user.entity.User;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
@@ -37,7 +37,7 @@ class AuthenticationServiceTest {
 	@DisplayName("관리자 등록 - 성공")
 	void signUpAdmin() {
 
-		SignUpRequestDto dto = SignUpRequestDto.builder()
+		SignUpRequestDTO dto = SignUpRequestDTO.builder()
 			.userId("admin")
 			.password("pluxity123!@#")
 			.name("관리자")
@@ -59,7 +59,7 @@ class AuthenticationServiceTest {
 	@DisplayName("사용자 등록 - 성공")
 	void signUp() {
 
-		SignUpRequestDto dto = SignUpRequestDto.builder()
+		SignUpRequestDTO dto = SignUpRequestDTO.builder()
 			.userId("nadk")
 			.password("pluxity123!@#")
 			.name("나동규")
@@ -81,7 +81,7 @@ class AuthenticationServiceTest {
 	@DisplayName("로그인 - 성공")
 	void signIn() {
 
-		SignUpRequestDto dto = SignUpRequestDto.builder()
+		SignUpRequestDTO dto = SignUpRequestDTO.builder()
 			.userId("nadk")
 			.password("pluxity123!@#")
 			.name("나동규")
@@ -92,8 +92,8 @@ class AuthenticationServiceTest {
 		em.flush();
 		em.clear();
 
-		SignInRequestDto request = new SignInRequestDto("nadk","pluxity123!@#");
-		SignInResponseDto response = service.signIn(request);
+		SignInRequestDTO request = new SignInRequestDTO("nadk","pluxity123!@#");
+		SignInResponseDTO response = service.signIn(request);
 
 		assertThat(response.accessToken()).isNotNull();
 		assertThat(response.refreshToken()).isNotNull();
@@ -105,7 +105,7 @@ class AuthenticationServiceTest {
 	@DisplayName("로그인 - 실패(비밀 번호 불일치)")
 	void signInFailure() {
 
-		SignUpRequestDto dto = SignUpRequestDto.builder()
+		SignUpRequestDTO dto = SignUpRequestDTO.builder()
 			.userId("nadk")
 			.password("pluxity123!@#")
 			.name("나동규")
@@ -117,8 +117,8 @@ class AuthenticationServiceTest {
 		em.clear();
 
 		CustomException exception = assertThrows(CustomException.class, () -> {
-			SignInRequestDto request = new SignInRequestDto("nadk","wrongPassword");
-			SignInResponseDto response = service.signIn(request);
+			SignInRequestDTO request = new SignInRequestDTO("nadk","wrongPassword");
+			SignInResponseDTO response = service.signIn(request);
 		});
 
 

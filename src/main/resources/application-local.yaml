@@ -22,7 +22,7 @@ spring:
     password:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     properties:
@@ -31,10 +31,10 @@ spring:
 
 jwt:
   access-token:
-    secret: +iBcUJRWGvl+94+ow4nXV1fzWIq4rph8x7MyRmrtWio=
+    secret-key: +iBcUJRWGvl+94+ow4nXV1fzWIq4rph8x7MyRmrtWio=
     expiration: 3600000
   refresh-token:
-    secret: gtzRlqF6bIkmOi5i15A9G5xbLdwiAMmZi6JPOeemC1E=
+    secret-key: gtzRlqF6bIkmOi5i15A9G5xbLdwiAMmZi6JPOeemC1E=
     expiration: 86400000
 
 logging:
@@ -42,3 +42,6 @@ logging:
     org: INFO
     com: DEBUG
     root: INFO
+
+root-path:
+  upload: C:/Dev/Upload

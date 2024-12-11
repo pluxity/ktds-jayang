@@ -1,8 +1,8 @@
 package com.pluxity.ktds.user.controller;
 
-import com.pluxity.ktds.domains.auth.dto.SignInRequestDto;
-import com.pluxity.ktds.domains.auth.dto.SignInResponseDto;
-import com.pluxity.ktds.domains.auth.dto.SignUpRequestDto;
+import com.pluxity.ktds.domains.auth.dto.SignInRequestDTO;
+import com.pluxity.ktds.domains.auth.dto.SignInResponseDTO;
+import com.pluxity.ktds.domains.auth.dto.SignUpRequestDTO;
 import com.pluxity.ktds.domains.auth.service.AuthenticationService;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -42,8 +42,8 @@ class UserSelfControllerTest {
 
     @BeforeEach
     void setUp() {
-        authService.signUp(new SignUpRequestDto("user", "password", "User Name"));
-        SignInResponseDto userSignInResponse = authService.signIn(new SignInRequestDto("user", "password"));
+        authService.signUp(new SignUpRequestDTO("user", "password", "User Name"));
+        SignInResponseDTO userSignInResponse = authService.signIn(new SignInRequestDTO("user", "password"));
         token = userSignInResponse.accessToken();
 
         em.clear();

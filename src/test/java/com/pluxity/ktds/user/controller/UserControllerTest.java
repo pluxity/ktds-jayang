@@ -1,8 +1,8 @@
 package com.pluxity.ktds.user.controller;
 
-import com.pluxity.ktds.domains.auth.dto.SignInRequestDto;
-import com.pluxity.ktds.domains.auth.dto.SignInResponseDto;
-import com.pluxity.ktds.domains.auth.dto.SignUpRequestDto;
+import com.pluxity.ktds.domains.auth.dto.SignInRequestDTO;
+import com.pluxity.ktds.domains.auth.dto.SignInResponseDTO;
+import com.pluxity.ktds.domains.auth.dto.SignUpRequestDTO;
 import com.pluxity.ktds.domains.auth.service.AuthenticationService;
 import com.pluxity.ktds.domains.user.entity.User;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
@@ -43,14 +43,14 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        SignUpRequestDto adminSignUpRequestDto = new SignUpRequestDto(
+        SignUpRequestDTO adminSignUpRequestDTO = new SignUpRequestDTO(
                 "admin", "admin", "관리자");
-        authService.signUpAdmin(adminSignUpRequestDto);
+        authService.signUpAdmin(adminSignUpRequestDTO);
 
-        SignInResponseDto adminSignInResponse = authService.signIn(new SignInRequestDto("admin", "admin"));
+        SignInResponseDTO adminSignInResponse = authService.signIn(new SignInRequestDTO("admin", "admin"));
         token = adminSignInResponse.accessToken();
 
-        authService.signUp(new SignUpRequestDto("testId", "testPassword", "홍길동"));
+        authService.signUp(new SignUpRequestDTO("testId", "testPassword", "홍길동"));
         User testUser = userRepository.findByUserId("testId").orElseThrow(() -> new RuntimeException("User not found"));
         id = testUser.getId();
 

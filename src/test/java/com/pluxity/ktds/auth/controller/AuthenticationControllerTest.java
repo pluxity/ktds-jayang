@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.pluxity.ktds.domains.auth.dto.SignUpRequestDto;
+import com.pluxity.ktds.domains.auth.dto.SignUpRequestDTO;
 import com.pluxity.ktds.domains.auth.service.AuthenticationService;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -51,7 +51,7 @@ class AuthenticationControllerTest {
 	@DisplayName("로그인 - 성공")
 	void signIn() throws Exception {
 
-		SignUpRequestDto dto = SignUpRequestDto.builder()
+		SignUpRequestDTO dto = SignUpRequestDTO.builder()
 			.userId("nadk")
 			.password("pluxity123!@#")
 			.name("나동규")
@@ -75,7 +75,7 @@ class AuthenticationControllerTest {
 	@DisplayName("로그인 - 실패(비밀 번호 불일치)")
 	void signInFailure() throws Exception {
 
-		SignUpRequestDto dto = SignUpRequestDto.builder()
+		SignUpRequestDTO dto = SignUpRequestDTO.builder()
 			.userId("nadk")
 			.password("pluxity123!@#")
 			.name("나동규")

@@ -1,56 +1,95 @@
 package com.pluxity.ktds.domains.user.controller;
 
-import static com.pluxity.ktds.global.constant.SuccessCode.*;
-
-import com.pluxity.ktds.domains.user.dto.ChangePasswordDto;
-import com.pluxity.ktds.domains.user.dto.PatchDto;
-import com.pluxity.ktds.domains.user.dto.ResponseDto;
+import com.pluxity.ktds.domains.user.domain.User;
+import com.pluxity.ktds.domains.user.dto.UserRequestDto;
+import com.pluxity.ktds.domains.user.dto.UserResponseDto;
 import com.pluxity.ktds.domains.user.service.UserService;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import com.pluxity.ktds.global.response.ResponseBody;
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.pluxity.ktds.global.constant.SuccessCode.*;
 
 @RestController
-@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
-  private final UserService service;
+    private final UserService service;
 
-  @GetMapping
-  public DataResponseBody<List<ResponseDto>> getUsers() {
-    return DataResponseBody.of(service.findAll());
-  }
+    @GetMapping("/users")
+    public DataResponseBody<List<UserResponseDto>> getUsers() {
+        return DataResponseBody.of(service.findAll());
+    }
 
-  @GetMapping(value = "/{id}", produces = "application/json")
-  public DataResponseBody<ResponseDto> getUser(@PathVariable("id") Long id) {
-    return DataResponseBody.of(service.findById(id));
-  }
+    @GetMapping("/users/{id}")
+    public DataResponseBody<UserResponseDto> getUser(@PathVariable Long id) {
+        return DataResponseBody.of(service.findById(id));
+    }
 
-  @PatchMapping(value = "/{id}", produces = "application/json")
-  public ResponseBody patchUserInfo(@PathVariable("id") Long id, @RequestBody PatchDto dto) {
-    service.patch(id, dto);
-    return ResponseBody.of(SUCCESS_PATCH);
-  }
+    @GetMapping("/users/auth")
+    public DataResponseBody<UserResponseDto> auth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal().equals("anonymousUser")) {
+            return DataResponseBody.of(HttpStatus.BAD_REQUEST, "인증되지 않은 사용자 입니다.", null);
+        }
 
-  @PatchMapping(value = "/{id}/change-password", produces = "application/json")
-  public ResponseBody changePassword(
-      @PathVariable("id") Long id, @RequestBody ChangePasswordDto dto) {
-    service.changePassword(id, dto);
-    return ResponseBody.of(SUCCESS_PATCH);
-  }
+        User principal = (User) authentication.getPrincipal();
+        UserResponseDto responseDto = UserResponseDto.builder()
+                .id(principal.getId())
+                .username(principal.getUsername())
+                .nickname(principal.getNickname())
+                .roles(principal.getUserRoles().stream().map(userRole -> userRole.getRole().getName()).collect(Collectors.toSet()))
+                .build();
 
-  @DeleteMapping(value = "/{id}", produces = "application/json")
-  public ResponseBody deleteUser(@PathVariable("id") Long id) {
-    service.delete(id);
-    return ResponseBody.of(SUCCESS_DELETE);
-  }
+
+        return DataResponseBody.of(responseDto);
+    }
+
+    @PostMapping("/login")
+    public ResponseBody authenticate(@RequestBody UserRequestDto dto,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        service.login(dto, request, response);
+        return ResponseBody.of(SUCCESS);
+    }
+
+    @PostMapping("/logout")
+    public ResponseBody logout(HttpServletRequest request,
+                               HttpServletResponse response) {
+        service.logout(request, response);
+        return ResponseBody.of(SUCCESS);
+    }
+
+
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseBody postUser(@RequestBody UserRequestDto dto) {
+        service.save(dto);
+        return ResponseBody.of(SUCCESS_CREATE);
+    }
+
+    @PatchMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchUser(@PathVariable Long id,
+                                  @RequestBody UserRequestDto dto) {
+        service.update(id, dto);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteUser(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseBody.of(SUCCESS_DELETE);
+    }
+
 }

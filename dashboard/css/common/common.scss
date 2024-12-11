@@ -173,11 +173,75 @@ body{
 
 
 /* GNB */
-header{
-   // position:absolute; top:0; left:0; z-index:1;
-    display:flex; align-items:center;
-    padding:0 23px 0 30px; background-color:#34343C; box-sizing:border-box;
+.header{
+    position:absolute; top:0; left:0; z-index:1;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 23px 0 30px; background-color:rgba(52, 52, 60, 0.50); box-sizing:border-box; 
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
     width:100%; height:5rem; 
+    &__logo{
+        position:relative;
+        display:flex; align-items:flex-start; gap:5px;
+        a{color:#fff; font-weight:800; font-size:1.5rem;}
+        &::before{
+            content:'';
+            display:inline-block;
+            width:33px; height:27px;
+            background:url('/dashboard/img/icon_kt.svg') no-repeat; background-size:contain;
+            
+        }
+    }
+    &__info{
+        display:flex; gap:15px; align-items:center;
+        .date{font-size:0.875rem; color:var(--color-grayscale-light);}
+        .profile{
+            position:relative;
+            &__image{
+                position:relative;
+                display:block; width:40px; height:40px;
+                .badge{
+                    position:absolute; top:-4px; right:-6px;
+                    margin:0;
+                }
+            }
+            &__layer{
+                position:absolute; top:calc(100% + 5px); right:0;
+                background-color:var(--color-black); border-radius:10px; box-sizing:border-box;
+                padding:12px 15px 21px 15px; border-top:1px solid var(--color-mint); box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+                width:10.64rem; 
+                color:var(--color-grayscale-light);
+                .head{
+                    display:flex; grid-gap:10px; align-items:center;
+                    margin-bottom:21px;
+                    &__level{font-weight:700; font-size:0.75rem; line-height:1.3;}
+                    &__name{font-size:0.875rem; line-height:1.3;}
+                }
+                .detail{
+                    &__group{
+                        border-top:1px solid var(--color-grayscale-dark);
+                        a{
+                            display:flex; align-items:center;
+                            margin:10px 0;
+                        }
+                        &:last-of-type a{margin-bottom:0;}
+                        .icon{
+                            &::after{
+                                content:'';
+                                display:inline-block;
+                                margin-left:5px;
+                                width:14px; height:14px;
+                                -webkit-mask-image:url('/dashboard/img/icon14/icon14.svg'); mask-image:url('/dashboard/img/icon14/icon14.svg'); 
+                                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                                background-color:var(--color-grayscale03);
+                            }
+                            &--manage::after{-webkit-mask-position:-10px -10px; mask-position:-10px -10px;}
+                            &--download::after{-webkit-mask-position:-78px -10px; mask-position:-78px -10px;}
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 

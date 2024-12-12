@@ -158,7 +158,7 @@ html{
 }
 
 body{
-    width:100vw;
+    width:100vw; 
     height:100vh;
 }
 
@@ -172,13 +172,25 @@ body{
 
 
 
+/* Container */
+.container{
+    width:100%; height:100%;
+    &__image{
+        background-repeat:no-repeat; background-position:center;
+        background-size:cover;
+        min-width:1920px;
+    }
+}
+
+
+
 /* GNB */
 .header{
-    position:absolute; top:0; left:0; z-index:1;
+    position:absolute; top:0; left:0; z-index:1; 
     display:flex; align-items:center; justify-content:space-between;
     padding:0 23px 0 30px; background-color:rgba(52, 52, 60, 0.50); box-sizing:border-box; 
     -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-    width:100%; height:5rem; 
+    width:100%; height:5rem; min-width:786px;
     &__logo{
         position:relative;
         display:flex; align-items:flex-start; gap:5px;
@@ -243,6 +255,7 @@ body{
         }
     }
 }
+
 
 
 /* 폰트 강조 색상 */

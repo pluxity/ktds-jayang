@@ -8,3 +8,5 @@ window.addEventListener('DOMContentLoaded', function(){
         toast.classList.remove('toast--active');
     });
 });
+
+

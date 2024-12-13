@@ -11,38 +11,25 @@
 
 // accordion
 @include accordion;
-@include sop-accordion;
+@include sop_accordion;
 
 // popup
 @include popup_warning;
-@include popup_notice;
-@include popup_equiplist;
+@include popup_event;
+@include popup_equip;
 
 // input
-@include input-checkbox;
-@include input-radio; 
-@include input-text;
+@include input_checkbox;
+@include input_radio; 
+@include input_text;
 
 // menu bar
-@include poi-menu;
+@include poi_menu;
 @include toolbox;
 
 
 /* Main */
 .contents{
-    padding: 5rem 0 0 1.87em;
-    height:100%; box-sizing:border-box; 
-    section{position:relative;}
-}
-
-.event-state{
-    position:fixed; right:0;
-    border-bottom-left-radius:20px; background:rgba(52, 52, 60, 0.90);// box-shadow:-4px 2px 5px 0px rgba(0, 0, 0, 0.35);
-    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-    width:25.625rem; height:100%;
-    &::before{
-        content:'';
-        display:block;
-        box-shadow:-4px 2px 5px 0px rgba(0, 0, 0, 0.35);
-    }
+    padding:5rem 0 0 1.87em; box-sizing:border-box;
+    height:100%;
 }

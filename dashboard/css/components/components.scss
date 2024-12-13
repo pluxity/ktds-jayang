@@ -57,7 +57,7 @@
 @mixin alert{
     .alert{
         display:flex; flex-direction:column; align-items:center; justify-content:center; grid-gap:48px;
-        padding:30px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box; 
+        padding:45px 30px 30px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box; 
         width:18.75rem; 
         color:#fff;
     }
@@ -140,56 +140,107 @@
 }
 
 /* 장비 목록 팝업 */
-@mixin popup_equiplist{
-    .popup-equiplist{
-        padding:15px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box;
+@mixin popup_equip{
+    .popup-equip{
+        display:inline-block;
+        background-color:var(--color-black); border-radius:10px; box-sizing:border-box;
         border-top:2px solid var(--color-mint); box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
-        width:17.5rem; 
-        &__info{
-            display:flex; grid-gap:10px;
-            display:grid; grid-template-columns:1fr 1fr 1fr 1fr;
-            margin-top:10px;
-            a{
-                position:relative;
-                display:flex; flex-direction:column; align-items:center; justify-content:center; grid-gap:5px; 
-                padding:10px 0; box-sizing:border-box;
-                color:var(--color-grayscale03); letter-spacing:-0.0075rem; font-size:0.75rem;
-                &::before{
-                    content:'';
-                    display:inline-block;
-                    width:20px; height:20px; 
-                    -webkit-mask-image:url('/dashboard/img/icon20/icon20.svg'); mask-image:url('/dashboard/img/icon20/icon20.svg'); 
-                    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
-                    -webkit-mask-position:-20px -20px; mask-position:-20px -20px;
-                    background-color:var(--color-grayscale03);
-                }
-                &:hover{
-                    color:var(--color-grayscale-light);
-                    &::before{background-color:var(--color-grayscale-light);}
-                }
-                &.active{
-                    color:var(--color-mint);
-                    &::before{background-color:var(--color-mint);}
-                }
+        
+        &--group{
+            padding:15px; 
+            min-width:17.5rem;
+            .popup-equip{
+                &__head{height:20px; padding:0; border-bottom:0;}
+                &__info{width:17.5rem; }
+            }
+        }
 
-                &.shutter::before{-webkit-mask-position:-60px -20px; mask-position:-60px -20px;}
-                &.fire::before{-webkit-mask-position:-100px -20px; mask-position:-100px -20px;}
-                &.air::before{-webkit-mask-position:-140px -20px; mask-position:-140px -20px;}
-                &.alarmbell::before{-webkit-mask-position:-180px -20px; mask-position:-180px -20px;}
-                &.invasion::before{-webkit-mask-position:-220px -20px; mask-position:-220px -20px;}
-                &.enter::before{-webkit-mask-position:-260px -20px; mask-position:-260px -20px;}
-                &.elevator::before{-webkit-mask-position:-300px -20px; mask-position:-300px -20px;}
+        &__head{
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 20px; border-top-left-radius:19px; border-top-right-radius:19px; border-bottom:1px solid var(--color-grayscale-dark);
+            height:50px;
+            font-weight:800; color:var(--color-mint); font-size:1.125rem;
+            .close{
+                width:24px; height:24px;
+                -webkit-mask-image:url('/dashboard/img/icon24/icon24.svg'); mask-image:url('/dashboard/img/icon24/icon24.svg'); 
+                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                -webkit-mask-position:-98px -9px; mask-position:-98px -9px;
+                background-color:var(--color-mint);
+            }
+        }
+
+        // 장비 표시 영역
+        @at-root{
+            .equip-group{
+                display:grid; grid-gap:10px; grid-template-columns:1fr 1fr 1fr 1fr;
+                margin-top:10px;
+                a{
+                    position:relative;
+                    display:flex; flex-direction:column; align-items:center; justify-content:center; grid-gap:5px; 
+                    padding:10px 0; box-sizing:border-box;
+                    color:var(--color-grayscale03); letter-spacing:-0.0075rem; font-size:0.75rem;
+                    &::before{
+                        content:'';
+                        display:inline-block;
+                        width:20px; height:20px; 
+                        -webkit-mask-image:url('/dashboard/img/icon20/icon20.svg'); mask-image:url('/dashboard/img/icon20/icon20.svg'); 
+                        -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                        -webkit-mask-position:-20px -20px; mask-position:-20px -20px;
+                        background-color:var(--color-grayscale03);
+                    }
+                    &:hover{
+                        color:var(--color-grayscale-light);
+                        &::before{background-color:var(--color-grayscale-light);}
+                    }
+                    &.active{
+                        color:var(--color-mint);
+                        &::before{background-color:var(--color-mint);}
+                    }
+    
+                    &.shutter::before{-webkit-mask-position:-60px -20px; mask-position:-60px -20px;}
+                    &.fire::before{-webkit-mask-position:-100px -20px; mask-position:-100px -20px;}
+                    &.air::before{-webkit-mask-position:-140px -20px; mask-position:-140px -20px;}
+                    &.alarmbell::before{-webkit-mask-position:-180px -20px; mask-position:-180px -20px;}
+                    &.invasion::before{-webkit-mask-position:-220px -20px; mask-position:-220px -20px;}
+                    &.enter::before{-webkit-mask-position:-260px -20px; mask-position:-260px -20px;}
+                    &.elevator::before{-webkit-mask-position:-300px -20px; mask-position:-300px -20px;}
+                }
+            }
+        }
+
+        // 장비 목록 영역
+        @at-root{
+            .equip-list{
+                padding:20px; box-sizing:border-box; 
+                width:25rem;
+                &__search{
+                    display:flex; grid-gap:5px;
+                    height:30px;
+                    .button{height:100%;}
+                }
+                &__contents{
+                    .title{
+                        display:flex; align-items:center; grid-gap:3px;
+                        margin:18px 0 10px;
+                        color:var(--color-grayscale-light); font-size:0.875rem;
+                    }
+                    .reflesh{
+                        display:inline-block;
+                        background:url('/dashboard/img/icon14/icon14.svg') no-repeat; background-position:-146px -10px;
+                        width:14px; height:14px; 
+                    }
+                }
             }
         }
     }
 }               
 
-/* 공지사항 알림 팝업 */
-@mixin popup_notice{
-    .popup-notice{
+/* 이벤트 팝업 - 공지사항/SOP */
+@mixin popup_event{
+    .popup-event{
+        display:inline-block;
         background-color:var(--color-black); box-shadow:0px 0px 30px 0px rgba(0, 0, 0, 0.75);
         border-radius:20px 20px 10px 10px;
-        width:31.25rem; height:37.5rem;
         &__head{
             display:flex; align-items:center; justify-content:space-between;
             padding:0 20px; background-color:var(--color-mint); border-top-left-radius:19px; border-top-right-radius:19px;
@@ -201,39 +252,6 @@
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-98px -9px; mask-position:-98px -9px;
                 background-color:var(--color-navy-dark);
-            }
-        }
-        &__info{
-            .title{
-                display:flex; grid-gap:5px; align-items:flex-start;
-                margin:15px 30px 5px 20px;
-                min-height:35px;
-                color:#fff; line-height:1.125rem;
-                &__label{
-                    flex-shrink:0;
-                    background-color:var(--color-danger); border-radius:5px; padding:0 4.5px;
-                    height:20px;
-                    font-size:0.75rem; line-height:20px;
-                }
-            }
-            .date{
-                margin:0 30px 0 20px;
-                color:var(--color-grayscale03); font-size:0.75rem;
-            }
-            .contents{
-                margin:15px 10px 0 0;
-                padding:0 14px 0 20px;
-                max-height:360px; overflow-y:auto; overflow-x:hidden;
-                color:var(--color-grayscale01); line-height:1.25rem; font-size:0.875rem; letter-spacing:-0.00875rem;
-                &::-webkit-scrollbar {width:6px;}
-                &::-webkit-scrollbar-thumb {
-                    background-color:var(--color-grayscale-dark); 
-                    border-radius:3px; 
-                }
-                &::-webkit-scrollbar-track {
-                    background-color:var(--color-black-key); 
-                    border-radius:3px;
-                }
             }
         }
         &__paging{
@@ -255,6 +273,65 @@
                 display:flex; grid-gap:10px;
             }
         }
+
+        // 공지사항 영역
+        @at-root{
+            .notice-info{
+                width:31.25rem;
+                &__title{
+                    display:flex; grid-gap:5px; align-items:flex-start;
+                    margin:15px 30px 5px 20px;
+                    min-height:35px;
+                    color:#fff; line-height:1.125rem;
+                    .label{
+                        flex-shrink:0;
+                        background-color:var(--color-danger); border-radius:5px; padding:0 4.5px;
+                        height:20px;
+                        font-size:0.75rem; line-height:20px;
+                    }
+                }
+                &__date{
+                    margin:0 30px 0 20px;
+                    color:var(--color-grayscale03); font-size:0.75rem;
+                }
+                &__contents{
+                    margin:15px 10px 0 0;
+                    padding:0 14px 0 20px;
+                    height:360px; max-height:360px; overflow-y:auto; overflow-x:hidden;
+                    color:var(--color-grayscale01); line-height:1.25rem; font-size:0.875rem; letter-spacing:-0.00875rem;
+                    &::-webkit-scrollbar {width:6px;}
+                    &::-webkit-scrollbar-thumb {
+                        background-color:var(--color-grayscale-dark); 
+                        border-radius:3px; 
+                    }
+                    &::-webkit-scrollbar-track {
+                        background-color:var(--color-black-key); 
+                        border-radius:3px;
+                    }
+                }
+            }
+        }
+
+        // SOP 영역
+        @at-root{
+            .sop-info{
+                width:38.125rem;
+                &__title{
+                    margin:20px; 
+                    font-size:0.875rem; font-weight:700; color:var(--color-grayscale-light);
+                }
+                &__contents{
+                    display:flex; grid-gap:10px;
+                    margin: 20px 10px 17px 20px;
+                    .image{
+                        color:var(--color-grayscale-light); font-size:0.75rem;
+                        &__text{line-height:1.6;}    
+                    }
+                    .manual{flex:1;}
+                }
+            }
+        }
+       
     }
 }
 
@@ -291,7 +368,7 @@
 
 
 /* Checkbox */
-@mixin input-checkbox{
+@mixin input_checkbox{
     .checkbox-wrap{
         display:flex; grid-gap:3px; align-items:center;
     }
@@ -321,7 +398,7 @@
 
 
 /* Radio */
-@mixin input-radio{
+@mixin input_radio{
     input[type="radio"]{
         appearance:none;
         position:relative; display:inline-block;
@@ -345,7 +422,7 @@
 
 
 /* Input Text */
-@mixin input-text{
+@mixin input_text{
     input[type="text"]{
         padding:7px 10px 8px 10px; border:1px solid var(--color-grayscale02); background-color:var(--color-black); border-radius:5px; box-sizing:border-box;
         color:var(--color-grayscale-light); font-size:0.75rem; 
@@ -390,7 +467,7 @@
 @mixin accordion{
     .accordion{
         padding-right:9px;
-        max-height:455px; overflow-y:auto; overflow-x:hidden;
+        height:455px; min-height:455px; overflow-y:auto; overflow-x:hidden;
 
         // 테이블안 문구 왼쪽 정렬
         .align-left{text-align:left;}
@@ -450,9 +527,10 @@
         }
         &__btn{
             position:relative;
-            padding:10px 24px 10px 10px; background-color:var(--color-black); border-bottom:1px solid var(--color-grayscale-dark); border-top:2px solid var(--color-grayscale02); box-sizing:border-box;
+            padding:10px 24px 10px 10px; background-color:var(--color-black); border-bottom:1px solid var(--color-grayscale-dark); border-top:1px solid var(--color-grayscale02); box-sizing:border-box;
             width:100%; 
             color:var(--color-grayscale01); 
+            &:first-of-type{border-top-width:2px;}
             &::after{
                 content:'';
                 position:absolute; top:50%; transform:translateY(-50%); right:10px;
@@ -469,7 +547,7 @@
 }
 
 /* SOP Accordion */
-@mixin sop-accordion{
+@mixin sop_accordion{
     .sopaccord{
         padding-right:9px;
         max-height:455px; overflow-y:auto; overflow-x:hidden;
@@ -483,6 +561,11 @@
         &::-webkit-scrollbar-track {
             background-color:var(--color-black-key); 
             border-radius:3px;
+        }
+
+        &__title{
+            background-color:var(--color-navy-dark);
+            color:var(--color-grayscale-light); font-size:0.875rem; line-height:27px; text-align:center; font-weight:700;
         }
 
         &__btn{
@@ -505,11 +588,12 @@
             &--active{
                 background-color:var(--color-grayscale03); color:var(--color-grayscale-light);
                 &::after{background-position-x:-214px;}
-                + table{display:block;}
+                + .sopaccord__detail{display:block;}
             }
         }
 
         &__detail{
+            display:none;
             padding:10px 5px;
             line-height:1.3;
             .message{
@@ -590,7 +674,7 @@
 
 
 /* POI Menu */
-@mixin poi-menu{
+@mixin poi_menu{
     .poi-menu{
         display:flex; flex-direction:column; align-items:center; grid-gap:20px;
         width:60px;
@@ -600,7 +684,7 @@
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); 
             width:60px; height:60px; border-radius:100%; 
 
-            .popup-equiplist{position:absolute; left:77px; top:0;}
+            .popup-equip--group{position:absolute; left:77px; top:0;}
             
             .all{
                 position:relative; 

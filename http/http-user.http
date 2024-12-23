@@ -1,0 +1,14 @@
+### 사용자 전체 정보
+@access-token = client.global.get("access-token")
+
+### 사용자 전체
+GET {{DOMAIN}}:{{PORT}}/users
+Authorization: Bearer {{access-token}}
+
+### 사용자 정보
+GET {{DOMAIN}}:{{PORT}}/users/1
+Authorization: Bearer {{access-token}}
+
+### 사용자 정보
+GET {{DOMAIN}}:{{PORT}}/my-info
+Authorization: Bearer {{access-token}}

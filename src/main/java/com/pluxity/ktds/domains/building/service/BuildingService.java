@@ -180,7 +180,7 @@ public class BuildingService {
 
     private FileInfo getFileInfo(Long fileInfoId) {
         return fileInfoRepository.findById(fileInfoId).orElseThrow(() -> {
-            throw new CustomException(NOT_FOUND_PX_FILE);
+            throw new CustomException(NOT_FOUND_plx_file);
         });
     }
 

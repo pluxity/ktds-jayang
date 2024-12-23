@@ -45,7 +45,7 @@ public enum ErrorCode implements Code {
 
   INVALID_CODE(BAD_REQUEST, "유효하지 않은 코드입니다."),
 
-  NOT_FOUND_USER(BAD_REQUEST, "해당 회원이 존재하지 않습니다."),
+  NOT_FOUND_USER(BAD_REQUEST, "해당 사용자가 존재하지 않습니다."),
   NOT_FOUND_ID(BAD_REQUEST, "해당 ID에 해당하는 정보를 찾을 수 없습니다."),
   NOT_FOUND_FILE_NAME_IN_XML(BAD_REQUEST, "XML 파일에 파일 이름이 존재하지 않습니다."),
   NOT_FOUND_SBM_FLOOR(BAD_REQUEST, "SMB 파일이 존재하지 않습니다."),
@@ -56,7 +56,7 @@ public enum ErrorCode implements Code {
   NOT_FOUND_XML_FILE_IS_MAIN(BAD_REQUEST, "XML에 IS_MAIN이 존재하지 않습니다."),
   NOT_FOUND_FILE_DIRECTORY(BAD_REQUEST, "Directory가 존재하지 않습니다. "),
   NOT_FOUND_FILE(BAD_REQUEST, "파일이 존재하지 않습니다."),
-  NOT_FOUND_PX_FILE(BAD_REQUEST, "PxFile이 존재하지 않습니다."),
+  NOT_FOUND_plx_file(BAD_REQUEST, "PxFile이 존재하지 않습니다."),
   NOT_FOUND_BUILDING(BAD_REQUEST, "건물이 존재하지 않습니다."),
   NOT_FOUND_PATROL(BAD_REQUEST, "가상순찰 정보가 존재하지 않습니다."),
   NOT_FOUND_PATROL_POINT(BAD_REQUEST, "가상순찰 포인터 정보가 존재하지 않습니다."),

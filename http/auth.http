@@ -1,12 +1,8 @@
-###
-###
-### Post Request
-# @no-cookie-jar
-POST {{domain}}:{{port}}/auth/sign-up
+POST {{DOMAIN}}:{{PORT}}/auth/sign-up
 Content-Type: application/json
 
 {
-  "userId": "test",
+  "username": "test",
   "password": "test123",
   "name": "홍길동"
 }

@@ -45,91 +45,88 @@
             </div>
         </header>
         <div class="contents">
-            <div class="contents__right">
-                <div class="poi-menu">
-                    <div class="poi-menu__all">
-                        <!-- [D] 선택 시 active 클래스 추가 -->
-                        <div class="all">
-                            <a href="#none">장비보기</a>
-                            <!-- 장비 목록 팝업 -->
-                            <div class="popup-equip popup-equip--group">
-                                <div class="popup-equip__head">
-                                    <span class="checkbox-wrap">
-                                        <input type="checkbox" id="check">
-                                        <label for="check">전체문구</label>
-                                        </span>
-                                </div>
-                                <!-- 장비 표시 영역 -->
-                                <div class="equip-group">
-                                    <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                                    <a href="#none" class="cctv active">CCTV</a>
-                                    <a href="#none" class="shutter">셔터</a>
-                                    <a href="#none" class="fire">소방시설</a>
-                                    <a href="#none" class="air">공기질센터</a>
-                                    <a href="#none" class="alarmbell">비상벨</a>
-                                    <a href="#none" class="invasion">침입탐지</a>
-                                    <a href="#none" class="enter">출입탐지</a>
-                                    <a href="#none" class="elevator" >엘리베이터</a>
-                                </div>
-                            </div> 
-                        </div>
-                    </div>
-                    <div class="poi-menu__list">
-                        <ul>
-                            <!-- [D] 선택 시 active 클래스 추가 -->
-                            <li class="cctv active">
-                                <a href="#none"><span class="hide">cctv</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">CCTV</span>
-                                </div>
-                            </li>
-                            <li class="shutter">
-                                <a href="#none"><span class="hide">셔텨</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">셔터</span>
-                                </div>
-                            </li>
-                            <li class="fire">
-                                <a href="#none"><span class="hide">소방</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">소방</span>
-                                </div>
-                            </li>
-                            <li class="alarmbell">
-                                <a href="#none"><span class="hide">공기질센터</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">공기질센터</span>
-                                </div>
-                            </li>
-                            <li class="air">
-                                <a href="#none"><span class="hide">비상벨</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">비상벨</span>
-                                </div>
-                            </li>
-                            <li class="invasion">
-                                <a href="#none"><span class="hide">침입탐지</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">침입탐지</span>
-                                </div>
-                            </li>
-                            <li class="enter">
-                                <a href="#none"><span class="hide">출입관리</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">출입관리</span>
-                                </div>
-                            </li>
-                            <li class="elevator">
-                                <a href="#none"><span class="hide">엘리베이터</span></a>
-                                <div class="tooltip">
-                                    <span class="tooltip__text tooltip__text--right">엘리베이터</span>
-                                </div>
-                            </li>
-                        </ul>
+            <div class="poi-menu">
+                <div class="poi-menu__all">
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <div class="all">
+                        <a href="#none">장비보기</a>
+                        <!-- 장비 목록 팝업 -->
+                        <div class="popup-basic popup-basic--group">
+                            <div class="popup-basic__head">
+                                <span class="checkbox-wrap">
+                                    <input type="checkbox" id="check">
+                                    <label for="check">전체문구</label>
+                                </span>
+                            </div>
+                            <!-- 장비 표시 영역 -->
+                            <div class="equip-group">
+                                <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
+                                <a href="#none" class="cctv active">CCTV</a>
+                                <a href="#none" class="shutter">셔터</a>
+                                <a href="#none" class="fire">소방시설</a>
+                                <a href="#none" class="air">공기질센터</a>
+                                <a href="#none" class="alarmbell">비상벨</a>
+                                <a href="#none" class="invasion">침입탐지</a>
+                                <a href="#none" class="enter">출입탐지</a>
+                                <a href="#none" class="elevator" >엘리베이터</a>
+                            </div>
+                        </div> 
                     </div>
                 </div>
+                <div class="poi-menu__list">
+                    <ul>
+                        <!-- [D] 선택 시 active 클래스 추가 -->
+                        <li class="cctv active">
+                            <a href="#none"><span class="hide">cctv</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">CCTV</span>
+                            </div>
+                        </li>
+                        <li class="shutter">
+                            <a href="#none"><span class="hide">셔텨</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">셔터</span>
+                            </div>
+                        </li>
+                        <li class="fire">
+                            <a href="#none"><span class="hide">소방</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">소방</span>
+                            </div>
+                        </li>
+                        <li class="alarmbell">
+                            <a href="#none"><span class="hide">공기질센터</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">공기질센터</span>
+                            </div>
+                        </li>
+                        <li class="air">
+                            <a href="#none"><span class="hide">비상벨</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">비상벨</span>
+                            </div>
+                        </li>
+                        <li class="invasion">
+                            <a href="#none"><span class="hide">침입탐지</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">침입탐지</span>
+                            </div>
+                        </li>
+                        <li class="enter">
+                            <a href="#none"><span class="hide">출입관리</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">출입관리</span>
+                            </div>
+                        </li>
+                        <li class="elevator">
+                            <a href="#none"><span class="hide">엘리베이터</span></a>
+                            <div class="tooltip">
+                                <span class="tooltip__text tooltip__text--right">엘리베이터</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="contents__left"></div>
         </div>
     </div>
 

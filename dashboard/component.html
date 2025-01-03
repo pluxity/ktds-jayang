@@ -17,6 +17,14 @@
        <button type="button" class="button button--solid-upper" disabled>확인</button>
    </div>
 
+   <div class="alert alert--border">
+    <p>
+        비밀번호가 변경되었습니다.<br>
+        다시 로그인해주세요.
+    </p>
+    <button type="button" class="button button--solid-middle">로그인</button>
+</div>
+
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Toast</div>
    <!-- [D] toast 노출 시 toast--active 클래스 추가 -->
    <div class="toast">
@@ -92,8 +100,8 @@
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 장비 팝업 - 장비 표시</div>
-   <div class="popup-equip popup-equip--group">
-       <div class="popup-equip__head">
+   <div class="popup-basic popup-basic--group">
+       <div class="popup-basic__head">
            <span class="checkbox-wrap">
                <input type="checkbox" id="check">
                <label for="check">전체문구</label>
@@ -114,8 +122,8 @@
    </div> 
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 장비 팝업 - 장비 목록</div>
-   <div class="popup-equip">
-        <div class="popup-equip__head">
+   <div class="popup-basic">
+        <div class="popup-basic__head">
            <h2 class="name">CCTV</h2>
            <button type="button" class="close"><span class="hide">close</span></button>
        </div>
@@ -169,7 +177,7 @@
            </div>
            <div class="equip-list__contents">
                <div class="title">
-                   총 233,214,123<button type="" class="reflesh"><span class="hide">새로고침</span></button>
+                   총 233,214,123<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
                </div>
                <!-- Accordion -->
                <div class="accordion">
@@ -1400,8 +1408,8 @@
         <div class="all">
             <a href="#none">장비보기</a>
             <!-- 장비 목록 팝업 -->
-            <div class="popup-equip popup-equip--group">
-                <div class="popup-equip__head">
+            <div class="popup-basic popup-basic--group">
+                <div class="popup-basic__head">
                     <span class="checkbox-wrap">
                         <input type="checkbox" id="check">
                         <label for="check">전체문구</label>

@@ -57,9 +57,13 @@
 @mixin alert{
     .alert{
         display:flex; flex-direction:column; align-items:center; justify-content:center; grid-gap:48px;
-        padding:45px 30px 30px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box; 
+        padding:45px 30px 30px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box; box-shadow:0px 0px 30px 0px rgba(0, 0, 0, 0.75);
         width:18.75rem; 
         color:#fff;
+        &--border{
+            padding:30px 20px 20px; border:2px solid var(--color-mint);
+            font-size:0.875rem;
+        }
     }
 }
 
@@ -98,8 +102,6 @@
         &--active{bottom:0; visibility:visible;}
     }
 }
-
-
 
 /* 경고 팝업 */
 @mixin popup_warning{
@@ -140,8 +142,8 @@
 }
 
 /* 장비 목록 팝업 */
-@mixin popup_equip{
-    .popup-equip{
+@mixin popup_basic{
+    .popup-basic{
         display:inline-block;
         background-color:var(--color-black); border-radius:10px; box-sizing:border-box;
         border-top:2px solid var(--color-mint); box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
@@ -149,7 +151,7 @@
         &--group{
             padding:15px; 
             min-width:17.5rem;
-            .popup-equip{
+            .popup-basic{
                 &__head{height:20px; padding:0; border-bottom:0;}
                 &__info{width:17.5rem; }
             }
@@ -366,7 +368,6 @@
     }
 }
 
-
 /* Checkbox */
 @mixin input_checkbox{
     .checkbox-wrap{
@@ -396,7 +397,6 @@
     }
 }
 
-
 /* Radio */
 @mixin input_radio{
     input[type="radio"]{
@@ -420,10 +420,9 @@
     }
 }
 
-
 /* Input Text */
 @mixin input_text{
-    input[type="text"]{
+    input[type="text"], input[type="password"]{
         padding:7px 10px 8px 10px; border:1px solid var(--color-grayscale02); background-color:var(--color-black); border-radius:5px; box-sizing:border-box;
         color:var(--color-grayscale-light); font-size:0.75rem; 
         &::placeholder{color:var(--color-grayscale03);}
@@ -437,31 +436,50 @@
 
         &:disabled{border-color:var(--color-grayscale-dark); color:var(--color-grayscale03);}
     }
+    // input 에러 메시지 노출 및 보더색상 변경 시 아래 클래스로 묶어서 적용
+    @at-root{
+        .input-error{
+            position:relative;
+            input{
+                border-color:#0B5746;
+                height:2.5rem; width:100%;
+                font-size:0.875rem;
+            }
+            &--active{
+                input{
+                    border-color:var(--color-danger); color:var(--color-danger);
+                }
+            }
+            &__text{
+                position:absolute; 
+                margin:3px 0 0 5px; 
+                color:var(--color-danger); font-size:0.75rem;
+            }
+        }
+    }
 }
-
 
 /* Table */
 @mixin table{
     .table {
         width:100%;
-      th, td{color:var(--color-grayscale-light);}
-      th{padding:7px 5px; font-size:0.875rem;}
-      td{
-        padding:11px 5px; border-bottom:1px solid var(--color-grayscale03);
-        font-size:0.75rem; text-align:center;
-    }
-      thead{
-        position:relative;
-        &::before{
-            content:'';
-            display:block; position:absolute; top:0; right:0; z-index:-1;
-            background-color:var(--color-grayscale03); border-radius:5px;
-            width:100%; height:100%;
+        th, td{color:var(--color-grayscale-light);}
+        th{padding:7px 5px; font-size:0.875rem;}
+        td{
+            padding:11px 5px; border-bottom:1px solid var(--color-grayscale03);
+            font-size:0.75rem; text-align:center;
         }
-      }
+        thead{
+            position:relative;
+            &::before{
+                content:'';
+                display:block; position:absolute; top:0; right:0; z-index:-1;
+                background-color:var(--color-grayscale03); border-radius:5px;
+                width:100%; height:100%;
+            }
+        }
     }
 }
-
 
 /* Accordion */
 @mixin accordion{
@@ -614,7 +632,6 @@
     }
 }
 
-
 /* Selectbox */
 @mixin selectbox{
     .selectbox{
@@ -672,7 +689,6 @@
     }
 }
 
-
 /* POI Menu */
 @mixin poi_menu{
     .poi-menu{
@@ -684,7 +700,7 @@
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); 
             width:60px; height:60px; border-radius:100%; 
 
-            .popup-equip--group{position:absolute; left:77px; top:0;}
+            .popup-basic--group{position:absolute; left:77px; top:0;}
             
             .all{
                 position:relative; 

@@ -16,7 +16,7 @@
 // popup
 @include popup_warning;
 @include popup_event;
-@include popup_equip;
+@include popup_basic;
 
 // input
 @include input_checkbox;
@@ -32,4 +32,8 @@
 .contents{
     padding:5rem 0 0 1.87em; box-sizing:border-box;
     height:100%;
+}
+
+.poi-menu{
+    position:absolute; top:calc(50% + 5rem); transform:translateY(-50%);
 }

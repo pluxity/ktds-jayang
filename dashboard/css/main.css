@@ -139,8 +139,12 @@
   background-color: var(--color-black);
   border-radius: 10px;
   box-sizing: border-box;
+  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
   width: 18.75rem;
   color: #fff;
+}
+.alert--border {
+  border: 2px solid var(--color-mint);
 }
 
 .toast {
@@ -730,7 +734,7 @@
   flex: 1;
 }
 
-.popup-equip {
+.popup-basic {
   display: inline-block;
   background-color: var(--color-black);
   border-radius: 10px;
@@ -738,19 +742,19 @@
   border-top: 2px solid var(--color-mint);
   box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
 }
-.popup-equip--group {
+.popup-basic--group {
   padding: 15px;
   min-width: 17.5rem;
 }
-.popup-equip--group .popup-equip__head {
+.popup-basic--group .popup-basic__head {
   height: 20px;
   padding: 0;
   border-bottom: 0;
 }
-.popup-equip--group .popup-equip__info {
+.popup-basic--group .popup-basic__info {
   width: 17.5rem;
 }
-.popup-equip__head {
+.popup-basic__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -763,7 +767,7 @@
   color: var(--color-mint);
   font-size: 1.125rem;
 }
-.popup-equip__head .close {
+.popup-basic__head .close {
   width: 24px;
   height: 24px;
   -webkit-mask-image: url("/dashboard/img/icon24/icon24.svg");
@@ -960,7 +964,7 @@ input[type=radio]:disabled::after {
   display: none;
 }
 
-input[type=text] {
+input[type=text], input[type=password] {
   padding: 7px 10px 8px 10px;
   border: 1px solid var(--color-grayscale02);
   background-color: var(--color-black);
@@ -969,30 +973,50 @@ input[type=text] {
   color: var(--color-grayscale-light);
   font-size: 0.75rem;
 }
-input[type=text]::-moz-placeholder {
+input[type=text]::-moz-placeholder, input[type=password]::-moz-placeholder {
   color: var(--color-grayscale03);
 }
-input[type=text]::placeholder {
+input[type=text]::placeholder, input[type=password]::placeholder {
   color: var(--color-grayscale03);
 }
-input[type=text]::-webkit-input-placeholder {
+input[type=text]::-webkit-input-placeholder, input[type=password]::-webkit-input-placeholder {
   color: var(--color-grayscale03);
 }
-input[type=text]:focus {
+input[type=text]:focus, input[type=password]:focus {
   outline: none;
 }
-input[type=text]:focus::-moz-placeholder {
+input[type=text]:focus::-moz-placeholder, input[type=password]:focus::-moz-placeholder {
   color: var(--color-grayscale-light);
 }
-input[type=text]:focus::placeholder {
+input[type=text]:focus::placeholder, input[type=password]:focus::placeholder {
   color: var(--color-grayscale-light);
 }
-input[type=text]:focus::-webkit-input-placeholder {
+input[type=text]:focus::-webkit-input-placeholder, input[type=password]:focus::-webkit-input-placeholder {
   color: var(--color-grayscale-light);
 }
-input[type=text]:disabled {
+input[type=text]:disabled, input[type=password]:disabled {
   border-color: var(--color-grayscale-dark);
   color: var(--color-grayscale03);
+}
+
+.input-error {
+  position: relative;
+}
+.input-error input {
+  border-color: #0B5746;
+  height: 2.5rem;
+  width: 100%;
+  font-size: 0.875rem;
+}
+.input-error--active input {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+.input-error__text {
+  position: absolute;
+  margin: 3px 0 0 5px;
+  color: var(--color-danger);
+  font-size: 0.75rem;
 }
 
 .poi-menu {
@@ -1014,7 +1038,7 @@ input[type=text]:disabled {
   height: 60px;
   border-radius: 100%;
 }
-.poi-menu__all .popup-equip--group {
+.poi-menu__all .popup-basic--group {
   position: absolute;
   left: 77px;
   top: 0;
@@ -1244,4 +1268,10 @@ input[type=text]:disabled {
   padding: 5rem 0 0 1.87em;
   box-sizing: border-box;
   height: 100%;
+}
+
+.poi-menu {
+  position: absolute;
+  top: calc(50% + 5rem);
+  transform: translateY(-50%);
 }/*# sourceMappingURL=main.css.map */

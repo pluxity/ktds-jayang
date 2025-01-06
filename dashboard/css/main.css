@@ -4,7 +4,7 @@
 /* Alert */
 /* Toast */
 /* 경고 팝업 */
-/* 장비 목록 팝업 */
+/* 기본 팝업 */
 /* 이벤트 팝업 - 공지사항/SOP */
 /* Tooltip */
 /* Checkbox */
@@ -142,9 +142,24 @@
   box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
   width: 18.75rem;
   color: #fff;
+  text-align: center;
+  line-height: 1.1;
 }
 .alert--border {
+  grid-gap: 29px;
+  padding: 30px 20px 20px;
   border: 2px solid var(--color-mint);
+  font-size: 0.875rem;
+  color: var(--color-grayscale-light);
+}
+.alert__buttons {
+  display: flex;
+  justify-content: center;
+  grid-gap: 10px;
+  width: 100%;
+}
+.alert__buttons .button {
+  width: 7.8125rem;
 }
 
 .toast {

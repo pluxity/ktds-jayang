@@ -59,10 +59,16 @@
         display:flex; flex-direction:column; align-items:center; justify-content:center; grid-gap:48px;
         padding:45px 30px 30px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box; box-shadow:0px 0px 30px 0px rgba(0, 0, 0, 0.75);
         width:18.75rem; 
-        color:#fff;
+        color:#fff; text-align:center; line-height:1.1;
         &--border{
+            grid-gap:29px;
             padding:30px 20px 20px; border:2px solid var(--color-mint);
-            font-size:0.875rem;
+            font-size:0.875rem; color:var(--color-grayscale-light);
+        }
+        &__buttons{
+            display:flex; justify-content:center; grid-gap:10px;
+            width:100%;
+            .button{width:7.8125rem;}
         }
     }
 }
@@ -141,7 +147,7 @@
     }
 }
 
-/* 장비 목록 팝업 */
+/* 기본 팝업 */
 @mixin popup_basic{
     .popup-basic{
         display:inline-block;

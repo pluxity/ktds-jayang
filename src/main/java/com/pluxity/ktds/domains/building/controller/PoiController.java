@@ -6,6 +6,7 @@ import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.service.PoiService;
+import com.pluxity.ktds.global.constant.SuccessCode;
 import com.pluxity.ktds.global.response.ResponseBody;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,9 +27,14 @@ import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
 public class PoiController {
     private final PoiService service;
 
+//    @GetMapping
+//    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
+//        return DataResponseBody.of(service.findAll());
+//    }
+
     @GetMapping
-    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
-        return DataResponseBody.of(service.findAll());
+    public DataResponseBody<List<PoiDetailResponseDTO>> getPoiAllDetail() {
+        return DataResponseBody.of(service.findAllDetail());
     }
 
     @GetMapping("/{id}")
@@ -51,21 +58,21 @@ public class PoiController {
 
     @PatchMapping("/{id}/position")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchPoiProperties(@PathVariable Long id, @Valid @NotNull @RequestBody Spatial dto) {
+    public ResponseBody patchPoiProperties(@PathVariable Long id, @Valid @RequestBody Spatial dto) {
         service.updatePosition(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }
 
     @PatchMapping("/{id}/rotation")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchPoiRotation(@PathVariable Long id, @Valid @NotNull @RequestBody Spatial dto) {
+    public ResponseBody patchPoiRotation(@PathVariable Long id, @Valid @RequestBody Spatial dto) {
         service.updateRotation(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }
 
     @PatchMapping("/{id}/scale")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchPoiScale(@PathVariable Long id, @Valid @NotNull @RequestBody Spatial dto) {
+    public ResponseBody patchPoiScale(@PathVariable Long id, @Valid @RequestBody Spatial dto) {
         service.updateScale(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }
@@ -77,5 +84,27 @@ public class PoiController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
+    @DeleteMapping("/id-list/{ids}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody deletePois(@PathVariable List<Long> ids) {
+        service.deleteAllById(ids);
+        return ResponseBody.of(SuccessCode.SUCCESS_DELETE);
+    }
+
+    @PatchMapping("/un-allocation/{ids}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchPoiUnAllocation(@PathVariable List<Long> ids) {
+        service.unAllocationPoi(ids);
+        return ResponseBody.of(SuccessCode.SUCCESS_PATCH);
+    }
+
+    @PostMapping("/batch-register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseBody postBatchPoi(@RequestParam(value = "buildingId") Long buildingId,
+                                     @RequestParam(value = "floorId") Long floorId,
+                                     @RequestBody MultipartFile file) {
+        service.batchRegisterPoi(buildingId, floorId, file);
+        return ResponseBody.of(SuccessCode.SUCCESS_CREATE);
+    }
 
 }

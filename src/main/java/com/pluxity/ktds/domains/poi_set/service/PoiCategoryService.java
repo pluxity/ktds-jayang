@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.poi_set.service;
 
 import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
+import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryRequestDTO;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryResponseDTO;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
@@ -35,6 +36,7 @@ public class PoiCategoryService {
     private final IconSetRepository iconSetRepository;
 
     private final SaveImage imageStrategy;
+    private final PoiRepository poiRepository;
 
     public PoiCategoryResponseDTO findById(Long id) {
         PoiCategory fetchPoiCategory = repository.findById(id)
@@ -108,8 +110,11 @@ public class PoiCategoryService {
 
     @Transactional
     public void delete(Long id) {
+
+        poiRepository.findByPoiCategoryId(id).ifPresent(poiCategory -> {
+            throw new CustomException(EXIST_POI_CONTAINING_CATEGORY);
+        });
         repository.deleteById(id);
     }
-
 
 }

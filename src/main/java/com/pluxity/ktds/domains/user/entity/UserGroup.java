@@ -1,11 +1,13 @@
 package com.pluxity.ktds.domains.user.entity;
 
+import com.pluxity.ktds.domains.user.dto.UserGroupResponseDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 
@@ -49,4 +51,15 @@ public class UserGroup {
         }
     }
 
+    public UserGroupResponseDTO toResponseDTO() {
+        return UserGroupResponseDTO.builder()
+                .id(this.getId())
+                .name(this.getName())
+                .build();
+    }
+    public void update(UserGroup userGroup) {
+        if (StringUtils.hasText(userGroup.getName())) {
+            this.name = userGroup.getName();
+        }
+    }
 }

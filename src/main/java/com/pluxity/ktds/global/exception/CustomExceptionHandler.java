@@ -1,6 +1,7 @@
 package com.pluxity.ktds.global.exception;
 
 import com.pluxity.ktds.global.response.ErrorResponseBody;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,10 @@ public class CustomExceptionHandler {
   }
 
   @ExceptionHandler(NoResourceFoundException.class)
-  public ResponseEntity<ErrorResponseBody> handleException(Exception e) {
-
+  public ResponseEntity<ErrorResponseBody> handleException(Exception e, HttpServletRequest request) {
+    if (request.getRequestURI().endsWith(".map")) {
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
     LOGGER.error("NoResourceFoundException", e);
     return new ResponseEntity<>(
         ErrorResponseBody.of(HttpStatus.NOT_FOUND, "해당 경로를 찾지 못했습니다. url 을 확인해주세요"),

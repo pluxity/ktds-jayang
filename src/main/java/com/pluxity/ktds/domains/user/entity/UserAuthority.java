@@ -27,6 +27,9 @@ public class UserAuthority {
     public UserAuthority(String name) {
         this.name = name;
     }
+    public void assignToUserGroup(UserGroup userGroup) {
+        this.userGroup = userGroup;
+    }
 
     @Override
     public String toString() {

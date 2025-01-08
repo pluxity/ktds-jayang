@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_DELETE;
 import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
@@ -25,9 +26,14 @@ public class BuildingController {
 
     private final BuildingService service;
 
+//    @GetMapping
+//    public DataResponseBody<List<BuildingResponseDTO>> getBuildings() {
+//        return DataResponseBody.of(service.findAll());
+//    }
+
     @GetMapping
-    public DataResponseBody<List<BuildingResponseDTO>> getBuildings() {
-        return DataResponseBody.of(service.findAll());
+    public DataResponseBody<List<BuildingDetailResponseDTO>> getBuildings() {
+        return DataResponseBody.of(service.findDetailAll());
     }
 
     @GetMapping("/{id}")
@@ -95,4 +101,12 @@ public class BuildingController {
         service.delete(id);
         return ResponseBody.of(SUCCESS_DELETE);
     }
+
+    @DeleteMapping("/ids/{ids}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteBuildings(@PathVariable List<Long> ids) {
+        service.deleteAll(ids);
+        return ResponseBody.of(SUCCESS_DELETE);
+    }
+
 }

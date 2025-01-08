@@ -1,0 +1,329 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+  min-width: 1200px;
+  font-size: 1.6rem;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+html {
+  font-size: 62.5%;
+}
+ol,
+ul {
+  list-style: none;
+}
+a {
+  background-color: transparent;
+  text-decoration: none;
+  outline: none;
+  color: inherit;
+}
+a:active,
+a:hover {
+  text-decoration: none;
+  color: inherit;
+  outline: 0;
+}
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  border: none;
+  background: none;
+  padding: 0;
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: inherit;
+  font: inherit;
+  color: inherit;
+}
+input {
+  outline: none;
+}
+
+:ROOT {
+  --layout_nav_height: 7rem;
+  --layout_main_height: calc(100vh - var(--layout_nav_height));
+
+  /* PRIMARY */
+  --color_primary_40: #D3FFE5;
+  --color_primary_50: #95F4B7;
+  --color_primary_60: #3BFFA1;
+  --color_primary_70: #21EA74;
+  --color_primary_80: #23C565;
+  --color_primary_90: #019947;
+  --color_primary_100: #165A3B;
+  --color_primary_110: #072714;
+
+  /* GRAYSCALE */
+  --color_gray_5:  #F5F5F5;
+  --color_gray_10:  #D2D2D3;
+  --color_gray_20:  #AFB0B1;
+  --color_gray_30:  #919193;
+  --color_gray_40:  #7B7A7D;
+  --color_gray_50:  #6A6A6D;
+  --color_gray_60:  #5A595D;
+  --color_gray_70:  #48474C;
+  --color_gray_80:  #333333;
+  --color_gray_90:  #292929;
+  --color_gray_100: #1E1E1E;
+  --color_gray_110: #0D0D0D;
+
+  /* SYSTEM */
+  /** 1 = font, 2 = border, 3 = background */
+  --color_danger_font: #FF0000;
+  --color_danger_border: #892323;
+  --color_danger_background: #270C0C;
+
+  --color_warning_font: #FFA800;
+  --color_warning_border: #916000;
+  --color_warning_background: #241800;
+
+  --color_not_received_font: #9D50FF;
+  --color_not_received_border: #6104AB;
+  --color_not_received_background: #20042D;
+}
+
+/* ==================================================
+                        FONT(필요하면 변경하세요)
+ ================================================= */
+@font-face {
+  font-family: "NotoSanskr";
+  src:url("/static/assets/webfonts/NotoSanskr-R/NotoSanskr-R.ttf") format("truetype");
+  src:url("/static/assets/webfonts/NotoSanskr-R/NotoSanskr-R.otf") format("embeddedopentype");
+  src:url("/static/assets/webfonts/NotoSanskr-R/NotoSanskr-R.woff") format("woff");
+}
+/*
+@font-face {
+    font-family: "NotoSanskr";
+    src:url("/static/assets/webfonts/NotoSanskr-M/NotoSanskr-B.ttf") format("truetype");
+    src:url("/static/assets/webfonts/NotoSanskr-M/NotoSanskr-B.otf") format("embeddedopentype");
+    src:url("/static/assets/webfonts/NotoSanskr-M/NotoSanskr-B.woff") format("woff");
+}
+@font-face {
+    font-family: "NotoSanskr";
+    src:url("/static/assets/webfonts/NotoSanskr-r/NotoSanskr-B.ttf") format("truetype");
+    src:url("/static/assets/webfonts/NotoSanskr-r/NotoSanskr-B.otf") format("embeddedopentype");
+    src:url("/static/assets/webfonts/NotoSanskr-r/NotoSanskr-B.woff") format("woff");
+}
+*/
+
+@font-face {
+  font-family: "digifonts";
+  src:url("/static/assets/digifonts/digital-7.monoitalic.ttf") format("truetype");
+}
+
+HTML {
+  font-family: "NotoSanskr", sans-serif;
+}
+
+BODY {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bg-primary-40      { background-color: var(--color_primary_40); }
+.bg-primary-50      { background-color: var(--color_primary_50); }
+.bg-primary-60      { background-color: var(--color_primary_60); }
+.bg-primary-70      { background-color: var(--color_primary_70); }
+.bg-primary-80      { background-color: var(--color_primary_80); }
+.bg-primary-90      { background-color: var(--color_primary_90); }
+.bg-primary-100     { background-color: var(--color_primary_100); }
+.bg-primary-110     { background-color: var(--color_primary_110); }
+
+.text-primary-40    { color: var(--color_primary_40); }
+.text-primary-50    { color: var(--color_primary_50); }
+.text-primary-60    { color: var(--color_primary_60); }
+.text-primary-70    { color: var(--color_primary_70); }
+.text-primary-80    { color: var(--color_primary_80); }
+.text-primary-90    { color: var(--color_primary_90); }
+.text-primary-100   { color: var(--color_primary_100); }
+.text-primary-110   { color: var(--color_primary_110); }
+.border-primary-40  { border-color: var(--color_primary_40); }
+.border-primary-50  { border-color: var(--color_primary_50); }
+.border-primary-60  { border-color: var(--color_primary_60); }
+.border-primary-70  { border-color: var(--color_primary_70); }
+.border-primary-80  { border-color: var(--color_primary_80); }
+.border-primary-90  { border-color: var(--color_primary_90); }
+.border-primary-100 { border-color: var(--color_primary_100); }
+.border-primary-110 { border-color: var(--color_primary_110); }
+
+
+.bg-gray-10      { background-color: var(--color_gray_10); }
+.bg-gray-20      { background-color: var(--color_gray_20); }
+.bg-gray-30      { background-color: var(--color_gray_30); }
+.bg-gray-40      { background-color: var(--color_gray_40); }
+.bg-gray-50      { background-color: var(--color_gray_50); }
+.bg-gray-60      { background-color: var(--color_gray_60); }
+.bg-gray-70      { background-color: var(--color_gray_70); }
+.bg-gray-80      { background-color: var(--color_gray_80); }
+.bg-gray-90      { background-color: var(--color_gray_90); }
+.bg-gray-100     { background-color: var(--color_gray_100); }
+.bg-gray-110     { background-color: var(--color_gray_110); }
+.text-gray-10    { color: var(--color_gray_10); }
+.text-gray-20    { color: var(--color_gray_20); }
+.text-gray-30    { color: var(--color_gray_30); }
+.text-gray-40    { color: var(--color_gray_40); }
+.text-gray-50    { color: var(--color_gray_50); }
+.text-gray-60    { color: var(--color_gray_60); }
+.text-gray-70    { color: var(--color_gray_70); }
+.text-gray-80    { color: var(--color_gray_80); }
+.text-gray-90    { color: var(--color_gray_90); }
+.text-gray-100   { color: var(--color_gray_100); }
+.text-gray-110   { color: var(--color_gray_110); }
+.border-gray-10  { border-color: var(--color_gray_10); }
+.border-gray-20  { border-color: var(--color_gray_20); }
+.border-gray-30  { border-color: var(--color_gray_30); }
+.border-gray-40  { border-color: var(--color_gray_40); }
+.border-gray-50  { border-color: var(--color_gray_50); }
+.border-gray-60  { border-color: var(--color_gray_60); }
+.border-gray-70  { border-color: var(--color_gray_70); }
+.border-gray-80  { border-color: var(--color_gray_80); }
+.border-gray-90  { border-color: var(--color_gray_90); }
+.border-gray-100 { border-color: var(--color_gray_100); }
+.border-gray-110 { border-color: var(--color_gray_110); }
+
+.bg-danger { background-color: var(--color_danger_background); }
+.border-danger { border-color: var(--color_danger_border); }
+.bg-danger-light { background-color: var(--color_danger_font); }
+
+.bg-warning { background-color: var(--color_warning_background); }
+.border-warning { border-color: var(--color_warning_border); }
+.bg-warning-light { background-color: var(--color_warning_font); }
+
+.bg-no_received { background: var(--color_not_received_background);}
+.border-no_received { border-color: var(--color_not_received_border); }
+.bg-no_received-light { background-color: var(--color_not_received_font); }
+
+.text-white { color: #FFFFFF }
+.text-black { color: #000000 }
+.text-danger { color: var(--color_danger_font); }
+.text-warning { color: var(--color_warning_font); }
+.text-no_received { color: var(--color_not_received_font); }

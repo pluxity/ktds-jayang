@@ -1,5 +1,7 @@
 package com.pluxity.ktds.domains.building.entity;
 
+import com.pluxity.ktds.domains.building.dto.BuildingResponseDTO;
+import com.pluxity.ktds.domains.building.dto.SbmFloorDTO;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.persistence.*;
@@ -66,4 +68,15 @@ public class SbmFloor {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_VALUE_XML_FIELD, fieldName));
     }
 
+    public SbmFloorDTO toResponseDTO() {
+        return SbmFloorDTO.builder()
+                .id(this.id)
+                .sbmFloorId(this.sbmFloorId)
+                .sbmFileName(this.sbmFileName)
+                .sbmFloorBase(this.sbmFloorBase)
+                .sbmFloorGroup(this.sbmFloorGroup)
+                .sbmFloorName(this.sbmFloorName)
+                .isMain(this.isMain)
+                .build();
+    }
 }

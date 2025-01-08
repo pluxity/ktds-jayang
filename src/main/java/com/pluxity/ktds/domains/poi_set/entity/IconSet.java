@@ -59,8 +59,8 @@ public class IconSet {
         return IconSetResponseDTO.builder()
                 .id(id)
                 .name(name)
-                .iconFile2D(iconFile2D.toDto())
-                .iconFile3D(iconFile3D.toDto())
+                .iconFile2D(iconFile2D != null ? iconFile2D.toDto() : null)
+                .iconFile3D(iconFile3D != null ? iconFile3D.toDto() : null)
                 .build();
     }
 

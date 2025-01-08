@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.cctv.dto.CreateCctvDTO;
 import com.pluxity.ktds.domains.cctv.entity.Cctv;
 import com.pluxity.ktds.domains.cctv.repository.CctvRepository;
 import com.pluxity.ktds.global.exception.CustomException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 

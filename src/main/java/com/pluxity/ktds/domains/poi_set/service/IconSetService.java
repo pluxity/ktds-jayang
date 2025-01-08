@@ -8,6 +8,7 @@ import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
+import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.global.exception.CustomException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
@@ -19,8 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.pluxity.ktds.global.constant.ErrorCode.DUPLICATE_NAME;
-import static com.pluxity.ktds.global.constant.ErrorCode.NOT_FOUND_ID;
+import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +29,7 @@ public class IconSetService {
     private final FileInfoService fileService;
 
     private final IconSetRepository repository;
+    private final PoiCategoryRepository poiCategoryRepository;
 
     public IconSetResponseDTO findById(Long id) {
 
@@ -38,6 +39,7 @@ public class IconSetService {
         return fetchIconSet.toDto();
     }
 
+    @Transactional
     public List<IconSetResponseDTO> findAll() {
         return repository.findAll()
                 .stream()
@@ -67,6 +69,7 @@ public class IconSetService {
         updateIcons(dto.iconFile3DId(), iconSet::updateFileInfo3D);
 
         IconSet savedIconSet = repository.save(iconSet);
+
         return savedIconSet.getId();
     }
 
@@ -88,7 +91,15 @@ public class IconSetService {
 
     @Transactional
     public void delete(Long id) {
+        if (!poiCategoryRepository.findByIconSetsId(id).isEmpty()) {
+            throw new CustomException(EXIST_CATEGORY_CONTAINING_ICON_SET);
+        }
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllById(@NotNull List<Long> ids) {
+        repository.deleteAllById(ids);
     }
 
     private void updateIcons(Long iconFileId, Consumer<FileInfo> updater) {

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 실내 도면 관리 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}" />
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}" />
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">실내 도면 관리</h1>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <form name="searchForm" id="searchForm" class="d-flex mb-3">
+                                <div class="input-group me-2">
+                                    <span class="input-group-text" id="search">도면검색</span>
+                                    <select id="searchType" name="searchType" class="form-select" style="max-width: fit-content;">
+                                        <option value="name">도면이름</option>
+                                        <option value="code">도면코드</option>
+                                    </select>
+                                    <input type="text" name="searchName" id="searchName" class="form-control" placeholder="검색명을 입력하세요." aria-label="" aria-describedby="button-addon2">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" id="searchButton">검색</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-7 text-right">
+                            <button type="button" class="btn btn-primary btn-md" id="btnRegistBuilding" data-bs-toggle="modal" data-bs-target="#buildingRegistModal">
+                                도면 등록
+                            </button>
+                            <button type="button" class="btn btn-danger delete" id="btnDeleteBuilding">일괄 삭제</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div id="wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div class="modal fade" id="buildingRegistModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">도면 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="buildingRegistForm" id="buildingRegistForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered ">
+                            <colgroup>
+                                <col style="width:15%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>도면명</th>
+                                <td>
+                                    <input type="text" name="name" id="registName" class="form-control input-sm" maxlength="20" title="도면명" required data-rules="required" data-tagname="도면명">
+                                </td>
+                                <th>도면코드</th>
+                                <td>
+                                    <input type="text" name="code" id="registCode" class="form-control input-sm" maxlength="36" title="도면코드" required data-rules="required" data-tagname="도면코드">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>도면파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="multipartFile" id="registMultipartFile" class="form-control input-sm" title="도면파일" required data-rules="required+buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>도면설명</th>
+                                <td colspan="3">
+                                    <textarea name="description" id="registDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255" data-tagname="도면설명"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnBuildingRegist">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="buildingModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">도면 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="buildingModifyForm" id="buildingModifyForm" method="post" enctype="multipart/form-data" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:15%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>도면명</th>
+                                <td>
+                                    <input type="hidden" name="id" id="modifyId">
+                                    <input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="30" title="도면명" required data-rules="required" data-tagname="도면명">
+                                </td>
+                                <th>도면코드</th>
+                                <td>
+                                    <input type="text" name="code" id="modifyCode" class="form-control input-sm" maxlength="36" title="도면코드" required data-rules="required" data-tagname="도면코드" disabled>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>도면파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="multipartFile" id="modifyMultipartFile" class="form-control input-sm" title="도면파일" data-rules="buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>도면설명</th>
+                                <td colspan="3">
+                                    <textarea name="description" id="modifyDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnBuildingModify">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/admin/building/indoor.js}"></script>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

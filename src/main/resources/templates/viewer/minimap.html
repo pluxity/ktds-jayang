@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div th:fragment="minimap-box" id="minimapBox">
+  <div id="minimap"></div>
+  <div id="buttonBox" >
+    <button type="button" class="control-button zoom-out bg-gray-100 border-gray-70" data-button-type="out">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="icon/zoomout">
+          <path id="Vector 514" d="M5.5 16H26.5" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </button>
+    <button type="button" class="control-button zoom-in  bg-gray-100 border-gray-70" data-button-type="in">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="icon/zoomin">
+          <path id="Vector 514" d="M5.50001 16H26.5" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+          <path id="Vector 515" d="M16 5.5L16 26.5" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </button>
+    <button type="button"  class="control-button home  bg-gray-100 border-gray-70" data-button-type="home">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="icon/main">
+          <path id="Rectangle 1252" d="M9 14V25H23V20.05V14" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+          <path id="Vector 519" d="M6 16L16 7L26 16" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </button>
+    <button type="button"  class="control-button first-view  bg-gray-100 border-gray-70" data-button-type="first-view">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="icon/first-view">
+          <path id="Vector 520" d="M5 8L16 26L27 8" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+          <path id="Vector 521" d="M10 16C13.6 13.3334 18.4 13.3333 22 16" stroke="#919193" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </button>
+    <button type="button" class="control-button top-view  bg-gray-100 border-gray-70" data-button-type="2D">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.96789 23V21.92C9.56789 17.9 11.6879 14.98 11.6879 12.46C11.6879 10.78 10.8079 9.56 8.98789 9.56C7.78789 9.56 6.74789 10.3 5.94789 11.26L4.88789 10.22C6.08789 8.92 7.34789 8.06 9.20789 8.06C11.8279 8.06 13.4679 9.78 13.4679 12.4C13.4679 15.32 11.1679 18.3 7.72789 21.56C8.48789 21.5 9.38789 21.42 10.1279 21.42H14.1879V23H4.96789ZM17.1816 23V8.34H20.8616C25.3616 8.34 27.7816 10.96 27.7816 15.62C27.7816 20.26 25.3616 23 20.9416 23H17.1816ZM19.0416 21.48H20.7016C24.1616 21.48 25.8616 19.32 25.8616 15.62C25.8616 11.9 24.1616 9.84 20.7016 9.84H19.0416V21.48Z" fill="#919193"/>
+      </svg>
+    </button>
+  </div>
+</div>
+</body>
+</html>

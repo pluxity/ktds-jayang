@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+
+<div th:fragment="popup-template" id="layerPopup">
+
+    <!-- 화재센서 팝업 -->
+    <div th:fragment="sensor-layer-popup" id="sensorLayerPopup" class="layer-popup" data-deactivate-target="sensorWrap">
+        <div id="dimSensorLayerPopup"></div>
+        <div class="popup sensor">
+            <div class="popup-header">
+                <div class="header-title"></div>
+                <button type="button" class="sensor-close-button">
+                    <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="close"
+                    >
+                        <path d="M19 5L5 19" stroke="white" />
+                        <path d="M5 5L19 19" stroke="white" />
+                    </svg>
+                </button>
+            </div>
+            <div class="popup-content sensor">
+                <div class="popup-content-box">
+                    <div class="popup-table event">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>이벤트명</th>
+                                <td class="event-name"></td>
+                            </tr>
+                            <tr>
+                                <th>상태</th>
+                                <td class="state-name"></td>
+                            </tr>
+                            <tr>
+                                <th>위치</th>
+                                <td class="location-name"></td>
+                            </tr>
+                            <tr>
+                                <th>발생 일시</th>
+                                <td class="occurrence-date"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="popup-table fire">
+                        <table>
+                            <tbody class="fire-content">
+                                <tr>
+                                    <th>항목</th>
+                                    <td class="category-name">상태값</td>
+                                </tr>
+                                <tr>
+                                    <th>불꽃</th>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <th>연기</th>
+                                    <td class="smoke-state"></td>
+                                </tr>
+                                <tr>
+                                    <th>온도</th>
+                                    <td class="temperature-state"></td>
+                                </tr>
+                            </tbody>
+                            <tbody class="tms-content" style="display: none">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <button type="button" class="button confirm">확인</button>
+            </div>
+        </div>
+    </div>
+    <!-- 지진정보 팝업 -->
+    <div th:fragment="earthquake-layer-popup" id="earthquakeLayerPopup" class="layer-popup" data-deactivate-target="btnEarthquake">
+        <div class="popup earthquake">
+            <div class="popup-header">
+                <div class="header-title">지진정보</div>
+                <button type="button" class="close-button">
+                    <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="close"
+                    >
+                        <path d="M19 5L5 19" stroke="white" />
+                        <path d="M5 5L19 19" stroke="white" />
+                    </svg>
+                </button>
+            </div>
+            <div class="popup-content earthquake">
+                <div class="popup-content-box">
+                    <div class="popup-table earthquake">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>발생시각</th>
+                                <th>규모</th>
+                                <th>발생위치</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <p class="earthquake-comment">
+                    주변환경의 영향 또는 일시적인 장비 이상으로 계기관측값이 크게 표출될
+                    수 있습니다.
+                </p>
+                <div class="earthquake-img-box"></div>
+            </div>
+        </div>
+    </div>
+    <!-- 최근 이벤트 팝업 -->
+    <div th:fragment="recent-layer-popup" id="recentLayerPopup" class="layer-popup" data-deactivate-target="recentWrap">
+        <div class="popup recent">
+            <div class="popup-header">
+                <div class="header-title">최근 이벤트</div>
+                <button type="button" class="close-button">
+                    <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="close"
+                    >
+                        <path d="M19 5L5 19" stroke="white" />
+                        <path d="M5 5L19 19" stroke="white" />
+                    </svg>
+                </button>
+            </div>
+            <div class="popup-content recent">
+                <ul class="event-list tab-container">
+                    <li class="all-event on" data-event-level="total">
+                        <span>전체</span>
+                        <span class="value">0</span>
+                    </li>
+                    <li class="danger-event" data-event-level="danger">
+                        <span>위험</span>
+                        <span class="value">0</span>
+                    </li>
+                    <li class="warning-event" data-event-level="warning">
+                        <span>경고</span>
+                        <span class="value">0</span>
+                    </li>
+                    <li class="not-received-event" data-event-level="missing">
+                        <span>화재미수신</span>
+                        <span class="value">0</span>
+                    </li>
+                </ul>
+                <div class="popup-table recent">
+                    <table>
+                        <colgroup>
+                            <col style="width: 23%;">
+                            <col style="width: 20%;">
+                            <col style="width: 19%;">
+                            <col style="width: 23%;">
+                            <col style="width: 15%;">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>장비명</th>
+                            <th>이벤트명</th>
+                            <th>위치</th>
+                            <th>발생일시</th>
+                            <th>녹화영상</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div class="scroll recent-tbody">
+                        <table>
+                            <colgroup>
+                                <col style="width: 23%;">
+                                <col style="width: 20%;">
+                                <col style="width: 19%;">
+                                <col style="width: 23%;">
+                                <col style="width: 15%;">
+                            </colgroup>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- weather -->
+    <div th:fragment="weather-layer-popup" id="weatherLayerPopup" class="layer-popup" data-deactivate-target="weatherWrap">
+        <div class="popup weather">
+            <div class="popup-header">
+                <div class="header-title">충북 청주시 기상 정보</div>
+                <button type="button" class="close-button">
+                    <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="close"
+                    >
+                        <path d="M19 5L5 19" stroke="white" />
+                        <path d="M5 5L19 19" stroke="white" />
+                    </svg>
+                </button>
+            </div>
+            <div class="popup-content weather">
+                <div class="period-box">
+                    <div class="calendar">
+                        <label for="start">기간</label>
+                        <input
+                                type="date"
+                                id="start"
+                                name="weather-start"
+                        />
+                        <label for="finish">~</label>
+                        <input
+                                type="date"
+                                id="finish"
+                                name="weather-finish"
+                        />
+                        <button type="button" class="button inquire">조회</button>
+                    </div>
+                    <button type="button" class="button download"><a>TxT 다운로드</a></button>
+                </div>
+                <div class="popup-table weather">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>일시</th>
+                            <th>온도(℃)</th>
+                            <th>습도(%)</th>
+                            <th>풍향</th>
+                            <th>풍속(m/s)</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div class="scroll weather-tbody">
+                        <div class="weather-data-loading">
+                            <div class="loading-wrap">
+                                <span class="loading-image"></span>
+                                <span class="loading-msg">조회중 입니다</span>
+                            </div>
+                        </div>
+                        <table>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 사이드바 -->
+    <div th:fragment="sidebar-layer-popup" id="sidebarLayerPopup"  class="layer-popup" data-deactivate-target="sidebar-wrap">
+        <div class="popup sidebar">
+            <div class="popup-header">
+                <div class="header-title"></div>
+                <button type="button" class="close-button">
+                    <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="close"
+                    >
+                        <path d="M19 5L5 19" stroke="white" />
+                        <path d="M5 5L19 19" stroke="white" />
+                    </svg>
+                </button>
+            </div>
+            <div class="sidebar-content sidebar">
+                <div class="equipment-container content">
+                    <div class="equipment-location">
+                        <p class="location"></p>
+                        <ul class="floor-tab tab-container">
+                        </ul>
+                    </div>
+                    <div class="equipment-box">
+                        <button class="equipment-category-select"></button>
+                        <ul class="equipment-category-list"></ul>
+                    </div>
+                    <div class="equipment-list">
+                        <div class="popup-table equipment">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>장비명</th>
+                                    <th>위치</th>
+                                </tr>
+                                </thead>
+                            </table>
+                            <div class="scroll equipment-tbody">
+                                <table>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-container content">
+                    <div class="category-container">
+                        <div class="categories">
+                            <div class="category">
+                                <h3>구분</h3>
+                                <ul class="category-tab tab-container">
+                                    <li class="on all-category" data-device-type="">전체</li>
+                                    <li class="fire-category" data-device-type="fire_sensor">화재센서</li>
+                                    <li class="cctv-category" data-device-type="cctv">CCTV</li>
+                                </ul>
+                            </div>
+                            <div class="event-box">
+                                <h3>이벤트 등급</h3>
+                                <ul class="event-list tab-container">
+                                    <li class="all-event on" data-event-level="">전체</li>
+                                    <li class="danger-event" data-event-level="danger">위험</li>
+                                    <li class="warning-event" data-event-level="warning">경고</li>
+                                    <li class="not-received-event" data-event-level="missing">화재미수신</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <h4 class="total-count">총 건수 <span>0</span>건</h4>
+                    </div>
+                    <div class="period-container">
+                        <div class="calendar">
+                            <label for="eventStart">기간</label>
+                            <input
+                                    type="datetime-local"
+                                    id="eventStart"
+                                    name="event-start"
+                                    step="1"
+                            />
+                            <label for="eventFinish">~</label>
+                            <input
+                                    type="datetime-local"
+                                    id="eventFinish"
+                                    name="event-start"
+                                    step="1"
+                            />
+                        </div>
+                        <div class="search">
+                            <div class="search-box">
+                                <label for="search">검색</label>
+                                <input
+                                        type="text"
+                                        id="search"
+                                        name="search"
+                                        placeholder="검색"
+                                />
+                                <button type="button" class="button search-button">검색</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-list-container"></div>
+                </div>
+                <div class="patrol-container content">
+                    <div class="patrol-list scroll"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dimmed"></div>
+</div>
+</body>
+</html>

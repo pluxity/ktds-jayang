@@ -54,4 +54,12 @@ public class Patrol {
         patrolPoint.changePatrol(null);
     }
 
+    public PatrolResponseDTO toResponseDto() {
+        return PatrolResponseDTO.builder()
+                .id(id)
+                .name(name)
+                .buildingId(building.getId())
+                .patrolPoints(patrolPoints.stream().map(PatrolPoint::toResponseDTO).toList())
+                .build();
+    }
 }

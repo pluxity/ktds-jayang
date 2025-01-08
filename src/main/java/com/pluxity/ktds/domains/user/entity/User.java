@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.user.entity;
 
+import com.pluxity.ktds.domains.user.dto.UserResponseDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -52,5 +53,13 @@ public class User {
 
     public void updateUserGroup(UserGroup userGroup) {
         this.userGroup = userGroup;
+    }
+
+    public UserResponseDTO toResponseDTO() {
+        return UserResponseDTO.builder()
+                .username(username)
+                .name(name)
+                .groupName(getUserGroup().getName())
+                .build();
     }
 }

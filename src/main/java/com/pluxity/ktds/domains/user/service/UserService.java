@@ -2,6 +2,8 @@ package com.pluxity.ktds.domains.user.service;
 
 import com.pluxity.ktds.domains.user.dto.*;
 import com.pluxity.ktds.domains.user.entity.User;
+import com.pluxity.ktds.domains.user.entity.UserGroup;
+import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import com.pluxity.ktds.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -20,6 +23,7 @@ import static com.pluxity.ktds.global.constant.ErrorCode.*;
 public class UserService {
 
     private final UserRepository repository;
+    private final UserGroupRepository userGroupRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -87,6 +91,20 @@ public class UserService {
     }
 
     @Transactional
+    public void save(CreateUserDTO dto, Map<String, Object> request) {
+        UserGroup userGroup = userGroupRepository.findById(Long.parseLong(request.get("userGroupId").toString()))
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER_GROUP));
+        User user = User.builder()
+                .username(dto.username())
+                .name(dto.name())
+                .password(dto.password())
+                .userGroup(userGroup)
+                .build();
+
+        repository.save(user);
+    }
+
+    @Transactional
     public void update(Long id, UpdateUserDTO dto) {
         User user = repository.findById(id).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
         user.updateName(dto.name());
@@ -101,5 +119,10 @@ public class UserService {
     @Transactional
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDTO findByUserid(String userid) {
+        return repository.findByUsername(userid).orElseThrow(() -> new CustomException(NOT_FOUND_USER)).toResponseDTO();
     }
 }

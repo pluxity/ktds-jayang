@@ -15,16 +15,16 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
     boolean existsByCode(String code);
 
 
-    @EntityGraph(attributePaths = {"poiSet", "fileInfo", "lodSettings"})
+    @EntityGraph(attributePaths = {"fileInfo", "lodSettings"})
     @Override
     Optional<Building> findById(@Param(value = "id") Long id);
 
-    @Query("""
-                SELECT b FROM Building b
-                JOIN FETCH b.poiSet
-                WHERE b.id = :buildingId
-            """)
-    List<Floor> findFloorsByBuildingId(@Param(value = "buildingId") Long buildingId);
+//    @Query("""
+//                SELECT b FROM Building b
+//                JOIN FETCH b.poiSet
+//                WHERE b.id = :buildingId
+//            """)
+//    List<Floor> findFloorsByBuildingId(@Param(value = "buildingId") Long buildingId);
 
 
     @Query("""

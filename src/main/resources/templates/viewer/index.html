@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="viewer/head :: head"></div>
+</head>
+<body>
+	<label class="buildingName" id="buildingName"></label>
+    <nav th:replace="viewer/navbar :: navbar"></nav>
+    <div th:replace="viewer/navbar :: user-box"></div>
+    <div th:replace="viewer/navbar :: notepad-box"></div>
+    <main>
+        <div class="left-information">
+            <div class="building bg-gray-100">
+                <span class="icon"></span>
+                <span class="txt"></span>
+            </div>
+            <div class="floor" data-floor-name="">
+                <div class="btn-floor-change bg-gray-100">
+                    <span class="txt">전체층</span>
+                    <span class="arrow"></span>
+                </div>
+                <ul class="floor-list bg-gray-100 .border-primary-80 "></ul>
+            </div>
+        </div>
+        <div class="counter">
+            <strong data-count-array-index="3"></strong>
+            <strong data-count-array-index="2"></strong>
+            <strong data-count-array-index="1"></strong>
+            <strong data-count-array-index="0"></strong>
+        </div>
+        <div class="right-information">
+            <div class="latest-event">
+                <div class="count-area">
+                    <div class="total" data-event-level="total">
+                        <span class="border-primary-90 bg-primary-110 text-primary-80">전체</span>
+                        <span class="value">0</span>
+                    </div>
+                    <div class="danger" data-event-level="danger">
+                        <span>위험</span>
+                        <span class="value">0</span>
+                    </div>
+                    <div class="warning" data-event-level="warning">
+                        <span>경고</span>
+                        <span class="value">0</span>
+                    </div>
+                    <div class="missing" data-event-level="missing">
+                        <span>화재미수신</span>
+                        <span class="value">0</span>
+                    </div>
+                </div>
+                <div id="recentWrap" class="btn-latest-event">
+                    <span class="icon"></span>
+                    <span class="txt">최근 이벤트</span>
+                </div>
+            </div>
+            <div class="right-information-bottom">
+                <div class="poi-category-wrap">
+                    <button id="poiCategoryButton" class="poi-button">
+                        <span class="icon"></span>
+                        <span>POI</span>
+                    </button>
+                    <div id="poiCategoryBox"></div>
+                </div>
+                <div class="device-search-area">
+                    <div class="input-wrap">
+                        <input type="search" name="" id="" placeholder="장비명 바로 검색" class="device-search-input">
+                    </div>
+                    <div class="search-list">
+                        <ul class="inner"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="container">
+
+        </div>
+        <div id="leftMenu">
+            <button
+                    class="equipment-button sidebar-menu-button sidebar-wrap"
+                    data-menu="equipment"
+            >
+                <img src="/static/images/viewer/icons/devices.svg" alt="장비목록" />
+                <span class="menu-title">장비 목록</span>
+            </button>
+            <button class="event-button sidebar-menu-button sidebar-wrap" data-menu="event" >
+                <img src="/static/images/viewer/icons/events.svg" alt="이벤트 현황" />
+                <span class="menu-title">이벤트 현황</span>
+            </button>
+            <button class="patrol-button sidebar-menu-button sidebar-wrap" data-menu="patrol">
+                <img src="/static/images/viewer/icons/virtual-patrols.svg" alt="가상순찰" />
+                <span class="menu-title">가상순찰</span>
+            </button>
+            <button class="evaluation-button sidebar-wrap" data-menu="evaluation">
+                <img src="/static/images/viewer/icons/evaluation.svg" alt="대피경로" />
+                <span class="menu-title">대피경로</span>
+            </button>
+            <button class="e-sop-button sidebar-wrap" data-menu="e-sop">
+                <img src="/static/images/viewer/icons/e-sop.svg" alt="e-sop" />
+                <span class="menu-title">E-SOP</span>
+            </button>
+        </div>
+        <div id="loadingLayer">
+                <span class="loading-image"></span>
+                <span class="loading-txt">도면 데이터 로딩중</span>
+        </div>
+    </main>
+    <div th:replace="viewer/minimap :: minimap-box"></div>
+    <template th:replace="viewer/layer-popup :: popup-template"></template>
+    <th:block th:replace="viewer/script :: script "></th:block>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.poi_set.repository;
 
+import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -20,4 +21,8 @@ public interface PoiCategoryRepository extends JpaRepository<PoiCategory, Long> 
     @Override
     @EntityGraph(attributePaths = {"imageFile", "iconSets"})
     Optional<PoiCategory> findById(@Param(value = "id") Long id);
+
+    @EntityGraph(attributePaths = {"imageFile", "iconSets"})
+    List<PoiCategory> findByIconSetsId(@Param(value = "id") Long id);
+
 }

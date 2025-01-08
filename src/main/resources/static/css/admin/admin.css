@@ -1,0 +1,16 @@
+table th {
+    vertical-align: middle;
+}
+
+.hidden {
+    display: none;
+}
+
+.searchCctvList table td {
+    padding: .5rem !important;
+}
+
+.searchCctvList table td.alert {
+    text-align: center;
+    padding: 3rem 0 !important;
+}

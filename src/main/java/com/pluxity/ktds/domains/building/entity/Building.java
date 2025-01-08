@@ -4,7 +4,6 @@ import com.pluxity.ktds.domains.building.dto.BuildingDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.BuildingResponseDTO;
 import com.pluxity.ktds.domains.building.dto.UpdateBuildingDTO;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
-import com.pluxity.ktds.domains.poi_set.entity.PoiSet;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.persistence.*;
@@ -36,10 +35,6 @@ public class Building {
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Floor> floors = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "poi_set_id")
-    private PoiSet poiSet;
-
     @Embedded
     private LodSettings lodSettings;
 
@@ -70,10 +65,6 @@ public class Building {
         this.description = validString(other.description()) ? other.description() : this.description;
 
 
-    }
-
-    public void changePoiSet(@NotNull PoiSet poiSet) {
-        this.poiSet = poiSet;
     }
 
     public void changeLodSettings(@NotNull LodSettings lodSettings) {
@@ -119,9 +110,9 @@ public class Building {
                 .description(this.description)
                 .lodSettings(this.lodSettings)
                 .topology(this.topology)
+                .floors(this.getFloors().stream().map(Floor::toResponseDto).toList())
                 .buildingFile(this.fileInfo == null ? null : this.fileInfo.toDto())
                 .floorIds(this.floors.stream().map(Floor::getId).toList())
-                .poiSetId(this.poiSet.getId())
                 .build();
 
     }

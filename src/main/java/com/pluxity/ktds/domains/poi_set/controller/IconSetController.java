@@ -95,4 +95,11 @@ public class IconSetController {
         service.delete(id);
         return ResponseBody.of(SUCCESS_DELETE);
     }
+
+    @DeleteMapping("/id-list/{ids}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteIconSetList(@PathVariable List<Long> ids) {
+        service.deleteAllById(ids);
+        return ResponseBody.of(SUCCESS_DELETE);
+    }
 }

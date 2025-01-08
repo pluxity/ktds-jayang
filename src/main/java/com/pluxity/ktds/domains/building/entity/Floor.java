@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.building.entity;
 
+import com.pluxity.ktds.domains.building.dto.FloorResponseDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -58,4 +59,12 @@ public class Floor {
             sbmFloors.addAll(sbmFloorsInGroup);
         }
     }
+    public FloorResponseDTO toResponseDto() {
+        return FloorResponseDTO.builder()
+                .id(this.getId())
+                .name(this.getName())
+                .sbmFloor(this.getSbmFloors().stream().map(SbmFloor::toResponseDTO).toList())
+                .build();
+    }
+
 }

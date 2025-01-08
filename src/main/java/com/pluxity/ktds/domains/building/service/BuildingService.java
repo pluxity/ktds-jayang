@@ -4,13 +4,16 @@ import com.pluxity.ktds.domains.building.dto.*;
 import com.pluxity.ktds.domains.building.entity.*;
 import com.pluxity.ktds.domains.building.repostiory.BuildingFileHistoryRepository;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
+import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.patrol.entity.Patrol;
+import com.pluxity.ktds.domains.patrol.entity.PatrolPoint;
+import com.pluxity.ktds.domains.patrol.repository.PatrolPointRepository;
+import com.pluxity.ktds.domains.patrol.repository.PatrolRepository;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
-import com.pluxity.ktds.domains.poi_set.entity.PoiSet;
-import com.pluxity.ktds.domains.poi_set.repository.PoiSetRepository;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -47,12 +50,14 @@ public class BuildingService {
     private final FileInfoService fileIoService;
     private final SaveZipFile saveZipFile;
     private final FileInfoRepository fileInfoRepository;
+    private final PoiRepository poiRepository;
+    private final PatrolRepository patrolRepository;
+    private final PatrolPointRepository patrolPointRepository;
 
     @Value("${root-path.upload}")
     private String uploadRootPath;
 
     private final BuildingFileHistoryRepository buildingFileHistoryRepository;
-    private final PoiSetRepository poiSetRepository;
 
     @Transactional(readOnly = true)
     public BuildingDetailResponseDTO findById(@NotNull final Long id) {
@@ -68,6 +73,13 @@ public class BuildingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<BuildingDetailResponseDTO> findDetailAll() {
+        return buildingRepository.findAll().stream()
+                .map(Building::toDetailResponseDTO)
+                .toList();
+    }
+
     @Transactional
     public FileInfoDTO saveFile(@NotNull final MultipartFile file) throws IOException {
         return saveZipFileAndGetFileInfo(file);
@@ -80,23 +92,16 @@ public class BuildingService {
         Building building = createBuildingByDto(dto, fileInfo);
 
         List<Floor> floors = createFloors(fileInfo);
+
         for (Floor floor : floors) {
             building.addFloor(floor);
         }
 
         createHistory(fileInfo, building);
-        PoiSet poiSet = getPoiSet(dto.poiSetId());
-        building.changePoiSet(poiSet);
 
         buildingRepository.save(building);
 
         return building.getId();
-    }
-
-    private PoiSet getPoiSet(Long poiSetId) {
-        return poiSetRepository.findById(poiSetId).orElseThrow(
-                () -> new CustomException(NOT_FOUND_POI_SET)
-        );
     }
 
     private Building getBuildingById(Long id) {
@@ -108,12 +113,18 @@ public class BuildingService {
 
     @Transactional
     public Long updateBuilding(@NotNull Long id, @NotNull UpdateBuildingDTO dto) {
+        FileInfo fileInfo = null;
         validateDuplicationCode(id, dto.code());
 
         Building building = getBuildingById(id);
-        FileInfo fileInfo = getFileInfo(dto.fileInfoId());
-        validationFile(fileInfo, building);
+
+        if (dto.fileInfoId() != null) {
+            fileInfo = getFileInfo(dto.fileInfoId());
+            validationFile(fileInfo, building);
+        }
+
         updateFields(dto, building, fileInfo);
+
         return id;
     }
 
@@ -129,13 +140,13 @@ public class BuildingService {
     }
 
     private void updateFields(UpdateBuildingDTO dto, Building building, FileInfo fileInfo) {
-        building.changeFileInfo(fileInfo);
+        if (fileInfo != null) {
+            building.changeFileInfo(fileInfo);
+            updateFloor(fileInfo, building);
+            createHistory(fileInfo, building);
+        }
         building.update(dto);
 
-        PoiSet poiSet = getPoiSet(dto.poiSetId());
-        building.changePoiSet(poiSet);
-        updateFloor(fileInfo, building);
-        createHistory(fileInfo, building);
     }
 
     @Transactional
@@ -143,7 +154,15 @@ public class BuildingService {
         Building building = getBuildingById(id);
 
         List<BuildingFileHistory> buildingFileHistories = buildingFileHistoryRepository.findByBuildingId(building.getId());
+
         buildingFileHistoryRepository.deleteAll(buildingFileHistories);
+
+        List<Patrol> patrols = patrolRepository.findByBuildingId(building.getId());
+        for (Patrol patrol : patrols) {
+            List<PatrolPoint> patrolPoints = patrolPointRepository.findByPatrolId(patrol.getId());
+            patrolPointRepository.deleteAll(patrolPoints);
+        }
+        patrolRepository.deleteByBuildingId(building.getId());
 
         buildingRepository.delete(building);
     }
@@ -166,6 +185,13 @@ public class BuildingService {
                     return building.getId();
                 })
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
+    }
+
+    @Transactional
+    public void deleteAll(List<Long> ids) {
+        for (Long id : ids) {
+            this.delete(id);
+        }
     }
 
     private static Building createBuildingByDto(CreateBuildingDTO dto, FileInfo fileInfo) {

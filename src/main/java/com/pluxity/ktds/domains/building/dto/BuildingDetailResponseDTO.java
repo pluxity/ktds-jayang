@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.building.dto;
 
+import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.LodSettings;
 import lombok.Builder;
 
@@ -15,6 +16,7 @@ public record BuildingDetailResponseDTO(
         LodSettings lodSettings,
         FileInfoDTO buildingFile,
         List<Long> floorIds,
-        Long poiSetId
+        List<FloorResponseDTO> floors
+//        Long poiSetId
 ) {
 }

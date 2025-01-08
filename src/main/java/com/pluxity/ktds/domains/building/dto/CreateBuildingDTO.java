@@ -23,8 +23,6 @@ public record CreateBuildingDTO(
         String description,
         @Digits(integer = 20, fraction = 0, message = "Px파일 번호는 20자리 이하의 숫자 입니다.")
         Long fileInfoId,
-        @NotNull(message = "poiSet 필수 입니다.")
-        Long poiSetId,
         LodSettings lodSettings,
         String topology
 ) {

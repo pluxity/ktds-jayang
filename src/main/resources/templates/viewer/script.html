@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <body th:fragment="script">
+        <script th:inline="javascript">
+            const ACTIVE_PROFILES = [[${@environment.getProperty('spring.profiles.active')}]];
+            const CONTEXT_PATH = /*[[@{/}]]*/ '';
+            const EVENT_SERVER_PORT = [[${@environment.getProperty('event.server.port')}]];
+            const E_SOP_URL = [[${@environment.getProperty('esop.url')}]];
+            const VMS_CLIENT_IP = [[${@environment.getProperty('vms.client.ip')}]];
+            let BUILDING_ID;
+        </script>
+
+        <!-- AXIOS -->
+        <script th:src="@{/static/js/lib/axios/axios.min.js}"></script>
+        <script th:src="@{/static/js/lib/axios/axios.interceptor.js}"></script>
+
+        <!-- ENGINE -->
+        <script th:src="@{/static/js/lib/pluxity/Px.Engine.min.js}"></script>
+
+        <!-- LIBRARY -->
+        <script th:src="@{/static/js/lib/gridjs/gridjs.umd.js}"></script>
+        <script th:src="@{/static/js/lib/gridjs/selection.umd.js}"></script>
+        <script th:src="@{/static/js/admin/gridjs/gridjsHandler.js}"></script>
+
+        <!-- DOMAINS -->
+        <script th:src="@{/static/js/applications/domains/system-setting/systemSetting.js}"></script>
+        <script th:src="@{/static/js/applications/domains/system-setting/systemSettingManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/poi/poi.js}"></script>
+        <script th:src="@{/static/js/applications/domains/poi/poiManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/poi-category/poiCategory.js}"></script>
+        <script th:src="@{/static/js/applications/domains/poi-category/poiCategoryManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/building/building.js}"></script>
+        <script th:src="@{/static/js/applications/domains/building/buildingManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/icon-set/iconSet.js}"></script>
+        <script th:src="@{/static/js/applications/domains/icon-set/iconSetManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/patrol/patrol.js}"></script>
+        <script th:src="@{/static/js/applications/domains/patrol/patrolPoint.js}"></script>
+        <script th:src="@{/static/js/applications/domains/patrol/patrolManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/event-data/eventData.js}"></script>
+        <script th:src="@{/static/js/applications/domains/event-data/eventDataManager.js}"></script>
+
+        <!-- Common -->
+        <script th:src="@{/static/js/common/common.js}"></script>
+        <script th:src="@{/static/js/common/cron.js}"></script>
+        <script th:src="@{/static/js/common/timerHandler.js}"></script>
+        <script th:src="@{/static/js/common/evacuationHandler.js}"></script>
+
+        <!-- NAVBAR -->
+        <script th:src="@{/static/js/viewer/nav/eventHandler.js}"></script>
+        <script th:src="@{/static/js/viewer/nav/mutations.js}"></script>
+        <!-- CCTV WEBSOCKET -->
+        <script th:src="@{/static/js/viewer/websocket/CctvPlayerWebsocket.js}"></script>
+
+        <!-- 상호 작용(Event Handler) -->
+        <script th:src="@{/static/js/viewer/main/eventHandler.js}"></script>
+        <script th:src="@{/static/js/viewer/event/cctv/CctvEventHandler.js}"></script>
+        <script th:src="@{/static/js/viewer/event/fireSensor/fireSensorEventHandler.js}"></script>
+        <script th:src="@{/static/js/viewer/event/tms/tmsEventHandler.js}"></script>
+
+
+        <!-- LAYER POPUP -->
+        <script th:src="@{/static/js/viewer/main/layer-popup.js}"></script>
+        <!-- MUTATION(상태관리) -->
+        <script th:src="@{/static/js/viewer/main/mutations.js}"></script>
+
+        <!-- 초기화 -->
+        <script th:src="@{/static/js/viewer/main/init.js}"></script>
+
+        <!-- SSE EVENT -->
+        <script th:src="@{/static/js/viewer/event/eventHandler.js}"></script>
+    </body>
+</html>

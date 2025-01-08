@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> POI 분류 관리 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}" />
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}" />
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">POI 분류 관리</h1>
+            </div>
+            <div class="row" id="category">
+            </div>
+        </main>
+    </div>
+</div>
+<div class="modal fade" id="poiCategoryRegisterModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">POI 분류 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiCategoryRegisterForm" id="poiCategoryRegisterForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>POI 분류 이름</th>
+                                <td>
+                                    <input type="text" name="name" id="registerName" class="form-control input-sm" maxlength="32" title="분류 이름" required data-rules="required" data-tagname="분류 이름">
+                                </td>
+                            </tr>
+                            <tr class="modify-select-icon-set">
+                                <th>ICON SET 선택</th>
+                                <td>
+                                    <select name="iconSetId" id="registerIconSetId" class="form-select" title="ICON SET 선택" required data-rules="required" data-tagname="아이콘 셋">
+                                        <option value="">ICON SET 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnPoiCategoryRegister">등록
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="poiCategoryModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">POI 분류 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiCategoryModifyForm" id="poiCategoryModifyForm" autocomplete="off">
+                    <input type="hidden" id="modifyId" name="id">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>POI 분류 이름</th>
+                                <td>
+                                    <input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="30" title="분류 이름" required data-rules="required" data-tagname="분류 이름">
+                                </td>
+                            </tr>
+                            <tr class="modify-select-icon-set">
+                                <th>ICON SET 선택</th>
+                                <td>
+                                    <select name="iconSetId" id="modifyIconSetId" class="form-select" title="ICON SET 선택" required data-rules="required" data-tagname="아이콘 셋">
+                                        <option value="">ICON SET 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnPoiCategoryModify">수정
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/admin/poi-category/poi-category.js}"></script>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -71,7 +71,7 @@ public class FileUtil {
 
     public static void checkExtractable(MultipartFile file) {
         String filename = Objects.requireNonNull(file.getOriginalFilename()).toLowerCase();
-        if (!filename.endsWith(".fbx") && !filename.endsWith(".gltf") && !filename.endsWith(".glb")) {
+        if (!filename.endsWith(".fbx") && !filename.endsWith(".gltf") && !filename.endsWith(".glb") && !filename.endsWith(".zip")) {
             throw new CustomException(ErrorCode.INVALID_FILE);
         }
 

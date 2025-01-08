@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>로그인</title>
+    <link rel="stylesheet" th:href="@{/static/css/common/reset.css}"/>
+    <link rel="stylesheet" th:href="@{/static/css/login/login.css}"/>
+</head>
+<body>
+<div class="container">
+    <div class="login-wrap">
+        <div class="login-form">
+<!--            <form th:action="@{/auth/sign-in}" method="post">-->
+            <span class="span s-id">
+              <input
+                      type="text"
+                      id="id"
+                      name="username"
+                      class="input01 id"
+                      placeholder="ID"
+              />
+            </span>
+                <span class="span s-pw">
+              <input
+                      type="password"
+                      id="pw"
+                      name="password"
+                      class="input01 pw"
+                      placeholder="PW"
+              />
+            </span>
+                <!-- on 일 경우  alert_txt 활성화-->
+                <span class="alert_txt">*계정 정보를 확인해주세요</span>
+                <button id="btn_login" type="button" class="btn1 btn_login">로그인</button>
+<!--            </form>-->
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    const params = new URLSearchParams(location.search);
+    const isError = JSON.parse(params.get("error"));
+
+    if (isError) {
+        const alertTxt = document.querySelector("SPAN.alert_txt");
+        alertTxt.classList.add("on");
+    }
+</script>
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/login/login.js}"></script>
+</body>
+</html>

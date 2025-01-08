@@ -1,0 +1,693 @@
+@charset "utf-8";
+body {
+    /*font-size:12px;*/
+}
+
+/* common */
+.table th {
+    vertical-align: middle;
+    text-align: center;
+    /*background: #f1f1f1;*/
+}
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background: #f1f1f1;
+}
+.table TR.tr_disabled {
+    background-color: #f1f1f1;
+}
+
+.table tr.active:not(.accordion-collapse) {
+    background-color: #ddebff;
+}
+
+.paginationBox {
+    text-align: center;
+    margin: 10px 0 15px 0;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.d-none {
+    display: none;
+}
+
+#poiIconList td {
+    text-align: center;
+}
+
+/* admin viewer left */
+.viewer-sidebar {
+    width: 25rem;
+    background-color: #fff;
+    min-height: calc(100vh - 70px);
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    padding-top: 5px;
+    padding-left: 3px;
+}
+
+.viewer-title {
+    color: #fff;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#leftPoiList {
+    height: 35rem;
+    overflow-y: auto;
+}
+
+#btnLodSetForm {
+    width: 32.4%;
+    height: 3rem;
+}
+
+.hr-margin {
+    margin: 10px 0 10px 0;
+}
+
+/* admin viewer map */
+#floorSelect {
+    position: absolute;
+    right: 2rem;
+    bottom: 1rem;
+    z-index: 9999;
+
+}
+
+#topologySelect {
+    position: absolute;
+    left: 37rem;
+    bottom: 1rem;
+    z-index: 9999;
+    display: none;
+    width: 10rem;
+}
+
+#topologySelect.active {
+    display: flex;
+}
+
+#editPoiToolBar {
+    position: absolute;
+    right: 2rem;
+    top: 4rem;
+}
+
+#poiSelect {
+    position: absolute;
+    left: 26.5rem;
+    bottom: 1rem;
+    z-index: 9999;
+    display: flex;
+    width: 10rem;
+}
+
+#content-wrapper {
+    width:100%;
+    overflow-y: hidden;
+    /*position: relative;*/
+}
+ #webGLContainer {
+     width:100%;
+     height:100%;
+ }
+ .container-fluid {
+     height: 100%;
+ }
+
+#buildingCtrlToolBar {
+    position: absolute;
+    right: 14rem;
+    top: 1rem;
+}
+
+#camPosToolbar {
+    position: absolute;
+    right: 2rem;
+    top: 1rem;
+}
+
+#evacRouteBtnToolBar {
+    position: absolute;
+    right: 34.5rem;
+    top: 1rem;
+    display: none;
+}
+#evacRouteBtnToolBar.active{
+    display: flex;
+}
+
+#evacRouteEditToolBar {
+    position: absolute;
+    right: 2rem;
+    top: 4rem;
+}
+
+#buildingCtrlTool {
+    float: left;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+}
+
+#editPoiTool {
+    margin-left: 5px;
+    float: right;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+}
+
+#camPosTool {
+    float: left;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+}
+
+#evacRouteBtnTool {
+    float: left;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+}
+
+#evacRouteBtnEditTool {
+    margin-left: 5px;
+    float: right;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+}
+
+.camPosTool:focus,
+.btnBuildingTool:focus,
+.btnPoiTool:focus,
+.evacRouteBtn:focus,
+.btnEvacRouteEdit:focus {
+    outline: none !important;
+}
+
+.evacRouteBtn.on, .btnEvacRouteEdit.on {
+    background-color: #3B7DDD;
+    border-color: #2560b1;
+}
+
+#poiCategorySel {
+    position: absolute;
+    left: 30px;
+    bottom: 73px;
+    z-index: 999;
+    display: none;
+    min-width: 118px;
+}
+
+#poiCategorySel span {
+    padding: 3px 7px 3px 7px;
+}
+
+/*#editTopologyToolBar {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    position: absolute;*/
+/*    top: 4rem;*/
+/*    left: 1rem;*/
+/*    width: 100%;*/
+/*}*/
+
+#editTopologyToolBarLeft {
+    top: 4rem;
+    left: 1rem;
+    display: flex;
+    position: absolute;
+
+}
+
+#editTopologyToolBarRight {
+    top: 4rem;
+    right: 26rem;
+    display: flex;
+    position: absolute;
+}
+
+#editTopologyToolBar.active {
+    display: flex;
+}
+
+.bar-background {
+    float: left;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+    margin-right: 0.5rem;
+}
+
+.selector-item_radio {
+    appearance: none;
+    display: none;
+}
+
+.tool-btn.justText {
+    color: black;
+    font-weight: bold;
+}
+
+.icon-collection {
+    background-image: url("/static/images/admin/admin_icon_collection.png");
+    background-repeat: no-repeat;
+    width: 30px;
+    height: 30px;
+}
+
+.i-tag {
+    width: 30px;
+    height: 30px;
+}
+
+.icon-collection.align-mid {
+    background-position: -268px 3px;
+}
+
+.icon-collection.align-bottom {
+    background-position: -298px 3px;
+}
+
+.icon-collection.align-top {
+    background-position: -234px 3px;
+}
+
+.icon-collection.align-left {
+    background-position: -132px 3px;
+}
+
+.icon-collection.align-center {
+    background-position: -167px 3px;
+}
+
+.icon-collection.align-right {
+    background-position: -200px 3px;
+}
+
+.icon-collection.two-way {
+    background-position: -269px -42px;
+}
+
+.icon-collection.one-way {
+    background-position: -333px -42px;
+}
+
+/* flex setting */
+.flex_container {
+    display: inline-flex;
+    align-items: center;
+    width: 340px;
+    justify-content: space-between;
+}
+
+.patrol-point.active .flex_container {
+    border-color: red;
+    border-style: dashed;
+}
+
+.flex_column {
+    display: flex;
+    flex-flow: column;
+}
+
+.flex_item ul {
+    margin: 0;
+    padding: 0;
+}
+
+.flex_item ul li {
+    list-style: none
+}
+
+/* table setting */
+#poiList > TR > TD, #poiList > TR > TH, #bookmarkedPoiList > TR > TD, #bookmarkedPoiList > TR > TH {
+    max-width: 400px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+#sidebar-dimm {
+    position: absolute;
+    background-color: #625f5b;
+    z-index: 999;
+}
+
+.paging-center {
+    left: 50%;
+    transform: translateX(-50%);
+    position: absolute;
+}
+
+.btnBuildingTool.on {
+    color: #fff !important;
+    background-color: #007bff !important;
+    border-color: #1d74cc !important;
+}
+
+.patrol.active {
+    background-color: #f7f6f6;
+}
+
+.overlay {
+    display: none;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+}
+
+.imgDiv {
+    padding: 20px;
+    background-color: white;
+    border-radius: 6px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+}
+
+
+div.input_autocomplete {
+    display: none;
+    position: absolute;
+    background-color: white;
+    z-index: 10;
+    width: 515px;
+    max-height: 140px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 10px 5px 0 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+div.input_autocomplete ul {
+    list-style: none;
+    padding-left: 5px;
+}
+
+div.input_autocomplete li {
+    height: 24px;
+    padding-left: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: black;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+div.input_autocomplete li a {
+    text-decoration: none
+}
+
+div.input_autocomplete ul.input_autocomplete li:hover {
+    background-color: #eee;
+}
+
+.codeTr {
+    background: #dbebff;
+}
+
+.alarm-lvl-circle {
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+    border: 1px solid #000;
+}
+
+#topologyTabClickEvent {
+    text-align: -webkit-center;
+}
+
+.btn-getFile, .btn-saveFile {
+    width: 47.5%;
+}
+
+.btn-copyFile {
+    width: 96%;
+    margin-top: 5px;
+}
+
+.span-choose-node {
+    top: 10rem;
+    left: 1rem;
+    position: absolute;
+
+}
+
+.input-text-node {
+    position: absolute;
+    top: 13rem;
+    left: 2rem;
+    width: 20rem;
+}
+
+.topology-category-wrapper {
+    top: 10rem;
+    left: 1rem;
+    position: relative;
+}
+
+.btn-createNodeName {
+    top: 30rem;
+    color: white;
+    width: 12rem;
+    border-radius: 0.5rem;
+    height: 2rem;
+    position: relative;
+    left: 6.5rem;
+    margin-top: 0.5rem
+}
+
+.connect-another-node-wrapper {
+    position: relative;
+    top: 35rem;
+}
+
+.connect-another-node {
+    width: 23rem;
+    text-align: center;
+    position: relative;
+    left: 0.5rem;
+}
+
+.btn-connectNode {
+    display: block;
+    background-color: var(--color-btn_register);
+    color: white;
+    border: 1px solid var(--color-btn_register);
+    width: 23rem;
+    border-radius: 0.5rem;
+    height: 2rem;
+    position: relative;
+    left: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.form-check.checkbox-xl {
+    margin-bottom: 1.5rem;
+}
+
+.checkbox-xl .form-check-input {
+    top: 1.2rem;
+    scale: 1.7;
+    margin-right: 0.8rem;
+}
+
+#editTopologyToolBar button.on {
+    color: #fff !important;
+    background-color: #007bff !important;
+    border-color: #1d74cc !important;
+}
+
+.pagination__pages {
+    display: inline-flex;
+    list-style-type: none;
+    padding: 0;
+    font-size: 1.5rem;
+}
+
+.pagination__page-btn {
+    border: 1px solid black;
+    width: 2.5rem;
+    background: white;
+}
+
+.pagination__navigate-btn {
+    border: 1px solid black;
+    width: 3rem;
+    height: 2.5rem;
+    position: relative;
+    bottom: 0.2rem;
+    background: white;
+}
+
+.pagination__page-btn--active {
+    border: 1px solid black;
+    background: #0D6EFD;
+    color: white;
+    width: 2.5rem;
+}
+
+.paging-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.txt-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+
+.dropdown-btn:after {
+    display: inline-block;
+    margin-left: 0.5em;
+    vertical-align: 0.1em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+}
+
+.dropdown-btn {
+    width: 4.5rem;
+    background-color: var(--color-btn_space);
+    color: white;
+    padding: 6px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 0.2rem;
+}
+
+.dropdown-content {
+    border-radius: 5px;
+    position: fixed;
+    background-color: #f9f9f9;
+    min-width: 11rem;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.nav-pills.nav-fill {
+    background-color: rgb(235, 234, 234);
+    padding: 0.3rem;
+}
+
+.nav-fill .nav-item {
+    background-color: white;
+}
+
+.vscomp-arrow {
+    transform: rotate(180deg);
+}
+
+#editTopologyToolBarRight button.on{
+    color: #fff !important;
+    background-color: #007bff !important;
+    border-color: #1d74cc !important;
+}
+
+.pagination__navigate-btn {
+    border-color: darkgrey;
+}
+
+.btnPoiTool.on {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #1d74cc;
+}
+#patrolTab {
+    position: relative;
+    width: 100%;
+}
+#patrolList {
+    width: 100%;
+    height: 85%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 2rem;
+}
+#patrolListTable tbody tr:hover {
+    cursor: pointer;
+}
+#patrolListTable tbody tr.accordion-collapse .flex-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: .5rem;
+}
+#patrolListTable tbody tr.accordion-collapse.active .flex-container {
+    border: 2px dashed red;
+}
+#patrolListTable tbody tr.accordion-collapse .flex-container .flex-item {
+    flex-grow: 1;
+}
+#patrolPlayer {
+    display: flex;
+    justify-content: space-around;
+    height: 2rem;
+}
+
+.patrol-control {
+    width: 2rem;
+}
+
+#wrapper > div.viewer-sidebar > div.tab-content {
+    padding: 5px;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 50px;
+    position: relative;
+}
+#patrolPlayer > button {
+    width: 2rem;
+}
+
+#virtualPatrolCtrlToolBar {
+    position: absolute;
+    right: 34.5rem;
+    top: 1rem;
+    display: none;
+}
+#virtualPatrolCtrlToolBar.active {
+    display: flex;
+}
+
+
+#virtualPatrolEditTool {
+    float: left;
+    z-index: 999;
+    padding: 5px;
+    background-color: #eee;
+}

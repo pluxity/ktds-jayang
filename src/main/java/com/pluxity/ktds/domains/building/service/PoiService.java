@@ -5,26 +5,38 @@ import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
 import com.pluxity.ktds.domains.building.entity.Building;
+import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.poi_set.entity.IconSet;
+import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
+import com.pluxity.ktds.global.utils.ExcelUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
+import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +64,13 @@ public class PoiService {
     public List<PoiResponseDTO> findAll() {
         return poiRepository.findAll().stream()
                 .map(Poi::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PoiDetailResponseDTO> findAllDetail() {
+        return poiRepository.findAll().stream()
+                .map(Poi::toDetailResponseDTO)
                 .toList();
     }
 
@@ -92,14 +111,14 @@ public class PoiService {
             throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
         }
 
-        boolean isNoneMatchInPoiSet = building.getPoiSet().getPoiCategories().stream()
-                .filter(poiCategory -> poiCategory.getId().equals(dto.poiCategoryId()))
-                .flatMap(poiCategory -> poiCategory.getIconSets().stream())
-                .noneMatch(iconSet -> iconSet.getId().equals(dto.iconSetId()));
-
-        if (isNoneMatchInPoiSet) {
-            throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION);
-        }
+//        boolean isNoneMatchInPoiSet = building.getPoiSet().getPoiCategories().stream()
+//                .filter(poiCategory -> poiCategory.getId().equals(dto.poiCategoryId()))
+//                .flatMap(poiCategory -> poiCategory.getIconSets().stream())
+//                .noneMatch(iconSet -> iconSet.getId().equals(dto.iconSetId()));
+//
+//        if (isNoneMatchInPoiSet) {
+//            throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION);
+//        }
     }
 
     private void validateSaveCode(String code) {
@@ -164,4 +183,146 @@ public class PoiService {
         poiRepository.delete(poi);
     }
 
+    @Transactional
+    public void deleteAllById(@NotNull List<Long> ids) {
+        poiRepository.deleteAllById(ids);
+    }
+
+    @Transactional
+    public void unAllocationPoi(List<Long> ids) {
+        Spatial position = Spatial.builder()
+                .x(null)
+                .y(null)
+                .z(null)
+                .build();
+        ids.forEach(id -> updateSpatial(id, poi -> poi.changePosition(position)));
+    }
+
+    // 일괄 등록 테스트
+    @Transactional
+    public void batchRegisterPoi(Long buildingId, Long floorId, MultipartFile file) {
+        try {
+            String fileName = file.getOriginalFilename();
+            String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
+            if(!ext.equals("xlsx") && !ext.equals("xls") && !ext.equals("csv")){
+                throw new CustomException(ErrorCode.INVALID_FILE);
+            }
+
+            // 엑셀 가져오기
+            List<Map<String, Object>> rows = ExcelUtil.readExcelBatch(file);
+            int headerLength = rows.get(0).size();
+
+            List<Poi> result = new ArrayList<>();
+
+            Building building = buildingRepository.findById(buildingId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUILDING));
+            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
+
+            List<PoiCategory> poiCategoryList = poiCategoryRepository.findAll();
+            List<IconSet> iconSetList = iconSetRepository.findAll();
+
+            for(int i = 1; i < rows.size(); i++) {
+                Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
+                existValidCheck(poiMap);
+
+                poiRepository.findByName(poiMap.get(POI_NAME.value))
+                        .ifPresent(found -> {
+                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + poiMap.get(POI_NAME.value));
+                        });
+
+                if (poiRepository.existsByCode(poiMap.get(POI_CODE.value))) {
+                    throw new CustomException(ErrorCode.DUPLICATED_POI_CODE, "Duplcate Poi Code: " + poiMap.get(POI_CODE.value));
+                }
+
+                PoiCategory poiCategory = poiCategoryList.stream()
+                        .filter(p -> p.getName().equalsIgnoreCase(poiMap.get(POI_CATEGORY_NAME.value)))
+                        .limit(1)
+                        .findFirst()
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiCategory Name: " + poiMap.get(POI_CATEGORY_NAME.value)));
+
+                IconSet iconSet = iconSetList.stream()
+                        .filter(c -> c.getName().equalsIgnoreCase(poiMap.get(POI_ICONSET_NAME.value)))
+                        .limit(1)
+                        .findFirst()
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ICON_SET, "NotFound Iconset Name: " + poiMap.get(POI_ICONSET_NAME.value)));
+
+                if(poiCategory.getIconSets().get(0).getId() != iconSet.getId()) {
+                    throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
+                            "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
+                                    + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));
+                }
+
+                CreatePoiDTO poiDto = CreatePoiDTO.builder()
+                        .code(poiMap.get(POI_CODE.value))
+                        .name(poiMap.get(POI_NAME.value))
+                        .buildingId(building.getId())
+                        .floorId(floor.getId())
+                        .poiCategoryId(poiCategory.getId())
+                        .iconSetId(iconSet.getId())
+                        .build();
+
+                Poi poi = Poi.builder()
+                        .code(poiMap.get(POI_CODE.value))
+                        .name(poiMap.get(POI_NAME.value))
+                        .build();
+
+                changeField(poiDto, poi);
+
+                result.add(poi);
+            }
+
+            try {
+                poiRepository.saveAll(result);
+            } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
+                if(e.getRootCause().getMessage().contains("Data too long for column")) {
+                    String errorMessage = e.getRootCause().getMessage();
+
+                    Pattern pattern = Pattern.compile("'(.*?)'");
+                    Matcher matcher = pattern.matcher(errorMessage);
+
+                    if (matcher.find()) {
+                        String columnName = matcher.group(1);
+                        throw new CustomException(ErrorCode.TOO_LONG_EXCEL_FIELD, columnName);
+                    } else {
+                        throw new CustomException(ErrorCode.TOO_LONG_EXCEL_FIELD);
+                    }
+                }
+
+                throw new CustomException(FAILED_BATCH_REGISTER_POI);
+            }
+
+        } catch(IOException e) {
+            throw new CustomException(ErrorCode.FAILED_BATCH_REGISTER_POI);
+        }
+    }
+
+    @NotNull
+    private Map<String, String> createMapByRows(List<Map<String, Object>> rows, int headerLength, int i) {
+        Map<String, String> workMap = new HashMap<>();
+        for(int j = 0; j < headerLength; j++) {
+            String o = String.valueOf(rows.get(i).get(String.valueOf(j)));
+            workMap.put(String.valueOf(rows.get(0).get(String.valueOf(j))), o);
+        }
+
+        return workMap;
+    }
+
+    private void existValidCheck(Map<String, String> poiMap) {
+        if (poiMap.get(POI_CATEGORY_NAME.value) == null || poiMap.get(POI_CATEGORY_NAME.value).equals("")) {
+            throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
+        } else if (poiMap.get(POI_ICONSET_NAME.value) == null || poiMap.get(POI_ICONSET_NAME.value).equals("")) {
+            throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
+        } else if (poiMap.get(POI_CODE.value) == null || poiMap.get(POI_CODE.value).equals("")) {
+            throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
+        } else if (poiMap.get(POI_NAME.value) == null || poiMap.get(POI_NAME.value).equals("")) {
+            throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
+        }
+    }
+
+    private void changeField(CreatePoiDTO dto, Poi poi) {
+        updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
+        updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+        updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
+        updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
+    }
 }

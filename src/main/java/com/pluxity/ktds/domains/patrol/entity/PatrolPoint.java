@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.patrol.entity;
 
 import com.pluxity.ktds.domains.building.entity.Floor;
+import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.patrol.dto.PatrolPointResponseDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -58,5 +61,17 @@ public class PatrolPoint {
         this.sortOrder = sortOrder;
     }
 
+    public void changeFloor(@NotNull Floor floor) {
+        this.floor = floor;
+        this.name = floor.getName();
+    }
 
+    public PatrolPointResponseDTO toResponseDTO() {
+        return PatrolPointResponseDTO.builder()
+                .id(id)
+                .floorId(floor.getId())
+                .sortOrder(sortOrder)
+                .name(name)
+                .build();
+    }
 }

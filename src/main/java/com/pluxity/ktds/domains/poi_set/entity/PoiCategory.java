@@ -72,9 +72,9 @@ public class PoiCategory {
     private IconSetResponseDTO iconSetMapper(@NotNull IconSet iconSet) {
         return IconSetResponseDTO.builder()
                 .id(iconSet.getId())
-                .name(name)
-                .iconFile2D(iconSet.getIconFile2D().toDto())
-                .iconFile3D(iconSet.getIconFile3D().toDto())
+                .name(iconSet.getName())
+                .iconFile2D(iconSet.getIconFile2D() != null ? iconSet.getIconFile2D().toDto() : null)
+                .iconFile3D(iconSet.getIconFile3D() != null ? iconSet.getIconFile3D().toDto() : null)
                 .build();
     }
 }

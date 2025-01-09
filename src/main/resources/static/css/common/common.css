@@ -1,0 +1,297 @@
+@charset "UTF-8";
+/* RESET */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video, button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+body {
+  line-height: 1;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+strong {
+  font-weight: 700;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: "";
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* COLOR */
+:root {
+  --color-black:#25232b;
+  --color-black-key:#25262e;
+  --color-grayscale-light:#d9dde3;
+  --color-grayscale01:#b7b7b7;
+  --color-grayscale02:#757680;
+  --color-grayscale03:#676977;
+  --color-grayscale-dark:#3c3d43;
+  --color-navy:#0f2640;
+  --color-navy-dark:#07142c;
+  --color-mint:#00f5bf;
+  --color-mint-dark:#0abf97;
+  --color-blue:#186ae5;
+  --color-blue-dark:#0754c8;
+  --color-danger:#df1344;
+  --color-warning:#ff6444;
+  --color-caution:#00deaa;
+}
+
+/* FONT */
+@font-face {
+  font-family: "SUIT";
+  font-weight: 100;
+  font-style: normal;
+  src: url("../webfonts/SUIT-Thin.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 200;
+  font-style: normal;
+  src: url("../webfonts/SUIT-ExtraLight.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 300;
+  font-style: normal;
+  src: url("../webfonts/SUIT-Light.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 400;
+  font-style: normal;
+  src: url("../webfonts/SUIT-Regular.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 500;
+  font-style: normal;
+  src: url("../webfonts/SUIT-Medium.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 600;
+  font-style: normal;
+  src: url("../webfonts/SUIT-SemiBold.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 700;
+  font-style: normal;
+  src: url("../webfonts/SUIT-Bold.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 800;
+  font-style: normal;
+  src: url("../webfonts/SUIT-ExtraBold.otf") format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUIT";
+  font-weight: 900;
+  font-style: normal;
+  src: url("../webfonts/SUIT-Heavy.otf") format("opentype");
+  font-display: swap;
+}
+html {
+  font-family: "SUIT", sans-serif;
+  font-size: 16px;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+}
+
+.hide {
+  position: absolute;
+  border: 0;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* GNB */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 23px 0 30px;
+  background-color: rgba(52, 52, 60, 0.5);
+  box-sizing: border-box;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  height: 5rem;
+}
+.header__logo a {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.5rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+.header__logo a::before {
+  content: "";
+  display: inline-block;
+  width: 33px;
+  height: 27px;
+  background: url("/static/images/viewer/icon_kt.svg") no-repeat center/contain;
+}
+.header__info {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.header__info .date {
+  font-size: 0.875rem;
+  color: var(--color-grayscale-light);
+}
+.header__info .profile {
+  position: relative;
+}
+.header__info .profile__btn {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+.header__info .profile__btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  margin: 0;
+}
+.header__info .profile__btn--active + .profile__layer {
+  display: block;
+}
+.header__info .profile__layer {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background-color: var(--color-black);
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding: 12px 15px 21px 15px;
+  border-top: 1px solid var(--color-mint);
+  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
+  width: 10.64rem;
+  color: var(--color-grayscale-light);
+}
+.header__info .profile__layer .head {
+  display: flex;
+  grid-gap: 10px;
+  align-items: center;
+  margin-bottom: 21px;
+}
+.header__info .profile__layer .head__level {
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+.header__info .profile__layer .head__name {
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+.header__info .profile__layer .detail__group {
+  border-top: 1px solid var(--color-grayscale-dark);
+}
+.header__info .profile__layer .detail__group a {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+.header__info .profile__layer .detail__group:last-of-type a {
+  margin-bottom: 0;
+}
+.header__info .profile__layer .detail__group .icon::after {
+  content: "";
+  display: inline-block;
+  margin-left: 5px;
+  width: 14px;
+  height: 14px;
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background-color: var(--color-grayscale03);
+}
+.header__info .profile__layer .detail__group .icon--manage::after {
+  -webkit-mask-position: -10px -10px;
+  mask-position: -10px -10px;
+}
+.header__info .profile__layer .detail__group .icon--download::after {
+  -webkit-mask-position: -78px -10px;
+  mask-position: -78px -10px;
+}
+
+/* 폰트 강조 색상 */
+.text-accent {
+  color: var(--color-mint-dark);
+}/*# sourceMappingURL=common.css.map */

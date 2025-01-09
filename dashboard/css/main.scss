@@ -1,0 +1,35 @@
+@import "../css/components/components";
+
+
+@include button;
+@include badge;
+@include table;
+@include alert;
+@include toast;
+@include tooltip;
+@include selectbox;
+
+// accordion
+@include accordion;
+@include sop_accordion;
+
+// popup
+@include popup_warning;
+@include popup_event;
+@include popup_equip;
+
+// input
+@include input_checkbox;
+@include input_radio; 
+@include input_text;
+
+// menu bar
+@include poi_menu;
+@include toolbox;
+
+
+/* Main */
+.contents{
+    padding:5rem 0 0 1.87em; box-sizing:border-box;
+    height:100%;
+}

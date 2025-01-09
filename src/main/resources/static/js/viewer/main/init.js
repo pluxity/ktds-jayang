@@ -1,20 +1,18 @@
 'use strict';
 (async function () {
-    const USER_ID = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)')[2];
-    api.get(`/users/userid/${USER_ID}`).then((result) => {
-        const {result: data} = result.data;
-        document.querySelector("#userBox > div.user-title-wrap > strong").innerHTML = data.nickname;
-        document.querySelector("#userBox > div.user-title-wrap > span").innerHTML = data.userGroupName;
-        if (data.role !== 'ADMIN') {
-            document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
-        }
-    });
+    // const USER_ID = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)')[2];
+    // api.get(`/users/userid/${USER_ID}`).then((result) => {
+    //     const {result: data} = result.data;
+    //     document.querySelector("#userBox > div.user-title-wrap > strong").innerHTML = data.nickname;
+    //     document.querySelector("#userBox > div.user-title-wrap > span").innerHTML = data.userGroupName;
+    //     if (data.role !== 'ADMIN') {
+    //         document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
+    //     }
+    // });
 
 
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
         const {disasterFreeDate} = systemSetting;
-        CountTimer.setStartDate(disasterFreeDate);
-        CountTimer.initialize();
     });
     await IconSetManager.getIconSetList();
     await BuildingManager.getBuildingList().then((buildingList) => {
@@ -26,45 +24,10 @@
         })
     });
 
-    initCctvWebsocket();
-
     await PoiCategoryManager.getPoiCategoryList();
 
     await PoiManager.getPoiList();
     await PatrolManager.getPatrolList();
-
-    const now = new Date();
-    const before24Hours = new Date(now - 24 * 60 * 60 * 1000);
-    await EventDataManager.getEventListByDate(
-        'latest',
-        before24Hours.toLocaleString(),
-        now.toLocaleString(),
-    ).then((latestEventList) => {
-        const eventCntByLevel = {
-            total: latestEventList.length,
-            danger: 0,
-            warning: 0,
-            missing: 0,
-        };
-
-        latestEventList.forEach((event) => {
-            eventCntByLevel[event.eventLevel.toLowerCase()] += 1;
-            TimerHandler.addTimer(event);
-        });
-
-        document
-            .querySelectorAll(
-                '.latest-event > .count-area > div, #recentLayerPopup .event-list li',
-            )
-            .forEach((element) => {
-                const {eventLevel} = element.dataset;
-                element.querySelector('.value').innerText = eventCntByLevel[eventLevel];
-            });
-
-        popup.createRecentPopup();
-    });
-
-    await VmsEventUsageManager.getVmsEventUsageList();
 
     const setDateTime = () => {
         const renderDateTime = () => {
@@ -73,13 +36,6 @@
                 timeStyle: 'short',
             });
             const dateTimeString = dateTimeFormat.format(new Date());
-
-            document.getElementById('spanDate').innerText = dateTimeString
-                .substring(0, dateTimeString.indexOf('오'))
-                .slice(0, -2);
-            document.getElementById('spanTime').innerText = dateTimeString.substring(
-                dateTimeString.indexOf('오'),
-            );
         };
 
         renderDateTime();
@@ -87,74 +43,10 @@
         Cron.addCronjob('* * * * * *', renderDateTime);
     };
 
-    const setWeatherData = () => {
-        const renderWeather = () => {
-            api.get('/weather-data/recent').then((result) => {
-                for (const [key, value] of Object.entries(result.data.data)) {
-                    const targetSpan = document.querySelector(`span[data-key='${key}']`);
-                    if (targetSpan) targetSpan.innerHTML = value;
-                }
-            });
-        };
-
-        renderWeather();
-
-        Cron.addCronjob('0 55 * * * *', renderWeather);
-    };
-
-    const setEarthquakeData = () => {
-        const renderEarthquake = () => {
-            api.get('/getEarthQuakeApiData').then((result) => {
-                const response = result.data.response;
-
-                const earthquakeAlert = document
-                    .getElementById('btnEarthquake')
-                    .querySelector('span');
-                const earthquakeData = document.querySelector(
-                    '.popup-table.earthquake tbody',
-                );
-
-                earthquakeData.innerHTML = '';
-                if (response.header.resultCode === '03') {
-                    earthquakeAlert.classList.remove('text-warning');
-                    earthquakeAlert.innerText = '최근 발생한 지진이 없습니다';
-                    earthquakeData.innerHTML =
-                        '<tr><td class="no-data" colspan="3">데이터가 없습니다.</td></tr>';
-                    return;
-                } else if (response.header.resultCode !== '00') {
-                    earthquakeAlert.classList.remove('text-warning');
-                    earthquakeAlert.innerText = '지진 정보를 가져오는데 실패하였습니다.';
-                    earthquakeData.innerHTML =
-                        '<tr><td class="no-data" colspan="3">데이터가 없습니다.</td></tr>';
-                    return;
-                }
-                const {body} = response;
-                const {items, totalCount} = body;
-
-                if (totalCount === 0) {
-                    earthquakeAlert.classList.remove('text-warning');
-                    earthquakeAlert.innerText = '최근 발생한 지진이 없습니다';
-                    earthquakeData.innerHTML =
-                        '<tr><td colspan="3">데이터가 없습니다.</td></tr>';
-                    return;
-                }
-
-                earthquakeAlert.classList.add('text-warning');
-                earthquakeAlert.innerText = `${items.item[0].loc} 지진 발생`;
-
-                popup.createEarthquakePopup(items.item);
-            });
-        };
-
-        renderEarthquake();
-        Cron.addCronjob('0 0 0 * * *', renderEarthquake);
-    }
-
-    await Init.initializeOutdoorBuilding();
+    // await Init.initializeOutdoorBuilding();
     setDateTime();
-    setWeatherData();
-    setEarthquakeData();
-    Px.Event.AddEventListener('dblclick', 'poi', Init.poiDblclick);
+    // Px.Event.AddEventListener('dblclick', 'poi', Init.poiDblclick);
+
 })();
 
 const Init = (function () {

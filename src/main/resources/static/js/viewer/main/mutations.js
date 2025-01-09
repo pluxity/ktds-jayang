@@ -119,8 +119,8 @@
 
     }
 
-    observerFloor();
-    observerRecentWrap();
+    // observerFloor();
+    // observerRecentWrap();
     observerSidebar();
     observerDate();
 })();

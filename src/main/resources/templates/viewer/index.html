@@ -4,108 +4,96 @@
     <div th:replace="viewer/head :: head"></div>
 </head>
 <body>
-	<label class="buildingName" id="buildingName"></label>
-    <nav th:replace="viewer/navbar :: navbar"></nav>
-    <div th:replace="viewer/navbar :: user-box"></div>
-    <div th:replace="viewer/navbar :: notepad-box"></div>
-    <main>
-        <div class="left-information">
-            <div class="building bg-gray-100">
-                <span class="icon"></span>
-                <span class="txt"></span>
+    <nav th:replace="viewer/header :: header"></nav>
+    <div class="container">
+        <div class="contents">
+            <div class="contents__right">
+                <div class="poi-menu">
+                    <div class="poi-menu__all">
+                        <!-- [D] 선택 시 active 클래스 추가 -->
+                        <div class="all">
+                            <a href="javascript:void(0);">장비보기</a>
+                            <!-- 장비 목록 팝업 -->
+                            <div class="popup-equip popup-equip--group">
+                                <div class="popup-equip__head">
+                                    <span class="checkbox-wrap">
+                                        <input type="checkbox" id="check">
+                                        <label for="check">전체문구</label>
+                                        </span>
+                                </div>
+                                <!-- 장비 표시 영역 -->
+                                <div class="equip-group">
+                                    <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
+                                    <a href="javascript:void(0);" class="cctv active">CCTV</a>
+                                    <a href="javascript:void(0);" class="shutter">셔터</a>
+                                    <a href="javascript:void(0);" class="fire">소방시설</a>
+                                    <a href="javascript:void(0);" class="air">공기질센터</a>
+                                    <a href="javascript:void(0);" class="alarmbell">비상벨</a>
+                                    <a href="javascript:void(0);" class="invasion">침입탐지</a>
+                                    <a href="javascript:void(0);" class="enter">출입탐지</a>
+                                    <a href="javascript:void(0);" class="elevator" >엘리베이터</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="poi-menu__list">
+                        <ul>
+                            <!-- [D] 선택 시 active 클래스 추가 -->
+                            <li class="cctv active">
+                                <a href="javascript:void(0);"><span class="hide">cctv</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">CCTV</span>
+                                </div>
+                            </li>
+                            <li class="shutter">
+                                <a href="javascript:void(0);"><span class="hide">셔텨</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">셔터</span>
+                                </div>
+                            </li>
+                            <li class="fire">
+                                <a href="javascript:void(0);"><span class="hide">소방</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">소방</span>
+                                </div>
+                            </li>
+                            <li class="alarmbell">
+                                <a href="javascript:void(0);"><span class="hide">공기질센터</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">공기질센터</span>
+                                </div>
+                            </li>
+                            <li class="air">
+                                <a href="javascript:void(0);"><span class="hide">비상벨</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">비상벨</span>
+                                </div>
+                            </li>
+                            <li class="invasion">
+                                <a href="javascript:void(0);"><span class="hide">침입탐지</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">침입탐지</span>
+                                </div>
+                            </li>
+                            <li class="enter">
+                                <a href="javascript:void(0);"><span class="hide">출입관리</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">출입관리</span>
+                                </div>
+                            </li>
+                            <li class="elevator">
+                                <a href="javascript:void(0);"><span class="hide">엘리베이터</span></a>
+                                <div class="tooltip">
+                                    <span class="tooltip__text tooltip__text--right">엘리베이터</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="floor" data-floor-name="">
-                <div class="btn-floor-change bg-gray-100">
-                    <span class="txt">전체층</span>
-                    <span class="arrow"></span>
-                </div>
-                <ul class="floor-list bg-gray-100 .border-primary-80 "></ul>
-            </div>
+            <div class="contents__left"></div>
         </div>
-        <div class="counter">
-            <strong data-count-array-index="3"></strong>
-            <strong data-count-array-index="2"></strong>
-            <strong data-count-array-index="1"></strong>
-            <strong data-count-array-index="0"></strong>
-        </div>
-        <div class="right-information">
-            <div class="latest-event">
-                <div class="count-area">
-                    <div class="total" data-event-level="total">
-                        <span class="border-primary-90 bg-primary-110 text-primary-80">전체</span>
-                        <span class="value">0</span>
-                    </div>
-                    <div class="danger" data-event-level="danger">
-                        <span>위험</span>
-                        <span class="value">0</span>
-                    </div>
-                    <div class="warning" data-event-level="warning">
-                        <span>경고</span>
-                        <span class="value">0</span>
-                    </div>
-                    <div class="missing" data-event-level="missing">
-                        <span>화재미수신</span>
-                        <span class="value">0</span>
-                    </div>
-                </div>
-                <div id="recentWrap" class="btn-latest-event">
-                    <span class="icon"></span>
-                    <span class="txt">최근 이벤트</span>
-                </div>
-            </div>
-            <div class="right-information-bottom">
-                <div class="poi-category-wrap">
-                    <button id="poiCategoryButton" class="poi-button">
-                        <span class="icon"></span>
-                        <span>POI</span>
-                    </button>
-                    <div id="poiCategoryBox"></div>
-                </div>
-                <div class="device-search-area">
-                    <div class="input-wrap">
-                        <input type="search" name="" id="" placeholder="장비명 바로 검색" class="device-search-input">
-                    </div>
-                    <div class="search-list">
-                        <ul class="inner"></ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="container">
-
-        </div>
-        <div id="leftMenu">
-            <button
-                    class="equipment-button sidebar-menu-button sidebar-wrap"
-                    data-menu="equipment"
-            >
-                <img src="/static/images/viewer/icons/devices.svg" alt="장비목록" />
-                <span class="menu-title">장비 목록</span>
-            </button>
-            <button class="event-button sidebar-menu-button sidebar-wrap" data-menu="event" >
-                <img src="/static/images/viewer/icons/events.svg" alt="이벤트 현황" />
-                <span class="menu-title">이벤트 현황</span>
-            </button>
-            <button class="patrol-button sidebar-menu-button sidebar-wrap" data-menu="patrol">
-                <img src="/static/images/viewer/icons/virtual-patrols.svg" alt="가상순찰" />
-                <span class="menu-title">가상순찰</span>
-            </button>
-            <button class="evaluation-button sidebar-wrap" data-menu="evaluation">
-                <img src="/static/images/viewer/icons/evaluation.svg" alt="대피경로" />
-                <span class="menu-title">대피경로</span>
-            </button>
-            <button class="e-sop-button sidebar-wrap" data-menu="e-sop">
-                <img src="/static/images/viewer/icons/e-sop.svg" alt="e-sop" />
-                <span class="menu-title">E-SOP</span>
-            </button>
-        </div>
-        <div id="loadingLayer">
-                <span class="loading-image"></span>
-                <span class="loading-txt">도면 데이터 로딩중</span>
-        </div>
-    </main>
-    <div th:replace="viewer/minimap :: minimap-box"></div>
-    <template th:replace="viewer/layer-popup :: popup-template"></template>
+    </div>
     <th:block th:replace="viewer/script :: script "></th:block>
 </body>
 </html>

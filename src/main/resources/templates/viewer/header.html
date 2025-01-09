@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <header th:fragment="header" class="header">
+        <h1 class="header__logo"><a href="/">KT 자양 통합운영 플랫폼</a></h1>
+        <div class="header__info">
+            <p class="date">2024년 11월 20일(월요일 21:25:20)</p>
+            <div class="profile">
+                <!-- [D] 클릭 시 profile__btn--active 클래스 추가 -->
+                <a class="profile__btn" href="javascript:void(0);">
+                    <img src="/dashboard/img/icon_profile.svg" alt="profile" width="40" height="40">
+                    <span class="hide">profile</span>
+                    <span class="badge">N</span>
+                </a>
+
+                <div class="profile__layer">
+                    <a href="javascript:void(0);" class="head">
+                        <img src="/dashboard/img/icon_profile02.svg" alt="profile" width="41" height="42">
+                        <div>
+                            <p class="head__level">슈퍼슈퍼 관리자</p>
+                            <p class="head__name">관리자이름</p>
+                        </div>
+                    </a>
+
+                    <div class="detail">
+                        <div class="detail__group">
+                            <a href="javascript:void(0);">공지사항<span class="badge">N</span></a>
+                            <a href="javascript:void(0);" class="icon icon--manage" target="_blank">결재 관리</a>
+                            <a href="javascript:void(0);" class="icon icon--download">CCTV 다운로드</a>
+                        </div>
+                        <div class="detail__group">
+                            <a href="javascript:void(0);">로그아웃</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+</html>

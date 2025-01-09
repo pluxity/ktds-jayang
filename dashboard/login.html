@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./css/common/common.css" rel="stylesheet"/>
+    <link href="./css/login.css" rel="stylesheet"/>
+    <title>KT 자양 통합 운영 플랫폼 - 로그인</title>
+</head>
+<body>
+    <div class="container" style="background-image:url(/dashboard/img/bg_login.png)">
+        <div class="login">
+            <h1 class="login__logo"><span class="hide">kt Login</span></h1>
+            <div class="login__box">
+                <h2 class="title">KT 자양 통합운영 플랫폼</h2>
+                <div class="login-forms">
+                    <!-- [D] 에러메시지 노출 시 input-error--active 추가 -->
+                    <div class="input-error input-error--active">
+                        <input type="text" placeholder="아이디를 입력하세요">
+                        <p class="input-error__text">아이디를 입력하세요.</p>
+                    </div>
+                    <div class="input-error">
+                        <input type="password" placeholder="비밀번호를 입력하세요">
+                        <!-- [D] 에러메시지 노출 문자 show/hide
+                            <p class="input-error__text">비밀번호를 입력하세요</p>
+                        -->
+                    </div>
+                </div>
+                <div class="login-footer">
+                    <p class="login-footer__warning">
+                        로그인 정보가 일치하지 않습니다.<br>
+                        5회 이상 불일치 시 로그인이 제한됩니다.(N/5)
+                    </p>
+                    <button type="button" class="button button--solid-middle">로그인</button>
+                </div>
+            </div>
+            <div class="popup-basic">
+                <div class="popup-basic__head">
+                    <h2 class="name">비밀번호 변경</h2>
+                    <button type="button" class="close"><span class="hide">close</span></button>
+                </div>
+                <div class="login-popup">
+                    <div class="login-popup__info">
+                        <p>
+                            비밀번호 유효기간(180일)이 만료되었습니다. <br>
+                            보안 강화를 위해 비밀번호를 변경하세요
+                        </p>
+                    </div>
+                    <div class="login-forms">
+                        <!-- [D] 에러메시지 노출 시 input-error--active 추가 -->
+                        <div class="input-error input-error--active">
+                            <input type="password" placeholder="새 비밀번호를 입력하세요.">
+                            <p class="input-error__text">영문+숫자+특수문자를 포함하여 8~16자리로 설정하세요.</p>
+                        </div>
+                        <div class="input-error">
+                            <input type="password" placeholder="세 비밀번호를 다시 한 번 입력하세요.">
+                            <!-- [D] 에러메시지 노출 문자 show/hide
+                                <p class="input-error__text">비밀번호가 일치하지 않습니다.</p>
+                            -->
+                        </div>
+                    </div>
+                    <div class="login-footer">
+                        <div class="login-footer__buttons">
+                            <button type="button" class="button button--ghost-middle">다음에 변경</button>
+                            <button type="button" class="button button--solid-middle">비밀번호 변경</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

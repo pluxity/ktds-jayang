@@ -14,8 +14,19 @@
     <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Alert</div>
     <div class="alert">
         <p>등록된 공지가 없습니다.</p>
-       <button type="button" class="button button--solid-upper" disabled>확인</button>
+       <button type="button" class="button button--solid-middle" disabled>확인</button>
    </div>
+
+   <div class="alert alert--border">
+    <p>
+        비밀번호가 변경되었습니다.<br>
+        다시 로그인해주세요.
+    </p>
+    <div class="alert__buttons">
+        <button type="button" class="button button--ghost-middle">다음에 변경</button>
+        <button type="button" class="button button--solid-middle">로그인</button>
+    </div>
+</div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Toast</div>
    <!-- [D] toast 노출 시 toast--active 클래스 추가 -->
@@ -86,14 +97,14 @@
            </table>
            <div class="buttons">
                <button type="button" class="button button--ghost-middle">이벤트 해제</button>
-               <button type="button" class="button button--solid-upper">3D Map 이동</button>
+               <button type="button" class="button button--solid-middle           ">3D Map 이동</button>
            </div>
        </div>
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 장비 팝업 - 장비 표시</div>
-   <div class="popup-equip popup-equip--group">
-       <div class="popup-equip__head">
+   <div class="popup-basic popup-basic--group">
+       <div class="popup-basic__head">
            <span class="checkbox-wrap">
                <input type="checkbox" id="check">
                <label for="check">전체문구</label>
@@ -102,35 +113,35 @@
        <!-- 장비 표시 영역 -->
        <div class="equip-group">
            <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-           <a href="javascript:void(0);" class="cctv active">CCTV</a>
-           <a href="javascript:void(0);" class="shutter">셔터</a>
-           <a href="javascript:void(0);" class="fire">소방시설</a>
-           <a href="javascript:void(0);" class="air">공기질센터</a>
-           <a href="javascript:void(0);" class="alarmbell">비상벨</a>
-           <a href="javascript:void(0);" class="invasion">침입탐지</a>
-           <a href="javascript:void(0);" class="enter">출입탐지</a>
-           <a href="javascript:void(0);" class="elevator" >엘리베이터</a>
+           <a href="#none" class="cctv active">CCTV</a>
+           <a href="#none" class="shutter">셔터</a>
+           <a href="#none" class="fire">소방시설</a>
+           <a href="#none" class="air">공기질센터</a>
+           <a href="#none" class="alarmbell">비상벨</a>
+           <a href="#none" class="invasion">침입탐지</a>
+           <a href="#none" class="enter">출입탐지</a>
+           <a href="#none" class="elevator" >엘리베이터</a>
        </div>
    </div> 
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 장비 팝업 - 장비 목록</div>
-   <div class="popup-equip">
-        <div class="popup-equip__head">
+   <div class="popup-basic">
+        <div class="popup-basic__head">
            <h2 class="name">CCTV</h2>
            <button type="button" class="close"><span class="hide">close</span></button>
        </div>
        <!-- 장비 목록 영역 -->
        <div class="equip-list">
            <div class="equip-list__search">
-               <!-- Selectbox -->
+               <!-- select-box -->
                <!-- [D] width값 지정 -->
-               <div class="selectbox" style="width:100px;">
+               <div class="select-box" style="width:100px;">
                    <!-- [D] 
-                    selectbox 클릭 시 selectbox__btn--active 클래스 추가 
-                    selectbox 비활성화 시 select__btn--disabled 클래스 추가 
+                    select-box 클릭 시 select-box__btn--active 클래스 추가 
+                    select-box 비활성화 시 select__btn--disabled 클래스 추가 
                     -->
-                   <span class="selectbox__btn selectbox__btn--active">건물 A</span>
-                   <div class="selectbox__content">
+                   <span class="select-box__btn select-box__btn--active">건물 A</span>
+                   <div class="select-box__content">
                        <ul>
                            <li>건물 A</li>
                            <li>건물 B</li>
@@ -143,13 +154,13 @@
                        </ul>
                    </div>
                </div>
-               <div class="selectbox" style="width:80px;">
+               <div class="select-box" style="width:80px;">
                    <!-- [D] 
-                    selectbox 클릭 시 selectbox__btn--active 클래스 추가 
-                    selectbox 비활성화 시 select__btn--disabled 클래스 추가 
+                    select-box 클릭 시 select-box__btn--active 클래스 추가 
+                    select-box 비활성화 시 select__btn--disabled 클래스 추가 
                     -->
-                   <span class="selectbox__btn -selectbox__btn--active">건물 A</span>
-                   <div class="selectbox__content">
+                   <span class="select-box__btn -select-box__btn--active">건물 A</span>
+                   <div class="select-box__content">
                        <ul>
                            <li>건물 A</li>
                            <li>건물 B</li>
@@ -169,7 +180,7 @@
            </div>
            <div class="equip-list__contents">
                <div class="title">
-                   총 233,214,123<button type="" class="reflesh"><span class="hide">새로고침</span></button>
+                   총 233,214,123<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
                </div>
                <!-- Accordion -->
                <div class="accordion">
@@ -672,14 +683,14 @@
                  <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
              </div>
              <div class="manual">
-                 <div class="sopaccord">
-                     <div class="sopaccord__title">매뉴얼</div>
-                     <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-                     <div class="sopaccord__btn sopaccord__btn--active">
+                 <div class="sop-accord">
+                     <div class="sop-accord__title">매뉴얼</div>
+                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                     <div class="sop-accord__btn sop-accord__btn--active">
                          <span class="label">1단계</span>
                          사고 위치 파악
                      </div>
-                     <div class="sopaccord__detail">
+                     <div class="sop-accord__detail">
                          <div class="message">
                              <strong class="message__title">방송 송출</strong>
                              <p>
@@ -693,48 +704,48 @@
                              <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
                          </ul>
                      </div>
-                     <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-                     <div class="sopaccord__btn">
+                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                     <div class="sop-accord__btn">
                          <span class="label">2단계</span>
                          안내 방송 송출
                      </div>     
-                     <div class="sopaccord__detail">
+                     <div class="sop-accord__detail">
                          <ul>
                              <li>1. 사고 위치 파악합니다.</li>
                              <li>2. 담당 직원을 현장 파견합니다.</li>
                              <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
                          </ul>
                      </div>
-                     <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-                     <div class="sopaccord__btn">
+                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                     <div class="sop-accord__btn">
                          <span class="label">3단계</span>
                          초동 조치
                      </div>  
-                     <div class="sopaccord__detail">
+                     <div class="sop-accord__detail">
                          <ul>
                              <li>1. 사고 위치 파악합니다.</li>
                              <li>2. 담당 직원을 현장 파견합니다.</li>
                              <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
                          </ul>
                      </div>
-                     <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-                     <div class="sopaccord__btn">
+                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                     <div class="sop-accord__btn">
                          <span class="label">4단계</span>
                          사고 상황 전파
                      </div>     
-                     <div class="sopaccord__detail">
+                     <div class="sop-accord__detail">
                          <ul>
                              <li>1. 사고 위치 파악합니다.</li>
                              <li>2. 담당 직원을 현장 파견합니다.</li>
                              <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
                          </ul>
                      </div> 
-                     <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-                     <div class="sopaccord__btn">
+                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                     <div class="sop-accord__btn">
                          <span class="label">5단계</span>
                          상황종료
                      </div>
-                     <div class="sopaccord__detail">
+                     <div class="sop-accord__detail">
                          <ul>
                              <li>1. 사고 위치 파악합니다.</li>
                              <li>2. 담당 직원을 현장 파견합니다.</li>
@@ -759,16 +770,16 @@
    <input type="radio" id="radio">
    <label for="radio"></label>
 
-   <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Tooltip</div>
-   <!-- [D] tooltip 위치 기준 -->
-   <div class="tooltip">
-       <!-- [D] 오른쪽 방향 Tootip .tooltip--right -->
-       <span class="tooltip__text tooltip__text--right">CCTV</span>
+   <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">tool-tip</div>
+   <!-- [D] tool-tip 위치 기준 -->
+   <div class="tool-tip">
+       <!-- [D] 오른쪽 방향 Tootip .tool-tip--right -->
+       <span class="tool-tip__text tool-tip__text--right">CCTV</span>
    </div>
-   <!-- [D] tooltip 위치 기준 -->
-   <div class="tooltip">
-       <!-- [D] 위 방향 Tootip .tooltip--top -->
-       <span class="tooltip__text tooltip__text--top">1인칭 시점</span>
+   <!-- [D] tool-tip 위치 기준 -->
+   <div class="tool-tip">
+       <!-- [D] 위 방향 Tootip .tool-tip--top -->
+       <span class="tool-tip__text tool-tip__text--top">1인칭 시점</span>
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Table</div>
@@ -1285,14 +1296,14 @@
 </div>
 
 <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Sop Accordion</div>
-<div class="sopaccord">
-    <div class="sopaccord__title">메뉴얼</div>
-    <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-    <div class="sopaccord__btn sopaccord__btn--active">
+<div class="sop-accord">
+    <div class="sop-accord__title">메뉴얼</div>
+    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+    <div class="sop-accord__btn sop-accord__btn--active">
         <span class="label">1단계</span>
         사고 위치 파악
     </div>
-    <div class="sopaccord__detail">
+    <div class="sop-accord__detail">
         <div class="message">
             <strong class="message__title">방송 송출</strong>
             <p>
@@ -1306,48 +1317,48 @@
             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
         </ul>
     </div>
-    <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-    <div class="sopaccord__btn">
+    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+    <div class="sop-accord__btn">
         <span class="label">2단계</span>
         안내 방송 송출
     </div>     
-    <div class="sopaccord__detail">
+    <div class="sop-accord__detail">
         <ul>
             <li>1. 사고 위치 파악합니다.</li>
             <li>2. 담당 직원을 현장 파견합니다.</li>
             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
         </ul>
     </div>
-    <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-    <div class="sopaccord__btn">
+    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+    <div class="sop-accord__btn">
         <span class="label">3단계</span>
         초동 조치
     </div>  
-    <div class="sopaccord__detail">
+    <div class="sop-accord__detail">
         <ul>
             <li>1. 사고 위치 파악합니다.</li>
             <li>2. 담당 직원을 현장 파견합니다.</li>
             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
         </ul>
     </div>
-    <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-    <div class="sopaccord__btn">
+    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+    <div class="sop-accord__btn">
         <span class="label">4단계</span>
         사고 상황 전파
     </div>     
-    <div class="sopaccord__detail">
+    <div class="sop-accord__detail">
         <ul>
             <li>1. 사고 위치 파악합니다.</li>
             <li>2. 담당 직원을 현장 파견합니다.</li>
             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
         </ul>
     </div> 
-    <!-- [D] 아코디언 클릭 시 sopaccord__btn--active 추가 -->
-    <div class="sopaccord__btn">
+    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+    <div class="sop-accord__btn">
         <span class="label">5단계</span>
         상황종료
     </div>
-    <div class="sopaccord__detail">
+    <div class="sop-accord__detail">
         <ul>
             <li>1. 사고 위치 파악합니다.</li>
             <li>2. 담당 직원을 현장 파견합니다.</li>
@@ -1356,38 +1367,38 @@
     </div>
 </div>      
    
-<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Toolbox</div>
-<div class="toolbox">
-    <ul class="toolbox__list">
+<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">tool-box</div>
+<div class="tool-box">
+    <ul class="tool-box__list">
     <!-- [D] 선택 시 active 클래스 추가 -->
         <li class="home active">
-            <a href="javascript:void(0);"><span class="hide">도면 홈</span></a>
-            <div class="tooltip">
-                <span class="tooltip__text tooltip__text--top">도면 홈</span>
+            <a href="#none"><span class="hide">도면 홈</span></a>
+            <div class="tool-tip">
+                <span class="tool-tip__text tool-tip__text--top">도면 홈</span>
             </div>
         </li>
         <li class="pov">
-            <a href="javascript:void(0);"><span class="hide">1인칭</span></a>
-            <div class="tooltip">
-                <span class="tooltip__text tooltip__text--top">1인칭</span>
+            <a href="#none"><span class="hide">1인칭</span></a>
+            <div class="tool-tip">
+                <span class="tool-tip__text tool-tip__text--top">1인칭</span>
             </div>
         </li>
         <li class="twd">
-            <a href="javascript:void(0);"><span class="hide">2d</span></a>
-            <div class="tooltip">
-                <span class="tooltip__text tooltip__text--top">2D</span>
+            <a href="#none"><span class="hide">2d</span></a>
+            <div class="tool-tip">
+                <span class="tool-tip__text tool-tip__text--top">2D</span>
             </div>
         </li>
         <li class="minus">
-            <a href="javascript:void(0);"><span class="hide">minus</span></a>
-            <div class="tooltip">
-                <span class="tooltip__text tooltip__text--top">축소</span>
+            <a href="#none"><span class="hide">minus</span></a>
+            <div class="tool-tip">
+                <span class="tool-tip__text tool-tip__text--top">축소</span>
             </div>
         </li>
         <li class="plus">
-            <a href="javascript:void(0);"><span class="hide">plus</span></a>
-            <div class="tooltip">
-                <span class="tooltip__text tooltip__text--top">확대</span>
+            <a href="#none"><span class="hide">plus</span></a>
+            <div class="tool-tip">
+                <span class="tool-tip__text tool-tip__text--top">확대</span>
             </div>
         </li>
     </ul>
@@ -1398,10 +1409,10 @@
     <div class="poi-menu__all">
         <!-- [D] 선택 시 active 클래스 추가 -->
         <div class="all">
-            <a href="javascript:void(0);">장비보기</a>
+            <a href="#none">장비보기</a>
             <!-- 장비 목록 팝업 -->
-            <div class="popup-equip popup-equip--group">
-                <div class="popup-equip__head">
+            <div class="popup-basic popup-basic--group">
+                <div class="popup-basic__head">
                     <span class="checkbox-wrap">
                         <input type="checkbox" id="check">
                         <label for="check">전체문구</label>
@@ -1410,14 +1421,14 @@
                 <!-- 장비 표시 영역 -->
                 <div class="equip-group">
                     <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                    <a href="javascript:void(0);" class="cctv active">CCTV</a>
-                    <a href="javascript:void(0);" class="shutter">셔터</a>
-                    <a href="javascript:void(0);" class="fire">소방시설</a>
-                    <a href="javascript:void(0);" class="air">공기질센터</a>
-                    <a href="javascript:void(0);" class="alarmbell">비상벨</a>
-                    <a href="javascript:void(0);" class="invasion">침입탐지</a>
-                    <a href="javascript:void(0);" class="enter">출입탐지</a>
-                    <a href="javascript:void(0);" class="elevator" >엘리베이터</a>
+                    <a href="#none" class="cctv active">CCTV</a>
+                    <a href="#none" class="shutter">셔터</a>
+                    <a href="#none" class="fire">소방시설</a>
+                    <a href="#none" class="air">공기질센터</a>
+                    <a href="#none" class="alarmbell">비상벨</a>
+                    <a href="#none" class="invasion">침입탐지</a>
+                    <a href="#none" class="enter">출입탐지</a>
+                    <a href="#none" class="elevator" >엘리베이터</a>
                 </div>
             </div> 
         </div>
@@ -1426,70 +1437,81 @@
         <ul>
             <!-- [D] 선택 시 active 클래스 추가 -->
             <li class="cctv active">
-                <a href="javascript:void(0);"><span class="hide">cctv</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">CCTV</span>
+                <a href="#none"><span class="hide">cctv</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">CCTV</span>
                 </div>
             </li>
             <li class="shutter">
-                <a href="javascript:void(0);"><span class="hide">셔텨</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">셔터</span>
+                <a href="#none"><span class="hide">셔텨</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">셔터</span>
                 </div>
             </li>
             <li class="fire">
-                <a href="javascript:void(0);"><span class="hide">소방</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">소방</span>
+                <a href="#none"><span class="hide">소방</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">소방</span>
                 </div>
             </li>
             <li class="alarmbell">
-                <a href="javascript:void(0);"><span class="hide">공기질센터</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">공기질센터</span>
+                <a href="#none"><span class="hide">공기질센터</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">공기질센터</span>
                 </div>
             </li>
             <li class="air">
-                <a href="javascript:void(0);"><span class="hide">비상벨</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">비상벨</span>
+                <a href="#none"><span class="hide">비상벨</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">비상벨</span>
                 </div>
             </li>
             <li class="invasion">
-                <a href="javascript:void(0);"><span class="hide">침입탐지</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">침입탐지</span>
+                <a href="#none"><span class="hide">침입탐지</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">침입탐지</span>
                 </div>
             </li>
             <li class="enter">
-                <a href="javascript:void(0);"><span class="hide">출입관리</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">출입관리</span>
+                <a href="#none"><span class="hide">출입관리</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">출입관리</span>
                 </div>
             </li>
             <li class="elevator">
-                <a href="javascript:void(0);"><span class="hide">엘리베이터</span></a>
-                <div class="tooltip">
-                    <span class="tooltip__text tooltip__text--right">엘리베이터</span>
+                <a href="#none"><span class="hide">엘리베이터</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--right">엘리베이터</span>
                 </div>
             </li>
         </ul>
     </div>
 </div>
    
-<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">input[type='text']</div>
+<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">input[type='text']/input[type="passport"]</div>
 <!-- [D] width값 지정 -->
-<input type="text" placeholder="장비명" style="width:100px;">
+<input type="text" placeholder="장비명"><br>
+<input type="password" placeholder="비밀번호를 입력하세요.">
+<!-- {if} error 에러 메시지와 같이 노출 시 input-error태그로 묶어서 적용 
+ [D] 에러메시지 노출 시 input-error--active 클래스 추가 
+ -->
+ <div class="input-error">
+    <input type="text" placeholder="아이디를 입력하세요">
+</div>
+<div class="input-error input-error--active">
+    <input type="text" placeholder="아이디를 입력하세요">
+    <p class="input-error__text">아이디를 입력하세요.</p>
+</div>
 
-<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Selectbox</div>
+<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">select-box</div>
 <!-- [D] width값 지정 -->
-<div class="selectbox" style="width:100px;">
+<div class="select-box" style="width:100px;">
     <!-- [D] 
-        selectbox 클릭 시 selectbox__btn--active 클래스 추가 
-        selectbox 비활성화 시 select__btn--disabled 클래스 추가 
+        select-box 클릭 시 select-box__btn--active 클래스 추가 
+        select-box 비활성화 시 select__btn--disabled 클래스 추가 
         -->
-    <span class="selectbox__btn -selectbox__btn--active">건물 A</span>
-    <div class="selectbox__content">
+    <span class="select-box__btn -select-box__btn--active">건물 A</span>
+    <div class="select-box__content">
         <ul>
             <li>건물 A</li>
             <li>건물 B</li>

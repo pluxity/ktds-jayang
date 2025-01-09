@@ -202,8 +202,8 @@
   left: 5px;
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/static/images/viewericon14/icon14.svg");
-  mask-image: url("/static/images/viewericon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -112px -10px;
@@ -242,7 +242,7 @@
 .tool-tip__text--right::before, .tool-tip__text--top::before {
   content: "";
   position: absolute;
-  background: url("/static/images/viewertooltip_arrow.svg") no-repeat;
+  background: url("/static/images/viewer/tooltip_arrow.svg") no-repeat;
   width: 5px;
   height: 6px;
 }
@@ -325,8 +325,8 @@
   transform: translateY(-50%);
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/static/images/viewericon14/icon14.svg");
-  mask-image: url("/static/images/viewericon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -70px 0;
@@ -446,7 +446,7 @@
   top: 50%;
   transform: translateY(-50%);
   right: 10px;
-  background: url("/static/images/viewericon14/icon14.svg") no-repeat -180px -10px;
+  background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -180px -10px;
   width: 14px;
   height: 14px;
 }
@@ -513,7 +513,7 @@
   top: 50%;
   transform: translateY(-50%);
   right: 10px;
-  background: url("/static/images/viewericon14/icon14.svg") no-repeat -180px -10px;
+  background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -180px -10px;
   width: 14px;
   height: 14px;
 }
@@ -631,8 +631,8 @@
 .popup-event__head .close {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
-  mask-image: url("/static/images/viewericon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon24.svg");
+  mask-image: url("/static/images/viewer/icon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -98px -9px;
@@ -653,8 +653,8 @@
 .popup-event__paging button {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
-  mask-image: url("/static/images/viewericon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon24.svg");
+  mask-image: url("/static/images/viewer/icon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -186px -9px;
@@ -783,8 +783,8 @@
 .popup-basic__head .close {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
-  mask-image: url("/static/images/viewericon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon24.svg");
+  mask-image: url("/static/images/viewer/icon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -98px -9px;
@@ -815,8 +815,8 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  -webkit-mask-image: url("/static/images/viewericon20/icon20.svg");
-  mask-image: url("/static/images/viewericon20/icon20.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon20/icon20.svg");
+  mask-image: url("/static/images/viewer/icon20/icon20.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -20px -20px;
@@ -887,7 +887,7 @@
 }
 .equip-list__contents .reflesh {
   display: inline-block;
-  background: url("/static/images/viewericon14/icon14.svg") no-repeat -146px -10px;
+  background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -146px -10px;
   width: 14px;
   height: 14px;
 }
@@ -920,7 +920,7 @@ input[type=checkbox]:checked::after {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  background: url("/static/images/viewerinput_checkbox.svg") no-repeat center/contain;
+  background: url("/static/images/viewer/input_checkbox.svg") no-repeat center/contain;
   width: 6px;
   height: 4px;
 }
@@ -1074,8 +1074,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .poi-menu__all .all > a::before {
   content: "";
-  -webkit-mask-image: url("/static/images/viewericon_poi.svg");
-  mask-image: url("/static/images/viewericon_poi.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon_poi.svg");
+  mask-image: url("/static/images/viewer/icon_poi.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -340px -20px;
@@ -1134,8 +1134,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 .poi-menu__list li > a {
   width: 45px;
   height: 45px;
-  -webkit-mask-image: url("/static/images/viewericon_poi.svg");
-  mask-image: url("/static/images/viewericon_poi.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon_poi.svg");
+  mask-image: url("/static/images/viewer/icon_poi.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -8px -6px;
@@ -1222,8 +1222,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 .tool-box__list li > a {
   width: 20px;
   height: 20px;
-  -webkit-mask-image: url("/static/images/viewericon_tool.svg");
-  mask-image: url("/static/images/viewericon_tool.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon_tool.svg");
+  mask-image: url("/static/images/viewer/icon_tool.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -20px -20px;

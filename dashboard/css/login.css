@@ -173,8 +173,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 .popup-basic__head .close {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
-  mask-image: url("/static/images/viewericon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon24.svg");
+  mask-image: url("/static/images/viewer/icon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -98px -9px;
@@ -205,8 +205,8 @@ input[type=text]:disabled, input[type=password]:disabled {
   display: inline-block;
   width: 20px;
   height: 20px;
-  -webkit-mask-image: url("/static/images/viewericon20/icon20.svg");
-  mask-image: url("/static/images/viewericon20/icon20.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon20/icon20.svg");
+  mask-image: url("/static/images/viewer/icon20/icon20.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -20px -20px;
@@ -277,7 +277,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .equip-list__contents .reflesh {
   display: inline-block;
-  background: url("/static/images/viewericon14/icon14.svg") no-repeat -146px -10px;
+  background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -146px -10px;
   width: 14px;
   height: 14px;
 }

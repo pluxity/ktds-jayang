@@ -4,16 +4,16 @@
 /* Alert */
 /* Toast */
 /* 경고 팝업 */
-/* 장비 목록 팝업 */
+/* 기본 팝업 */
 /* 이벤트 팝업 - 공지사항/SOP */
-/* Tooltip */
+/* tool-tip */
 /* Checkbox */
 /* Radio */
 /* Input Text */
 /* Table */
 /* Accordion */
 /* SOP Accordion */
-/* Selectbox */
+/* select-box */
 /* POI Menu */
 /* Tool Box */
 .button {
@@ -277,8 +277,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .equip-list__contents .reflesh {
   display: inline-block;
-  background: url("/dashboard/img/icon14/icon14.svg") no-repeat;
-  background-position: -146px -10px;
+  background: url("/dashboard/img/icon14/icon14.svg") no-repeat -146px -10px;
   width: 14px;
   height: 14px;
 }
@@ -295,8 +294,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   margin-bottom: 30px;
   width: 55px;
   height: 45px;
-  background: url("/dashboard/img/icon_kt.svg") no-repeat;
-  background-size: contain;
+  background: url("/dashboard/img/icon_kt.svg") no-repeat center/contain;
 }
 .login__box {
   position: relative;

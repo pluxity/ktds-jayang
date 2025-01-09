@@ -4,6 +4,9 @@
 // 각 css에 사용되는 @mixin 불러서 사용 
 // ---------------------------------------------------
 
+// 이미지 경로 변수 설정 
+$base-img-path:"/dashboard/img/";
+
 /* Button */
 @mixin button{
     $button-types:(
@@ -95,7 +98,7 @@
                 content:'';
                 position:absolute; top:5px; left:5px;
                 width:14px; height:14px;
-                -webkit-mask-image:url('/dashboard/img/icon14/icon14.svg'); mask-image:url('/dashboard/img/icon14/icon14.svg'); 
+                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-112px -10px; mask-position:-112px -10px;
                 background-color:var(--color-mint);
@@ -170,7 +173,7 @@
             font-weight:800; color:var(--color-mint); font-size:1.125rem;
             .close{
                 width:24px; height:24px;
-                -webkit-mask-image:url('/dashboard/img/icon24/icon24.svg'); mask-image:url('/dashboard/img/icon24/icon24.svg'); 
+                -webkit-mask-image:url('#{$base-img-path}icon24/icon24.svg'); mask-image:url('#{$base-img-path}icon24/icon24.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-98px -9px; mask-position:-98px -9px;
                 background-color:var(--color-mint);
@@ -191,7 +194,7 @@
                         content:'';
                         display:inline-block;
                         width:20px; height:20px; 
-                        -webkit-mask-image:url('/dashboard/img/icon20/icon20.svg'); mask-image:url('/dashboard/img/icon20/icon20.svg'); 
+                        -webkit-mask-image:url('#{$base-img-path}icon20/icon20.svg'); mask-image:url('#{$base-img-path}icon20/icon20.svg'); 
                         -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                         -webkit-mask-position:-20px -20px; mask-position:-20px -20px;
                         background-color:var(--color-grayscale03);
@@ -234,7 +237,7 @@
                     }
                     .reflesh{
                         display:inline-block;
-                        background:url('/dashboard/img/icon14/icon14.svg') no-repeat; background-position:-146px -10px;
+                        background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -146px -10px;
                         width:14px; height:14px; 
                     }
                 }
@@ -256,7 +259,7 @@
             font-weight:800; color:var(--color-navy-dark); font-size:1.125rem;
             .close{
                 width:24px; height:24px;
-                -webkit-mask-image:url('/dashboard/img/icon24/icon24.svg'); mask-image:url('/dashboard/img/icon24/icon24.svg'); 
+                -webkit-mask-image:url('#{$base-img-path}icon24/icon24.svg'); mask-image:url('#{$base-img-path}icon24/icon24.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-98px -9px; mask-position:-98px -9px;
                 background-color:var(--color-navy-dark);
@@ -268,7 +271,7 @@
             color:var(--color-grayscale03); font-size:1.375rem; font-weight:700;
             button{
                 width:24px; height:24px;
-                -webkit-mask-image:url('/dashboard/img/icon24/icon24.svg'); mask-image:url('/dashboard/img/icon24/icon24.svg'); 
+                -webkit-mask-image:url('#{$base-img-path}icon24/icon24.svg'); mask-image:url('#{$base-img-path}icon24/icon24.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-186px -9px; mask-position:-186px -9px;
                 background-color:var(--color-grayscale03);
@@ -343,9 +346,9 @@
     }
 }
 
-/* Tooltip */
-@mixin tooltip{
-    .tooltip{
+/* tool-tip */
+@mixin tool-tip{
+    .tool-tip{
         position:relative; display:inline-block;
         &__text{
             position:absolute; 
@@ -355,7 +358,7 @@
             &--right::before, &--top::before{
                 content:'';
                 position:absolute; 
-                background:url('/dashboard/img/tooltip_arrow.svg') no-repeat;
+                background:url('#{$base-img-path}tooltip_arrow.svg') no-repeat;
                 width:5px; height:6px;
             }
             &--right{
@@ -389,7 +392,7 @@
             &::after{
                 content:'';
                 position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
-                background:url('/dashboard/img/input_checkbox.svg') no-repeat; background-size:contain;
+                background:url('#{$base-img-path}input_checkbox.svg') no-repeat center/contain; 
                 width:6px; height:4px;
             }
             + label{color:var(--color-mint-dark);}
@@ -558,7 +561,7 @@
             &::after{
                 content:'';
                 position:absolute; top:50%; transform:translateY(-50%); right:10px;
-                background:url('/dashboard/img/icon14/icon14.svg') no-repeat; background-position:-180px -10px;
+                background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -180px -10px; 
                 width:14px; height:14px;
             }
             &--active{
@@ -572,7 +575,7 @@
 
 /* SOP Accordion */
 @mixin sop_accordion{
-    .sopaccord{
+    .sop-accord{
         padding-right:9px;
         max-height:455px; overflow-y:auto; overflow-x:hidden;
         font-size:0.75rem;
@@ -606,13 +609,13 @@
             &::after{
                 content:'';
                 position:absolute; top:50%; transform:translateY(-50%); right:10px;
-                background:url('/dashboard/img/icon14/icon14.svg') no-repeat; background-position:-180px -10px;
+                background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -180px -10px; 
                 width:14px; height:14px;
             }
             &--active{
                 background-color:var(--color-grayscale03); color:var(--color-grayscale-light);
                 &::after{background-position-x:-214px;}
-                + .sopaccord__detail{display:block;}
+                + .sop-accord__detail{display:block;}
             }
         }
 
@@ -638,9 +641,9 @@
     }
 }
 
-/* Selectbox */
-@mixin selectbox{
-    .selectbox{
+/* select-box */
+@mixin select-box{
+    .select-box{
         position:relative;
         font-size:0.75rem;
         &__content{
@@ -676,7 +679,7 @@
                 content:'';
                 position:absolute; right:4px; top:50%; transform:translateY(-50%);
                 width:14px; height:14px;
-                -webkit-mask-image:url('/dashboard/img/icon14/icon14.svg'); mask-image:url('/dashboard/img/icon14/icon14.svg'); 
+                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-70px 0; mask-position:-70px 0;
                 -webkit-mask-size:cover; mask-size:cover;
@@ -684,7 +687,7 @@
             }
             &--active{
                 color:var(--color-grayscale-light);
-                + .selectbox__content{display:block;}
+                + .select-box__content{display:block;}
                 &::after{
                     -webkit-mask-position:-84px 0; mask-position:-84px 0;
                     background-color:var(--color-grayscale-light);
@@ -719,7 +722,7 @@
                     text-align:center;
                     &::before{
                         content:'';
-                        -webkit-mask-image:url('/dashboard/img/icon_poi.svg'); mask-image:url('/dashboard/img/icon_poi.svg'); 
+                        -webkit-mask-image:url('#{$base-img-path}icon_poi.svg'); mask-image:url('#{$base-img-path}icon_poi.svg'); 
                         -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                         -webkit-mask-position:-340px -20px; mask-position:-340px -20px;
                         background-color:var(--color-navy-dark); 
@@ -741,7 +744,7 @@
             background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); box-shadow:0px -8px 13px 0px rgba(3, 61, 170, 0.60) inset;
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); padding:10px 7.5px; border-radius:40px;
             width:60px; box-sizing:border-box;
-            .tooltip{
+            .tool-tip{
                 display:none;
                 &__text{top:50%; transform:translateY(-50%); left:-10px;}
             }
@@ -752,7 +755,7 @@
                 width:45px; height:45px; border-radius:100%;
                 > a{
                     width:45px; height:45px;
-                    -webkit-mask-image:url('/dashboard/img/icon_poi.svg'); mask-image:url('/dashboard/img/icon_poi.svg'); 
+                    -webkit-mask-image:url('#{$base-img-path}icon_poi.svg'); mask-image:url('#{$base-img-path}icon_poi.svg'); 
                     -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     -webkit-mask-position:-8px -6px; mask-position:-8px -6px;
                     background-color:var(--color-navy-dark);
@@ -767,12 +770,12 @@
                 
                 &:hover{
                     background-color:rgba(20, 111, 121, 0.20);
-                    > .tooltip{display:block;}
+                    > .tool-tip{display:block;}
                 }
                 &.active{
                     background-color:rgba(255, 255, 255, 0.80); box-shadow:0px 4px 4px 0px #43D0DF inset;
                     > a{background-color:var(--color-blue);}
-                    > .tooltip{display:none;}
+                    > .tool-tip{display:none;}
                 }
             }
         }
@@ -780,8 +783,8 @@
 }
 
 /* Tool Box */
-@mixin toolbox{
-    .toolbox{
+@mixin tool-box{
+    .tool-box{
         display:inline-flex;
         padding:10px; border:1px solid #0A1714; border-radius:70px; box-sizing:border-box;
         background:linear-gradient(180deg, rgba(0, 245, 191, 0.00) 61.5%, rgba(0, 245, 191, 0.20) 100%), #25252B;
@@ -789,7 +792,7 @@
         height:65px; 
         &__list{
             display:flex; align-items:center; justify-content:center; grid-gap:10px;
-            .tooltip{
+            .tool-tip{
                 display:none;
                 &__text{top:-38px; transform:translateX(-50%); left:50%; margin-left:-10px;}
             }
@@ -799,7 +802,7 @@
                 width:45px; height:45px;
                 > a{
                     width:20px; height:20px;
-                    -webkit-mask-image:url('/dashboard/img/icon_tool.svg'); mask-image:url('/dashboard/img/icon_tool.svg'); 
+                    -webkit-mask-image:url('#{$base-img-path}icon_tool.svg'); mask-image:url('#{$base-img-path}icon_tool.svg'); 
                     -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     -webkit-mask-position:-20px -20px; mask-position:-20px -20px;
                     background-color:var(--color-grayscale-light);
@@ -822,11 +825,11 @@
                 &:hover{
                     background-color:#25252A; border-radius:100%;
                     box-shadow:0px 0px 4px 0px rgba(0, 245, 191, 0.45) inset;
-                    > .tooltip{display:block;}
+                    > .tool-tip{display:block;}
                 }
                 &.active{
                     > a{background-color:var(--color-mint);}
-                    > .tooltip{display:none;}
+                    > .tool-tip{display:none;}
                 }
             }
         }

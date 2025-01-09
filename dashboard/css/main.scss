@@ -1,13 +1,12 @@
 @import "../css/components/components";
 
-
 @include button;
 @include badge;
 @include table;
 @include alert;
 @include toast;
-@include tooltip;
-@include selectbox;
+@include tool-tip;
+@include select-box;
 
 // accordion
 @include accordion;
@@ -25,7 +24,10 @@
 
 // menu bar
 @include poi_menu;
-@include toolbox;
+@include tool-box;
+ 
+// 이미지 경로 변수 설정 
+$base-img-path:"/dashboard/img/";
 
 
 /* Main */

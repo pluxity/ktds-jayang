@@ -8,6 +8,9 @@
 // popup
 @include popup_basic;
 
+// 이미지 경로 변수 설정 
+$base-img-path:"/dashboard/img/";
+
 .login{
     display:flex; align-items:center; justify-content:center; flex-direction:column;
     height:100%;
@@ -15,7 +18,7 @@
         display:inline-block;
         margin-bottom:30px;
         width:55px; height:45px;
-        background:url('/dashboard/img/icon_kt.svg') no-repeat; background-size:contain;
+        background:url('#{$base-img-path}icon_kt.svg') no-repeat center/contain; 
     }
     &__box{
         position:relative; display:flex; align-items:center; flex-direction:column;

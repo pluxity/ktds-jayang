@@ -12,7 +12,7 @@
 
 
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
-        const {disasterFreeDate} = systemSetting;
+        const { } = systemSetting;
     });
     await IconSetManager.getIconSetList();
     await BuildingManager.getBuildingList().then((buildingList) => {
@@ -43,7 +43,7 @@
         Cron.addCronjob('* * * * * *', renderDateTime);
     };
 
-    // await Init.initializeOutdoorBuilding();
+    await Init.initializeOutdoorBuilding();
     setDateTime();
     // Px.Event.AddEventListener('dblclick', 'poi', Init.poiDblclick);
 
@@ -61,68 +61,35 @@ const Init = (function () {
     }
     const initializeOutdoorBuilding = async (onComplete) => {
         try {
-            document.getElementById('loadingLayer').classList.add('on');
-            const buildingName = document.getElementById('buildingName');
-            buildingName.style.display = 'none';
-            buildingName.style.zIndex = '0';
-            buildingName.style.left = '';
-            buildingName.style.top = '';
-
-            const minimap = document.getElementById('minimapBox');
-            minimap.className = '';
-
-
-
-            const container = document.getElementById('container');
+            const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
+
+
             Px.Core.Initialize(container, async () => {
-                const outdoorBuilding = BuildingManager.findAll().find(building => building.buildingType === "outdoor");
 
-                BUILDING_ID = outdoorBuilding.id;
+                const sbmDataArray = [];
+                sbmDataArray.push({
+                    url: "/static/assets/modeling/outside/KTDS_Out_All_250109_1F_0.sbm",
+                    id: 0,
+                    displayName: "외부 전경",
+                    baseFloor: 1,
+                    groupId: 0
+                });
 
-                const { buildingFile, floors, camera3d } = outdoorBuilding;
-                const { directory, storedName, extension } = buildingFile;
-
-                Px.Loader.LoadFbx({
-                    url: `/Building/${directory}/${storedName}.${extension}`,
-                    onLoad: async () => {
+                Px.Loader.LoadSbmUrlArray({
+                    urlDataList: sbmDataArray,
+                    center: "",
+                    onLoad: function() {
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
-                        PoiManager.renderAllPoiToEngineByBuildingId(BUILDING_ID);
-
-                        Px.Lod.SetLodData(outdoorBuilding.lod);
-
-                        if (floors.length > 1) {
-                            Px.Model.Expand({
-                                duration: 200,
-                                interval: 200,
-                                name: floors[0].floorName,
-                                onComplete: () => {
-                                    if(camera3d) {
-                                        Px.Camera.SetState(JSON.parse(camera3d));
-                                    }
-                                }
-                            });
-                        } else {
-                            if(camera3d) {
-                                Px.Camera.SetState(JSON.parse(camera3d));
-                            }
-                        }
 
                         Px.Event.On();
                         Px.Event.AddEventListener('dblclick', 'sbm', buildingDblclick);
-                        Px.Effect.Outline.HoverEventOn('area_no');
-                        Px.Effect.Outline.AddHoverEventCallback(renderingBuildingNameDom);
                         initializeTexture();
 
-                        document.getElementById('loadingLayer').classList.remove('on');
                         if (onComplete) onComplete();
-                        renderingPoiList();
-                        Init.setBuildingNameAndFloors();
-
-
-                    },
+                    }
                 });
             });
         } catch (error) {

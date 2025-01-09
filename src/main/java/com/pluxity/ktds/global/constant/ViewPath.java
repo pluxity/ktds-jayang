@@ -23,6 +23,7 @@ public enum ViewPath {
     DEFAULT("/", "login/login"),
 
     VIEWER_MAIN("/viewer","viewer/index"),
+    VIEWER_MAP("/map","map/index"),
     ;
 
     private final String path;

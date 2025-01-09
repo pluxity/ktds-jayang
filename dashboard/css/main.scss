@@ -5,8 +5,8 @@
 @include table;
 @include alert;
 @include toast;
-@include tool-tip;
-@include select-box;
+@include tooltip;
+@include selectbox;
 
 // accordion
 @include accordion;
@@ -24,10 +24,10 @@
 
 // menu bar
 @include poi_menu;
-@include tool-box;
+@include toolbox;
  
 // 이미지 경로 변수 설정 
-$base-img-path:"/dashboard/img/";
+$base-img-path:"/static/images/viewer";
 
 
 /* Main */

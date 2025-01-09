@@ -9,7 +9,7 @@
 @include popup_basic;
 
 // 이미지 경로 변수 설정 
-$base-img-path:"/dashboard/img/";
+$base-img-path:"/static/images/viewer/";
 
 .login{
     display:flex; align-items:center; justify-content:center; flex-direction:column;

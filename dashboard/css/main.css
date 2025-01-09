@@ -6,16 +6,16 @@
 /* 경고 팝업 */
 /* 기본 팝업 */
 /* 이벤트 팝업 - 공지사항/SOP */
-/* tool-tip */
+/* tooltip */
 /* Checkbox */
 /* Radio */
 /* Input Text */
 /* Table */
 /* Accordion */
 /* SOP Accordion */
-/* select-box */
+/* selectbox */
 /* POI Menu */
-/* Tool Box */
+/* ToolBox */
 .button {
   display: flex;
   align-items: center;
@@ -139,7 +139,7 @@
   background-color: var(--color-black);
   border-radius: 10px;
   box-sizing: border-box;
-  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
   width: 18.75rem;
   color: #fff;
   text-align: center;
@@ -202,8 +202,8 @@
   left: 5px;
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/dashboard/img/icon14/icon14.svg");
-  mask-image: url("/dashboard/img/icon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewericon14/icon14.svg");
+  mask-image: url("/static/images/viewericon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -112px -10px;
@@ -242,7 +242,7 @@
 .tool-tip__text--right::before, .tool-tip__text--top::before {
   content: "";
   position: absolute;
-  background: url("/dashboard/img/tooltip_arrow.svg") no-repeat;
+  background: url("/static/images/viewertooltip_arrow.svg") no-repeat;
   width: 5px;
   height: 6px;
 }
@@ -325,8 +325,8 @@
   transform: translateY(-50%);
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/dashboard/img/icon14/icon14.svg");
-  mask-image: url("/dashboard/img/icon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewericon14/icon14.svg");
+  mask-image: url("/static/images/viewericon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -70px 0;
@@ -446,7 +446,7 @@
   top: 50%;
   transform: translateY(-50%);
   right: 10px;
-  background: url("/dashboard/img/icon14/icon14.svg") no-repeat -180px -10px;
+  background: url("/static/images/viewericon14/icon14.svg") no-repeat -180px -10px;
   width: 14px;
   height: 14px;
 }
@@ -513,7 +513,7 @@
   top: 50%;
   transform: translateY(-50%);
   right: 10px;
-  background: url("/dashboard/img/icon14/icon14.svg") no-repeat -180px -10px;
+  background: url("/static/images/viewericon14/icon14.svg") no-repeat -180px -10px;
   width: 14px;
   height: 14px;
 }
@@ -557,7 +557,7 @@
   background-color: var(--color-black);
   border: 2px solid var(--color-danger);
   border-radius: 10px;
-  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
   box-sizing: border-box;
   width: 21.875rem;
 }
@@ -612,7 +612,7 @@
 .popup-event {
   display: inline-block;
   background-color: var(--color-black);
-  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
   border-radius: 20px 20px 10px 10px;
 }
 .popup-event__head {
@@ -631,8 +631,8 @@
 .popup-event__head .close {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/dashboard/img/icon24/icon24.svg");
-  mask-image: url("/dashboard/img/icon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
+  mask-image: url("/static/images/viewericon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -98px -9px;
@@ -653,8 +653,8 @@
 .popup-event__paging button {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/dashboard/img/icon24/icon24.svg");
-  mask-image: url("/dashboard/img/icon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
+  mask-image: url("/static/images/viewericon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -186px -9px;
@@ -753,7 +753,7 @@
   border-radius: 10px;
   box-sizing: border-box;
   border-top: 2px solid var(--color-mint);
-  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
 }
 .popup-basic--group {
   padding: 15px;
@@ -783,8 +783,8 @@
 .popup-basic__head .close {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/dashboard/img/icon24/icon24.svg");
-  mask-image: url("/dashboard/img/icon24/icon24.svg");
+  -webkit-mask-image: url("/static/images/viewericon24/icon24.svg");
+  mask-image: url("/static/images/viewericon24/icon24.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -98px -9px;
@@ -815,8 +815,8 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  -webkit-mask-image: url("/dashboard/img/icon20/icon20.svg");
-  mask-image: url("/dashboard/img/icon20/icon20.svg");
+  -webkit-mask-image: url("/static/images/viewericon20/icon20.svg");
+  mask-image: url("/static/images/viewericon20/icon20.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -20px -20px;
@@ -887,7 +887,7 @@
 }
 .equip-list__contents .reflesh {
   display: inline-block;
-  background: url("/dashboard/img/icon14/icon14.svg") no-repeat -146px -10px;
+  background: url("/static/images/viewericon14/icon14.svg") no-repeat -146px -10px;
   width: 14px;
   height: 14px;
 }
@@ -920,7 +920,7 @@ input[type=checkbox]:checked::after {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  background: url("/dashboard/img/input_checkbox.svg") no-repeat center/contain;
+  background: url("/static/images/viewerinput_checkbox.svg") no-repeat center/contain;
   width: 6px;
   height: 4px;
 }
@@ -962,7 +962,7 @@ input[type=radio]:checked::after {
   top: 50%;
   transform: translate(-50%, -50%);
   background-color: var(--color-mint);
-  box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.6) inset;
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.6) inset;
   border-radius: 100%;
   width: 8px;
   height: 8px;
@@ -1043,7 +1043,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   justify-content: center;
   z-index: 1;
   background: linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%);
-  box-shadow: 0px -8px 13px 0px rgba(3, 61, 170, 0.6) inset;
+  box-shadow: 0 -8px 13px 0 rgba(3, 61, 170, 0.6) inset;
   filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.7));
   width: 60px;
   height: 60px;
@@ -1074,8 +1074,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .poi-menu__all .all > a::before {
   content: "";
-  -webkit-mask-image: url("/dashboard/img/icon_poi.svg");
-  mask-image: url("/dashboard/img/icon_poi.svg");
+  -webkit-mask-image: url("/static/images/viewericon_poi.svg");
+  mask-image: url("/static/images/viewericon_poi.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -340px -20px;
@@ -1086,7 +1086,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .poi-menu__all .all.active {
   background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0px 4px 4px 0px #43D0DF inset;
+  box-shadow: 0 4px 4px 0 #43D0DF inset;
   color: var(--color-blue);
 }
 .poi-menu__all .all.active > a::before {
@@ -1100,7 +1100,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .poi-menu__list {
   background: linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%);
-  box-shadow: 0px -8px 13px 0px rgba(3, 61, 170, 0.6) inset;
+  box-shadow: 0 -8px 13px 0 rgba(3, 61, 170, 0.6) inset;
   filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.7));
   padding: 10px 7.5px;
   border-radius: 40px;
@@ -1134,8 +1134,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 .poi-menu__list li > a {
   width: 45px;
   height: 45px;
-  -webkit-mask-image: url("/dashboard/img/icon_poi.svg");
-  mask-image: url("/dashboard/img/icon_poi.svg");
+  -webkit-mask-image: url("/static/images/viewericon_poi.svg");
+  mask-image: url("/static/images/viewericon_poi.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -8px -6px;
@@ -1178,7 +1178,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 .poi-menu__list li.active {
   background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0px 4px 4px 0px #43D0DF inset;
+  box-shadow: 0 4px 4px 0 #43D0DF inset;
 }
 .poi-menu__list li.active > a {
   background-color: var(--color-blue);
@@ -1194,7 +1194,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   border-radius: 70px;
   box-sizing: border-box;
   background: linear-gradient(180deg, rgba(0, 245, 191, 0) 61.5%, rgba(0, 245, 191, 0.2) 100%), #25252B;
-  box-shadow: 0px 5px 14px 0px rgba(0, 245, 191, 0.65);
+  box-shadow: 0 5px 14px 0 rgba(0, 245, 191, 0.65);
   height: 65px;
 }
 .tool-box__list {
@@ -1222,8 +1222,8 @@ input[type=text]:disabled, input[type=password]:disabled {
 .tool-box__list li > a {
   width: 20px;
   height: 20px;
-  -webkit-mask-image: url("/dashboard/img/icon_tool.svg");
-  mask-image: url("/dashboard/img/icon_tool.svg");
+  -webkit-mask-image: url("/static/images/viewericon_tool.svg");
+  mask-image: url("/static/images/viewericon_tool.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -20px -20px;
@@ -1262,7 +1262,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 .tool-box__list li:hover {
   background-color: #25252A;
   border-radius: 100%;
-  box-shadow: 0px 0px 4px 0px rgba(0, 245, 191, 0.45) inset;
+  box-shadow: 0 0 4px 0 rgba(0, 245, 191, 0.45) inset;
 }
 .tool-box__list li:hover > .tool-tip {
   display: block;

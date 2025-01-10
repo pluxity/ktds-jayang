@@ -84,63 +84,63 @@ a {
   font-family: "SUIT";
   font-weight: 100;
   font-style: normal;
-  src: url("../webfonts/SUIT-Thin.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-Thin.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 200;
   font-style: normal;
-  src: url("../webfonts/SUIT-ExtraLight.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-ExtraLight.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 300;
   font-style: normal;
-  src: url("../webfonts/SUIT-Light.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-Light.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 400;
   font-style: normal;
-  src: url("../webfonts/SUIT-Regular.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-Regular.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 500;
   font-style: normal;
-  src: url("../webfonts/SUIT-Medium.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-Medium.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 600;
   font-style: normal;
-  src: url("../webfonts/SUIT-SemiBold.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-SemiBold.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 700;
   font-style: normal;
-  src: url("../webfonts/SUIT-Bold.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-Bold.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 800;
   font-style: normal;
-  src: url("../webfonts/SUIT-ExtraBold.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-ExtraBold.otf") format("opentype");
   font-display: swap;
 }
 @font-face {
   font-family: "SUIT";
   font-weight: 900;
   font-style: normal;
-  src: url("../webfonts/SUIT-Heavy.otf") format("opentype");
+  src: url("/publishing/webfonts/SUIT-Heavy.otf") format("opentype");
   font-display: swap;
 }
 html {
@@ -170,12 +170,21 @@ body {
   background-size: cover;
 }
 
+/* dashboard > main / map > main 
+메인 페이지 너비 고정 클래스 */
+.contents {
+  position: relative;
+  padding: 5rem 0 0 1.87em;
+  box-sizing: border-box;
+  height: 100%;
+}
+
 /* GNB */
 .header {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -201,7 +210,7 @@ body {
   display: inline-block;
   width: 33px;
   height: 27px;
-  background: url("/static/images/viewer/icon_kt.svg") no-repeat center/contain;
+  background: url("/dashboard/img/icon_kt.svg") no-repeat center/contain;
 }
 .header__info {
   display: flex;
@@ -276,8 +285,8 @@ body {
   margin-left: 5px;
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
-  mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  -webkit-mask-image: url("/dashboard/img/icon14/icon14.svg");
+  mask-image: url("/dashboard/img/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   background-color: var(--color-grayscale03);
@@ -289,6 +298,37 @@ body {
 .header__info .profile__layer .detail__group .icon--download::after {
   -webkit-mask-position: -78px -10px;
   mask-position: -78px -10px;
+}
+.header__tab {
+  display: flex;
+  align-items: center;
+  grid-gap: 5px;
+}
+.header__tab li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #80858D;
+  padding: 0 5px;
+  width: 120px;
+  height: 37px;
+  border-radius: 7px;
+  color: var(--color-grayscale01);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.header__tab li:first-child {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+.header__tab li:last-child {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+.header__tab li.active {
+  color: var(--color-mint);
+  border-color: var(--color-mint);
 }
 
 /* 폰트 강조 색상 */

@@ -5,7 +5,8 @@
 // ---------------------------------------------------
 
 // 이미지 경로 변수 설정 
-$base-img-path:"/static/images/viewer/";
+//$base-img-path:"/static/images/viewer/";
+$base-img-path:"/dashboard/img/";
 
 /* Button */
 @mixin button{
@@ -100,7 +101,7 @@ $base-img-path:"/static/images/viewer/";
                 width:14px; height:14px;
                 -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
-                -webkit-mask-position:-112px -10px; mask-position:-112px -10px;
+                -webkit-mask-position:-146px -10px; mask-position:-146px -10px;
                 background-color:var(--color-mint);
             }    
        }
@@ -189,7 +190,7 @@ $base-img-path:"/static/images/viewer/";
                     position:relative;
                     display:flex; flex-direction:column; align-items:center; justify-content:center; grid-gap:5px; 
                     padding:10px 0; box-sizing:border-box;
-                    color:var(--color-grayscale03); letter-spacing:-0.0075rem; font-size:0.75rem;
+                    color:var(--color-grayscale03); letter-spacing:-0.0075rem; font-size:0.75rem; white-space:nowrap;
                     &::before{
                         content:'';
                         display:inline-block;
@@ -237,7 +238,7 @@ $base-img-path:"/static/images/viewer/";
                     }
                     .reflesh{
                         display:inline-block;
-                        background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -146px -10px;
+                        background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -180px -10px;
                         width:14px; height:14px; 
                     }
                 }
@@ -561,12 +562,12 @@ $base-img-path:"/static/images/viewer/";
             &::after{
                 content:'';
                 position:absolute; top:50%; transform:translateY(-50%); right:10px;
-                background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -180px -10px; 
+                background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -248px -10px; 
                 width:14px; height:14px;
             }
             &--active{
                 background-color:var(--color-grayscale03); color:var(--color-grayscale-light);
-                &::after{background-position-x:-214px;}
+                &::after{background-position-x:-282px;}
                 + .accordion__detail{display:block;}
             }
         }
@@ -609,12 +610,12 @@ $base-img-path:"/static/images/viewer/";
             &::after{
                 content:'';
                 position:absolute; top:50%; transform:translateY(-50%); right:10px;
-                background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -180px -10px; 
+                background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -248px -10px; 
                 width:14px; height:14px;
             }
             &--active{
                 background-color:var(--color-grayscale03); color:var(--color-grayscale-light);
-                &::after{background-position-x:-214px;}
+                &::after{background-position-x:-282px;}
                 + .sop-accord__detail{display:block;}
             }
         }
@@ -681,15 +682,19 @@ $base-img-path:"/static/images/viewer/";
                 width:14px; height:14px;
                 -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
-                -webkit-mask-position:-70px 0; mask-position:-70px 0;
+                -webkit-mask-position:-100px 0; mask-position:-100px 0;
                 -webkit-mask-size:cover; mask-size:cover;
                 background-color:var(--color-grayscale03);
+            }
+            &:hover{
+                color:var(--color-grayscale-light);
+                &::after{background-color:var(--color-grayscale-light);}
             }
             &--active{
                 color:var(--color-grayscale-light);
                 + .select-box__content{display:block;}
                 &::after{
-                    -webkit-mask-position:-84px 0; mask-position:-84px 0;
+                    -webkit-mask-position:-114px 0; mask-position:-114px 0;
                     background-color:var(--color-grayscale-light);
                 }
             }
@@ -701,11 +706,13 @@ $base-img-path:"/static/images/viewer/";
 /* POI Menu */
 @mixin poi_menu{
     .poi-menu{
-        display:flex; flex-direction:column; align-items:center; grid-gap:20px;
+        position:absolute; top:50%; transform:translateY(-50%);
+        display:flex; flex-direction:column; align-items:center; 
         width:60px;
+        
         &__all{
             display:flex; align-items:center; justify-content:center; z-index:1;
-            background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); box-shadow:0 -8px 13px 0 rgba(3, 61, 170, 0.60) inset;
+            margin-bottom:20px; background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); box-shadow:0 -8px 13px 0 rgba(3, 61, 170, 0.60) inset;
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); 
             width:60px; height:60px; border-radius:100%; 
 
@@ -744,6 +751,10 @@ $base-img-path:"/static/images/viewer/";
             background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); box-shadow:0 -8px 13px 0 rgba(3, 61, 170, 0.60) inset;
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); padding:10px 7.5px; border-radius:40px;
             width:60px; box-sizing:border-box;
+
+            // 3d view에서 사용되는 poi menu 리스트 
+            &--map{margin-top:3px; border-top-left-radius:0; border-top-right-radius:0;}
+
             .tool-tip{
                 display:none;
                 &__text{top:50%; transform:translateY(-50%); left:-10px;}
@@ -767,7 +778,11 @@ $base-img-path:"/static/images/viewer/";
                 &.invasion a{-webkit-mask-position:-208px -6px; mask-position:-208px -6px;}
                 &.enter a{-webkit-mask-position:-248px -8px; mask-position:-248px -8px;}
                 &.elevator a{-webkit-mask-position:-288px -8px; mask-position:-288px -8px;}
-                
+                &.patrol a{-webkit-mask-position:-367px -6px; mask-position:-367px -6px;}
+                &.sop a{-webkit-mask-position:-407px -6px; mask-position:-407px -6px;} 
+                &.shelter a{-webkit-mask-position:-448px -8px; mask-position:-448px -8px;}
+                &.maintenance a{-webkit-mask-position:-486px -6px; mask-position:-486px -6px;}
+
                 &:hover{
                     background-color:rgba(20, 111, 121, 0.20);
                     > .tool-tip{display:block;}
@@ -779,13 +794,24 @@ $base-img-path:"/static/images/viewer/";
                 }
             }
         }
+        &:has(.poi-menu__list--map){
+            .poi-menu__list:not(.poi-menu__list--map){
+                background:linear-gradient(178deg, #00F5BF 44.07%, #00F5BF 99.49%); 
+                box-shadow:0 0 10px 0 rgba(3, 61, 170, 0.60) inset, 3px 3px 6px 0 rgba(0, 0, 0, 0.70);
+                border-bottom-left-radius:0; border-bottom-right-radius:0;
+            }   
+            .poi-menu__list--map:not(.poi-menu__list){
+                background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%);
+                box-shadow:0 -8px 13px 0 rgba(3, 61, 170, 0.60) inset, 3px 3px 6px 0 rgba(0, 0, 0, 0.70);
+            }
+        }
     }
 }
 
 /* ToolBox */
 @mixin toolbox{
     .tool-box{
-        display:inline-flex;
+        display:inline-flex; position:absolute; bottom:20px; right:20px;
         padding:10px; border:1px solid #0A1714; border-radius:70px; box-sizing:border-box;
         background:linear-gradient(180deg, rgba(0, 245, 191, 0.00) 61.5%, rgba(0, 245, 191, 0.20) 100%), #25252B;
         box-shadow:0 5px 14px 0 rgba(0, 245, 191, 0.65);
@@ -833,6 +859,18 @@ $base-img-path:"/static/images/viewer/";
                 }
             }
         }
+    }
+}
+
+/* 이벤트 현황 */
+// 이벤트 현황 영역 추후 추가 작업 예정
+@mixin eventState{
+    .event-state{
+        position:absolute; top:80px; right:-25.625rem; transition:right 0.3s ease; z-index:50;
+        width:25.625rem; height:calc(100% - 5rem);
+        background-color:#34343C; box-shadow:-4px 2px 5px 0 rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px);
+        
+        &--active{right:0;}
     }
 }
 

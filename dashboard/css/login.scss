@@ -1,4 +1,4 @@
-@import "../css/components/components";
+@import "../../publishing/css/components";
 
 @include button;
 
@@ -9,7 +9,8 @@
 @include popup_basic;
 
 // 이미지 경로 변수 설정 
-$base-img-path:"/static/images/viewer/";
+//$base-img-path:"/static/images/viewer/";
+$base-img-path:"/dashboard/img/";
 
 .login{
     display:flex; align-items:center; justify-content:center; flex-direction:column;

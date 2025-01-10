@@ -1,4 +1,4 @@
-@import "../css/components/components";
+@import "../../publishing/css/components";
 
 @include button;
 @include badge;
@@ -25,18 +25,16 @@
 // menu bar
 @include poi_menu;
 @include toolbox;
+@include eventState;
  
 // 이미지 경로 변수 설정 
-$base-img-path:"/static/images/viewer/";
+//$base-img-path:"/static/images/viewer/";
+$base-img-path:"/dashboard/img/";
 
 
-/* Main */
-.contents{
-    padding:5rem 0 0 1.87em; box-sizing:border-box;
-    height:100%;
-}
+/* Main */ 
+.tool-box--active{right:430px;}
 
-.poi-menu{
-    position:absolute; top:calc(50% + 5rem); transform:translateY(-50%);
-}
 
+
+ 

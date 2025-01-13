@@ -254,20 +254,20 @@ input[type=text]:disabled, input[type=password]:disabled {
   mask-position: -300px -20px;
 }
 
-.equip-list {
+.search-result {
   padding: 20px;
   box-sizing: border-box;
   width: 25rem;
 }
-.equip-list__search {
+.search-result__search {
   display: flex;
   grid-gap: 5px;
   height: 30px;
 }
-.equip-list__search .button {
+.search-result__search .button {
   height: 100%;
 }
-.equip-list__contents .title {
+.search-result__contents .title {
   display: flex;
   align-items: center;
   grid-gap: 3px;
@@ -275,7 +275,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   color: var(--color-grayscale-light);
   font-size: 0.875rem;
 }
-.equip-list__contents .reflesh {
+.search-result__contents .reflesh {
   display: inline-block;
   background: url("/dashboard/img/icon14/icon14.svg") no-repeat -146px -10px;
   width: 14px;

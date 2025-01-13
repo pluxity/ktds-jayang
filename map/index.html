@@ -13,9 +13,9 @@
             <h1 class="header__logo"><a href="/dashboard/index.html">KT 자양 통합운영 플랫폼</a></h1>
             <ul class="header__tab" role="tablist">
                 <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0">건물 A</li>
-                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0">건물 B</li>
-                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0">지하 주차장</li>
+                <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">건물 A</a></li>
+                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 B</a></li>
+                <li role="tab" id="tab3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">지하 주차장</a></li>
             </ul>
             <div class="header__info">
                 <p class="date">2024년 11월 20일(월요일 21:25:20)</p>
@@ -208,8 +208,10 @@
             <!-- [!] 이벤트 메뉴 영역과 같이 확인 진행 예정 추후 작업 진행 -->
             <div class="floor-info floor-info--active">
                 <div class="floor-info__inner">
-                    <div class="floor-info__title">층별</div>
+                    <!-- [D] 버튼 클릭 시 floor-info__detail show/hide 적용 -->
+                    <button type="button" class="floor-info__button">층별</button>
                     <div class="floor-info__detail">
+                        <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
                         <button type="button" class="up"><span class="hide">UP</span></button>
                         <ul>
                             <li>1</li>
@@ -223,18 +225,19 @@
                             <li>9</li>
                             <li>10</li>
                         </ul>
+                        <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
                         <button type="button" class="down"><span class="hide">DOWN</span></button>
                     </div>
-                    <span class="floor-info__all">전체</span>
-                    <span class="floor-info__scale"><span class="hide">축소</span></span>
+                    <div class="floor-info__ctrl">
+                        <span class="all">전체</span>
+                        <!-- 축소 scale--down 클래스 추가 및 문구 축소 적용 -->
+                        <span class="scale scale--down"><span class="hide">축소</span></span>
+                    </div>
                 </div>
-            
             </div>
             <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
             <aside class="event-state event-state--active"></aside>
         </div>
     </div>
-
 </body>
-
 </html>

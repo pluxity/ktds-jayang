@@ -59,6 +59,10 @@ a {
   color: inherit;
 }
 
+button {
+  background-color: transparent;
+}
+
 /* COLOR */
 :root {
   --color-black:#25232b;

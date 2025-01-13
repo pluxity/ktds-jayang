@@ -6,6 +6,8 @@
 /* 경고 팝업 */
 /* 기본 팝업 */
 /* 이벤트 팝업 - 공지사항/SOP */
+/* DataPicker/TimePicker */
+/* TimePicker */
 /* tooltip */
 /* Checkbox */
 /* Radio */
@@ -25,7 +27,6 @@
   border: 1px solid transparent;
   border-radius: 7px;
   box-sizing: border-box;
-  min-width: 5rem;
   height: 2.313rem;
   font-size: 0.875rem;
   color: var(--color-black);
@@ -145,6 +146,9 @@
   color: #fff;
   text-align: center;
   line-height: 1.1;
+}
+.alert .button {
+  width: 5rem;
 }
 .alert--border {
   grid-gap: 29px;
@@ -309,7 +313,7 @@
 .select-box__btn {
   position: relative;
   display: inline-block;
-  padding: 7.5px 8px;
+  padding: 7.5px 10px;
   border: 1px solid var(--color-grayscale02);
   background-color: var(--color-black);
   border-radius: 5px;
@@ -359,6 +363,7 @@
 }
 
 .accordion {
+  margin-right: -10px;
   padding-right: 9px;
   height: 455px;
   min-height: 455px;
@@ -393,6 +398,7 @@
   color: var(--color-grayscale-light);
 }
 .accordion__detail table th, .accordion__detail table td {
+  vertical-align: middle;
   text-align: center;
 }
 .accordion__detail table th {
@@ -436,6 +442,7 @@
 }
 .accordion__btn {
   position: relative;
+  display: flex;
   padding: 10px 24px 10px 10px;
   background-color: var(--color-black);
   border-bottom: 1px solid var(--color-grayscale-dark);
@@ -443,6 +450,11 @@
   box-sizing: border-box;
   width: 100%;
   color: var(--color-grayscale01);
+  text-align: left;
+  font-size: 0.75rem;
+}
+.accordion__btn .sub {
+  margin: 0 10px 0 auto;
 }
 .accordion__btn:first-of-type {
   border-top-width: 2px;
@@ -469,6 +481,7 @@
 }
 
 .sop-accord {
+  margin-right: -10px;
   padding-right: 9px;
   max-height: 455px;
   overflow-y: auto;
@@ -741,7 +754,8 @@
 .sop-info__contents {
   display: flex;
   grid-gap: 10px;
-  margin: 20px 10px 17px 20px;
+  justify-content: center;
+  margin: 20px 20px 17px 20px;
 }
 .sop-info__contents .image {
   color: var(--color-grayscale-light);
@@ -751,6 +765,9 @@
   line-height: 1.6;
 }
 .sop-info__contents .manual {
+  flex: 1;
+}
+.sop-info .accordion {
   flex: 1;
 }
 
@@ -775,9 +792,9 @@
   width: 17.5rem;
 }
 .popup-basic__head {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 20px;
   border-top-left-radius: 19px;
   border-top-right-radius: 19px;
@@ -788,6 +805,7 @@
   font-size: 1.125rem;
 }
 .popup-basic__head .close {
+  margin-left: auto;
   width: 24px;
   height: 24px;
   -webkit-mask-image: url("/dashboard/img/icon24/icon24.svg");
@@ -796,6 +814,17 @@
   mask-repeat: no-repeat;
   -webkit-mask-position: -98px -9px;
   mask-position: -98px -9px;
+  background-color: var(--color-mint);
+}
+.popup-basic__head .arrow {
+  width: 24px;
+  height: 24px;
+  -webkit-mask-image: url("/dashboard/img/icon24/icon24.svg");
+  mask-image: url("/dashboard/img/icon24/icon24.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: -190px -10px;
+  mask-position: -190px -10px;
   background-color: var(--color-mint);
 }
 .equip-group {
@@ -872,32 +901,97 @@
   mask-position: -300px -20px;
 }
 
-.equip-list {
+.search-result {
   padding: 20px;
   box-sizing: border-box;
   width: 25rem;
 }
-.equip-list__search {
+.search-result__filter {
   display: flex;
   grid-gap: 5px;
   height: 30px;
 }
-.equip-list__search .button {
+.search-result__filter .button {
+  flex: 1;
   height: 100%;
 }
-.equip-list__contents .title {
+.search-result__contents {
+  margin-top: 18px;
+}
+.search-result__contents .title {
   display: flex;
   align-items: center;
   grid-gap: 3px;
-  margin: 18px 0 10px;
+  margin: 0 0 10px;
   color: var(--color-grayscale-light);
   font-size: 0.875rem;
 }
-.equip-list__contents .reflesh {
+.search-result__contents .reflesh {
   display: inline-block;
   background: url("/dashboard/img/icon14/icon14.svg") no-repeat -180px -10px;
   width: 14px;
   height: 14px;
+}
+
+.maintenance-info {
+  padding: 20px;
+  box-sizing: border-box;
+  width: 25rem;
+}
+.maintenance-info__list {
+  margin-right: -10px;
+  padding-right: 9px;
+  max-height: 530px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 0.75rem;
+}
+.maintenance-info__list::-webkit-scrollbar {
+  width: 6px;
+}
+.maintenance-info__list::-webkit-scrollbar-thumb {
+  background-color: var(--color-grayscale-dark);
+  border-radius: 3px;
+}
+.maintenance-info__list::-webkit-scrollbar-track {
+  background-color: var(--color-black-key);
+  border-radius: 3px;
+}
+.maintenance-info__list table {
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: -0.0075rem;
+}
+.maintenance-info__list table th, .maintenance-info__list table td {
+  vertical-align: middle;
+  margin-right: 6px;
+  padding: 10px 5px;
+  box-sizing: border-box;
+  color: var(--color-grayscale02);
+}
+.maintenance-info__list table th {
+  height: 35px;
+  font-weight: 800;
+}
+.maintenance-info__list table td {
+  height: 50px;
+  color: var(--color-grayscale-light);
+}
+.maintenance-info__list thead tr {
+  border-top: 1px solid var(--color-grayscale02);
+  border-bottom: 1px solid var(--color-grayscale-dark);
+}
+.maintenance-info__list tbody tr {
+  border-bottom: 1px solid var(--color-grayscale-dark);
+}
+.maintenance-info__list li + li {
+  margin-top: 20px;
+}
+.maintenance-info__title {
+  margin-bottom: 10px;
+  color: var(--color-grayscale-light);
+  font-size: 0.875rem;
+  font-weight: 700;
 }
 
 .checkbox-wrap {
@@ -947,6 +1041,13 @@ input[type=checkbox] + label {
   color: var(--color-grayscale03);
 }
 
+.radiobox-wrap {
+  display: flex;
+  grid-gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 input[type=radio] {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -975,12 +1076,19 @@ input[type=radio]:checked::after {
   width: 8px;
   height: 8px;
 }
+input[type=radio]:checked + label {
+  color: var(--color-mint-dark);
+}
 input[type=radio]:disabled {
   border-color: var(--color-grayscale-dark);
   background-color: var(--color-black-key);
 }
 input[type=radio]:disabled::after {
   display: none;
+}
+input[type=radio] + label {
+  font-size: 0.75rem;
+  color: var(--color-grayscale03);
 }
 
 input[type=text], input[type=password] {

@@ -20,7 +20,7 @@ $base-img-path:"/dashboard/img/";
     .button{
         display:flex; align-items:center; justify-content:center;
         padding:10px 5px; border:1px solid transparent; border-radius:7px; box-sizing:border-box;
-        min-width:5rem; height:2.313rem;
+        height:2.313rem;
         font-size:0.875rem; color:var(--color-black); letter-spacing:-0.00875rem;
         &--solid{
             @each $name, $type in $button-types{
@@ -64,6 +64,7 @@ $base-img-path:"/dashboard/img/";
         padding:45px 30px 30px; background-color:var(--color-black); border-radius:10px; box-sizing:border-box; box-shadow:0 0 30px 0 rgba(0, 0, 0, 0.75);
         width:18.75rem; 
         color:#fff; text-align:center; line-height:1.1;
+        .button{width:5rem;}
         &--border{
             grid-gap:29px;
             padding:30px 20px 20px; border:2px solid var(--color-mint);
@@ -168,15 +169,23 @@ $base-img-path:"/dashboard/img/";
         }
 
         &__head{
-            display:flex; align-items:center; justify-content:space-between;
+            position:relative; display:flex; align-items:center; 
             padding:0 20px; border-top-left-radius:19px; border-top-right-radius:19px; border-bottom:1px solid var(--color-grayscale-dark);
             height:50px;
             font-weight:800; color:var(--color-mint); font-size:1.125rem;
             .close{
+                margin-left:auto;
                 width:24px; height:24px;
                 -webkit-mask-image:url('#{$base-img-path}icon24/icon24.svg'); mask-image:url('#{$base-img-path}icon24/icon24.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-98px -9px; mask-position:-98px -9px;
+                background-color:var(--color-mint);
+            }
+            .arrow{
+                width:24px; height:24px;
+                -webkit-mask-image:url('#{$base-img-path}icon24/icon24.svg'); mask-image:url('#{$base-img-path}icon24/icon24.svg'); 
+                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                -webkit-mask-position:-190px -10px; mask-position:-190px -10px;
                 background-color:var(--color-mint);
             }
         }
@@ -222,18 +231,19 @@ $base-img-path:"/dashboard/img/";
 
         // 장비 목록 영역
         @at-root{
-            .equip-list{
+            .search-result{
                 padding:20px; box-sizing:border-box; 
                 width:25rem;
-                &__search{
+                &__filter{
                     display:flex; grid-gap:5px;
                     height:30px;
-                    .button{height:100%;}
+                    .button{flex:1; height:100%;}
                 }
                 &__contents{
+                    margin-top:18px;
                     .title{
                         display:flex; align-items:center; grid-gap:3px;
-                        margin:18px 0 10px;
+                        margin:0 0 10px;
                         color:var(--color-grayscale-light); font-size:0.875rem;
                     }
                     .reflesh{
@@ -244,8 +254,65 @@ $base-img-path:"/dashboard/img/";
                 }
             }
         }
+
+        // 유지 보수 영역
+        @at-root{
+            .maintenance-info{
+                padding:20px; box-sizing:border-box;
+                width:25rem; 
+                &__list{
+                    margin-right:-10px; padding-right:9px;
+                    max-height:530px; overflow-y:auto; overflow-x:hidden;
+                    font-size:0.75rem;
+                    &::-webkit-scrollbar {width:6px;}
+                    &::-webkit-scrollbar-thumb {
+                        background-color:var(--color-grayscale-dark); 
+                        border-radius:3px; 
+                    }
+                    &::-webkit-scrollbar-track {
+                        background-color:var(--color-black-key); 
+                        border-radius:3px;
+                    }
+                    table{
+                        text-align:center; font-size:0.75rem; letter-spacing:-0.0075rem;
+                        th,td{
+                            vertical-align:middle;
+                            margin-right:6px; padding:10px 5px; box-sizing:border-box;
+                            color:var(--color-grayscale02);
+                        }
+                        th{
+                            height:35px;
+                            font-weight:800;
+                        }
+                        td{
+                            height:50px; 
+                            color:var(--color-grayscale-light);
+                        }
+                    }
+                    thead{
+                        tr{border-top:1px solid var(--color-grayscale02); border-bottom:1px solid var(--color-grayscale-dark);}
+                    }
+                    tbody{
+                        tr{border-bottom:1px solid var(--color-grayscale-dark);}
+                    }
+                    li + li{margin-top:20px;}
+                    
+                }
+                &__title{
+                    margin-bottom:10px;
+                    color:var(--color-grayscale-light); font-size:0.875rem; font-weight:700;
+                }
+            }
+        }
+
+        // 가상 순찰 영역
+        @at-root{
+            .patrol-info{
+
+            }
+        }
     }
-}               
+}       
 
 /* 이벤트 팝업 - 공지사항/SOP */
 @mixin popup_event{
@@ -333,19 +400,65 @@ $base-img-path:"/dashboard/img/";
                     font-size:0.875rem; font-weight:700; color:var(--color-grayscale-light);
                 }
                 &__contents{
-                    display:flex; grid-gap:10px;
-                    margin: 20px 10px 17px 20px;
+                    display:flex; grid-gap:10px; justify-content:center;
+                    margin:20px 20px 17px 20px;
                     .image{
                         color:var(--color-grayscale-light); font-size:0.75rem;
                         &__text{line-height:1.6;}    
                     }
                     .manual{flex:1;}
                 }
+                .accordion{flex:1;}
             }
         }
-       
     }
 }
+
+/* DataPicker/TimePicker */
+%picker {
+    height:30px;
+        input{
+            position:relative;
+            padding:7.5px 24px 7.5px 10px; border:1px solid var(--color-grayscale02); border-radius:5px;
+            background-color:var(--color-black);
+            height:100%; box-sizing:border-box;
+            color:var(--color-grayscale-light); font-family:'SUIT', sans-serif; font-size:0.75rem; letter-spacing:-1px;
+            &::-webkit-calendar-picker-indicator{
+                display:block; position:absolute; top:0; left:0; opacity:0;
+                width:100%; height:100%; overflow:hidden;
+                cursor:pointer;
+            }
+            &::after{
+                content:'';
+                position:absolute; right:10px; top:50%; transform:translateY(-50%);
+                width:14px; height:14px;
+                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
+                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                background-color:var(--color-grayscale-light);
+            }
+        }
+
+}
+@mixin datapicker{
+    .data-picker{
+        @extend %picker;
+        input{
+            width:110px;
+            &::after{-webkit-mask-position:-452px -10px; mask-position:-452px -10px;}
+        }
+    }
+}
+/* TimePicker */
+@mixin timepicker{
+    .time-picker{
+        @extend %picker;
+        input{
+            width:95px;
+            &::after{-webkit-mask-position:-486px -10px; mask-position:-486px -10px;}
+        }
+    }
+}
+
 
 /* tooltip */
 @mixin tooltip{
@@ -387,7 +500,7 @@ $base-img-path:"/dashboard/img/";
         appearance:none;
         position:relative; display:inline-block; 
         width:16px; height:16px;
-        margin:0; border:1px solid var(--color-grayscale03); background-color:var(--color-black); border-radius:3px;
+        margin:0; border:1px solid var(--color-grayscale03); background-color:var(--color-black); border-radius:3px; 
         &:checked{
             border-color:var(--color-mint-dark);
             &::after{
@@ -409,6 +522,9 @@ $base-img-path:"/dashboard/img/";
 
 /* Radio */
 @mixin input_radio{
+    .radiobox-wrap{
+        display:flex; grid-gap:3px; align-items:center; flex-shrink:0;
+    }
     input[type="radio"]{
         appearance:none;
         position:relative; display:inline-block;
@@ -422,11 +538,13 @@ $base-img-path:"/dashboard/img/";
                 background-color:var(--color-mint); box-shadow:0 0 3px 0 rgba(0, 0, 0, 0.60) inset; border-radius:100%;
                 width:8px; height:8px;
             }
+            + label{color:var(--color-mint-dark);}
         }
         &:disabled{
             border-color:var(--color-grayscale-dark); background-color:var(--color-black-key);
             &::after{display:none;}
         }
+        + label{font-size:0.75rem; color:var(--color-grayscale03);}
     }
 }
 
@@ -494,7 +612,7 @@ $base-img-path:"/dashboard/img/";
 /* Accordion */
 @mixin accordion{
     .accordion{
-        padding-right:9px;
+        margin-right:-10px; padding-right:9px; 
         height:455px; min-height:455px; overflow-y:auto; overflow-x:hidden;
 
         // 테이블안 문구 왼쪽 정렬
@@ -520,7 +638,7 @@ $base-img-path:"/dashboard/img/";
                 color:var(--color-grayscale-light)
             }
             table{
-                th, td{text-align:center;}
+                th, td{vertical-align:middle; text-align:center;}
                 th{
                     padding:7px 5px; background-color:var(--color-grayscale-dark);
                     color:var(--color-grayscale-light); font-weight:700;
@@ -554,10 +672,11 @@ $base-img-path:"/dashboard/img/";
             }
         }
         &__btn{
-            position:relative;
+            position:relative; display:flex;
             padding:10px 24px 10px 10px; background-color:var(--color-black); border-bottom:1px solid var(--color-grayscale-dark); border-top:1px solid var(--color-grayscale02); box-sizing:border-box;
             width:100%; 
-            color:var(--color-grayscale01); 
+            color:var(--color-grayscale01); text-align:left; font-size:0.75rem;
+            .sub{margin:0 10px 0 auto;}
             &:first-of-type{border-top-width:2px;}
             &::after{
                 content:'';
@@ -577,7 +696,7 @@ $base-img-path:"/dashboard/img/";
 /* SOP Accordion */
 @mixin sop_accordion{
     .sop-accord{
-        padding-right:9px;
+        margin-right:-10px; padding-right:9px;
         max-height:455px; overflow-y:auto; overflow-x:hidden;
         font-size:0.75rem;
 
@@ -673,7 +792,7 @@ $base-img-path:"/dashboard/img/";
         }
         &__btn{
             position:relative; display:inline-block;
-            padding:7.5px 8px; border:1px solid var(--color-grayscale02); background-color:var(--color-black); border-radius:5px; box-sizing:border-box;
+            padding:7.5px 10px; border:1px solid var(--color-grayscale02); background-color:var(--color-black); border-radius:5px; box-sizing:border-box;
             width:100%;
             color:var(--color-grayscale03); cursor:pointer; 
             &::after{

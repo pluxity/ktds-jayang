@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.patrol.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Poi;
@@ -9,6 +10,7 @@ import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.patrol.dto.CreatePatrolDTO;
 import com.pluxity.ktds.domains.patrol.dto.CreatePatrolPointDTO;
+import com.pluxity.ktds.domains.patrol.dto.PatrolPointResponseDTO;
 import com.pluxity.ktds.domains.patrol.dto.PatrolResponseDTO;
 import com.pluxity.ktds.domains.patrol.entity.Patrol;
 import com.pluxity.ktds.domains.patrol.entity.PatrolPoint;
@@ -21,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
@@ -43,7 +47,7 @@ public class PatrolService {
     public List<PatrolResponseDTO> findAll() {
 
         return patrolRepository.findAll().stream()
-                .map(Patrol::toResponseDto)
+                .map(this::convertPatrolToResponseDTO)
                 .toList();
     }
 
@@ -121,6 +125,31 @@ public class PatrolService {
 
     }
 
+    @Transactional
+    public void updatePois(Long id, CreatePatrolPointDTO dto) {
+
+        PatrolPoint patrolPoint = getPatrolPointById(id);
+
+        List<Poi> pois = new ArrayList<>();
+    }
+
+    @Transactional
+    public void updateName(Long id, CreatePatrolPointDTO dto) {
+
+        PatrolPoint patrolPoint = getPatrolPointById(id);
+
+//        patrolPoint.updateName(dto.floorId());
+    }
+
+    @Transactional
+    public void deletePoint(Long id) {
+
+        PatrolPoint patrolPoint = getPatrolPointById(id);
+        Patrol patrol = patrolPoint.getPatrol();
+        patrol.removePatrolPoint(patrolPoint);
+
+    }
+
     private PatrolPoint getPatrolPointById(Long id) {
         return patrolPointRepository.findById(id).orElseThrow(() -> {
             throw new CustomException(NOT_FOUND_PATROL_POINT);
@@ -142,6 +171,57 @@ public class PatrolService {
     private Patrol getPatrolById(Long id) {
         return patrolRepository.findById(id).orElseThrow(() -> {
             throw new CustomException(NOT_FOUND_PATROL);
+        });
+    }
+
+    private Poi getPoiByFloorId(Long id) {
+        return poiRepository.findByFloorId(id).orElseThrow(() -> {
+           throw new CustomException(NOT_FOUND_POI);
+        });
+    }
+
+    // test
+    private PatrolResponseDTO convertPatrolToResponseDTO(Patrol patrol) {
+        List<PatrolPointResponseDTO> patrolPointDTOs = patrol.getPatrolPoints().stream()
+                .map(this::convertPatrolPointToResponseDTO)
+                .collect(Collectors.toList());
+
+        return PatrolResponseDTO.builder()
+                .id(patrol.getId())
+                .name(patrol.getName())
+                .buildingId(patrol.getBuilding().getId())
+                .patrolPoints(patrolPointDTOs)
+                .build();
+    }
+
+    private PatrolPointResponseDTO convertPatrolPointToResponseDTO(PatrolPoint patrolPoint) {
+        String pointLocation = convertPointToString(patrolPoint.getPoint());
+
+        return PatrolPointResponseDTO.builder()
+                .id(patrolPoint.getId())
+                .floorId(patrolPoint.getFloor().getId())
+                .sortOrder(patrolPoint.getSortOrder())
+                .name(patrolPoint.getName())
+                .pointLocation(pointLocation)
+                .pois(new ArrayList<>())
+                .build();
+    }
+
+    private String convertPointToString(Object point) {
+        if (point != null) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.writeValueAsString(point);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private Poi getPoiById(Long id) {
+        return poiRepository.findById(id).orElseThrow(() -> {
+            throw new CustomException(NOT_FOUND_POI);
         });
     }
 }

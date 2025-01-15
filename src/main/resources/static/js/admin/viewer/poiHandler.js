@@ -296,11 +296,12 @@ const moveToPoi = (id) => {
         poiId = id;
     }
     const poiData = Px.Poi.GetData(poiId);
+
     if (poiData) {
         Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(String(poiData.property.floorId));
         Px.Camera.MoveToPoi({
-            poiId,
+            id: poiId,
             isAnimation: true,
             duration: 500,
         });

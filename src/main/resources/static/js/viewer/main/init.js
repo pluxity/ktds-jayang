@@ -42,14 +42,35 @@
 
         Cron.addCronjob('* * * * * *', renderDateTime);
     };
-
+    setInterval(Init.updateCurrentTime, 1000);
     await Init.initializeOutdoorBuilding();
+    Init.initCategoryId();
     setDateTime();
     // Px.Event.AddEventListener('dblclick', 'poi', Init.poiDblclick);
 
 })();
 
 const Init = (function () {
+    const updateCurrentTime = () => {
+        const dateElement = document.querySelector('.header__info .date');
+
+        const now = new Date();
+
+        const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+        const date = String(now.getDate()).padStart(2, '0');
+        const day = days[now.getDay()];
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        const formattedTime = `${year}년 ${month}월 ${date}일(${day} ${hours}:${minutes}:${seconds})`;
+
+        dateElement.textContent = formattedTime;
+    }
+
     const initializeTexture = () => {
         Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
             console.log('화살표 로딩완료');
@@ -59,21 +80,43 @@ const Init = (function () {
             console.log('가상순찰 캐릭터 로딩 완료');
         });
     }
+
+    const initCategoryId = () => {
+        const categoryList = PoiCategoryManager.findAll();
+        const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+        poiMenuList.forEach(menu => {
+            // const menuClass = menu.className;
+            const menuClasses = menu.className.split(' ');
+            const matchedCategory = categoryList.find(category => menuClasses.includes(category.name));
+
+            if (matchedCategory) {
+                menu.setAttribute('data-category-id', matchedCategory.id);
+            }
+            // Px.Poi.ShowByPropertyArray({"poiCategoryId": Number(matchedCategory.id)});
+        });
+    }
+
     const initializeOutdoorBuilding = async (onComplete) => {
         try {
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
 
-
             Px.Core.Initialize(container, async () => {
 
-                const sbmDataArray = [];
-                sbmDataArray.push({
-                    url: "/static/assets/modeling/outside/KTDS_Out_All_250109_1F_0.sbm",
-                    id: 0,
-                    displayName: "외부 전경",
-                    baseFloor: 1,
-                    groupId: 0
+                const { buildingFile, floors } = await BuildingManager.getOutdoorBuilding();
+                const { directory } = buildingFile;
+
+                const sbmDataArray = floors.map((floor) => {
+
+                    const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                    const sbmData = {
+                        url,
+                        id: floor.sbmFloor[0].id,
+                        displayName: floor.sbmFloor[0].sbmFileName,
+                        baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                        groupId: floor.sbmFloor[0].sbmFloorGroup,
+                    };
+                    return sbmData;
                 });
 
                 Px.Loader.LoadSbmUrlArray({
@@ -169,7 +212,6 @@ const Init = (function () {
     const buildingDblclick = async (buildingInfo) => {
         const {area_no} = buildingInfo.property;
         const building = BuildingManager.findAll().find(building => building.code != null && building.code.split("-")[1] === area_no);
-
         if (building == null) {
             return;
         }
@@ -416,8 +458,10 @@ const Init = (function () {
     return {
         initializeIndoorBuilding,
         initializeOutdoorBuilding,
+        initCategoryId,
         poiDblclick,
         setBuildingNameAndFloors,
-        changeFloor
+        changeFloor,
+        updateCurrentTime
     }
 })();

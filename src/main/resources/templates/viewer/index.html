@@ -12,9 +12,9 @@
                 <div class="poi-menu__all">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <div class="all">
-                        <a href="javascript:void(0);">장비보기</a>
+                        <a href="javascript:void(0);" id="toggle-menu">장비보기</a>
                         <!-- 장비 목록 팝업 -->
-                        <div class="popup-basic popup-basic--group">
+                        <div class="popup-basic popup-basic--group" style="display: none">
                             <div class="popup-basic__head">
                                 <span class="checkbox-wrap">
                                     <input type="checkbox" id="check">
@@ -24,7 +24,7 @@
                             <!-- 장비 표시 영역 -->
                             <div class="equip-group">
                                 <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                                <a href="javascript:void(0);" class="cctv active">CCTV</a>
+                                <a href="javascript:void(0);" class="cctv">CCTV</a>
                                 <a href="javascript:void(0);" class="shutter">셔터</a>
                                 <a href="javascript:void(0);" class="fire">소방시설</a>
                                 <a href="javascript:void(0);" class="air">공기질센터</a>
@@ -34,6 +34,7 @@
                                 <a href="javascript:void(0);" class="elevator" >엘리베이터</a>
                             </div>
                         </div>
+                        <template th:replace="viewer/popup :: popup-template"></template>
                     </div>
                 </div>
                 <div class="poi-menu__list">
@@ -46,7 +47,7 @@
                             </div>
                         </li>
                         <li class="shutter">
-                            <a href="javascript:void(0);"><span class="hide">셔텨</span></a>
+                            <a href="javascript:void(0);"><span class="hide">셔터</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--right">셔터</span>
                             </div>
@@ -88,6 +89,71 @@
                             </div>
                         </li>
                     </ul>
+                </div>
+            </div>
+            <!-- toolBox -->
+            <div class="tool-box" style="position: fixed;bottom: 2rem;right: 2rem;">
+                <ul class="tool-box__list">
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <li class="home active">
+                        <a href="javascript:void(0);"><span class="hide">도면 홈</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">도면 홈</span>
+                        </div>
+                    </li>
+                    <li class="pov">
+                        <a href="javascript:void(0);"><span class="hide">1인칭</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">1인칭</span>
+                        </div>
+                    </li>
+                    <li class="twd">
+                        <a href="javascript:void(0);"><span class="hide">2d</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">2D</span>
+                        </div>
+                    </li>
+                    <li class="minus">
+                        <a href="javascript:void(0);"><span class="hide">minus</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">축소</span>
+                        </div>
+                    </li>
+                    <li class="plus">
+                        <a href="javascript:void(0);"><span class="hide">plus</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">확대</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div id="floorSelect">
+                <select name="floorNo" id="floorNo" class="form-select input-sm">
+                </select>
+            </div>
+            <!-- notice -->
+            <div id="noticePopup" class="popup-event" style="display: none">
+                <div class="popup-event__head">
+                    <h2 class="name">공지사항</h2>
+                    <button type="button" class="close"><span class="hide">close</span></button>
+                </div>
+                <!-- 공지사항 영역 -->
+                <div class="notice-info">
+                    <h3 class="notice-info__title">
+                        <span class="label">긴급</span>
+                        <p>제목<span class="badge">N</span></p>
+                    </h3>
+                    <span class="notice-info__date">2024년 10월 10일 15:22</span>
+                    <div class="notice-info__contents">
+                        <p>
+                            본문
+                        </p>
+                    </div>
+                </div>
+                <div class="popup-event__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"><span class="active">1</span>/<span>22</span></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
                 </div>
             </div>
         </div>

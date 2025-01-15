@@ -62,7 +62,7 @@ const adminPatrolButtonEvent = (() => {
                 BuildingManager.findById(patrol.buildingId).getDetail().then((data) => {
                     const floor = data.floors.find(floor => floor.id === point.floorId);
                     Px.Model.Visible.HideAll();
-                    Px.Model.Visible.Show(floor.floorName);
+                    Px.Model.Visible.Show(floor.id);
                 });
 
                 Px.VirtualPatrol.RemoveAll();

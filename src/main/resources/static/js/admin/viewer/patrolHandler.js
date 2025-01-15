@@ -20,7 +20,8 @@ const savePoint = (pointData) => {
 
     let param = {
         floorId : floorNo
-        ,pointLocation : JSON.stringify(pointData.position)
+        // ,pointLocation : JSON.stringify(pointData.position)
+        ,pointLocation : pointData.position
     };
 
     api.patch(`/patrols/${id}/points`,param).then(() => {

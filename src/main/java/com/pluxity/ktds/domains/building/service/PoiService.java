@@ -55,6 +55,14 @@ public class PoiService {
     }
 
     @Transactional(readOnly = true)
+    public List<PoiDetailResponseDTO> findByCategoryId(@NotNull final Long id) {
+        return poiRepository.findPoisByPoiCategoryId(id).stream()
+                .map(Poi::toDetailResponseDTO)
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
     public PoiDetailResponseDTO findById(@NotNull final Long id) {
         Poi poi = getPoi(id);
         return poi.toDetailResponseDTO();

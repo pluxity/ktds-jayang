@@ -18,6 +18,8 @@ import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,6 +80,14 @@ public class BuildingService {
         return buildingRepository.findAll().stream()
                 .map(Building::toDetailResponseDTO)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public BuildingDetailResponseDTO findOutdoorDetail() {
+
+        Building building = buildingRepository.findTop1ByIsIndoorOrderByIdDesc("N");
+
+        return building.toDetailResponseDTO();
     }
 
     @Transactional
@@ -178,6 +188,13 @@ public class BuildingService {
     }
 
     @Transactional
+    public void updateEvacuationRoute(Long id, String evacuationRoute) {
+        buildingRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
+                .changeEvacuationRoute(evacuationRoute);
+    }
+
+    @Transactional
     public void updateTopology(Long id, String topology) {
         buildingRepository.findById(id)
                 .map(building -> {
@@ -199,6 +216,7 @@ public class BuildingService {
                 .code(dto.code())
                 .name(dto.name())
                 .description(dto.description())
+                .isIndoor(dto.isIndoor())
                 .build();
         building.changeFileInfo(fileInfo);
         return building;

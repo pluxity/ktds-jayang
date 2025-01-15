@@ -2,12 +2,53 @@
 // TODO 버튼 상호 작용 등 을 넣으시오
 
 (function () {
+    const initializeTexture = () => {
+        Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
+            console.log('화살표 로딩완료');
+        });
+
+        Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
+            console.log('가상순찰 캐릭터 로딩 완료');
+        });
+    }
+    const initPoi = async (buildingId) => {
+        await getPoiRenderingAndList(buildingId);
+        PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
+    };
+
+    // test중
+    const getPoiRenderingAndList = async (buildingId) => {
+        await PoiManager.getPoiList().then(() => {
+            let filteredList = PoiManager.findByBuilding(buildingId)
+
+            if (filteredList === undefined || filteredList.length < 1) {
+                console.warn('POI 가 한 개도 없습니다.');
+                return;
+            }
+
+            Px.Poi.HideAll();
+            filteredList.forEach((poiInfo) => {
+                Px.Poi.Show(poiInfo.id);
+            });
+        });
+
+    };
+    const renderingPoiList = (filteredList) => {
+        Px.Poi.HideAll();
+        filteredList.forEach((poiInfo) => {
+            Px.Poi.Show(poiInfo.id);
+        });
+    };
+
     // 미니맵
-    const zoomInButton = document.querySelector('.control-button.zoom-in');
-    const zoomOutButton = document.querySelector('.control-button.zoom-out');
-    const homeButton = document.querySelector('.control-button.home');
-    const firstViewButton = document.querySelector('.control-button.first-view');
-    const topViewButton = document.querySelector('.control-button.top-view');
+    const zoomInButton = document.querySelector('.tool-box__list .plus');
+    const zoomOutButton = document.querySelector('.tool-box__list .minus');
+    const homeButton = document.querySelector('.tool-box__list .home');
+    const firstViewButton = document.querySelector('.tool-box__list .pov');
+    const camera2D = document.querySelector('.tool-box__list .twd');
+
+
+    let categoryList = [];
 
     const defaultStyle = ['bg-gray-100', 'border-gray-70'];
     const activeStyle = ['bg-primary-80', 'border-primary-60'];
@@ -28,7 +69,7 @@
                 setButtonIconColor(firstViewButton, '#919193');
                 firstViewButton.classList.remove(...activeStyle);
                 firstViewButton.classList.add(...defaultStyle);
-                firstViewButton.classList.remove('on');
+                firstViewButton.classList.remove('active');
             }
 
             setButtonIconColor(button, '#fff');
@@ -58,17 +99,17 @@
 
     function addButtonPointerEvent(button, onAction, offAction) {
         button.addEventListener('pointerup', () => {
-            const isOn = button.classList.contains('on');
+            const isOn = button.classList.contains('active');
 
             setButtonIconColor(button, '#fff');
             if (isOn) {
                 setButtonIconColor(button, '#919193');
-                button.classList.remove('on');
+                button.classList.remove('active');
                 button.classList.remove(...activeStyle);
                 button.classList.add(...defaultStyle);
                 offAction();
             } else {
-                button.classList.add('on');
+                button.classList.add('active');
                 button.classList.remove(...defaultStyle);
                 button.classList.add(...activeStyle);
                 onAction();
@@ -106,7 +147,7 @@
         });
     }
 
-    function handleFirstView() {
+    function handleFirstView(buildingId) {
         addButtonPointerEvent(
             firstViewButton,
             () => {
@@ -118,23 +159,17 @@
                 } else {
                     Px.Util.PointPicker.Off();
                     Px.Camera.ExtendView();
-                    const {camera3d} = BuildingManager.findById(BUILDING_ID);
-                    if(camera3d) {
-                        Px.Camera.SetState(JSON.parse(camera3d));
-                    } else {
-                        Px.Camera.ExtendView();
-                    }
                 }
             },
         );
     }
 
-    function handle2D() {
+    function handle2D(buildingId) {
         addButtonPointerEvent(
-            topViewButton,
+            camera2D,
             () => {
                 // TODO: top-view 위치
-                const building = BuildingManager.findById(BUILDING_ID);
+                const building = BuildingManager.findById(buildingId);
                 const option = JSON.parse(building.camera2d);
                 if (option === null) {
                     console.error('2D 카메라 정보가 없습니다.');
@@ -146,7 +181,7 @@
                 Px.Camera.SetState(option);
             },
             () => {
-                const building = BuildingManager.findById(BUILDING_ID);
+                const building = BuildingManager.findById(buildingId);
                 const option = JSON.parse(building.camera3d);
                 if (option === null) {
                     console.error('3D 카메라 정보가 없습니다.');
@@ -164,67 +199,6 @@
     const deviceSearchInput = document.querySelector(
         '.device-search-area .input-wrap input[type=search]',
     );
-    const deviceSearchList = document.querySelector(
-        '.device-search-area .search-list',
-    );
-    const deviceSearchListUL = deviceSearchList.querySelector('ul');
-    deviceSearchInput.addEventListener('keyup', (event) => {
-        const {value} = event.target;
-        deviceSearchListUL.innerHTML = '';
-        if (value === '') return;
-
-        const poiList = PoiManager.findAll();
-        poiList
-            .filter((poi) => poi.position !== null && poi.name.toLowerCase().includes(value.toLowerCase()))
-            .forEach((poi) => {
-                const {id, name} = poi;
-                deviceSearchListUL.innerHTML += `<li data-poi-id='${id}'><span>${name}</span></li>`;
-
-                deviceSearchListUL.querySelectorAll('li').forEach((element) => {
-                    element.addEventListener('mousedown', (event) => {
-                        const {poiId} = event.currentTarget.dataset;
-                        popup.closeAllPopup();
-                        popup.moveToPoi(Number(poiId), () => popup.setPoiEvent(poiId));
-                    });
-                });
-                deviceSearchList.classList.add('on');
-            });
-
-        if (deviceSearchListUL.innerHTML === '') {
-            deviceSearchList.classList.remove('on');
-        }
-    });
-    deviceSearchInput.addEventListener('focus', (event) => {
-        const {value} = event.target;
-        deviceSearchListUL.innerHTML = '';
-
-        if (value === '') return;
-        deviceSearchList.classList.add('on');
-        const poiList = PoiManager.findAll();
-        poiList
-            .filter((poi) => poi.position !== null && poi.name.toLowerCase().includes(value.toLowerCase()))
-            .forEach((poi) => {
-                const {id, name} = poi;
-                deviceSearchListUL.innerHTML += `<li data-poi-id='${id}'><span>${name}</span></li>`;
-                deviceSearchList.classList.add('on');
-            });
-    });
-    deviceSearchInput.addEventListener('blur', () => {
-        deviceSearchListUL.innerHTML = '';
-        deviceSearchInput.value = '';
-        deviceSearchList.classList.remove('on');
-    });
-
-    document
-        .querySelector('.left-information .floor .btn-floor-change')
-        .addEventListener('pointerup', () => {
-            document
-                .querySelector('.left-information .floor .btn-floor-change')
-                .classList.toggle('on');
-            document
-                .querySelector(".left-information .floor .floor-list")
-                .classList.toggle("on");
-        });
 
     document.querySelectorAll("input[type=date], input[type=datetime-local]").forEach((dateInput) => {
         dateInput.addEventListener("change", (event) => {
@@ -232,21 +206,17 @@
         });
     });
 
-  document.querySelector('.popup-content.weather .button.inquire').addEventListener('click', () => {
-      popup.createWeatherPopup()
-  })
-
     // 사이드바
     const sideBar = document.getElementById('sidebarLayerPopup');
     const headerTitle = document.querySelector('.popup.sidebar .header-title');
     const contents = document.querySelectorAll('.content');
     const sidebarList = document.querySelectorAll('.sidebar-wrap');
+    const poiMenu = document.querySelector('.poi-menu__all .all > a');
 
     function renderPatrol() {
         const patrolList = PatrolManager.findByBuildingId(BUILDING_ID);
         const patrolContentList = document.querySelector('.patrol-list');
         const buildingInfo = BuildingManager.findById(BUILDING_ID)
-
         patrolContentList.innerHTML = '';
 
         const patrolControl = `
@@ -335,8 +305,6 @@
 
                 target.classList.toggle('show');
                 content.classList.toggle('show');
-
-
 
 
                 if (!isShowing && target.classList.contains('show')) {
@@ -522,7 +490,6 @@
         eventFinish.setAttribute('value', end);
         eventFinish.value = end;
 
-
         document.getElementById('eventStart').value = start;
 
         popup.createEventList();
@@ -579,7 +546,7 @@
                     }
                     const {floors} = BuildingManager.findById(BUILDING_ID);
                     Px.Model.Expand({
-                        name: floors[0].floorName,
+                        name: floors[0].id,
                         interval: 200,
                         duration: 1000
                     });
@@ -630,10 +597,269 @@
 
         });
     });
+    const popupBtn = document.querySelector('#toggle-menu')
+    popupBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        const popupGroup = document.querySelector('.popup-basic.popup-basic--group')
+        const equipGroupLinks = document.querySelectorAll('.equip-group a');
 
-    handleZoomIn();
-    handleZoomOut();
-    handleExtendView();
-    handleFirstView();
-    handle2D();
+        if (popupGroup.style.display === 'none') {
+            popupGroup.style.display = 'inline-block';
+            categoryList = PoiCategoryManager.findAll();
+
+            equipGroupLinks.forEach(link => {
+                const linkClass = link.className;
+                const matchedCategory = categoryList.find(category => category.name === linkClass);
+
+                if (matchedCategory) {
+                    link.setAttribute('data-category-id', matchedCategory.id);
+                }
+            });
+        } else {
+            popupGroup.style.display = 'none';
+        }
+    });
+
+    // 장비보기 클릭 > popup
+    let lastClicked = null;
+    const equipmentGroup = document.querySelectorAll('.equip-group a');
+    equipmentGroup.forEach(equipment => {
+        equipment.addEventListener('click', function () {
+            if (lastClicked === this) {
+                return;
+            }
+            equipmentGroup.forEach(item => item.classList.remove('active'));
+            lastClicked = this;
+            this.classList.add('active');
+            let categoryId = this.getAttribute('data-category-id');
+            PoiManager.getPoiByCategoryId(categoryId).then(pois => {
+                // test 중...
+                const btnContainer = document.querySelector('header .btn');
+                const existingLinks = btnContainer.querySelectorAll('a');
+                existingLinks.forEach(link => link.remove());
+                if (pois.length > 0) {
+
+                    const buildingIds = {};
+                    pois.forEach(poi => {
+                        if (!buildingIds[poi.buildingId]) {
+                            buildingIds[poi.buildingId] = true;
+                            const { name, code } = BuildingManager.findById(poi.buildingId);
+                            if (name) {
+                                const link = document.createElement('a');
+                                link.textContent = name;
+                                link.classList.add('poi-link');
+                                link.setAttribute('data-building-id', poi.buildingId); // 데이터 속성 추가
+                                btnContainer.appendChild(link);
+                            }
+                        }
+                    });
+                    getBuilding(pois[0].buildingId);
+                } else {
+                    const container = document.getElementById('webGLContainer');
+                    container.innerHTML = '';
+                }
+            })
+        });
+    });
+
+    document.addEventListener('click', function (event) {
+        const target = event.target;
+        if (target.classList.contains('poi-link')) {
+            event.preventDefault();
+            const buildingId = target.getAttribute('data-building-id');
+            if (buildingId) {
+                loadBuildingInfo(buildingId, async () => {
+                    // camPos.setData(mapInfo.camPosJson);
+                    getBuilding(buildingId);
+                    // 도면 휠 이벤트
+                    document
+                        .querySelector('canvas')
+                        .addEventListener('mousedown wheel resize ', () => {
+                            hidePoiMenu();
+                        });
+
+                    // 층 콤보 박스 생성
+                    let floorListOpt = "<option value=''>전체</option>";
+                    BuildingManager.findById(buildingId).floors.forEach((item) => {
+                        floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
+                    });
+                    const floorNo = document.querySelector('#floorNo');
+                    floorNo.innerHTML = floorListOpt;
+
+                    floorNo.addEventListener('change', function () {
+                        changeEventFloor(this.value);
+                    });
+
+                });
+            }
+        }
+    });
+
+    // menu list click
+    const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+    poiMenuList.forEach(item => {
+        item.addEventListener('click', function (event) {
+            poiMenuList.forEach(li => {
+                li.classList.remove('active');
+            });
+            let clickedItem = event.target.closest('li');
+            let name = clickedItem.className;
+
+            let title = clickedItem.querySelector('span').textContent;
+            let id = clickedItem.getAttribute('data-category-id');
+            PoiManager.getPoiByCategoryId(id).then(pois => {
+                layerPopup.setCategoryData(title, pois);
+            })
+            clickedItem.classList.add('active');
+        });
+    });
+
+    const closeButton = document.querySelector('.popup-basic.popup-basic--group .close');
+    const popup = document.getElementById('layerPopup');
+    closeButton.addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    function getBuilding(buildingId) {
+        const container = document.getElementById('webGLContainer');
+        container.innerHTML = '';
+        Px.Core.Initialize(container, async () => {
+
+            const { buildingFile, floors } = await BuildingManager.findById(buildingId);
+            const { directory } = buildingFile;
+
+            const sbmDataArray = floors.map((floor) => {
+
+                const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                const sbmData = {
+                    url,
+                    id: floor.sbmFloor[0].id,
+                    displayName: floor.sbmFloor[0].sbmFileName,
+                    baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                    groupId: floor.sbmFloor[0].sbmFloorGroup,
+                };
+                return sbmData;
+            });
+
+            Px.Loader.LoadSbmUrlArray({
+                urlDataList: sbmDataArray,
+                center: "",
+                onLoad: function() {
+                    initPoi(buildingId);
+                    Px.Util.SetBackgroundColor('#333333');
+                    Px.Camera.FPS.SetHeightOffset(15);
+                    Px.Camera.FPS.SetMoveSpeed(500);
+
+                    Px.Event.On();
+                    Px.Event.AddEventListener('dblclick', 'sbm', Init.buildingDblclick);
+                    initializeTexture();
+                }
+            });
+        });
+        handleZoomIn();
+        handleZoomOut();
+        handleExtendView();
+        handleFirstView(buildingId);
+        handle2D(buildingId);
+    }
+
+    function loadBuildingInfo(buildingId, callback) {
+        BuildingManager.getBuildingById(buildingId).then((building) => {
+            const buildingList = BuildingManager.findAll();
+            const index = buildingList.findIndex(building => building.id === Number(buildingId));
+            buildingList[index] = building;
+
+            if (callback) callback();
+        });
+    }
+
+    // profile btn
+    const profileBtn = document.querySelector('.header__info .profile .profile__btn');
+    profileBtn.addEventListener('click', () => {
+        if (profileBtn.classList.contains('profile__btn--active')) {
+            profileBtn.classList.remove('profile__btn--active')
+        } else {
+            profileBtn.classList.add('profile__btn--active');
+        }
+    })
+
+    const noticePopup = document.querySelector('.header__info .profile #notice');
+    noticePopup.addEventListener('click', async function () {
+        const popup = document.getElementById('noticePopup');
+        popup.style.display = 'block';
+        popup.style.position = 'absolute';
+        popup.style.top = '50%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.zIndex = '30';
+
+        const noticeList = await NoticeManager.getNotices();
+        pagingNotice(noticeList, 1);
+    });
+
+    function pagingNotice(noticeList, itemsPerPage = 1) {
+        let currentPage = 1; // 초기 페이지
+        const totalPages = Math.ceil(noticeList.length / itemsPerPage);
+
+        const updatePaging = (page) => {
+            const startIndex = (page - 1) * itemsPerPage;
+            const currentNotice = noticeList[startIndex];
+
+            const noticeTitle = document.querySelector('.notice-info__title p');
+            const urgentLabel = document.querySelector('.notice-info__title .label');
+            const noticeDate = document.querySelector('.notice-info__date');
+            const pagingNumber = document.querySelector('.popup-event__paging .number');
+            const noticeContent = document.querySelector('.notice-info__contents p');
+
+            console.log("currentNotice : ", currentNotice);
+            if (currentNotice) {
+                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
+                noticeDate.textContent = formatDate(currentNotice.createdAt);
+                noticeContent.textContent = currentNotice.content;
+            }
+
+            pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
+        };
+
+        updatePaging(currentPage);
+
+        document.querySelector('.popup-event__paging .left').addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePaging(currentPage);
+            }
+        });
+
+        document.querySelector('.popup-event__paging .right').addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePaging(currentPage);
+            }
+        });
+
+        const closeBtn = document.querySelector('#noticePopup .close');
+        closeBtn.addEventListener('click', function () {
+            const popup = document.getElementById('noticePopup');
+            popup.style.display = 'none'; // 팝업 숨기기
+        });
+    }
+
+    // date format
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    // handleZoomIn();
+    // handleZoomOut();
+    // handleExtendView();
+    // handleFirstView();
+    // handle2D();
 })();

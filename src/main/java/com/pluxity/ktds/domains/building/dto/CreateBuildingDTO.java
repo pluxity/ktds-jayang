@@ -24,6 +24,8 @@ public record CreateBuildingDTO(
         @Digits(integer = 20, fraction = 0, message = "Px파일 번호는 20자리 이하의 숫자 입니다.")
         Long fileInfoId,
         LodSettings lodSettings,
-        String topology
+        String topology,
+        String evacuationRoute,
+        String isIndoor
 ) {
 }

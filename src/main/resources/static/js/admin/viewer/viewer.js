@@ -218,12 +218,13 @@ function changeEventFloor(floorId) {
     if (floorId === '') {
         Px.Model.Visible.ShowAll();
     } else {
+
         Px.Model.Visible.HideAll();
 
         const floor = BuildingManager.findById(BUILDING_ID).floors.find(
             (floor) => floor.id === Number(floorId),
         );
-        Px.Model.Visible.Show(floor.name);
+        Px.Model.Visible.Show(floor.id);
     }
     const activeId = document.querySelector(
         '#wrapper > div.viewer-sidebar > ul > li > a.active',
@@ -275,102 +276,95 @@ function initBuilding() {
     Px.Core.Initialize(container, async () => {
         Px.Util.SetBackgroundColor('#1b1c2f'); // 백그라운드 색깔지정
         // BuildingManager.findById(BUILDING_ID).getDetail();
-        const {camera3d, buildingFile} = BuildingManager.findById(BUILDING_ID);
+        const { buildingFile, code} = BuildingManager.findById(BUILDING_ID);
         const { directory, storedName, extension } = buildingFile;
 
-        // load sbmArray Test
-        const { floors } = BuildingManager.findById(BUILDING_ID);
-
+        const {floors} = BuildingManager.findById(BUILDING_ID);
         const sbmDataArray = floors.map((floor) => {
-            const url = `/Building/${directory}/${storedName}.${extension}`;
+
+            const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
             const sbmData = {
                 url,
-                id: floor.id, // 기존 sbmfloorId
-                displayName: floor.sbmFileName,
-                baseFloor: floor.sbmFloorBase,
-                groupId: floor.sbmFloorGroup,
+                id: floor.sbmFloor[0].id, // 기존 sbmfloorId
+                displayName: floor.sbmFloor[0].sbmFileName,
+                baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                groupId: floor.sbmFloor[0].sbmFloorGroup,
             };
             return sbmData;
         });
 
         Px.Loader.LoadSbmUrlArray({
             urlDataList: sbmDataArray,
-            center: centerPosJson ? JSON.parse(centerPosJson) : null,
+            center: '',
             onLoad: () => {
+                initPoi();
+                initPatrol();
+                Px.Event.On();
+                Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
+                    const activeTab = document.querySelector('.viewer-sidebar .nav li a.active').id;
+                    if(activeTab === 'poi-tab') {
+                        const canvasRect = document.getElementsByTagName('canvas')[0].getBoundingClientRect();
+                        const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
+
+                        const popup = document.createElement('div');
+                        popup.classList.add('dropdown-content');
+
+                        const removePoiPopup = (event) => {
+                            const {parentElement} = event.currentTarget;
+                            parentElement.remove();
+                        };
+
+                        const dropdownItemAllocateA = document.createElement('a');
+                        dropdownItemAllocateA.classList.add('dropdown-item');
+                        dropdownItemAllocateA.textContent = 'POI 배치하기';
+                        dropdownItemAllocateA.addEventListener(
+                            'pointerup',
+                            (event) => {
+                                allocatePoi(poiInfo.id);
+                                removePoiPopup(event);
+                            },
+                        );
+
+                        const dropdownItemDeleteA = document.createElement('a');
+                        dropdownItemDeleteA.classList.add('dropdown-item');
+                        dropdownItemDeleteA.textContent = 'POI 삭제하기';
+                        dropdownItemDeleteA.addEventListener(
+                            'pointerup',
+                            (event) => {
+                                deletePoi(poiInfo.id);
+                                removePoiPopup(event);
+                            },
+                        );
+
+                        const dropdownItemUnAllocateA = document.createElement('a');
+                        dropdownItemUnAllocateA.classList.add('dropdown-item');
+                        dropdownItemUnAllocateA.textContent = 'POI 미배치로 변경';
+                        dropdownItemUnAllocateA.addEventListener(
+                            'pointerup',
+                            (event) => {
+                                unAllocatePoi([poiInfo.id]);
+                                removePoiPopup(event);
+                            },
+                        );
+
+                        popup.appendChild(dropdownItemAllocateA);
+                        popup.appendChild(dropdownItemDeleteA);
+                        popup.appendChild(dropdownItemUnAllocateA);
+
+                        popup.style.position = 'absolute';
+                        popup.style.left = `${x + canvasRect.left}px`;
+                        popup.style.top = `${y + canvasRect.top}px`;
+
+                        document
+                            .querySelector('#webGLContainer')
+                            .appendChild(popup);
+                    } else {
+                        addPatrolPoi(poiInfo);
+                    }
+                });
                 console.log('sbm loading complete');
-                if (callback) callback();
             },
         });
-
-        let url = `/Building/${directory}/${storedName}.${extension}`;
-        initPoi();
-        initPatrol();
-        Px.Event.On();
-        Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-            const activeTab = document.querySelector('.viewer-sidebar .nav li a.active').id;
-
-            if(activeTab === 'poi-tab') {
-                const canvasRect = document.getElementsByTagName('canvas')[0].getBoundingClientRect();
-                const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
-
-                const popup = document.createElement('div');
-                popup.classList.add('dropdown-content');
-
-                const removePoiPopup = (event) => {
-                    const {parentElement} = event.currentTarget;
-                    parentElement.remove();
-                };
-
-                const dropdownItemAllocateA = document.createElement('a');
-                dropdownItemAllocateA.classList.add('dropdown-item');
-                dropdownItemAllocateA.textContent = 'POI 배치하기';
-                dropdownItemAllocateA.addEventListener(
-                    'pointerup',
-                    (event) => {
-                        allocatePoi(poiInfo.id);
-                        removePoiPopup(event);
-                    },
-                );
-
-                const dropdownItemDeleteA = document.createElement('a');
-                dropdownItemDeleteA.classList.add('dropdown-item');
-                dropdownItemDeleteA.textContent = 'POI 삭제하기';
-                dropdownItemDeleteA.addEventListener(
-                    'pointerup',
-                    (event) => {
-                        deletePoi(poiInfo.id);
-                        removePoiPopup(event);
-                    },
-                );
-
-                const dropdownItemUnAllocateA = document.createElement('a');
-                dropdownItemUnAllocateA.classList.add('dropdown-item');
-                dropdownItemUnAllocateA.textContent = 'POI 미배치로 변경';
-                dropdownItemUnAllocateA.addEventListener(
-                    'pointerup',
-                    (event) => {
-                        unAllocatePoi([poiInfo.id]);
-                        removePoiPopup(event);
-                    },
-                );
-
-                popup.appendChild(dropdownItemAllocateA);
-                popup.appendChild(dropdownItemDeleteA);
-                popup.appendChild(dropdownItemUnAllocateA);
-
-                popup.style.position = 'absolute';
-                popup.style.left = `${x + canvasRect.left}px`;
-                popup.style.top = `${y + canvasRect.top}px`;
-
-                document
-                    .querySelector('#webGLContainer')
-                    .appendChild(popup);
-            } else {
-                addPatrolPoi(poiInfo);
-            }
-        });
-
-        if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
     });
 }
 
@@ -422,7 +416,7 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
             Px.Evac.ShowAll();
             const { floors } = BuildingManager.findById(BUILDING_ID);
             Px.Model.Expand({
-                name: floors[0].name,
+                name: floors[0].id,
                 interval: 200,
                 duration: 1000,
                 onComplete: () => {

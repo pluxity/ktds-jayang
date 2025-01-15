@@ -1,5 +1,6 @@
 'use strict';
 
+// 20240114 임시 remark 처리
 const popup = (function () {
     // 센서
     const createSensorPopup = (title, state, eventData) => {

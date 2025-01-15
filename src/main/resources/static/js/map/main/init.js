@@ -54,7 +54,6 @@ const Init = (function () {
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
 
-
             Px.Core.Initialize(container, async () => {
 
                 const sbmDataArray = [];

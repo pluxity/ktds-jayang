@@ -14,9 +14,11 @@ public record BuildingDetailResponseDTO(
         String description,
         String topology,
         LodSettings lodSettings,
+        String evacuationRoute,
         FileInfoDTO buildingFile,
         List<Long> floorIds,
-        List<FloorResponseDTO> floors
+        List<FloorResponseDTO> floors,
+        String isIndoor
 //        Long poiSetId
 ) {
 }

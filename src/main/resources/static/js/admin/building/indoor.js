@@ -102,6 +102,11 @@ function modifyBuildingModal(id) {
         const {result: resultData} = res.data;
         form.querySelector('#modifyName').value = resultData.name;
         form.querySelector('#modifyCode').value = resultData.code;
+        if (resultData.isIndoor === 'Y') {
+            form.querySelector('input[name="isIndoor"][value="Y"]').checked = true;
+        } else {
+            form.querySelector('input[name="isIndoor"][value="N"]').checked = true;
+        }
         form.querySelector('#modifyDescription').innerHTML =
             resultData.description;
     });
@@ -117,8 +122,11 @@ btnBuildingRegist.onclick = () => {
     document.getElementById('btnBuildingRegist').innerHTML =
         '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading...';
 
+    const isIndoor = form.querySelector('input[name="isIndoor"]:checked').value;
+    const buildingType = (isIndoor === 'Y') ? 'indoor' : 'outdoor';
+
     const formData = new FormData(form);
-    formData.set('buildingType', 'indoor');
+    formData.set('buildingType', buildingType);
 
     const fileFormData = new FormData();
     fileFormData.set('file', formData.get('multipartFile'));
@@ -130,11 +138,12 @@ btnBuildingRegist.onclick = () => {
     api.post('/buildings/upload/file', fileFormData).then((res) => {
         const {result: data} = res.data;
         const param = {
-            buildingType: 'indoor',
+            buildingType: buildingType,
             name: formData.get('name'),
             code: formData.get('code'),
             description: formData.get('description'),
             fileInfoId: data.id,
+            isIndoor: isIndoor
             // floors
         }
         api.post('/buildings', param, {headers}).then(() => {
@@ -172,6 +181,7 @@ btnBuildingModify.onclick = () => {
         buildingType: 'indoor',
         code: document.getElementById('modifyCode').value,
         name: formData.get('name'),
+        isIndoor: formData.get('isIndoor'),
         description: formData.get('description')
     }
 

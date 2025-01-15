@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+
+<div class="popup-basic popup-basic--group" th:fragment="popup-template" id="layerPopup" style="display: none">
+    <div class="popup-basic__head">
+        <h2 class="name">CCTV</h2>
+        <button type="button" class="close"><span class="hide">close</span></button>
+    </div>
+    <!-- 장비 목록 영역 -->
+    <div class="equip-list">
+        <div class="equip-list__search">
+            <!-- select-box -->
+            <!-- [D] width값 지정 -->
+            <div id="buildingSelect" class="select-box" style="width:100px;">
+                <!-- [D]
+                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                 -->
+                <span class="select-box__btn">건물 전체</span>
+                <div class="select-box__content">
+                </div>
+            </div>
+            <div id="floorSelect" class="select-box" style="width:80px;">
+                <!-- [D]
+                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                 -->
+                <span class="select-box__btn">층 전체</span>
+                <div class="select-box__content">
+                </div>
+            </div>
+            <!-- input[type="text"]-->
+            <!-- [D] width값 지정 -->
+            <input type="text" placeholder="장비명" style="width:100px;">
+            <button id="searchBtn" type="button" class="button button--solid-middle">검색</button>
+        </div>
+        <div class="equip-list__contents">
+            <div class="title">
+                총 0<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+            </div>
+            <!-- Accordion -->
+            <div class="accordion">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

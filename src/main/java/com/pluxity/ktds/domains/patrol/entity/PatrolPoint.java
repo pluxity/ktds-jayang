@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -72,6 +73,7 @@ public class PatrolPoint {
                 .floorId(floor.getId())
                 .sortOrder(sortOrder)
                 .name(name)
+                .pois(new ArrayList<>())
                 .build();
     }
 }

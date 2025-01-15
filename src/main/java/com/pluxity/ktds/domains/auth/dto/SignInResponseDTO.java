@@ -4,8 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record SignInResponseDTO(
-    String accessToken,
-    String refreshToken,
     String username,
     String name
 ) {

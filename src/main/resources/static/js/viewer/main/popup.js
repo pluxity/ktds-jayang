@@ -1,6 +1,6 @@
 'use strict';
 
-const layerPopup_old = (function () {
+const layerPopup = (function () {
     // 센서
     const createSensorPopup = (title, state, eventData) => {
 
@@ -517,54 +517,6 @@ const layerPopup_old = (function () {
         clickedTab.classList.add('on');
     }
 
-
-
-    let tabs = document.querySelectorAll('.floor-tab, .equipment-tab, .event-container .event-list');
-    tabs.forEach((tab) => {
-        let li = tab.querySelectorAll('li');
-        li.forEach((lis) => {
-            lis.addEventListener('pointerdown', tabsToggle);
-        });
-    });
-
-    document.querySelectorAll('.category-tab li').forEach((tab) => {
-        tab.addEventListener('pointerdown', (event) => {
-            tabsToggle(event);
-
-            const missingLevelTab = document.querySelector('.event-container .event-list li[data-event-level=missing]');
-            const warningLevelTab = document.querySelector('.event-container .event-list li[data-event-level=warning]');
-            const dangerLevelTab = document.querySelector('.event-container .event-list li[data-event-level=danger]');
-            const { deviceType } = event.currentTarget.dataset;
-            if(deviceType === 'cctv') {
-                missingLevelTab.classList.add('hidden');
-                warningLevelTab.classList.remove('hidden');
-
-                missingLevelTab.classList.remove('on');
-                dangerLevelTab.classList.remove('on');
-                document.querySelector('.event-container .event-list li[data-event-level=""]').classList.add('on');
-
-            } else if(deviceType === 'fire_sensor') {
-                warningLevelTab.classList.add('hidden');
-                missingLevelTab.classList.remove('hidden');
-
-                warningLevelTab.classList.remove('on');
-                dangerLevelTab.classList.remove('on');
-                document.querySelector('.event-container .event-list li[data-event-level=""]').classList.add('on');
-
-            } else {
-                missingLevelTab.classList.remove('hidden');
-                warningLevelTab.classList.remove('hidden');
-
-                missingLevelTab.classList.remove('on');
-                warningLevelTab.classList.remove('on');
-                dangerLevelTab.classList.remove('on');
-                document.querySelector('.event-container .event-list li[data-event-level=""]').classList.add('on');
-
-            }
-        })
-    })
-
-
     function filterPoi(floorId='', categoryId) {
         const equipmentTbody = document.querySelector('.equipment-tbody table tbody');
         const equipmentQuantity = document.querySelectorAll('.equipment-quantity');
@@ -630,113 +582,6 @@ const layerPopup_old = (function () {
                 </svg>영상</span>`) : ''
             ]
         })
-
-
-    const createEventList = () => {
-        const startDate = new Date(document.getElementById('eventStart').value).toLocaleString();
-        const endDate = new Date(document.getElementById('eventFinish').value).toLocaleString();
-
-        const { deviceType } = document.querySelector('.event-container .category-container .category-tab li.on').dataset;
-        const { eventLevel } = document.querySelector('.event-container .event-box .event-list li.on').dataset;
-        const searchValue = document.getElementById('search').value;
-
-        EventDataManager.getEventListByDate('search', startDate, endDate).then((eventList) => {
-            const params = {
-                deviceType, eventLevel, searchValue
-            };
-            const filteringEventList = EventDataManager.filteringEventList('search', params);
-
-            const dom = document.querySelector('.event-list-container');
-
-            const columns = [
-                {
-                    id: 'id',
-                    name: 'id',
-                    hidden: true,
-                },
-                {
-                    name: '번호',
-                    width: '7.5%',
-                },
-                {
-                    name: '구분',
-                    width: '7.5%',
-                },
-                {
-                    name: '장비명',
-                    width: '15%',
-                },
-                {
-                    name: '이벤트명',
-                    width: '15%',
-                },
-                {
-                    name: '이벤트 등급',
-                    width: '10%',
-                },
-                {
-                    name: '위치',
-                    width: '20%',
-                },
-                {
-                    name: '발생일시',
-                    width: '15%',
-                },
-                {
-                    name: '녹화영상',
-                    width: '10%',
-                },
-            ];
-
-            const data = renderEventDatas(filteringEventList) ?? [];
-            const option = {
-                dom,
-                columns,
-                data,
-                limit: 13,
-                buttonsCount: 10,
-                isPagination: true,
-                previous: '<',
-                next: '>',
-                noRecordsFound: '검색된 내용이 없습니다.'
-            };
-            if (dom.innerHTML === '') {
-                createGrid(option);
-                grid.on('rowClick', (...args) => {
-                    if(args[0].target.closest('span.video')) return;
-
-                    const eventId = args[1].cells[0].data;
-
-                    document.querySelector('.sidebar-wrap[data-menu=event]').classList.remove('active');
-                    const eventData = EventDataManager.findEventById('search', eventId);
-                    EventListHandler.clickEventList(eventData, 'search');
-                })
-            } else {
-                resizeGrid(option);
-            }
-
-            document.querySelector('.event-container .total-count span').innerText = filteringEventList.length;
-            if(filteringEventList.length === 0) {
-                document.querySelector('.event-list-container .gridjs-footer').classList.add('hidden');
-            } else {
-                document.querySelector('.event-list-container .gridjs-footer').classList.remove('hidden');
-            }
-        })
-    }
-
-    // 검색
-    document.querySelector('.search-button').addEventListener('click', createEventList);
-
-    document.querySelector('.event-container .event-list-container').addEventListener('click', (event) => {
-        const target = event.target;
-        const video = target.closest('span');
-
-        if(!video || !video.classList.contains('video')) return;
-
-        const { deviceId } = video.dataset;
-        const eventTime = target.closest('tr').querySelector('td[data-column-id=발생일시]').innerText;
-        openPlaybackCctv(deviceId, eventTime);
-    })
 
     const moveToPoi = async (id, callback, distanceOffset = 0, showEvacRoute = false) => {
         const { buildingId, floorId } = PoiManager.findById(id);
@@ -812,8 +657,8 @@ const layerPopup_old = (function () {
             const tmsId = code.split('-')[1];
 
             PoiManager.getTmsCurrentData(tmsId).then((currentData) => {
-                    const location = `${buildingName} ${floorName}`;
-                    createTmsPopup(name, location, currentData.data);
+                const location = `${buildingName} ${floorName}`;
+                createTmsPopup(name, location, currentData.data);
             });
 
         } else {
@@ -846,22 +691,6 @@ const layerPopup_old = (function () {
     const categoryList = document.querySelector('.equipment-category-list');
 
     let isCategoryListVisible = false;
-    function showCategoryList() {
-        if (isCategoryListVisible) {
-            categoryList.style.display = 'none';
-            categorySelect.classList.remove('on');
-        } else {
-            categoryList.style.display = 'block';
-            categorySelect.classList.add('on');
-
-            categoryList.querySelectorAll('li').forEach((category) => {
-                category.removeEventListener('click', selectCategory);
-                category.addEventListener('click', selectCategory);
-            });
-        }
-
-        isCategoryListVisible = !isCategoryListVisible;
-    }
 
     function selectCategory(event) {
         categorySelect.innerHTML = `
@@ -873,39 +702,257 @@ const layerPopup_old = (function () {
         categoryList.style.display = 'none';
         categorySelect.classList.remove('on');
         filterPoi('', categoryId);
-        resetFloor();
     }
 
-    function resetFloor() {
-        const floorTab = document.querySelectorAll('.equipment-location .floor-tab .floor');
+    // category list click > popup mapping
+    function setCategoryData(title, pois, clickedItem = null) {
 
-        floorTab.forEach((floor) => {
-            floor.classList.remove('on')
+        const titleElement = document.querySelector('.popup-basic.popup-basic--group .popup-basic__head .name');
+        const popup = document.getElementById('layerPopup');
+        const currentTitle = titleElement.textContent;
+        const totalElement = document.querySelector('.equip-list__contents .title');
+        const newTitle = title.toUpperCase();
+        const accordionContainer = document.querySelector('.accordion');
+        if (accordionContainer) {
+            accordionContainer.innerHTML = '';
+        }
+
+        const buildingSelectContent = document.querySelector('#buildingSelect .select-box__content');
+        const floorSelectContent = document.querySelector('#floorSelect .select-box__content');
+        const buildingSet = new Set();
+        const floorSet = new Set();
+
+        // accordion data set
+        pois.forEach(poi => {
+            const buildingInfo = BuildingManager.findById(poi.buildingId);
+            if (buildingInfo) {
+                buildingSet.add(JSON.stringify({ id: buildingInfo.id, name: buildingInfo.name }));
+                const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
+                if (floorInfo) {
+                    floorSet.add(JSON.stringify({ id: floorInfo.id, name: floorInfo.name }));
+                }
+            }
+            createAccordion(poi);
         })
-        const allFloor = [...floorTab].find((floor) => floor.dataset.floor === '');
 
-        if (allFloor) {
-            allFloor.classList.add('on');
+        // select
+        if (buildingSelectContent) {
+            buildingSelectContent.innerHTML = '<ul></ul>'; // 기존 리스트 초기화
+            const buildingList = buildingSelectContent.querySelector('ul');
+
+            const allBuildingsOption = document.createElement('li');
+            allBuildingsOption.textContent = '건물 전체';
+            allBuildingsOption.setAttribute('data-building-id', '');
+            buildingList.appendChild(allBuildingsOption);
+
+            Array.from(buildingSet).map(JSON.parse).forEach(building => {
+                const li = document.createElement('li');
+                li.textContent = building.name;
+                li.setAttribute('data-building-id', building.id);
+                buildingList.appendChild(li);
+            });
         }
+
+        if (floorSelectContent) {
+            floorSelectContent.innerHTML = '<ul></ul>';
+            const floorList = floorSelectContent.querySelector('ul');
+
+            const allFloorsOption = document.createElement('li');
+            allFloorsOption.textContent = '층 전체';
+            allFloorsOption.setAttribute('data-floor-id', '');
+            floorList.appendChild(allFloorsOption);
+
+            Array.from(floorSet).map(JSON.parse).forEach(floor => {
+                const li = document.createElement('li');
+                li.textContent = floor.name;
+                li.setAttribute('data-floor-id', floor.id);
+                floorList.appendChild(li);
+            });
+        }
+
+        if ((currentTitle !== newTitle)) {
+            titleElement.textContent = newTitle;
+            popup.style.display = 'inline-block';
+        } else {
+            popup.style.display = popup.style.display === 'none' ? 'inline-block' : 'none';
+        }
+        // total count
+        totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
+        setupSelectBox();
     }
 
-    categorySelect.addEventListener('click', showCategoryList);
+    function createAccordion(poi) {
 
-    const closeAllPopup = (closeRecentEvent = true) => {
-        Px.VirtualPatrol.RemoveAll();
-        document.querySelectorAll(
-            '.layer-popup.open:not([data-deactivate-target=recentWrap]), .user-layer-box.open')?.forEach((popup) => popup.classList.remove('open'));
+        let buildingInfo = BuildingManager.findById(poi.buildingId);
 
-        document.querySelectorAll(
-            '.nav-right button.active, ' +
-            '.nav-center div#weatherWrap.active, ' +
-            '.sidebar-menu-button.active')?.forEach((button) => button.classList.remove('active'));
+        const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
+        const accordionElement = document.querySelector('.accordion');
+        // 버튼
+        const accordionBtn = document.createElement('div');
+        accordionBtn.classList.add('accordion__btn');
+        accordionBtn.innerHTML = `${poi.name}`;
 
-        if(closeRecentEvent) {
-            document.querySelector('.layer-popup[data-deactivate-target=recentWrap].open')?.classList.remove('open');
-            document.querySelector('#recentWrap.active')?.classList.remove('active');
+        accordionBtn.addEventListener('click', () => {
+            const allBtns = document.querySelectorAll('.accordion__btn');
+            if (accordionBtn.classList.contains('accordion__btn--active')) {
+                accordionBtn.classList.remove('accordion__btn--active');
+            } else {
+                allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
+                accordionBtn.classList.add('accordion__btn--active');
+            }
+        });
+
+        // 상세
+        const accordionDetail = document.createElement('div');
+        accordionDetail.classList.add('accordion__detail');
+
+        // 상세 > 테이블
+        const table = document.createElement('table');
+        const caption = document.createElement('caption');
+        caption.classList.add('hide');
+        caption.textContent = `${poi.name}`;
+        table.appendChild(caption);
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        ['건물', '층', '장비명'].forEach(text => {
+            const th = document.createElement('th');
+            th.setAttribute('scope', 'col');
+            th.textContent = text;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        const tr = document.createElement('tr');
+        const tdBuilding = document.createElement('td');
+
+        tdBuilding.textContent = buildingInfo.name;
+        const tdFloor = document.createElement('td');
+        tdFloor.textContent = floorInfo.name;
+        const tdEquipment = document.createElement('td');
+        // 수정 필요
+        tdEquipment.classList.add('align-left');
+        tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
+        // node 추가
+        tr.appendChild(tdBuilding);
+        tr.appendChild(tdFloor);
+        tr.appendChild(tdEquipment);
+        tbody.appendChild(tr);
+        table.appendChild(tbody);
+        accordionDetail.appendChild(table);
+        accordionElement.appendChild(accordionBtn);
+        accordionElement.appendChild(accordionDetail);
+    }
+
+    // 검색폼
+    function setupSelectBox() {
+        const buildingSelectBtn = document.querySelector('#buildingSelect .select-box__btn');
+        const floorSelectBtn = document.querySelector('#floorSelect .select-box__btn');
+        const buildingSelectContent = document.querySelector('#buildingSelect .select-box__content');
+        const floorSelectContent = document.querySelector('#floorSelect .select-box__content');
+
+        buildingSelectBtn.addEventListener('click', function () {
+            if (this.classList.contains('select-box__btn--disabled')) return;
+
+            if (this.classList.contains('select-box__btn--active')) {
+                this.classList.remove('select-box__btn--active');
+                buildingSelectContent.classList.remove('select-box__btn--active'); // 연관된 컨텐츠 숨김
+            } else {
+                this.classList.add('select-box__btn--active');
+                buildingSelectContent.classList.add('select-box__btn--active'); // 연관된 컨텐츠 표시
+            }
+        });
+
+        buildingSelectContent.addEventListener('click', function (event) {
+            if (event.target.tagName === 'LI') {
+                const buildingId = event.target.getAttribute('data-building-id');
+                buildingSelectBtn.textContent = event.target.textContent;
+
+                updateFloorSelect(buildingId);
+
+                buildingSelectBtn.classList.remove('select-box__btn--active');
+                buildingSelectContent.classList.remove('select-box__btn--active');
+            }
+        });
+
+        floorSelectBtn.addEventListener('click', function () {
+            if (this.classList.contains('select-box__btn--disabled')) return;
+
+            if (this.classList.contains('select-box__btn--active')) {
+                this.classList.remove('select-box__btn--active');
+                floorSelectContent.classList.remove('select-box__btn--active'); // 연관된 컨텐츠 숨김
+            } else {
+                this.classList.add('select-box__btn--active');
+                floorSelectContent.classList.add('select-box__btn--active'); // 연관된 컨텐츠 표시
+            }
+        });
+
+        floorSelectContent.addEventListener('click', function (event) {
+            if (event.target.tagName === 'LI') {
+                const floorId = event.target.getAttribute('data-floor-id');
+                floorSelectBtn.textContent = event.target.textContent;
+
+                floorSelectBtn.classList.remove('select-box__btn--active');
+                floorSelectContent.classList.remove('select-box__btn--active');
+            }
+        });
+    }
+
+    // 검색폼
+    document.getElementById('searchBtn').addEventListener('click', function () {
+        const buildingSelect = document.querySelector('#buildingSelect .select-box__btn').textContent.trim();
+        const floorSelect = document.querySelector('#floorSelect .select-box__btn').textContent.trim();
+        const equipmentName = document.querySelector('input[type="text"]').value.trim();
+
+        const allAccordionBtns = document.querySelectorAll('.accordion__btn');
+
+        allAccordionBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
+
+        const allAccordionDetails = document.querySelectorAll('.accordion__detail');
+        allAccordionDetails.forEach((detail, index) => {
+            const tr = detail.querySelector('tbody > tr');
+            const tdBuilding = tr.querySelector('td:nth-child(1)').textContent.trim();
+            const tdFloor = tr.querySelector('td:nth-child(2)').textContent.trim();
+            const tdEquipment = tr.querySelector('td:nth-child(3)').textContent.trim();
+
+            const matchBuilding = (buildingSelect === '건물 전체' || tdBuilding === buildingSelect);
+            const matchFloor = (floorSelect === '층 전체' || tdFloor === floorSelect);
+            const matchEquipment = (!equipmentName || tdEquipment.includes(equipmentName));
+
+            if (matchBuilding && matchFloor && matchEquipment) {
+                allAccordionBtns[index].classList.add('accordion__btn--active');
+            }
+        });
+    });
+
+    // 검색폼
+    function updateFloorSelect(buildingId) {
+        const floorSelectContent = document.querySelector('#floorSelect .select-box__content');
+
+        if (!floorSelectContent) return;
+
+        floorSelectContent.innerHTML = '<ul></ul>';
+        const floorList = floorSelectContent.querySelector('ul');
+
+        const allFloorsOption = document.createElement('li');
+        allFloorsOption.textContent = '층 전체';
+        allFloorsOption.setAttribute('data-floor-id', '');
+        floorList.appendChild(allFloorsOption);
+
+        if (buildingId) {
+            const buildingInfo = BuildingManager.findById(buildingId);
+
+            if (buildingInfo && Array.isArray(buildingInfo.floors)) {
+                buildingInfo.floors.forEach(floor => {
+                    const li = document.createElement('li');
+                    li.textContent = floor.name;
+                    li.setAttribute('data-floor-id', floor.id);
+                    floorList.appendChild(li);
+                });
+            }
         }
-
     }
 
     return {
@@ -916,12 +963,9 @@ const layerPopup_old = (function () {
         createWeatherPopup,
         updateRecentEventList,
         newRecentEvent,
-        filterPoi,
-        createEventList,
+        setCategoryData,
         moveToPoi,
         setPoiEvent,
-        closeAllPopup,
-        resetFloor
     }
 })();
 

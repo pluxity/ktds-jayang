@@ -2,8 +2,11 @@
 <html lang="ko">
     <header th:fragment="header" class="header">
         <h1 class="header__logo"><a href="/">KT 자양 통합운영 플랫폼</a></h1>
+        <div class="btn">
+
+        </div>
         <div class="header__info">
-            <p class="date">2024년 11월 20일(월요일 21:25:20)</p>
+            <p class="date"></p>
             <div class="profile">
                 <!-- [D] 클릭 시 profile__btn--active 클래스 추가 -->
                 <a class="profile__btn" href="javascript:void(0);">
@@ -23,7 +26,7 @@
 
                     <div class="detail">
                         <div class="detail__group">
-                            <a href="javascript:void(0);">공지사항<span class="badge">N</span></a>
+                            <a id="notice" href="javascript:void(0);">공지사항<span class="badge">N</span></a>
                             <a href="javascript:void(0);" class="icon icon--manage" target="_blank">결재 관리</a>
                             <a href="javascript:void(0);" class="icon icon--download">CCTV 다운로드</a>
                         </div>

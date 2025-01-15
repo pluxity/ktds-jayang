@@ -37,6 +37,11 @@ public class PoiController {
         return DataResponseBody.of(service.findAllDetail());
     }
 
+    @GetMapping("/poi-category/{id}")
+    public DataResponseBody<List<PoiDetailResponseDTO>> getPoiByCategoryId(@PathVariable Long id) {
+        return DataResponseBody.of(service.findByCategoryId(id));
+    }
+
     @GetMapping("/{id}")
     public DataResponseBody<PoiDetailResponseDTO> getPoi(@PathVariable Long id) {
         return DataResponseBody.of(service.findById(id));

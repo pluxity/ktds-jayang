@@ -29,6 +29,17 @@ const PoiManager = (() => {
         });
     };
 
+    const getPoiByCategoryId = (id) => {
+        return new Promise((resolve) => {
+            api.get(`/poi/poi-category/${id}`).then((result) => {
+                const { result: data } = result.data;
+
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+
     const getPoi = (id) => {
         return new Promise((resolve) => {
             api.get(`/poi/${id}`).then((result) => {
@@ -198,6 +209,7 @@ const PoiManager = (() => {
 
     return {
         getPoiList,
+        getPoiByCategoryId,
         getPoi,
         getFireSensorCurrentData,
         getTmsCurrentData,

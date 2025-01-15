@@ -14,6 +14,19 @@ const BuildingManager = (() => {
         });
     };
 
+    // outdoor get
+    const getOutdoorBuilding = () => {
+        const uri = `/buildings/outdoor`;
+
+        return new Promise((resolve) => {
+            api.get(uri).then((result) => {
+                const { result: data } = result.data;
+                const outdoorBuilding = new Building(data);
+                resolve(outdoorBuilding);
+            });
+        });
+    };
+
     const getBuildingById = (id) => {
         const uri = `/buildings/${id}`;
 
@@ -89,6 +102,7 @@ const BuildingManager = (() => {
 
     return {
         getBuildingList,
+        getOutdoorBuilding,
         getBuildingById,
         postBuilding,
         patchBuilding,

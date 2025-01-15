@@ -8,7 +8,7 @@ const EvacRouteHandler = (() => {
                 BuildingManager.getBuildingList().then(() => {
                     BuildingManager.findById(BUILDING_ID).getDetail().then((res) => {
                         Px.Model.Expand({
-                            name: res.floors[0].floorName,
+                            name: res.floors[0].id,
                             interval: 200,
                             duration: 1000,
                             onComplete: () => {
@@ -88,7 +88,7 @@ const EvacRouteHandler = (() => {
                             Px.Model.Expand({
                                 duration: 200,
                                 interval: 100,
-                                name: floors[0].floorName,
+                                name: floors[0].id,
                                 onComplete: () => {
                                     Px.Camera.ExtendView();
                                 }

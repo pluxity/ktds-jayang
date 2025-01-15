@@ -7,7 +7,7 @@ public record BuildingResponseDTO(
         Long id,
         String code,
         String name,
-        String description
-
+        String description,
+        String isIndoor
 ) {
 }

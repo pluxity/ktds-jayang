@@ -33,9 +33,4 @@ public class AuthenticationController {
       @RequestBody SignInRequestDTO signInRequestDto) {
     return DataResponseBody.of(authenticationService.signIn(signInRequestDto));
   }
-
-  @PostMapping(value = "/refresh-token")
-  public DataResponseBody<SignInResponseDTO> refreshToken(HttpServletRequest request) {
-    return DataResponseBody.of(authenticationService.refreshToken(request));
-  }
 }

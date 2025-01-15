@@ -48,6 +48,35 @@ public class PatrolController {
         return ResponseBody.of(SUCCESS_PATCH);
     }
 
+    @PatchMapping("/{id}/points")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchPatrolPoints(@PathVariable Long id, @Valid @RequestBody CreatePatrolPointDTO dto) {
+        service.updatePatrolAddPoint(id, dto);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
+    @PatchMapping("/points/{id}/pois")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchPatrolPointsAddPois(@PathVariable Long id, @Valid @RequestBody CreatePatrolPointDTO dto) {
+        service.updatePois(id, dto);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
+    @PatchMapping("/points/{id}/name")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchPatrolPointModifyName(@PathVariable Long id, @Valid @NotNull @RequestBody CreatePatrolPointDTO dto) {
+        service.updateName(id, dto);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
+    @DeleteMapping("/points/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deletePatrolPoints(@PathVariable Long id) {
+        service.deletePoint(id);
+        return ResponseBody.of(SUCCESS_DELETE);
+    }
+
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseBody deletePatrol(@PathVariable Long id) {
@@ -55,11 +84,5 @@ public class PatrolController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
-    @PatchMapping("/{id}/points")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchPatrolPoints(@PathVariable Long id, @Valid @RequestBody CreatePatrolPointDTO dto) {
-        service.updatePatrolAddPoint(id, dto);
-        return ResponseBody.of(SUCCESS_PATCH);
-    }
 
 }

@@ -21,8 +21,10 @@ class Building {
 
     #camera3d;
 
+    #topology;
+
     constructor(buildingListDto) {
-        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d } =
+        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology } =
             buildingListDto;
 
         this.#id = id;
@@ -34,6 +36,7 @@ class Building {
         this.#buildingType = buildingType;
         this.#camera2d = camera2d;
         this.#camera3d = camera3d;
+        this.#topology = topology;
     }
 
     get id() {
@@ -56,12 +59,11 @@ class Building {
         if(!this.#floors) return [];
         return this.#floors?.map((floor) => {
             const floorInfo = {};
-            const { id, name, floorOrder, floorNo } = floor;
+            const { id, name, sbmFloor } = floor;
 
             floorInfo.id = id;
             floorInfo.name = name;
-            floorInfo.floorOrder = floorOrder;
-            floorInfo.floorNo = floorNo;
+            floorInfo.sbmFloor = sbmFloor;
 
             return floorInfo;
         });
@@ -114,6 +116,14 @@ class Building {
 
     set camera3d(camera3d) {
         this.#camera3d = camera3d;
+    }
+
+    get topology() {
+        return this.#topology;
+    }
+
+    set topology(topology) {
+        this.#topology = topology;
     }
 
     getDetail() {

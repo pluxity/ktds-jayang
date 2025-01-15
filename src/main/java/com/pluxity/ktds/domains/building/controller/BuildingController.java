@@ -36,6 +36,11 @@ public class BuildingController {
         return DataResponseBody.of(service.findDetailAll());
     }
 
+    @GetMapping("/outdoor")
+    public DataResponseBody<BuildingDetailResponseDTO> getOutdoorBuilding() {
+        return DataResponseBody.of(service.findOutdoorDetail());
+    }
+
     @GetMapping("/{id}")
     public DataResponseBody<BuildingDetailResponseDTO> getBuilding(@PathVariable Long id) {
         return DataResponseBody.of(service.findById(id));
@@ -84,6 +89,14 @@ public class BuildingController {
     public ResponseBody patchBuildingLod(@PathVariable Long id,
                                          @RequestBody LodSettings lodSettings) {
         service.updateLod(id, lodSettings);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
+    @PatchMapping("/{id}/evacuationRoute")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchBuildingEvacuationRoute(@PathVariable Long id,
+                                                     @RequestBody Map<String, String> evacuationRouteMap) {
+        service.updateEvacuationRoute(id, evacuationRouteMap.get("evacuationRoute"));
         return ResponseBody.of(SUCCESS_PATCH);
     }
 

@@ -47,13 +47,20 @@ public class Building {
     @Column(name = "description", nullable = false, length = 200)
     private String description;
 
+    @Column(name = "evacuation_route", columnDefinition = "LONGTEXT")
+    private String evacuationRoute;
+
     @Column(name = "topology", columnDefinition = "LONGTEXT")
     private String topology;
 
+    @Column(name = "is_indoor", nullable = false)
+    private String isIndoor;
+
     @Builder
-    public Building(String code, String name, String description) {
+    public Building(String code, String name, String description, String isIndoor) {
         this.code = code;
         this.name = name;
+        this.isIndoor = isIndoor;
         this.description = description;
     }
 
@@ -62,13 +69,21 @@ public class Building {
             throw new CustomException(ErrorCode.INVALID_CODE);
         }
         this.name = validString(other.name()) ? other.name() : this.name;
+        this.isIndoor = validString(other.isIndoor()) ? other.isIndoor() : this.isIndoor;
         this.description = validString(other.description()) ? other.description() : this.description;
 
 
     }
 
+    public void changeEvacuationRoute(String evacuationRoute) {
+        this.evacuationRoute = evacuationRoute;
+    }
+
     public void changeLodSettings(@NotNull LodSettings lodSettings) {
         this.lodSettings = lodSettings;
+    }
+    public void changeIsIndoor(@NotNull String isIndoor) {
+        this.isIndoor = isIndoor;
     }
 
     public void changeTopology(@NotNull String topology) {
@@ -98,6 +113,7 @@ public class Building {
                 .id(this.id)
                 .code(this.code)
                 .name(this.name)
+                .isIndoor(this.isIndoor)
                 .description(this.description)
                 .build();
     }
@@ -109,10 +125,12 @@ public class Building {
                 .name(this.name)
                 .description(this.description)
                 .lodSettings(this.lodSettings)
+                .evacuationRoute(this.evacuationRoute)
                 .topology(this.topology)
                 .floors(this.getFloors().stream().map(Floor::toResponseDto).toList())
                 .buildingFile(this.fileInfo == null ? null : this.fileInfo.toDto())
                 .floorIds(this.floors.stream().map(Floor::getId).toList())
+                .isIndoor(this.isIndoor)
                 .build();
 
     }

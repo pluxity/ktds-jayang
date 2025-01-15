@@ -314,20 +314,60 @@ $base-img-path:"/dashboard/img/";
                     .number{display:flex; grid-gap:20px; cursor:pointer;}
                 }
                 &__space{
-                    display:flex; 
-                    .right{
-                        position:relative;
-                        width:15rem;
-                        &::after{
-                            content:'';
-                            position:absolute; right:0; top:0; bottom:0;
-                            width:1px; height:100%; background-color:var(--color-grayscale-dark);
-
+                    display:flex;
+                    .section{
+                        padding:20px;
+                        .label{
+                            position:relative;
+                            padding:0 10px; border-radius:7px; background-color:var(--color-grayscale-dark);
+                            height:24px;
+                            line-height:24px; color:var(--color-grayscale-light); font-size:0.75rem;
+                            &::after{
+                                content:'';
+                                display:inline-block; vertical-align:middle;
+                                margin:-3px 0 0 5px;
+                                width:14px; height:14px;
+                                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
+                                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                                -webkit-mask-position:-10px -10px; mask-position:-10px -10px;
+                                background-color:var(--color-grayscale-light);
+                            }
+                        }
+                        &--select{
+                            border-right:1px solid var(--color-grayscale-dark);
+                            width:15rem;
+                        }
+                        &--contents{flex:1;}
+                        &__head{
+                            display:flex; align-items:center;
+                            margin-bottom:10px;
+                            .title{font-size:1.125rem; color:var(--color-grayscale-light); font-weight:500;}
+                            .sub{margin-left:auto}
+                        }
+                        &__detail{
+                            padding:5px; background-color:var(--color-grayscale-dark);
+                            width:100%; height:580px; max-height:580px; box-sizing:border-box;
+                            .inner{
+                                height:100%; max-height:100%; overflow-y:auto; overflow-x:hidden;
+                        
+                                &::-webkit-scrollbar {width:6px;}
+                                &::-webkit-scrollbar-thumb {
+                                    background-color:var(--color-grayscale03); 
+                                    border-radius:3px; 
+                                }
+                                &::-webkit-scrollbar-track {
+                                    background-color:var(--color-black-key); 
+                                    border-radius:3px;
+                                }
+                                &--grid3{
+                                    display:grid; grid-template-columns:repeat(3, 1fr);
+                                }
+                            }
                         }
                     }
-                    
                 }
                 &--wide{width:60rem;}
+                &--space{padding:0;}
             }
         }
 
@@ -709,7 +749,7 @@ $base-img-path:"/dashboard/img/";
     }
     input[type="checkbox"]{ 
         appearance:none;
-        position:relative; display:inline-block; 
+        position:relative; display:inline-block; flex-shrink:0;
         width:16px; height:16px;
         margin:0; border:1px solid var(--color-grayscale03); background-color:var(--color-black); border-radius:3px; 
         &:checked{
@@ -738,7 +778,7 @@ $base-img-path:"/dashboard/img/";
     }
     input[type="radio"]{
         appearance:none;
-        position:relative; display:inline-block;
+        position:relative; display:inline-block; flex-shrink:0;
         width:16px; height:16px;
         margin:0; border:1px solid var(--color-grayscale03); background-color:var(--color-black); border-radius:15px;
         &:checked{
@@ -820,10 +860,37 @@ $base-img-path:"/dashboard/img/";
     }
 }
 
+/* tab */
+@mixin tab_list{
+    .tab-list{
+        display:flex; align-items:center; 
+        &--border{border-bottom:2px solid var(--color-grayscale02);}
+        li{
+            position:relative;
+            display:flex; align-items:center; justify-content:center; flex:1;
+            padding:0 3px; background-color:var(--color-black);
+            height:30px; border:solid var(--color-grayscale-dark); border-width:1px 0 0 1px;
+            color:var(--color-grayscale03); font-size:0.75rem; font-weight:700; cursor:pointer;
+            &.active{
+                border-color:var(--color-grayscale02); background-color:var(--color-grayscale02);
+                color:var(--color-grayscale-light); 
+                &::before{
+                    content:'';
+                    position:absolute; left:-2px; 
+                    width:1px; height:100%; box-shadow:inset -1px 0 0 var(--color-grayscale-dark);
+                }
+            }
+            &:first-child.active::before{display:none;}
+            &:last-child{border-right-width:1px;}
+        } 
+        + .accordion .accordion__btn:first-child{border-top:0;}
+    }
+}
+
 /* Accordion */
 @mixin accordion{
     .accordion{
-        margin-right:-10px; padding-right:9px; 
+        margin-right:-10px; padding-right:4px; 
         height:455px; min-height:455px; overflow-y:auto; overflow-x:hidden;
 
         // 테이블안 문구 왼쪽 정렬
@@ -856,7 +923,7 @@ $base-img-path:"/dashboard/img/";
                 }
                 td{
                     padding:11px 5px;  
-                    color:var(--color-grayscale01);
+                    color:var(--color-grayscale02);
                 }
                 tbody{
                     display:block;
@@ -908,7 +975,7 @@ $base-img-path:"/dashboard/img/";
 @mixin sop_accordion{
     .sop-accord{
         margin-right:-10px; padding-right:9px;
-        max-height:455px; overflow-y:auto; overflow-x:hidden;
+        max-height:485px; overflow-y:auto; overflow-x:hidden;
         font-size:0.75rem;
 
         &::-webkit-scrollbar {width:6px;}

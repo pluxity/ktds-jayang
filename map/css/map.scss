@@ -7,6 +7,7 @@
 @include toast;
 @include tooltip;
 @include selectbox;
+@include tab-list;
 
 // accordion
 @include accordion;
@@ -125,4 +126,3 @@
 
 // 이벤트 현황
 .event-state{height:calc(100% - 12.5rem);}
-

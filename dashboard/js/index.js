@@ -20,7 +20,7 @@ profileBtn.forEach(function(btns){
 /* POI Menu */
 function PoiMenuAll() {
     const PoiAll = document.querySelector(".poi-menu__all .all a");
-    const poiAllPopup = document.querySelector(".poi-menu__all .popup-basic--group");
+    const poiAllPopup = document.querySelector(".poi-menu__all .popup-basic--small");
 
     PoiAll.addEventListener ("click", function() { 
         if (poiAllPopup.style.display === "none") {

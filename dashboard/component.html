@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../publishing/css/common.css" rel="stylesheet"/>
     <link href="./css/main.css" rel="stylesheet"/>
+    <link href="../map/css/map.css" rel="stylesheet"/>
     <title>KT 자양 통합 운영 플랫폼</title>
 </head>
 <body>
@@ -103,7 +104,7 @@
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 장비 표시</div>
-   <div class="popup-basic popup-basic--group">
+   <div class="popup-basic popup-basic--small">
        <div class="popup-basic__head">
            <span class="checkbox-wrap">
                <input type="checkbox" id="check">
@@ -895,12 +896,12 @@
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 이벤트 현황 전체</div>
-   <div class="popup-basic">
+   <div class="popup-basic popup-basic--wide">
         <div class="popup-basic__head">
             <h2 class="name">이벤트 현황 전체</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div class="search-result search-result--wide">
+        <div class="search-result">
             <div class="search-result__filter">
                 <!-- select-box -->
                 <!-- [D] width값 지정 -->
@@ -975,137 +976,139 @@
                 <input type="text" placeholder="화재발생" style="width:277px;">
                 <button type="button" class="button button--solid-middle">검색</button>
             </div>
-            <div class="search-result__checkbox search-result__checkbox--active">
-                <!-- [D] 아래 펼침 버튼 클릭 시 btn--open 및 부모에 search-result__checkbox--active 클래스 추가 -->
-                <button type="button" class="btn btn--open"><span class="hide">펼침</span></button>
-                <ul>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check01">
-                            <label for="check01">이벤트 전체</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check02">
-                            <label for="check02">수위 상승</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check03">
-                            <label for="check03 ">화재감지</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check04">
-                            <label for="check04">온도상승</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check05">
-                            <label for="check05">불꽃감지</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check06">
-                            <label for="check06">정전</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check07">
-                            <label for="check07">엘리베이터 끼임 사고</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check08">
-                            <label for="check08">쓰러짐 발생</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check09">
-                            <label for="check09">침입 탐지</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check10">
-                            <label for="check10">이벤트 명칭 1</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check11">
-                            <label for="check11">이벤트 명칭 B</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check12">
-                            <label for="check12">이벤트 명칭 C</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check13">
-                            <label for="check13">이벤트 명칭 F</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check14">
-                            <label for="check14">이벤트 명칭 5555</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check15">
-                            <label for="check15">이벤트 명칭 6666</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check16">
-                            <label for="check16">이벤트 명칭 7777</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check17">
-                            <label for="check17">이벤트 명칭 8888</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check18">
-                            <label for="check18">이벤트 명칭 9999</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check19">
-                            <label for="check19">이벤트 명칭 101010</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check20">
-                            <label for="check20">이벤트 명칭 B</label>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="checkbox-wrap">
-                            <input type="checkbox" id="check21">
-                            <label for="check21">이벤트 명칭 B</label>
-                        </span>
-                    </li>
-                </ul>
+            <div class="search-result__checkbox -search-result__checkbox--active">
+                <div class="inner">
+                    <!-- [D] 아래 펼침 버튼 클릭 시 btn--open 및 부모에 search-result__checkbox--active 클래스 추가 -->
+                    <button type="button" class="btn btn--open"><span class="hide">펼침</span></button>
+                    <ul>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check01">
+                                <label for="check01">이벤트 전체</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check02">
+                                <label for="check02">수위 상승</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check03">
+                                <label for="check03 ">화재감지</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check04">
+                                <label for="check04">온도상승</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check05">
+                                <label for="check05">불꽃감지</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check06">
+                                <label for="check06">정전</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check07">
+                                <label for="check07">엘리베이터 끼임 사고</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check08">
+                                <label for="check08">쓰러짐 발생</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check09">
+                                <label for="check09">침입 탐지</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check10">
+                                <label for="check10">이벤트 명칭 1</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check11">
+                                <label for="check11">이벤트 명칭 B</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check12">
+                                <label for="check12">이벤트 명칭 C</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check13">
+                                <label for="check13">이벤트 명칭 F</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check14">
+                                <label for="check14">이벤트 명칭 5555</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check15">
+                                <label for="check15">이벤트 명칭 6666</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check16">
+                                <label for="check16">이벤트 명칭 7777</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check17">
+                                <label for="check17">이벤트 명칭 8888</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check18">
+                                <label for="check18">이벤트 명칭 9999</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check19">
+                                <label for="check19">이벤트 명칭 101010</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check20">
+                                <label for="check20">이벤트 명칭 B</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check21">
+                                <label for="check21">이벤트 명칭 B</label>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="search-result__contents">
                 <div class="title">
@@ -1204,6 +1207,36 @@
                                 <td>2024-10-10 14:21:11</td>
                                 <td>2024-10-10 14:21:11</td>
                                 <td><a href="#none" class="icon-move"><span class="hide">도면 이동</span></a></td>
+                            </tr> 
+                            <tr>
+                                <td>업무공간</td>
+                                <td>5층</td>
+                                <td>화재발생</td>
+                                <td>공조기</td>
+                                <td>공조모터 A-5411A</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td><a href="#none" class="icon-move"><span class="hide">도면 이동</span></a></td>
+                            </tr> 
+                            <tr>
+                                <td>업무공간</td>
+                                <td>5층</td>
+                                <td>화재발생</td>
+                                <td>공조기</td>
+                                <td>공조모터 A-5411A</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td><a href="#none" class="icon-move"><span class="hide">도면 이동</span></a></td>
+                            </tr> 
+                            <tr>
+                                <td>업무공간</td>
+                                <td>5층</td>
+                                <td>화재발생</td>
+                                <td>공조기</td>
+                                <td>공조모터 A-5411A</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td><a href="#none" class="icon-move"><span class="hide">도면 이동</span></a></td>
                             </tr>      
                         </tbody>
                     </table>
@@ -1221,12 +1254,12 @@
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#DF1344;">[Popup] 기본 팝업 - 설비 부분 미확정 상태로 작업 보류</div>
-   <div class="popup-basic">
+   <div class="popup-basic popup-basic--wide">
         <div class="popup-basic__head">
             <h2 class="name">설비</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div class="search-result search-result--wide search-result--space">
+        <div class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--select">
                     <ul class="tab-list tab-list--border" role="tablist">
@@ -1427,7 +1460,7 @@
                 <div class="section section--contents">
                     <div class=section__head>
                         <h3 class="title">정보제목</h3>
-                        <div class="sub"><button type="button" class="label">도면 이동</button></div>
+                        <div class="sub"><button type="button" class="button-move">도면 이동</button></div>
                     </div>
                     <div class="section__detail"></div>
                 </div>
@@ -1436,12 +1469,12 @@
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 엘리베이터</div>
-   <div class="popup-basic">
+   <div class="popup-basic popup-basic--wide">
         <div class="popup-basic__head">
             <h2 class="name">엘리베이터</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div class="search-result search-result--wide search-result--space">
+        <div class="search-result search-result--space">
                <div class="search-result__space">
                     <div class="section section--contents">
                         <ul class="tab-list" role="tablist">
@@ -1451,12 +1484,369 @@
                             <li role="tab" id="tab3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">건물 B</a></li>
                         </ul>
                         <div class="section__detail">
-                            <!-- 스크롤바 노출 시 적용 -->
-                            <div class="inner inner--grid3">
-                                <div>sdf</div>
-                               <div>sdf</div>
-                               <div>sdf</div>
-
+                            <div class="facility-area facility-area--elevator">
+                                <ul class="facility-area__list facility-area__list--grid3">
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--standby">대기</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--stop">혼잡</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--standby">대기</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--stop">혼잡</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--standby">대기</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--stop">혼잡</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--standby">대기</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="head">
+                                            <div class="head__title">
+                                                <span>건물 A</span>
+                                                <span>E/L01호기</span>
+                                            </div>
+                                            <div class="head__state">
+                                                <span class="label label--stop">혼잡</span>
+                                                <button type="button" class="button-move">도면 이동</button>
+                                            </div>
+                                        </div>
+                                        <div class="detail">  
+                                            <div class="elevator-info">
+                                                <!-- CCTV 뷰어 들어갈 공간 -->
+                                                <div class="elevator-info__view">
+                                                    <div style="background-color:#000; height:100%;"></div>
+                                                </div>
+                                                <div class="elevator-info__detail">
+                                                    <div class="info info--floor">
+                                                        <dl>
+                                                            <dt class="info__title">운행층수</dt>
+                                                            <dd>
+                                                                <strong class="info__floor">B4F ~ 31F</strong>
+                                                                <br>
+                                                                <span class="info__text">전층운행</span>
+                                                            </dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="info info--location">
+                                                        <dl>
+                                                            <dt class="info__title">현재 위치</dt>
+                                                            <dd class="info__floor">25F</dd>
+                                                        </dl>
+                                                        <!-- [D]
+                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
+                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
+                                                        -->
+                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -1498,7 +1888,7 @@
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 이벤트 팝업 - Sop</div>
    <div style="height:15px; padding:10px; background-color:#aaa; font-size:16px; color:#000;">Type - dashboard</div>
-   <div class="popup-event">
+   <div class="popup-event popup-event--middle">
         <div class="popup-event__head">
             <h2 class="name">SOP</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
@@ -1513,8 +1903,8 @@
                     <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
                 </div>
                 <div class="manual">
+                    <div class="manual__title">매뉴얼</div>
                     <div class="sop-accord">
-                        <div class="sop-accord__title">매뉴얼</div>
                         <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
                         <button type="button" class="sop-accord__btn sop-accord__btn--active">
                             <span class="label">1단계</span>
@@ -1588,7 +1978,7 @@
         </div>
    </div>
    <div style="height:15px; padding:10px; background-color:#aaa; font-size:16px; color:#000;">Type - 3D View</div>
-   <div class="popup-basic">
+   <div class="popup-basic popup-basic--middle">
         <div class="popup-basic__head">
             <h2 class="name">SOP</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
@@ -1607,7 +1997,7 @@
         </div>
     </div> 
     <br>
-   <div class="popup-basic">
+   <div class="popup-basic popup-basic--middle">
         <div class="popup-basic__head">
             <button type="button" class="arrow"><span class="hide">되돌아가기</span></button>
             <h2 class="name">SOP</h2>
@@ -1623,8 +2013,8 @@
                     <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
                 </div>
                 <div class="manual">
+                    <div class="manual__title">매뉴얼</div>
                     <div class="sop-accord">
-                        <div class="sop-accord__title">매뉴얼</div>
                         <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
                         <div class="sop-accord__btn sop-accord__btn--active">
                             <span class="label">1단계</span>
@@ -2768,7 +3158,7 @@
             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
         </ul>
     </div>
-</div>      
+</div>     
    
 <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">tool-box</div>
 <div class="tool-box">
@@ -2814,7 +3204,7 @@
         <div class="all">
             <a href="#none">장비보기</a>
             <!-- 장비 목록 팝업 -->
-            <div class="popup-basic popup-basic--group">
+            <div class="popup-basic popup-basic--small">
                 <div class="popup-basic__head">
                     <span class="checkbox-wrap">
                         <input type="checkbox" id="check">

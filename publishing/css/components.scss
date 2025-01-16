@@ -158,15 +158,17 @@ $base-img-path:"/dashboard/img/";
         display:inline-block;
         background-color:var(--color-black); border-radius:10px; box-sizing:border-box;
         border-top:2px solid var(--color-mint); box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
+        width:25rem; height:38.75rem;
         
-        &--group{
+        // popup 사이즈 클래스 
+        &--small{
             padding:15px; 
-            min-width:17.5rem;
-            .popup-basic{
-                &__head{height:20px; padding:0; border-bottom:0;}
-                &__info{width:17.5rem; }
-            }
+            width:17.5rem; height:auto;
+            .popup-basic__head{height:20px; padding:0; border-bottom:0;}
         }
+        &--middle{width:38.125rem; height:40rem;       
+        }
+        &--wide{width:60rem; height:43.75rem;}
 
         &__head{
             position:relative; display:flex; align-items:center; 
@@ -232,8 +234,7 @@ $base-img-path:"/dashboard/img/";
         // 장비 목록 영역 , 가상 순찰 , 이벤트 전체 현황, 설비, 주차, 충전소   
         @at-root{
             .search-result{
-                padding:20px; box-sizing:border-box; 
-                width:25rem;
+                padding:20px; 
                 &__filter{
                     display:flex; grid-gap:5px;
                     height:30px;
@@ -254,9 +255,17 @@ $base-img-path:"/dashboard/img/";
                 }
                 &__checkbox{
                     position:relative;
-                    margin:15px 0 20px; padding:15px 25px; border:1px solid var(--color-grayscale-dark); background-color:var(--color-black-key); border-radius:10px; box-sizing:border-box;
-                    height:80px; overflow:hidden;
-                    &--active{height:auto;}
+                    margin:15px 0 20px; 
+                    height:78px;
+                    .inner{
+                            position:absolute;
+                            padding:15px 25px; border:1px solid var(--color-grayscale-dark); background-color:var(--color-black-key); border-radius:10px; box-sizing:border-box;
+                            overflow:hidden; height:80px;
+                        }
+                        &--active{
+                            .inner{height:auto;}
+                        }
+                    
                     .btn{
                         position:absolute; bottom:-1px; right:-1px;
                         background-color:var(--color-grayscale-dark); border-top-left-radius:5px; border-bottom-right-radius:5px;
@@ -316,8 +325,8 @@ $base-img-path:"/dashboard/img/";
                 &__space{
                     display:flex;
                     .section{
-                        padding:20px;
-                        .label{
+                        padding:18px;
+                        .button-move{
                             position:relative;
                             padding:0 10px; border-radius:7px; background-color:var(--color-grayscale-dark);
                             height:24px;
@@ -340,33 +349,17 @@ $base-img-path:"/dashboard/img/";
                         &--contents{flex:1;}
                         &__head{
                             display:flex; align-items:center;
-                            margin-bottom:10px;
+                            margin-bottom:8px;
                             .title{font-size:1.125rem; color:var(--color-grayscale-light); font-weight:500;}
                             .sub{margin-left:auto}
                         }
                         &__detail{
-                            padding:5px; background-color:var(--color-grayscale-dark);
-                            width:100%; height:580px; max-height:580px; box-sizing:border-box;
-                            .inner{
-                                height:100%; max-height:100%; overflow-y:auto; overflow-x:hidden;
-                        
-                                &::-webkit-scrollbar {width:6px;}
-                                &::-webkit-scrollbar-thumb {
-                                    background-color:var(--color-grayscale03); 
-                                    border-radius:3px; 
-                                }
-                                &::-webkit-scrollbar-track {
-                                    background-color:var(--color-black-key); 
-                                    border-radius:3px;
-                                }
-                                &--grid3{
-                                    display:grid; grid-template-columns:repeat(3, 1fr);
-                                }
-                            }
+                            background-color:var(--color-grayscale-dark);
+                            width:100%; height:578px; max-height:578px; box-sizing:border-box;
                         }
                     }
+                    .accordion{height:578px; max-height:578px;}
                 }
-                &--wide{width:60rem;}
                 &--space{padding:0;}
             }
         }
@@ -380,7 +373,7 @@ $base-img-path:"/dashboard/img/";
                     th,td{
                         vertical-align:middle;
                         height:35px;
-                        font-size:0.75rem; padding:10px; box-sizing:border-box;
+                        font-size:0.75rem; box-sizing:border-box;
                     }
                     th{
                         background-color:var(--color-grayscale-dark);
@@ -406,21 +399,13 @@ $base-img-path:"/dashboard/img/";
 
         }
 
-        // 설비 
-        @at-root{
-            .facility-info{
-
-            }
-        }
-
         // 유지 보수 영역
         @at-root{
             .maintenance-info{
-                padding:20px; box-sizing:border-box;
-                width:25rem; 
+                padding:20px; 
                 &__list{
                     margin-right:-10px; padding-right:9px;
-                    max-height:530px; overflow-y:auto; overflow-x:hidden;
+                    max-height:530px; overflow-y:auto; overflow-x:hidden; 
                     font-size:0.75rem;
                     &::-webkit-scrollbar {width:6px;}
                     &::-webkit-scrollbar-thumb {
@@ -468,7 +453,7 @@ $base-img-path:"/dashboard/img/";
             .patrol-info{
                 margin:10px 0 0 10px;
                 padding:0 10px 0 0;
-                height:360px; max-height:360px; overflow-y:auto; overflow-x:hidden;
+                height:360px; max-height:360px; overflow-y:auto; overflow-x:hidden; 
                 color:var(--color-grayscale01); line-height:1.25rem; font-size:0.875rem; letter-spacing:-0.00875rem;
                 &::-webkit-scrollbar {width:6px;}
                 &::-webkit-scrollbar-thumb {
@@ -556,7 +541,12 @@ $base-img-path:"/dashboard/img/";
     .popup-event{
         display:inline-block;
         background-color:var(--color-black); box-shadow:0 0 30px 0 rgba(0, 0, 0, 0.75);
-        border-radius:20px 20px 10px 10px;
+        border-radius:20px 20px 10px 10px; box-sizing:border-box;
+        width:31.25rem; height:37.5rem;
+
+        // popup 사이즈 클래스 
+        &--middle{width:38.125rem; height:40rem;}
+
         &__head{
             display:flex; align-items:center; justify-content:space-between;
             padding:0 20px; background-color:var(--color-mint); border-top-left-radius:19px; border-top-right-radius:19px;
@@ -631,7 +621,6 @@ $base-img-path:"/dashboard/img/";
         // SOP 영역
         @at-root{
             .sop-info{
-                width:38.125rem;
                 &__title{
                     margin:20px; 
                     font-size:0.875rem; font-weight:700; color:var(--color-grayscale-light);
@@ -643,9 +632,15 @@ $base-img-path:"/dashboard/img/";
                         color:var(--color-grayscale-light); font-size:0.75rem;
                         &__text{line-height:1.6;}    
                     }
-                    .manual{flex:1;}
+                    .manual{
+                        flex:1;
+                        &__title{
+                            background-color:var(--color-navy-dark);
+                            color:var(--color-grayscale-light); font-size:0.875rem; line-height:27px; text-align:center; font-weight:700;
+                        }
+                    }
                 }
-                .accordion{flex:1;}
+                .accordion{width:100%; height:525px; max-height:525px;}
             }
         }
     }
@@ -891,10 +886,7 @@ $base-img-path:"/dashboard/img/";
 @mixin accordion{
     .accordion{
         margin-right:-10px; padding-right:4px; 
-        height:455px; min-height:455px; overflow-y:auto; overflow-x:hidden;
-
-        // 테이블안 문구 왼쪽 정렬
-        .align-left{text-align:left;}
+        height:455px; min-height:455px; overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable;
 
         &::-webkit-scrollbar {width:6px;}
         &::-webkit-scrollbar-thumb {
@@ -902,9 +894,13 @@ $base-img-path:"/dashboard/img/";
             border-radius:3px; 
         }
         &::-webkit-scrollbar-track {
-            background-color:var(--color-black-key); 
+            background-color:var(--color-black-key); ;
             border-radius:3px;
         }
+        
+        // 테이블안 문구 왼쪽 정렬
+        .align-left{text-align:left;}
+        
         &__detail{
             display:none; 
             margin-bottom:10px;
@@ -927,19 +923,19 @@ $base-img-path:"/dashboard/img/";
                 }
                 tbody{
                     display:block;
-                    max-height:185px; overflow-y:auto; overflow-x:hidden;
+                    max-height:185px; overflow-y:auto; overflow-x:hidden; 
                     background-color:var(--color-black);
                     tr{
                         border-bottom:1px solid var(--color-grayscale-dark);
                         &:last-child{border-bottom:none;}
                     }
-                    &::-webkit-scrollbar {width:6px;}
+                    &::-webkit-scrollbar {width:6px; background-color:transparent;}
                     &::-webkit-scrollbar-thumb {
                         background-color:var(--color-grayscale-dark); 
                         border-radius:3px; 
                     }
                     &::-webkit-scrollbar-track {
-                        background-color:var(--color-black-key); 
+                        background-color:var(--color-black-key); opacity:0.5;
                         border-radius:3px;
                     }
                 } 
@@ -974,8 +970,8 @@ $base-img-path:"/dashboard/img/";
 /* SOP Accordion */
 @mixin sop_accordion{
     .sop-accord{
-        margin-right:-10px; padding-right:9px;
-        max-height:485px; overflow-y:auto; overflow-x:hidden;
+        margin-right:-12px; padding-right:6px;
+        height:485px; max-height:485px; overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable;
         font-size:0.75rem;
 
         &::-webkit-scrollbar {width:6px;}
@@ -986,11 +982,6 @@ $base-img-path:"/dashboard/img/";
         &::-webkit-scrollbar-track {
             background-color:var(--color-black-key); 
             border-radius:3px;
-        }
-
-        &__title{
-            background-color:var(--color-navy-dark);
-            color:var(--color-grayscale-light); font-size:0.875rem; line-height:27px; text-align:center; font-weight:700;
         }
 
         &__btn{
@@ -1050,7 +1041,7 @@ $base-img-path:"/dashboard/img/";
             background-color:var(--color-black); border:1px solid var(--color-grayscale-dark); border-radius:5px; box-sizing:border-box;
             width:100%; 
             ul{
-                max-height:162px; overflow-y:auto; overflow-x:hidden;
+                max-height:162px; overflow-y:auto; overflow-x:hidden; 
                 &::-webkit-scrollbar {width:6px;}
                 &::-webkit-scrollbar-thumb {
                     background-color:var(--color-grayscale-dark); 
@@ -1118,7 +1109,7 @@ $base-img-path:"/dashboard/img/";
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); 
             width:60px; height:60px; border-radius:100%; 
 
-            .popup-basic--group{position:absolute; left:77px; top:0;}
+            .popup-basic--small{position:absolute; left:77px; top:0;}
             
             .all{
                 position:relative; 

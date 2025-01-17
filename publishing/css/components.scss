@@ -5,8 +5,7 @@
 // ---------------------------------------------------
 
 // 이미지 경로 변수 설정 
-//$base-img-path:"/static/images/viewer/";
-$base-img-path:"/dashboard/img/";
+$base-img-path:"/static/images/viewer/";
 
 /* Button */
 @mixin button{
@@ -43,6 +42,24 @@ $base-img-path:"/dashboard/img/";
                     @if(#{$name} == disabled){color:var(--color-grayscale03);}
                 }
             }
+        }
+    }
+
+    // 도면 이동 버튼
+    .button-move{
+        position:relative;
+        padding:0 10px; border-radius:7px; background-color:var(--color-grayscale-dark);
+        height:24px;
+        line-height:24px; color:var(--color-grayscale-light); font-size:0.75rem;
+        &::after{
+            content:'';
+            display:inline-block; vertical-align:middle;
+            margin:-3px 0 0 5px;
+            width:14px; height:14px;
+            -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
+            -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+            -webkit-mask-position:-10px -10px; mask-position:-10px -10px;
+            background-color:var(--color-grayscale-light);
         }
     }
 }
@@ -231,7 +248,7 @@ $base-img-path:"/dashboard/img/";
             }
         }
 
-        // 장비 목록 영역 , 가상 순찰 , 이벤트 전체 현황, 설비, 주차, 충전소   
+        // 검색결과 : 장비 목록 영역 , 가상 순찰 , 이벤트 전체 현황, 설비, 주차, 충전소   
         @at-root{
             .search-result{
                 padding:20px; 
@@ -326,22 +343,7 @@ $base-img-path:"/dashboard/img/";
                     display:flex;
                     .section{
                         padding:18px;
-                        .button-move{
-                            position:relative;
-                            padding:0 10px; border-radius:7px; background-color:var(--color-grayscale-dark);
-                            height:24px;
-                            line-height:24px; color:var(--color-grayscale-light); font-size:0.75rem;
-                            &::after{
-                                content:'';
-                                display:inline-block; vertical-align:middle;
-                                margin:-3px 0 0 5px;
-                                width:14px; height:14px;
-                                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
-                                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
-                                -webkit-mask-position:-10px -10px; mask-position:-10px -10px;
-                                background-color:var(--color-grayscale-light);
-                            }
-                        }
+                        
                         &--select{
                             border-right:1px solid var(--color-grayscale-dark);
                             width:15rem;

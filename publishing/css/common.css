@@ -214,7 +214,7 @@ body {
   display: inline-block;
   width: 33px;
   height: 27px;
-  background: url("/dashboard/img/icon_kt.svg") no-repeat center/contain;
+  background: url("/static/images/viewer/icon_kt.svg") no-repeat center/contain;
 }
 .header__info {
   display: flex;
@@ -289,8 +289,8 @@ body {
   margin-left: 5px;
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/dashboard/img/icon14/icon14.svg");
-  mask-image: url("/dashboard/img/icon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   background-color: var(--color-grayscale03);

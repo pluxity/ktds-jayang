@@ -9,12 +9,12 @@
 @include popup_basic;
 
 // 이미지 경로 변수 설정 
-//$base-img-path:"/static/images/viewer/";
-$base-img-path:"/dashboard/img/";
+$base-img-path:"/static/images/viewer/";
 
 .login{
     display:flex; align-items:center; justify-content:center; flex-direction:column;
     height:100%;
+    .popup-basic{width:21.25rem; height:26.875rem;}
     &__logo{
         display:inline-block;
         margin-bottom:30px;

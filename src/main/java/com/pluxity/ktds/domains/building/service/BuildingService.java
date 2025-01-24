@@ -85,7 +85,8 @@ public class BuildingService {
     @Transactional(readOnly = true)
     public BuildingDetailResponseDTO findOutdoorDetail() {
 
-        Building building = buildingRepository.findTop1ByIsIndoorOrderByIdDesc("N");
+        Building building = buildingRepository.findTop1ByIsIndoorOrderByIdDesc("N")
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
 
         return building.toDetailResponseDTO();
     }
@@ -168,11 +169,14 @@ public class BuildingService {
         buildingFileHistoryRepository.deleteAll(buildingFileHistories);
 
         List<Patrol> patrols = patrolRepository.findByBuildingId(building.getId());
-        for (Patrol patrol : patrols) {
-            List<PatrolPoint> patrolPoints = patrolPointRepository.findByPatrolId(patrol.getId());
-            patrolPointRepository.deleteAll(patrolPoints);
+
+        if (!patrols.isEmpty()) {
+            for (Patrol patrol : patrols) {
+                List<PatrolPoint> patrolPoints = patrolPointRepository.findByPatrolId(patrol.getId());
+                patrolPointRepository.deleteAll(patrolPoints);
+            }
+            patrolRepository.deleteByBuildingId(building.getId());
         }
-        patrolRepository.deleteByBuildingId(building.getId());
 
         buildingRepository.delete(building);
     }

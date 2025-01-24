@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
     <header th:fragment="header" class="header">
-        <h1 class="header__logo"><a href="/">KT 자양 통합운영 플랫폼</a></h1>
+        <h1 class="header__logo"><a href="/viewer">KT 자양 통합운영 플랫폼</a></h1>
+        <ul class="header__tab" role="tablist">
+            <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+<!--            <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">건물 A</a></li>-->
+<!--            <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 B</a></li>-->
+<!--            <li role="tab" id="tab3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">지하 주차장</a></li>-->
+        </ul>
         <div class="header__info">
             <p class="date">2024년 11월 20일(월요일 21:25:20)</p>
             <div class="profile">
@@ -23,12 +29,12 @@
 
                     <div class="detail">
                         <div class="detail__group">
-                            <a href="javascript:void(0);">공지사항<span class="badge">N</span></a>
+                            <a id="notice" href="javascript:void(0);">공지사항<span class="badge">N</span></a>
                             <a href="javascript:void(0);" class="icon icon--manage" target="_blank">결재 관리</a>
                             <a href="javascript:void(0);" class="icon icon--download">CCTV 다운로드</a>
                         </div>
                         <div class="detail__group">
-                            <a href="javascript:void(0);">로그아웃</a>
+                            <a id="logout" href="javascript:void(0);">로그아웃</a>
                         </div>
                     </div>
                 </div>

@@ -1,20 +1,31 @@
 'use strict';
 (async function () {
+    // // 로그인 후 처리
     // const USER_ID = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)')[2];
     // api.get(`/users/userid/${USER_ID}`).then((result) => {
     //     const {result: data} = result.data;
-    //     document.querySelector("#userBox > div.user-title-wrap > strong").innerHTML = data.nickname;
-    //     document.querySelector("#userBox > div.user-title-wrap > span").innerHTML = data.userGroupName;
-    //     if (data.role !== 'ADMIN') {
-    //         document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
-    //     }
+    //     document.querySelector('.header__info .head__name').innerHTML = data.name;
+    //     document.querySelector('.header__info .head__level').innerHTML = data.groupName;
+    //     // if (data.role !== 'ADMIN') {
+    //     //     document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
+    //     // }
     // });
-
-
+    const floorInfo = document.querySelector('#floor-info .floor-info__button');
+    const floorDetail = document.querySelector('#floor-info .floor-info__detail');
+    floorInfo.addEventListener('click', event => {
+        if (floorDetail.style.display == 'none') {
+            floorDetail.style.display = 'block';
+        } else {
+            floorDetail.style.display = 'none';
+        }
+    })
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
         const { } = systemSetting;
     });
+    await NoticeManager.getNotices()
     await IconSetManager.getIconSetList();
+    await PoiCategoryManager.getPoiCategoryList();
+
     await BuildingManager.getBuildingList().then((buildingList) => {
         buildingList.forEach(async (building) => {
             const {id} = building;
@@ -23,10 +34,29 @@
             });
         })
     });
+    await BuildingManager.getOutdoorBuilding().then((outdoorBuilding) => {
+        loadBuildingInfo(outdoorBuilding.id, async () => {
+            // camPos.setData(mapInfo.camPosJson);
+            await Init.initializeOutdoorBuilding();
+            // 도면 휠 이벤트
+            document
+                .querySelector('canvas')
+                .addEventListener('mousedown wheel resize ', () => {
+                    hidePoiMenu();
+                });
+        });
+    })
 
-    await PoiCategoryManager.getPoiCategoryList();
+    function loadBuildingInfo(buildingId, callback) {
+        BuildingManager.getBuildingById(buildingId).then((building) => {
+            const buildingList = BuildingManager.findAll();
+            const index = buildingList.findIndex(building => building.id === Number(buildingId));
+            buildingList[index] = building;
 
-    await PoiManager.getPoiList();
+            if (callback) callback();
+        });
+    }
+
     await PatrolManager.getPatrolList();
 
     const setDateTime = () => {
@@ -42,18 +72,21 @@
 
         Cron.addCronjob('* * * * * *', renderDateTime);
     };
+
     setInterval(Init.updateCurrentTime, 1000);
-    await Init.initializeOutdoorBuilding();
+    // await Init.initializeOutdoorBuilding();
     Init.initCategoryId();
     setDateTime();
+    await PoiManager.getPoiList();
     // Px.Event.AddEventListener('dblclick', 'poi', Init.poiDblclick);
 
 })();
 
 const Init = (function () {
-    const updateCurrentTime = () => {
-        const dateElement = document.querySelector('.header__info .date');
 
+    const updateCurrentTime = () => {
+
+        const dateElement = document.querySelector('.header__info .date');
         const now = new Date();
 
         const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
@@ -81,64 +114,380 @@ const Init = (function () {
         });
     }
 
+    // 분리
+    const setCategoryId = (elements, categoryList) => {
+        elements.forEach(element => {
+            const elementClasses = element.className.split(' ').map(className => className.toLowerCase());
+            const matchedCategory = categoryList.find(category =>
+                elementClasses.includes(category.name.toLowerCase())
+            );
+
+            if (matchedCategory) {
+                element.setAttribute('data-category-id', matchedCategory.id);
+            }
+        });
+    };
+
     const initCategoryId = () => {
         const categoryList = PoiCategoryManager.findAll();
         const poiMenuList = document.querySelectorAll('.poi-menu__list li');
-        poiMenuList.forEach(menu => {
-            // const menuClass = menu.className;
-            const menuClasses = menu.className.split(' ');
-            const matchedCategory = categoryList.find(category => menuClasses.includes(category.name));
+        const equipmentGroup = document.querySelectorAll('#equipmentListPop a');
 
-            if (matchedCategory) {
-                menu.setAttribute('data-category-id', matchedCategory.id);
-            }
-            // Px.Poi.ShowByPropertyArray({"poiCategoryId": Number(matchedCategory.id)});
-        });
+        setCategoryId(poiMenuList, categoryList);
+        setCategoryId(equipmentGroup, categoryList);
+    };
+
+    // init floor
+    const initFloors = (buildingId) => {
+        const { floors } = BuildingManager.findById(buildingId);
+        // floor setting
+        const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
+        floors.forEach(floor => {
+            const floorLi = document.createElement('li');
+            floorLi.setAttribute('floor-id', floor.id);
+            floorLi.textContent = floor.name
+            floorUl.appendChild(floorLi);
+        })
+        clickFloor();
+    }
+    const clickFloor = () => {
+        const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
+        // btnClick
+        floorBtns.forEach(floorBtn => {
+            floorBtn.addEventListener('click', event => {
+                Px.Model.Visible.HideAll();
+                Px.Poi.HideAll();
+                let floorId = floorBtn.getAttribute('floor-id')
+                Px.Model.Visible.Show(Number(floorId));
+                PoiManager.getPoisByFloorId(floorId).then(pois => {
+                    pois.forEach(poi => {
+                        Px.Poi.Show(Number(poi.id));
+                    })
+                })
+            })
+        })
+        // allFloor
+        const allFloor = document.querySelector('.floor-info__ctrl');
+        allFloor.addEventListener('click', event => {
+            Px.Model.Visible.ShowAll();
+        })
+    }
+
+    const setActiveEquipment = (buildingId) => {
+        const equipmentGroup = document.querySelectorAll('#equipmentListPop a');
+        PoiManager.getPoisByBuildingId(buildingId).then(pois => {
+            equipmentGroup.forEach(element => {
+                if (element) {
+                    const categoryId = element.getAttribute("data-category-id")
+                    pois.forEach(poi => {
+                        if (categoryId == poi.poiCategory) {
+                            element.classList.add('active');
+                        }
+                    })
+                }
+            })
+        })
     }
 
     const initializeOutdoorBuilding = async (onComplete) => {
         try {
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
-
+            const contents = document.querySelector('.contents');
+            const outdoorBuilding = await BuildingManager.getOutdoorBuilding();
+            let buildingId = outdoorBuilding.id;
+            initFloors(buildingId);
+            setActiveEquipment(buildingId);
             Px.Core.Initialize(container, async () => {
+                let sbmDataArray = [];
+                if (outdoorBuilding) {
+                    const { buildingFile, floors } = outdoorBuilding;
+                    const { directory } = buildingFile;
+                    sbmDataArray = floors.map((floor) => {
+                        const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                        const sbmData = {
+                            url,
+                            id: floor.sbmFloor[0].id,
+                            displayName: floor.sbmFloor[0].sbmFileName,
+                            baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                            groupId: floor.sbmFloor[0].sbmFloorGroup,
+                        };
+                        return sbmData;
+                    });
 
-                const { buildingFile, floors } = await BuildingManager.getOutdoorBuilding();
-                const { directory } = buildingFile;
-
-                const sbmDataArray = floors.map((floor) => {
-
-                    const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
-                    const sbmData = {
-                        url,
-                        id: floor.sbmFloor[0].id,
-                        displayName: floor.sbmFloor[0].sbmFileName,
-                        baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                        groupId: floor.sbmFloor[0].sbmFloorGroup,
-                    };
-                    return sbmData;
-                });
+                } else {
+                    sbmDataArray.push({
+                        url: "/static/assets/modeling/outside/KTDS_Out_All_250109/KTDS_Out_All_250109_1F_0.sbm",
+                        id: 0,
+                        displayName: "외부 전경",
+                        baseFloor: 1,
+                        groupId: 0,
+                    });
+                }
 
                 Px.Loader.LoadSbmUrlArray({
                     urlDataList: sbmDataArray,
                     center: "",
                     onLoad: function() {
+                        initPoi(buildingId);
+                        initPatrol();
+                        Px.Model.Visible.ShowAll();
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
-
                         Px.Event.On();
-                        Px.Event.AddEventListener('dblclick', 'sbm', buildingDblclick);
-                        initializeTexture();
+                        Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
+                            moveToPoi(poiInfo.id)
+                        });
+                        Px.Effect.Outline.HoverEventOn('area_no');
+                        Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
+                            // Px.Effect.Outline 참고
+                            // Px.Effect.Outline.HoverEventOn('area_no');
 
+                            window.location.href = `/map?buildingId=${buildingId}`;
+                        });
+                        // position relative로 되잇어서 임시 처리
+                        contents.style.position = 'static';
                         if (onComplete) onComplete();
+
                     }
                 });
             });
         } catch (error) {
             console.error('PX Engine Initial', error);
         }
+
+        handleZoomIn();
+        handleZoomOut();
+        handleExtendView();
+        handleFirstView(buildingId);
+        handle2D(buildingId);
     }
+
+    function throttle(callback, interval) {
+        let lastCall = 0;
+        return function (...args) {
+            const now = Date.now();
+            if ((now - lastCall) >= interval) {
+                lastCall = now;
+                callback(...args);
+            }
+        }
+    }
+
+    // zoomIn btn
+    function handleZoomIn() {
+        addButtonEvent(
+            zoomInButton,
+            () => {
+                Px.Camera.StartZoomIn();
+            },
+            () => {
+                Px.Camera.StopZoomIn();
+            },
+        );
+    }
+
+    function handleZoomOut() {
+        addButtonEvent(
+            zoomOutButton,
+            () => {
+                Px.Camera.StartZoomOut();
+            },
+            () => {
+                Px.Camera.StopZoomOut();
+            },
+        );
+    }
+
+    function handleExtendView() {
+        addButtonEvent(homeButton, () => {
+            Px.Camera.ExtendView();
+        });
+    }
+
+    function handleFirstView(buildingId) {
+        addButtonPointerEvent(
+            firstViewButton,
+            () => {
+                Px.Camera.FPS.On();
+            },
+            () => {
+                if (Px.Camera.FPS.IsOn()) {
+                    Px.Camera.FPS.Off();
+                } else {
+                    Px.Util.PointPicker.Off();
+                    Px.Camera.ExtendView();
+                }
+            },
+        );
+    }
+
+    function handle2D(buildingId) {
+        addButtonPointerEvent(
+            camera2D,
+            () => {
+                // TODO: top-view 위치
+                const building = BuildingManager.findById(buildingId);
+                const option = JSON.parse(building.camera2d);
+                if (option === null) {
+                    console.error('2D 카메라 정보가 없습니다.');
+                    return;
+                }
+                option.onComplete = () => {
+                    Px.Camera.SetOrthographic();
+                };
+                Px.Camera.SetState(option);
+            },
+            () => {
+                const building = BuildingManager.findById(buildingId);
+                const option = JSON.parse(building.camera3d);
+                if (option === null) {
+                    console.error('3D 카메라 정보가 없습니다.');
+                    return;
+                }
+                option.onComplete = () => {
+                    Px.Camera.SetPerspective();
+                };
+                Px.Camera.SetState(option);
+
+            },
+        );
+    }
+
+    function setButtonIconColor(button, color) {
+        const buttonIcons = button.querySelectorAll('svg path');
+        buttonIcons.forEach((buttonIcon) => {
+            buttonIcon.setAttribute('stroke', color);
+        });
+    }
+
+    function addButtonPointerEvent(button, onAction, offAction) {
+        button.addEventListener('pointerup', () => {
+            const isOn = button.classList.contains('active');
+
+            setButtonIconColor(button, '#fff');
+            if (isOn) {
+                setButtonIconColor(button, '#919193');
+                button.classList.remove('active');
+                button.classList.remove(...activeStyle);
+                button.classList.add(...defaultStyle);
+                offAction();
+            } else {
+                button.classList.add('active');
+                button.classList.remove(...defaultStyle);
+                button.classList.add(...activeStyle);
+                onAction();
+            }
+        });
+    }
+
+    function addButtonEvent(button, action, stopAction) {
+        button.addEventListener('mousedown', () => {
+            if (Px.Camera.FPS.IsOn()) {
+                Px.Camera.FPS.Off();
+            } else {
+                Px.Util.PointPicker.Off();
+                setButtonIconColor(firstViewButton, '#919193');
+                firstViewButton.classList.remove(...activeStyle);
+                firstViewButton.classList.add(...defaultStyle);
+                firstViewButton.classList.remove('active');
+            }
+
+            setButtonIconColor(button, '#fff');
+            button.classList.remove(...defaultStyle);
+            button.classList.add(...activeStyle);
+            action();
+        });
+
+        button.addEventListener('mouseup', () => {
+            setButtonIconColor(button, '#919193');
+            button.classList.remove(...activeStyle);
+            button.classList.add(...defaultStyle);
+            if (stopAction) {
+                stopAction();
+            }
+        });
+
+        button.addEventListener('mouseleave', () => {
+            setButtonIconColor(button, '#919193');
+            button.classList.remove(...activeStyle);
+            button.classList.add(...defaultStyle);
+            if (stopAction) {
+                stopAction();
+            }
+        });
+    }
+
+    const moveToPoi = (id) => {
+        let poiId;
+        if (id.constructor.name === 'PointerEvent') {
+            poiId = id.currentTarget.getAttribute('poiid');
+        } else {
+            poiId = id;
+        }
+        const poiData = Px.Poi.GetData(poiId);
+
+        if (poiData) {
+            // Px.Model.Visible.HideAll();
+            Px.Model.Visible.Show(String(poiData.property.floorId));
+            Px.Camera.MoveToPoi({
+                id: poiId,
+                isAnimation: true,
+                duration: 500,
+            });
+        } else {
+            alertSwal('POI를 배치해주세요');
+        }
+    };
+
+    const initPoi = async (buildingId) => {
+        PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
+
+        document.querySelector('#webGLContainer').addEventListener('pointerup', () => {
+            const popupList = document.querySelectorAll(
+                '#webGLContainer .dropdown-content',
+            );
+            popupList.forEach((popup) => {
+                popup.remove();
+            });
+        });
+
+    };
+
+    const initPatrol = () => {
+
+        Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
+            console.log('화살표 로딩완료');
+        });
+
+        Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
+            console.log('가상순찰 캐릭터 로딩 완료');
+        });
+
+        Px.VirtualPatrol.Editor.SetPointCreateCallback(savePoint);	//가상순찰 점찍을때 콜백
+
+    }
+
+    const savePoint = (pointData) => {
+
+        const id = document.querySelector("#patrolListTable > tbody > tr.active").dataset.id;
+        const floorNo = document.querySelector("#floorNo").value;
+
+        let param = {
+            floorId : floorNo
+            // ,pointLocation : JSON.stringify(pointData.position)
+            ,pointLocation : pointData.position
+        };
+
+        api.patch(`/patrols/${id}/points`,param).then(() => {
+            patrolPointOnComplete(() => {
+                Px.VirtualPatrol.Editor.On();
+            });
+
+        });
+    }
+
     const initializeIndoorBuilding = async (onComplete) => {
         try {
             document.getElementById('loadingLayer').classList.add('on');
@@ -230,7 +579,6 @@ const Init = (function () {
     const renderingBuildingNameDom = (data) => {
         const {pointerEventData, property} = data;
         const buildingName = document.getElementById('buildingName');
-
         if (property === null || !BuildingManager.findAll().some(building => building.code != null && building.code.split("-")[1] === property.area_no)) {
             buildingName.style.display = 'none';
             buildingName.style.zIndex = '0';

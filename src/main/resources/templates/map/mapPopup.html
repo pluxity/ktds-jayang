@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+
+<div class="popup-basic" th:fragment="popup-template" id="mapLayerPopup" style="display: none">
+    <div class="popup-basic__head">
+        <h2 class="name">가상순찰</h2>
+        <button type="button" class="close"><span class="hide">close</span></button>
+    </div>
+    <!-- 장비 목록 영역 -->
+    <!-- 가상순찰 -->
+    <div id="patrolPopup" class="search-result" style="display: none">
+        <div class="search-result__filter">
+                <span class="radiobox-wrap">
+                    <input type="radio" id="radio">
+                    <label for="radio">실시간</label>
+                </span>
+            <span class="radiobox-wrap">
+                    <input type="radio" id="radio">
+                    <label for="radio">이전</label>
+                </span>
+            <div class="date-picker">
+                <!-- [D] 클릭 시 selected 클래스 추가 -->
+                <input type="date">
+            </div>
+            <div class="time-picker">
+                <!-- [D] 클릭 시 selected 클래스 추가 -->
+                <input type="time">
+            </div>
+            <button type="button" class="button button--solid-middle">조회</button>
+        </div>
+        <div class="search-result__contents">
+            <!-- Accordion -->
+            <div class="accordion">
+                <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                <button class="accordion__btn accordion__btn--active" type="button">야간 순찰 경로 1F<span class="sub">보안팀</span></button>
+                <div class="accordion__detail">
+                    <div class="patrol-info">
+                        <div class="patrol-info__ctrl">
+                            <button type="button" class="play"><span class="hide">play</span></button>
+                            <button type="button" class="pause"><span class="hide">pause</span></button>
+                            <button type="button" class="stop"><span class="hide">stop</span></button>
+                        </div>
+                        <div class="patrol-info__output">
+                            <ol>
+                                <li>
+                                    <div class="location">
+                                        <div class="location__title">정문 출입구</div>
+                                        <ul>
+                                            <li>1F 정문 A</li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 유지보수 -->
+    <div id="maintenancePopup" class="maintenance-info" style="display: none">
+        <ul class="maintenance-info__list">
+            <li>
+                <h3 class="maintenance-info__title">승강설비</h3>
+                <table>
+                    <caption class="hide">승강설비</caption>
+                    <colgroup>
+                        <col style="width:28%;">
+                        <col style="width:25%;">
+                        <col style="width:20%;">
+                        <col style="width:30%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col">유지보수명</th>
+                        <th scope="col">담당 부서</th>
+                        <th scope="col">담당자</th>
+                        <th scope="col">연락처</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>비상감지</td>
+                        <td>부서명은몇글자인두줄가능</td>
+                        <td>김다섯글자</td>
+                        <td>010-1234-5678</td>
+                    </tr>
+                    <tr>
+                        <td>비상감지</td>
+                        <td>부서명은몇글자인두줄가능</td>
+                        <td>김다섯글자</td>
+                        <td>010-1234-5678</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </li>
+            <li>
+                <h3 class="maintenance-info__title">비상벨</h3>
+                <table>
+                    <caption class="hide">비상벨</caption>
+                    <colgroup>
+                        <col style="width:28%;">
+                        <col style="width:25%;">
+                        <col style="width:20%;">
+                        <col style="width:30%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col">유지보수명</th>
+                        <th scope="col">담당 부서</th>
+                        <th scope="col">담당자</th>
+                        <th scope="col">연락처</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>장비 관리자</td>
+                        <td>관리팀</td>
+                        <td>김다섯글자</td>
+                        <td>010-1234-5678</td>
+                    </tr>
+                    <tr>
+                        <td>비상감지</td>
+                        <td>부서명은몇글자인두줄가능</td>
+                        <td>김다섯글자</td>
+                        <td>010-1234-5678</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </li>
+            <li>
+                <h3 class="maintenance-info__title">공조시설</h3>
+                <table>
+                    <caption class="hide">공조시설</caption>
+                    <colgroup>
+                        <col style="width:28%;">
+                        <col style="width:25%;">
+                        <col style="width:20%;">
+                        <col style="width:30%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col">유지보수명</th>
+                        <th scope="col">담당 부서</th>
+                        <th scope="col">담당자</th>
+                        <th scope="col">연락처</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>비상감지</td>
+                        <td>부서명은몇글자인두줄가능</td>
+                        <td>김다섯글자</td>
+                        <td>010-1234-5678</td>
+                    </tr>
+                    <tr>
+                        <td>비상감지</td>
+                        <td>부서명은몇글자인두줄가능</td>
+                        <td>김다섯글자</td>
+                        <td>010-1234-5678</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+    <!-- SOP 영역 -->
+    <div id="sopPopup" class="sop-info" style="display: none">
+        <div class="sop-info__contents">
+            <div class="accordion">
+                <a href="#none" class="accordion__btn">에스컬레이터 끼임 사고</a>
+                <a href="#none" class="accordion__btn">화재 발생</a>
+                <a href="#none" class="accordion__btn">건물 내 정전</a>
+                <a href="#none" class="accordion__btn">추락 사고</a>
+                <a href="#none" class="accordion__btn">주차장 침수</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

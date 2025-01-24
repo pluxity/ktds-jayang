@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8085
   servlet:
     encoding:
       charset: UTF-8
@@ -16,15 +16,16 @@ spring:
     virtual:
       enabled: true
   datasource:
-    url: jdbc:h2:tcp://localhost/~/ktds;
-    driver-class-name: org.h2.Driver
-    username: pluxity
-    password:
+    url: jdbc:mariadb://localhost:3306/test?characterEncoding=UTF-8&serverTimezone=UTC
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: 1234
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MariaDBDialect
+#    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: true
@@ -33,24 +34,14 @@ spring:
       host: localhost
       port: 6379
       timeout: 1000
-  cache:
-    type: redis
-    redis:
-      time-to-live: 60000
-
-jwt:
-  access-token:
-    secret-key: +iBcUJRWGvl+94+ow4nXV1fzWIq4rph8x7MyRmrtWio=
-    expiration: 3600000
-  refresh-token:
-    secret-key: gtzRlqF6bIkmOi5i15A9G5xbLdwiAMmZi6JPOeemC1E=
-    expiration: 86400000
 
 logging:
   level:
-    org: INFO
     com: DEBUG
     root: INFO
+    org:
+      hibernate:
+        SQL: DEBUG
 
 root-path:
   upload: C:/Dev/Upload

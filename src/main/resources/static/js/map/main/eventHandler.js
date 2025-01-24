@@ -2,15 +2,414 @@
 // TODO 버튼 상호 작용 등 을 넣으시오
 
 (function () {
+    // location에 따라 분기처리 할지 말지..
+    const locationPath = window.location.pathname;
     // 미니맵
-    const zoomInButton = document.querySelector('.control-button.zoom-in');
-    const zoomOutButton = document.querySelector('.control-button.zoom-out');
-    const homeButton = document.querySelector('.control-button.home');
-    const firstViewButton = document.querySelector('.control-button.first-view');
-    const topViewButton = document.querySelector('.control-button.top-view');
+    const zoomInButton = document.querySelector('.tool-box__list .plus');
+    const zoomOutButton = document.querySelector('.tool-box__list .minus');
+    const homeButton = document.querySelector('.tool-box__list .home');
+    const firstViewButton = document.querySelector('.tool-box__list .pov');
+    const camera2D = document.querySelector('.tool-box__list .twd');
 
     const defaultStyle = ['bg-gray-100', 'border-gray-70'];
     const activeStyle = ['bg-primary-80', 'border-primary-60'];
+
+    let categoryList = [];
+    const headerTabList = document.querySelector('.header__tab');
+
+    const equipmentList = document.querySelector('#toggle-menu');
+    const equipmentListPop = document.getElementById('equipmentListPop');
+    const equipGroupLinks = document.querySelectorAll('#equipmentListPop .equip-group a');
+
+    const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+    const selectBtn = document.querySelectorAll('.select-box__btn');
+    const searchText = document.querySelector('input[name="searchText"]');
+
+    const equipmentGroup = document.querySelectorAll('.equip-group a');
+
+    const closeButtons = document.querySelectorAll('.popup-basic .close');
+    const popup = document.getElementById('layerPopup');
+    // 팝업 close
+    const closePop = () => {
+        const subPopupList = ['elevatorPop', 'equipmentPop']
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', (event) => {
+                const target = event.target.closest('.popup-basic');
+                target.style.display = 'none';
+                const hasSubPopup = subPopupList.some(subId => target.querySelector(`#${subId}`));
+                if (hasSubPopup) {
+                    subPopupList.forEach(subId => {
+                        const subPopup = target.querySelector(`#${subId}`);
+                        if (subPopup) {
+                            subPopup.style.display = 'none';
+                        }
+                    });
+                }
+            });
+        })
+    }
+
+    // header tab활성화
+    const initTab = () => {
+        headerTabList.addEventListener('click', (event) => {
+            const headerTab = event.target.closest('li');
+            const buildingId = headerTab.getAttribute('data-building-id');
+            window.location.href = `/map?buildingId=${buildingId}`;
+            if (headerTab && headerTabList.contains(headerTab)) {
+                event.preventDefault();
+
+                headerTabList.querySelectorAll('li').forEach((tab) => {
+                    tab.classList.remove('active');
+                });
+                headerTab.classList.add('active');
+
+                if (buildingId) {
+                    getBuilding(buildingId);
+                }
+            }
+        });
+    }
+
+    const viewEquipment = () => {
+        equipmentGroup.forEach(equipment => {
+            equipment.addEventListener('click', function (event) {
+                event.preventDefault();
+                const categoryId = event.target.getAttribute('data-category-id');
+                if (event.target.classList.contains('active')) {
+                    event.target.classList.remove('active');
+                    Px.Poi.HideByProperty("poiCategoryId", Number(categoryId));
+                } else {
+                    event.target.classList.add('active');
+                    Px.Poi.ShowByProperty("poiCategoryId", Number(categoryId));
+                }
+            });
+        });
+    }
+
+    const viewEquipmentList = () => {
+        equipmentList.addEventListener('click', (event) => {
+            if (equipmentListPop.style.display === 'none') {
+                equipmentListPop.style.display = 'inline-block';
+                categoryList = PoiCategoryManager.findAll();
+
+                equipGroupLinks.forEach(link => {
+                    const linkClass = link.className.toLowerCase();
+                    const matchedCategory = categoryList.find(category =>
+                        category.name.toLowerCase() === linkClass);
+
+                    if (matchedCategory) {
+                        link.setAttribute('data-category-id', matchedCategory.id);
+                    }
+                });
+            } else {
+                equipmentListPop.style.display = 'none';
+            }
+        })
+    }
+
+    // system tab
+    const systemTabs = document.querySelectorAll('.system-tap li');
+    const systemPopup = document.getElementById('systemPopup');
+    const systemPopView = () => {
+        systemTabs.forEach(tab => {
+            tab.addEventListener('click', (event) => {
+
+                handleSystemTabClick(event);
+            })
+        })
+    }
+    const elevatorPop = document.getElementById('elevatorPop');
+    const equipmentPop = document.getElementById('equipmentPop');
+    // 하단 systemTab handle
+    const handleSystemTabClick = (event) => {
+        const clickedItem = event.target.closest('li');
+        const isActive = clickedItem.classList.contains('active');
+
+        const closeAllPopups = () => {
+            ['equipmentPop', 'elevatorPop'].forEach(id => {
+                const popup = document.getElementById(id);
+                if (popup) {
+                    popup.style.display = 'none';
+                }
+            });
+            systemPopup.style.display = 'none';
+            systemTabs.forEach(tab => {
+                tab.classList.remove('active')
+            });
+        };
+
+        if (isActive) {
+            closeAllPopups();
+            return;
+        }
+
+        closeAllPopups();
+        clickedItem.classList.add('active');
+        systemPopup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+
+        systemPopup.style.position = 'absolute';
+        systemPopup.style.top = '50%';
+        systemPopup.style.left = '50%';
+        systemPopup.style.transform = 'translate(-50%, -50%)';
+        systemPopup.style.display = 'inline-block';
+        const actions = {
+            equipmentTab: () => {
+                console.log("equipmentTab");
+                equipmentPop.style.display = 'block';
+            },
+            parkTab: () => {
+                console.log("parkTab");
+            },
+            chargeTab: () => {
+                console.log("chargeTab");
+            },
+            elevatorTab: () => {
+                console.log("elevatorTab");
+                layerPopup.setElevatorTab();
+                elevatorPop.style.display = 'block';
+            }
+        };
+        const matchedAction = Object.keys(actions).find(action => clickedItem.id === action);
+        console.log("matchedAction : ", matchedAction);
+        if (matchedAction) {
+            actions[matchedAction]();
+        }
+    }
+
+    // side
+    const handlePoiMenuClick = (event) => {
+        event.preventDefault();
+
+        if (searchText && searchText.value.trim() !== '') {
+            searchText.value = '';
+        }
+
+        poiMenuList.forEach(li => li.classList.remove('active'));
+
+        selectBtn.forEach(btn => {
+            if (btn.classList.contains('select-box__btn--active')) {
+                btn.classList.remove('select-box__btn--active');
+            }
+        });
+
+        const clickedItem = event.target.closest('li');
+        const title = clickedItem.querySelector('span').textContent;
+        const id = clickedItem.getAttribute('data-category-id');
+
+        if (!clickedItem.closest('div').classList.contains('poi-menu__list--map')) {
+            handlePoiCategoryClick(title, id);
+        } else {
+            handlePoiMapClick(clickedItem, title);
+        }
+
+        clickedItem.classList.toggle('active');
+    };
+
+    const handlePoiCategoryClick = (title, id) => {
+        PoiManager.getPoiByCategoryId(id).then(pois => {
+            layerPopup.setCategoryData(title, pois);
+        });
+    };
+
+    const handlePoiMapClick = (clickedItem, title) => {
+        const poiMapMenuList = document.querySelectorAll('#poiMenuListMap li');
+        const titleElement = document.querySelector('#mapLayerPopup .popup-basic__head .name');
+        const mapPopup = document.getElementById('mapLayerPopup');
+        mapPopup.style.display = 'inline-block';
+        mapPopup.style.position = 'absolute';
+        mapPopup.style.transform = 'translate(80px, 5%)';
+        // mapPopup.style.zIndex = '50';
+
+        titleElement.textContent = title;
+        const actions = {
+            closeAllPopups: () => {
+                const popupIds = ['patrolPopup', 'maintenancePopup', 'sopPopup'];
+                popupIds.forEach(id => {
+                    const popup = mapPopup.querySelector(`#${id}`);
+                    if (popup) {
+                        popup.style.display = 'none';
+                    }
+                });
+            },
+            patrol: () => {
+                // patrol popup
+                actions.closeAllPopups();
+                const patrolPopup = mapPopup.querySelector('#patrolPopup')
+                mapPopup.className = '';
+                mapPopup.classList.add('popup-basic');
+                patrolPopup.style.display = 'block';
+                console.log("patrol");
+            },
+            sop: () => {
+                // sop popup
+                actions.closeAllPopups();
+                const sopPopup = mapPopup.querySelector('#sopPopup');
+                mapPopup.className = '';
+                mapPopup.classList.add('popup-basic', 'popup-basic--middle');
+                sopPopup.style.display = 'block';
+                console.log("sop");
+            },
+            maintenance: () => {
+                // maintenance popup
+                actions.closeAllPopups();
+                const maintenancePopup = mapPopup.querySelector('#maintenancePopup')
+                mapPopup.className = '';
+                mapPopup.classList.add('popup-basic');
+                maintenancePopup.style.display = 'block';
+                console.log("maintenance");
+            },
+            shelter: () => {
+                // shelter popup
+                console.log("shelter");
+            }
+        };
+
+        const matchedAction = Object.keys(actions).find(action => clickedItem.classList.contains(action));
+        if (matchedAction) {
+            actions[matchedAction]();
+        }
+    };
+
+    const viewSopDetail = () => {
+        const accordionBtns = document.querySelectorAll('#sopPopup .accordion__btn');
+        const sopDetailPopup = document.querySelector('#sopLayerPopup');
+        const mapLayerPopup = document.getElementById('mapLayerPopup');
+        accordionBtns.forEach(accordionBtn => {
+            accordionBtn.addEventListener('click', (event) => {
+                const rect = mapLayerPopup.getBoundingClientRect();
+                sopDetailPopup.style.left = `${rect.right + 10}px`;
+                sopDetailPopup.style.top = `${rect.top}px`;
+                sopDetailPopup.style.display = 'inline-block';
+                sopDetailPopup.style.position = 'absolute';
+            })
+        })
+    }
+
+    const poiMenuListView = () => {
+        poiMenuList.forEach(item => {
+            item.addEventListener('click', handlePoiMenuClick);
+        });
+    };
+
+
+    // profile btn
+    const profileBtn = document.querySelector('.header__info .profile .profile__btn');
+    profileBtn.addEventListener('click', () => {
+        if (profileBtn.classList.contains('profile__btn--active')) {
+            profileBtn.classList.remove('profile__btn--active')
+        } else {
+            profileBtn.classList.add('profile__btn--active');
+        }
+    })
+
+    const noticePopup = document.querySelector('.header__info .profile #notice');
+    const noticeAlert = document.getElementById('noticeAlert');
+    noticePopup.addEventListener('click', async function () {
+        const noticeList = await NoticeManager.getNotices();
+        if (noticeList.length === 0) {
+            noticeAlert.style.display = 'flex'
+            noticeAlert.style.position = 'absolute';
+            noticeAlert.style.top = '50%';
+            noticeAlert.style.left = '50%';
+            noticeAlert.style.transform = 'translate(-50%, -50%)';
+            // noticeAlert.style.zIndex = '30';
+            const closeButton = noticeAlert.querySelector('button');
+            closeButton.removeAttribute('disabled');
+            closeButton.addEventListener('click', function () {
+                noticeAlert.style.display = 'none';
+            });
+        } else {
+            const popup = document.getElementById('noticePopup');
+            popup.style.display = 'inline-block';
+            popup.style.position = 'absolute';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            // popup.style.zIndex = '30';
+
+            pagingNotice(noticeList, 1);
+        }
+    });
+
+    function pagingNotice(noticeList, itemsPerPage = 1) {
+        let currentPage = 1; // 초기 페이지
+        const totalPages = Math.ceil(noticeList.length / itemsPerPage);
+
+        const updatePaging = (page) => {
+            const startIndex = (page - 1) * itemsPerPage;
+            const currentNotice = noticeList[startIndex];
+
+            const noticeTitle = document.querySelector('.notice-info__title p');
+            const urgentLabel = document.querySelector('.notice-info__title .label');
+            const noticeDate = document.querySelector('.notice-info__date');
+            const pagingNumber = document.querySelector('.popup-event__paging .number');
+            const noticeContent = document.querySelector('.notice-info__contents p');
+
+            if (currentNotice) {
+                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
+                noticeDate.textContent = formatDate(currentNotice.createdAt);
+                noticeContent.textContent = currentNotice.content;
+            }
+
+            pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
+        };
+
+        updatePaging(currentPage);
+
+        document.querySelector('.popup-event__paging .left').addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePaging(currentPage);
+            }
+        });
+
+        document.querySelector('.popup-event__paging .right').addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePaging(currentPage);
+            }
+        });
+
+        const closeBtn = document.querySelector('#noticePopup .close');
+        closeBtn.addEventListener('click', function () {
+            const popup = document.getElementById('noticePopup');
+            popup.style.display = 'none'; // 팝업 숨기기
+        });
+    }
+
+    // date format
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    const allCheck = document.getElementById('check');
+    allCheck.addEventListener('change', () => {
+        if (allCheck.checked) {
+            equipmentGroup.forEach(equipment => equipment.classList.add('active'));
+            Px.Poi.ShowAll();
+        } else {
+            equipmentGroup.forEach(equipment => equipment.classList.remove('active'));
+            Px.Poi.HideAll();
+        }
+    })
+
+    const initializeTexture = () => {
+        Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
+            console.log('화살표 로딩완료');
+        });
+
+        Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
+            console.log('가상순찰 캐릭터 로딩 완료');
+        });
+    }
 
     function setButtonIconColor(button, color) {
         const buttonIcons = button.querySelectorAll('svg path');
@@ -58,17 +457,17 @@
 
     function addButtonPointerEvent(button, onAction, offAction) {
         button.addEventListener('pointerup', () => {
-            const isOn = button.classList.contains('on');
+            const isOn = button.classList.contains('active');
 
             setButtonIconColor(button, '#fff');
             if (isOn) {
                 setButtonIconColor(button, '#919193');
-                button.classList.remove('on');
+                button.classList.remove('active');
                 button.classList.remove(...activeStyle);
                 button.classList.add(...defaultStyle);
                 offAction();
             } else {
-                button.classList.add('on');
+                button.classList.add('active');
                 button.classList.remove(...defaultStyle);
                 button.classList.add(...activeStyle);
                 onAction();
@@ -131,7 +530,7 @@
 
     function handle2D() {
         addButtonPointerEvent(
-            topViewButton,
+            camera2D,
             () => {
                 // TODO: top-view 위치
                 const building = BuildingManager.findById(BUILDING_ID);
@@ -161,86 +560,7 @@
         );
     }
 
-    const deviceSearchInput = document.querySelector(
-        '.device-search-area .input-wrap input[type=search]',
-    );
-    const deviceSearchList = document.querySelector(
-        '.device-search-area .search-list',
-    );
-    const deviceSearchListUL = deviceSearchList.querySelector('ul');
-    deviceSearchInput.addEventListener('keyup', (event) => {
-        const {value} = event.target;
-        deviceSearchListUL.innerHTML = '';
-        if (value === '') return;
-
-        const poiList = PoiManager.findAll();
-        poiList
-            .filter((poi) => poi.position !== null && poi.name.toLowerCase().includes(value.toLowerCase()))
-            .forEach((poi) => {
-                const {id, name} = poi;
-                deviceSearchListUL.innerHTML += `<li data-poi-id='${id}'><span>${name}</span></li>`;
-
-                deviceSearchListUL.querySelectorAll('li').forEach((element) => {
-                    element.addEventListener('mousedown', (event) => {
-                        const {poiId} = event.currentTarget.dataset;
-                        popup.closeAllPopup();
-                        popup.moveToPoi(Number(poiId), () => popup.setPoiEvent(poiId));
-                    });
-                });
-                deviceSearchList.classList.add('on');
-            });
-
-        if (deviceSearchListUL.innerHTML === '') {
-            deviceSearchList.classList.remove('on');
-        }
-    });
-    deviceSearchInput.addEventListener('focus', (event) => {
-        const {value} = event.target;
-        deviceSearchListUL.innerHTML = '';
-
-        if (value === '') return;
-        deviceSearchList.classList.add('on');
-        const poiList = PoiManager.findAll();
-        poiList
-            .filter((poi) => poi.position !== null && poi.name.toLowerCase().includes(value.toLowerCase()))
-            .forEach((poi) => {
-                const {id, name} = poi;
-                deviceSearchListUL.innerHTML += `<li data-poi-id='${id}'><span>${name}</span></li>`;
-                deviceSearchList.classList.add('on');
-            });
-    });
-    deviceSearchInput.addEventListener('blur', () => {
-        deviceSearchListUL.innerHTML = '';
-        deviceSearchInput.value = '';
-        deviceSearchList.classList.remove('on');
-    });
-
-    document
-        .querySelector('.left-information .floor .btn-floor-change')
-        .addEventListener('pointerup', () => {
-            document
-                .querySelector('.left-information .floor .btn-floor-change')
-                .classList.toggle('on');
-            document
-                .querySelector(".left-information .floor .floor-list")
-                .classList.toggle("on");
-        });
-
-    document.querySelectorAll("input[type=date], input[type=datetime-local]").forEach((dateInput) => {
-        dateInput.addEventListener("change", (event) => {
-            event.target.setAttribute("value", event.target.value);
-        });
-    });
-
-  document.querySelector('.popup-content.weather .button.inquire').addEventListener('click', () => {
-      popup.createWeatherPopup()
-  })
-
     // 사이드바
-    const sideBar = document.getElementById('sidebarLayerPopup');
-    const headerTitle = document.querySelector('.popup.sidebar .header-title');
-    const contents = document.querySelectorAll('.content');
-    const sidebarList = document.querySelectorAll('.sidebar-wrap');
 
     function renderPatrol() {
         const patrolList = PatrolManager.findByBuildingId(BUILDING_ID);
@@ -335,9 +655,6 @@
 
                 target.classList.toggle('show');
                 content.classList.toggle('show');
-
-
-
 
                 if (!isShowing && target.classList.contains('show')) {
                     const patrolPoints = document.querySelectorAll('.patrol-path');
@@ -603,37 +920,78 @@
         });
     }
 
-    sidebarList.forEach((sidebar) => {
-        sidebar.addEventListener('click', (event) => {
-            const target = event.currentTarget;
-            const isActive = target.classList.contains('active');
-            const isEsop = target.classList.contains('e-sop-button');
-            const isEvacuation = target.classList.contains('evaluation-button');
-            const dataset = target.dataset.menu;
+    const initPoi = async (buildingId) => {
+        await getPoiRenderingAndList(buildingId);
+        PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
+    };
 
-            sidebarList.forEach((sidebarItem) => {
-                sidebarItem.classList.remove('active');
-            });
-            if (!isActive && menuActions.hasOwnProperty(dataset)) {
-                if(!isEsop) {
-                    if(!isEvacuation) {
-                        Px.Evac.Clear();
-                        popup.closeAllPopup();
-                    }
-                    target.classList.add('active');
-                }
+    // test중
+    const getPoiRenderingAndList = async (buildingId) => {
+        await PoiManager.getPoiList().then(() => {
+            let filteredList = PoiManager.findByBuilding(buildingId)
 
-                menuActions[dataset]();
-            } else if(isActive && menuActions.hasOwnProperty(dataset)) {
-                menuCloseAction[dataset]();
+            if (filteredList === undefined || filteredList.length < 1) {
+                console.warn('POI 가 한 개도 없습니다.');
+                return;
             }
 
+            Px.Poi.HideAll();
+            filteredList.forEach((poiInfo) => {
+                Px.Poi.Show(poiInfo.id);
+            });
         });
-    });
 
-    handleZoomIn();
-    handleZoomOut();
-    handleExtendView();
-    handleFirstView();
-    handle2D();
+    };
+
+
+    function getBuilding(buildingId) {
+        const container = document.getElementById('webGLContainer');
+        container.innerHTML = '';
+        Px.Core.Initialize(container, async () => {
+
+            const { buildingFile, floors } = await BuildingManager.findById(buildingId);
+            const { directory } = buildingFile;
+
+            const sbmDataArray = floors.map((floor) => {
+
+                const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                const sbmData = {
+                    url,
+                    id: floor.sbmFloor[0].id,
+                    displayName: floor.sbmFloor[0].sbmFileName,
+                    baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                    groupId: floor.sbmFloor[0].sbmFloorGroup,
+                };
+                return sbmData;
+            });
+
+            Px.Loader.LoadSbmUrlArray({
+                urlDataList: sbmDataArray,
+                center: "",
+                onLoad: function() {
+                    initPoi(buildingId);
+                    Px.Util.SetBackgroundColor('#333333');
+                    Px.Camera.FPS.SetHeightOffset(15);
+                    Px.Camera.FPS.SetMoveSpeed(500);
+
+                    Px.Event.On();
+                    Px.Event.AddEventListener('dblclick', 'sbm', Init.buildingDblclick);
+                    initializeTexture();
+                }
+            });
+        });
+        handleZoomIn();
+        handleZoomOut();
+        handleExtendView();
+        handleFirstView(buildingId);
+        handle2D(buildingId);
+    }
+
+    initTab();
+    viewEquipmentList();
+    poiMenuListView();
+    viewEquipment();
+    closePop();
+    systemPopView();
+    viewSopDetail();
 })();

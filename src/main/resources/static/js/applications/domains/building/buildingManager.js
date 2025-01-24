@@ -23,6 +23,8 @@ const BuildingManager = (() => {
                 const { result: data } = result.data;
                 const outdoorBuilding = new Building(data);
                 resolve(outdoorBuilding);
+            }).catch(() => {
+                resolve(null);
             });
         });
     };

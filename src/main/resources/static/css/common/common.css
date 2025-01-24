@@ -59,6 +59,10 @@ a {
   color: inherit;
 }
 
+button {
+  background-color: transparent;
+}
+
 /* COLOR */
 :root {
   --color-black:#25232b;
@@ -170,12 +174,21 @@ body {
   background-size: cover;
 }
 
+/* dashboard > main / map > main 
+메인 페이지 너비 고정 클래스 */
+.contents {
+  position: relative;
+  padding: 5rem 0 0 1.87em;
+  box-sizing: border-box;
+  height: 100%;
+}
+
 /* GNB */
 .header {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -289,6 +302,37 @@ body {
 .header__info .profile__layer .detail__group .icon--download::after {
   -webkit-mask-position: -78px -10px;
   mask-position: -78px -10px;
+}
+.header__tab {
+  display: flex;
+  align-items: center;
+  grid-gap: 5px;
+}
+.header__tab li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #80858D;
+  padding: 0 5px;
+  width: 120px;
+  height: 37px;
+  border-radius: 7px;
+  color: var(--color-grayscale01);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.header__tab li:first-child {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+.header__tab li:last-child {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+.header__tab li.active {
+  color: var(--color-mint);
+  border-color: var(--color-mint);
 }
 
 /* 폰트 강조 색상 */

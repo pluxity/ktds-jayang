@@ -8,10 +8,7 @@ import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
-import com.pluxity.ktds.domains.patrol.dto.CreatePatrolDTO;
-import com.pluxity.ktds.domains.patrol.dto.CreatePatrolPointDTO;
-import com.pluxity.ktds.domains.patrol.dto.PatrolPointResponseDTO;
-import com.pluxity.ktds.domains.patrol.dto.PatrolResponseDTO;
+import com.pluxity.ktds.domains.patrol.dto.*;
 import com.pluxity.ktds.domains.patrol.entity.Patrol;
 import com.pluxity.ktds.domains.patrol.entity.PatrolPoint;
 import com.pluxity.ktds.domains.patrol.repository.PatrolPointRepository;
@@ -134,11 +131,10 @@ public class PatrolService {
     }
 
     @Transactional
-    public void updateName(Long id, CreatePatrolPointDTO dto) {
+    public void updateName(Long id, UpdatePatrolPointDTO dto) {
 
         PatrolPoint patrolPoint = getPatrolPointById(id);
-
-//        patrolPoint.updateName(dto.floorId());
+        patrolPoint.updateName(dto.name());
     }
 
     @Transactional

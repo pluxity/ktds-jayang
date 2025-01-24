@@ -40,6 +40,29 @@ const PoiManager = (() => {
         });
     };
 
+    // by buildingId
+    const getPoisByBuildingId = (id) => {
+        return new Promise((resolve) => {
+            api.get(`/poi/building/${id}`).then((result) => {
+                const { result: data } = result.data;
+
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+    // by floorId
+    const getPoisByFloorId = (id) => {
+        return new Promise((resolve) => {
+            api.get(`/poi/floor/${id}`).then((result) => {
+                const { result: data } = result.data;
+
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+
     const getPoi = (id) => {
         return new Promise((resolve) => {
             api.get(`/poi/${id}`).then((result) => {
@@ -210,6 +233,7 @@ const PoiManager = (() => {
     return {
         getPoiList,
         getPoiByCategoryId,
+        getPoisByBuildingId,
         getPoi,
         getFireSensorCurrentData,
         getTmsCurrentData,
@@ -225,6 +249,7 @@ const PoiManager = (() => {
         findByCode,
         findByPoiCategory,
         renderAllPoiToEngineByBuildingId,
-        renderPoiByIdAddByMouse
+        renderPoiByIdAddByMouse,
+        getPoisByFloorId
     };
 })();

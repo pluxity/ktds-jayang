@@ -47,7 +47,6 @@
     const firstViewButton = document.querySelector('.tool-box__list .pov');
     const camera2D = document.querySelector('.tool-box__list .twd');
 
-
     let categoryList = [];
 
     const defaultStyle = ['bg-gray-100', 'border-gray-70'];
@@ -600,16 +599,17 @@
     const popupBtn = document.querySelector('#toggle-menu')
     popupBtn.addEventListener('click', (event) => {
         event.preventDefault();
-        const popupGroup = document.querySelector('.popup-basic.popup-basic--group')
-        const equipGroupLinks = document.querySelectorAll('.equip-group a');
+        const popupGroup = document.getElementById('equipmentListPop');
+        const equipGroupLinks = document.querySelectorAll('#equipmentListPop .equip-group a');
 
         if (popupGroup.style.display === 'none') {
             popupGroup.style.display = 'inline-block';
             categoryList = PoiCategoryManager.findAll();
 
             equipGroupLinks.forEach(link => {
-                const linkClass = link.className;
-                const matchedCategory = categoryList.find(category => category.name === linkClass);
+                const linkClass = link.className.toLowerCase();
+                const matchedCategory = categoryList.find(category =>
+                    category.name.toLowerCase() === linkClass);
 
                 if (matchedCategory) {
                     link.setAttribute('data-category-id', matchedCategory.id);
@@ -621,88 +621,40 @@
     });
 
     // 장비보기 클릭 > popup
-    let lastClicked = null;
     const equipmentGroup = document.querySelectorAll('.equip-group a');
     equipmentGroup.forEach(equipment => {
-        equipment.addEventListener('click', function () {
-            if (lastClicked === this) {
-                return;
+        equipment.addEventListener('click', function (event) {
+            event.preventDefault();
+            let categoryId = event.target.getAttribute('data-category-id');
+            if (event.target.classList.contains('active')) {
+                event.target.classList.remove('active');
+                Px.Poi.HideByProperty("poiCategoryId", Number(categoryId));
+            } else {
+                event.target.classList.add('active');
+                Px.Poi.ShowByProperty("poiCategoryId", Number(categoryId));
             }
-            equipmentGroup.forEach(item => item.classList.remove('active'));
-            lastClicked = this;
-            this.classList.add('active');
-            let categoryId = this.getAttribute('data-category-id');
-            PoiManager.getPoiByCategoryId(categoryId).then(pois => {
-                // test 중...
-                const btnContainer = document.querySelector('header .btn');
-                const existingLinks = btnContainer.querySelectorAll('a');
-                existingLinks.forEach(link => link.remove());
-                if (pois.length > 0) {
-
-                    const buildingIds = {};
-                    pois.forEach(poi => {
-                        if (!buildingIds[poi.buildingId]) {
-                            buildingIds[poi.buildingId] = true;
-                            const { name, code } = BuildingManager.findById(poi.buildingId);
-                            if (name) {
-                                const link = document.createElement('a');
-                                link.textContent = name;
-                                link.classList.add('poi-link');
-                                link.setAttribute('data-building-id', poi.buildingId); // 데이터 속성 추가
-                                btnContainer.appendChild(link);
-                            }
-                        }
-                    });
-                    getBuilding(pois[0].buildingId);
-                } else {
-                    const container = document.getElementById('webGLContainer');
-                    container.innerHTML = '';
-                }
-            })
         });
     });
-
-    document.addEventListener('click', function (event) {
-        const target = event.target;
-        if (target.classList.contains('poi-link')) {
-            event.preventDefault();
-            const buildingId = target.getAttribute('data-building-id');
-            if (buildingId) {
-                loadBuildingInfo(buildingId, async () => {
-                    // camPos.setData(mapInfo.camPosJson);
-                    getBuilding(buildingId);
-                    // 도면 휠 이벤트
-                    document
-                        .querySelector('canvas')
-                        .addEventListener('mousedown wheel resize ', () => {
-                            hidePoiMenu();
-                        });
-
-                    // 층 콤보 박스 생성
-                    let floorListOpt = "<option value=''>전체</option>";
-                    BuildingManager.findById(buildingId).floors.forEach((item) => {
-                        floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
-                    });
-                    const floorNo = document.querySelector('#floorNo');
-                    floorNo.innerHTML = floorListOpt;
-
-                    floorNo.addEventListener('change', function () {
-                        changeEventFloor(this.value);
-                    });
-
-                });
-            }
-        }
-    });
-
     // menu list click
     const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+    const selectBtn = document.querySelectorAll('.select-box__btn');
+    const searchText = document.querySelector('input[name="searchText"]');
     poiMenuList.forEach(item => {
         item.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (searchText && searchText.value.trim() !== '') {
+                searchText.value = '';
+            }
             poiMenuList.forEach(li => {
                 li.classList.remove('active');
             });
-            let clickedItem = event.target.closest('li');
+            selectBtn.forEach(btn => {
+                if (btn.classList.contains('select-box__btn--active')) {
+                    btn.classList.remove('select-box__btn--active');
+                }
+            })
+
+            const clickedItem = event.target.closest('li');
             let name = clickedItem.className;
 
             let title = clickedItem.querySelector('span').textContent;
@@ -710,11 +662,15 @@
             PoiManager.getPoiByCategoryId(id).then(pois => {
                 layerPopup.setCategoryData(title, pois);
             })
-            clickedItem.classList.add('active');
+            if (clickedItem.classList.contains('active')) {
+                clickedItem.classList.remove('active');
+            } else {
+                clickedItem.classList.add('active');
+            }
         });
     });
 
-    const closeButton = document.querySelector('.popup-basic.popup-basic--group .close');
+    const closeButton = document.querySelector('#layerPopup .close');
     const popup = document.getElementById('layerPopup');
     closeButton.addEventListener('click', () => {
         popup.style.display = 'none';
@@ -763,16 +719,6 @@
         handle2D(buildingId);
     }
 
-    function loadBuildingInfo(buildingId, callback) {
-        BuildingManager.getBuildingById(buildingId).then((building) => {
-            const buildingList = BuildingManager.findAll();
-            const index = buildingList.findIndex(building => building.id === Number(buildingId));
-            buildingList[index] = building;
-
-            if (callback) callback();
-        });
-    }
-
     // profile btn
     const profileBtn = document.querySelector('.header__info .profile .profile__btn');
     profileBtn.addEventListener('click', () => {
@@ -784,17 +730,32 @@
     })
 
     const noticePopup = document.querySelector('.header__info .profile #notice');
+    const noticeAlert = document.getElementById('noticeAlert');
     noticePopup.addEventListener('click', async function () {
-        const popup = document.getElementById('noticePopup');
-        popup.style.display = 'block';
-        popup.style.position = 'absolute';
-        popup.style.top = '50%';
-        popup.style.left = '50%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.zIndex = '30';
-
         const noticeList = await NoticeManager.getNotices();
-        pagingNotice(noticeList, 1);
+        if (noticeList.length === 0) {
+            noticeAlert.style.display = 'flex'
+            noticeAlert.style.position = 'absolute';
+            noticeAlert.style.top = '50%';
+            noticeAlert.style.left = '50%';
+            noticeAlert.style.transform = 'translate(-50%, -50%)';
+            noticeAlert.style.zIndex = '30';
+            const closeButton = noticeAlert.querySelector('button');
+            closeButton.removeAttribute('disabled');
+            closeButton.addEventListener('click', function () {
+                noticeAlert.style.display = 'none';
+            });
+        } else {
+            const popup = document.getElementById('noticePopup');
+            popup.style.display = 'inline-block';
+            popup.style.position = 'absolute';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.zIndex = '30';
+
+            pagingNotice(noticeList, 1);
+        }
     });
 
     function pagingNotice(noticeList, itemsPerPage = 1) {
@@ -811,7 +772,6 @@
             const pagingNumber = document.querySelector('.popup-event__paging .number');
             const noticeContent = document.querySelector('.notice-info__contents p');
 
-            console.log("currentNotice : ", currentNotice);
             if (currentNotice) {
                 noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
                 urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
@@ -856,6 +816,17 @@
 
         return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
+
+    const allCheck = document.getElementById('check');
+    allCheck.addEventListener('change', () => {
+        if (allCheck.checked) {
+            equipmentGroup.forEach(equipment => equipment.classList.add('active'));
+            Px.Poi.ShowAll();
+        } else {
+            equipmentGroup.forEach(equipment => equipment.classList.remove('active'));
+            Px.Poi.HideAll();
+        }
+    })
 
     // handleZoomIn();
     // handleZoomOut();

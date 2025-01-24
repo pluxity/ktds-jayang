@@ -54,6 +54,7 @@ table {
 	border-spacing: 0;
 }
 a{text-decoration:none; color:inherit;}
+button{background-color:transparent;}
 
 
 
@@ -174,7 +175,6 @@ body{
 $base-img-path:"/static/images/viewer/";
 
 
-
 /* Container */
 .container{
     width:100%; height:100%;
@@ -182,10 +182,18 @@ $base-img-path:"/static/images/viewer/";
 }
 
 
+/* dashboard > main / map > main 
+메인 페이지 너비 고정 클래스 */
+.contents{
+    position:relative;
+    padding:5rem 0 0 1.87em; box-sizing:border-box;
+    height:100%;
+}
+
 
 /* GNB */
 .header{
-    position:absolute; top:0; left:0; z-index:1; 
+    position:absolute; top:0; left:0; z-index:9999; 
     display:flex; align-items:center; justify-content:space-between;
     padding:0 23px 0 30px; background-color:rgba(52, 52, 60, 0.50); box-sizing:border-box; 
     -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
@@ -259,8 +267,21 @@ $base-img-path:"/static/images/viewer/";
             }
         }
     }
+    &__tab{
+        display:flex; align-items:center; grid-gap:5px;
+        li{
+            display:flex; align-items:center; justify-content:center;
+            border:1px solid #80858D; padding:0 5px;
+            width:120px; height:37px; border-radius:7px;
+            color:var(--color-grayscale01); font-size:0.875rem; font-weight:700; cursor:pointer;
+            &:first-child{border-top-left-radius:20px; border-bottom-left-radius:20px;}
+            &:last-child{border-top-right-radius:20px; border-bottom-right-radius:20px;}
+            &.active{
+                color:var(--color-mint); border-color:var(--color-mint);
+            }
+        }
+    }
 }
-
 
 
 /* 폰트 강조 색상 */

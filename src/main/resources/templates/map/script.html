@@ -31,6 +31,8 @@
         <script th:src="@{/static/js/applications/domains/patrol/patrol.js}"></script>
         <script th:src="@{/static/js/applications/domains/patrol/patrolPoint.js}"></script>
         <script th:src="@{/static/js/applications/domains/patrol/patrolManager.js}"></script>
+        <script th:src="@{/static/js/applications/domains/notice/notice.js}"></script>
+        <script th:src="@{/static/js/applications/domains/notice/noticeManager.js}"></script>
 
         <!-- Common -->
         <script th:src="@{/static/js/common/common.js}"></script>
@@ -38,9 +40,13 @@
         <script th:src="@{/static/js/common/timerHandler.js}"></script>
 
         <!-- MUTATION(상태관리) -->
-        <script th:src="@{/static/js/viewer/main/mutations.js}"></script>
+        <script th:src="@{/static/js/map/main/mutations.js}"></script>
 
         <!-- 초기화 -->
-        <script th:src="@{/static/js/viewer/main/init.js}"></script>
+        <script th:src="@{/static/js/map/main/init.js}"></script>
+
+        <script th:src="@{/static/js/map/main/eventHandler.js}"></script>
+        <script th:src="@{/static/js/viewer/main/popup.js}"></script>
+
     </body>
 </html>

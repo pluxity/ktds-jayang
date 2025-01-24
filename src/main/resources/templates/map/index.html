@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <div th:replace="viewer/head :: head"></div>
+    <div th:replace="~{map/head :: head}"></div>
 </head>
 <body>
-    <nav th:replace="viewer/header :: header"></nav>
+    <nav th:replace="~{map/header :: header}"></nav>
     <div id="webGLContainer" style="position:fixed; width: 100%; height:100%; "></div>
     <div class="container">
         <div class="contents">
@@ -12,9 +12,9 @@
                 <div class="poi-menu__all">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <div class="all">
-                        <a href="javascript:void(0);">장비보기</a>
+                        <a href="javascript:void(0);" id="toggle-menu">장비보기</a>
                         <!-- 장비 목록 팝업 -->
-                        <div class="popup-basic popup-basic--group">
+                        <div id="equipmentListPop" class="popup-basic popup-basic--small">
                             <div class="popup-basic__head">
                                 <span class="checkbox-wrap">
                                     <input type="checkbox" id="check">
@@ -22,9 +22,9 @@
                                 </span>
                             </div>
                             <!-- 장비 표시 영역 -->
-                            <div class="equip-group">
+                            <div id="equipmentGroup" class="equip-group">
                                 <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                                <a href="javascript:void(0);" class="cctv active">CCTV</a>
+                                <a href="javascript:void(0);" class="cctv">CCTV</a>
                                 <a href="javascript:void(0);" class="shutter">셔터</a>
                                 <a href="javascript:void(0);" class="fire">소방시설</a>
                                 <a href="javascript:void(0);" class="air">공기질센터</a>
@@ -36,17 +36,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="poi-menu__list">
+                <div id="poiMenuList" class="poi-menu__list">
                     <ul>
                         <!-- [D] 선택 시 active 클래스 추가 -->
-                        <li class="cctv active">
+                        <li class="cctv">
                             <a href="javascript:void(0);"><span class="hide">cctv</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--right">CCTV</span>
                             </div>
                         </li>
                         <li class="shutter">
-                            <a href="javascript:void(0);"><span class="hide">셔텨</span></a>
+                            <a href="javascript:void(0);"><span class="hide">셔터</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--right">셔터</span>
                             </div>
@@ -89,9 +89,143 @@
                         </li>
                     </ul>
                 </div>
+                <!-- poi menu list map -->
+                <div id="poiMenuListMap" class="poi-menu__list poi-menu__list--map">
+                    <ul>
+                        <!-- [D] 선택 시 active 클래스 추가 -->
+                        <li class="patrol active">
+                            <a href="javascript:void(0)"><span class="hide">가상순찰</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">가상순찰</span>
+                            </div>
+                        </li>
+                        <li class="sop">
+                            <a href="javascript:void(0)"><span class="hide">SOP</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">SOP</span>
+                            </div>
+                        </li>
+                        <li class="shelter">
+                            <a href="javascript:void(0)"><span class="hide">대피경로</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">대피경로</span>
+                            </div>
+                        </li>
+                        <li class="maintenance">
+                            <a href="javascript:void(0)"><span class="hide">유지보수</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">유지보수</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="system-tap">
+                <ul>
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <li id="equipmentTab">설비</li>
+                    <li id="parkTab">주차</li>
+                    <li id="chargeTab">충전소</li>
+                    <li id="elevatorTab">엘리베이터</li>
+                </ul>
+            </div>
+            <div>
+                <!--  floor-info--active 추가 여부 -->
+                <div id="floor-info" class="floor-info">
+                    <div class="floor-info__inner">
+                        <!-- [D] 버튼 클릭 시 floor-info__detail show/hide 적용 -->
+                        <button type="button" class="floor-info__button">층별</button>
+                        <div class="floor-info__detail">
+                            <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
+                            <button type="button" class="up"><span class="hide">UP</span></button>
+                            <ul>
+                            </ul>
+                            <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
+                            <button type="button" class="down"><span class="hide">DOWN</span></button>
+                        </div>
+                        <div class="floor-info__ctrl">
+                            <span class="all">전체</span>
+                            <!-- 축소 scale--down 클래스 추가 및 문구 축소 적용 -->
+                            <span class="scale scale--down"><span class="hide">축소</span></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
+<!--                <aside class="event-state event-state&#45;&#45;active"></aside>-->
+            </div>
+
+            <template th:replace="viewer/popup :: popup-template"></template>
+            <template th:replace="map/mapPopup :: popup-template"></template>
+            <template th:replace="map/sopPopup :: popup-template"></template>
+            <template th:replace="map/systemPopup :: popup-template"></template>
+            <!-- toolBox -->
+            <div class="tool-box" style="position: fixed;bottom: 2rem;right: 2rem;">
+                <ul class="tool-box__list">
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <li class="home active">
+                        <a href="javascript:void(0);"><span class="hide">도면 홈</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">도면 홈</span>
+                        </div>
+                    </li>
+                    <li class="pov">
+                        <a href="javascript:void(0);"><span class="hide">1인칭</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">1인칭</span>
+                        </div>
+                    </li>
+                    <li class="twd">
+                        <a href="javascript:void(0);"><span class="hide">2d</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">2D</span>
+                        </div>
+                    </li>
+                    <li class="minus">
+                        <a href="javascript:void(0);"><span class="hide">minus</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">축소</span>
+                        </div>
+                    </li>
+                    <li class="plus">
+                        <a href="javascript:void(0);"><span class="hide">plus</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">확대</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- notice -->
+            <div id="noticePopup" class="popup-event" style="display: none">
+                <div class="popup-event__head">
+                    <h2 class="name">공지사항</h2>
+                    <button type="button" class="close"><span class="hide">close</span></button>
+                </div>
+                <!-- 공지사항 영역 -->
+                <div class="notice-info">
+                    <h3 class="notice-info__title">
+                        <span class="label">긴급</span>
+                        <p>제목<span class="badge">N</span></p>
+                    </h3>
+                    <span class="notice-info__date">2024년 10월 10일 15:22</span>
+                    <div class="notice-info__contents">
+                        <p>
+                            본문
+                        </p>
+                    </div>
+                </div>
+                <div class="popup-event__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"><span class="active">1</span>/<span>22</span></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
+                </div>
+            </div>
+            <!-- notice == 0 -->
+            <div id="noticeAlert" class="alert" style="display: none">
+                <p>등록된 공지가 없습니다.</p>
+                <button type="button" class="button button--solid-middle" disabled>확인</button>
             </div>
         </div>
     </div>
-    <th:block th:replace="viewer/script :: script "></th:block>
+    <th:block th:replace="~{map/script :: script} "></th:block>
 </body>
 </html>

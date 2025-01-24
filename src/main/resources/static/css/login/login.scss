@@ -1,0 +1,69 @@
+@import "../../publishing/css/components";
+
+@include button;
+
+// input
+@include input_text;
+
+// popup
+@include popup_basic;
+
+// 이미지 경로 변수 설정 
+$base-img-path:"/static/images/viewer/";
+
+.login{
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    height:100%;
+    .popup-basic{width:21.25rem; height:26.875rem;}
+    &__logo{
+        display:inline-block;
+        margin-bottom:30px;
+        width:55px; height:45px;
+        background:url('#{$base-img-path}icon_kt.svg') no-repeat center/contain; 
+    }
+    &__box{
+        position:relative; display:flex; align-items:center; flex-direction:column;
+        padding:40px 45px; box-sizing:border-box;
+        width:21.25rem; height:25.625rem;
+        background-color:var(--color-black); border:1px solid #1D1B22; border-radius:10px;
+        &::after{
+            content:'';
+            position:absolute; right:0; left:0; bottom:0;
+            background:linear-gradient(90deg, rgba(29, 27, 34, 0.60) 0%, rgba(0, 245, 191, 0.60) 50%, rgba(29, 27, 34, 0.60) 100%);
+            width:18.75rem; height:0.0625rem;
+        }
+        .title{
+            margin-bottom:36px; 
+            color:#fff; font-size:24px; font-weight:800; text-align:center;
+        }
+        
+        
+    }
+    &-forms{
+        display:flex; flex-direction:column; grid-gap:35px;
+        width:100%;
+    }
+    &-footer{
+        margin-top:auto; 
+        width:100%;
+        &__warning{
+            margin-bottom:3px;
+            color:var(--color-danger); font-size:0.75rem; line-height:1.2; text-align:center;
+        }
+        &__buttons{
+            display:flex; align-items:center; justify-content:center; grid-gap:10px;
+        }
+        .button{width:100%; margin:0 auto;}
+    }
+    // 로그인 팝업
+    &-popup{
+        display:flex; flex-direction:column;
+        padding:20px; box-sizing:border-box;
+        width:21.25rem; height:23.75rem;
+        &__info{
+            margin-bottom:20px; padding:15px 0; background-color:var(--color-black-key); border-bottom:1px solid var(--color-black); border-radius:8px;
+            text-align:center; color:var(--color-grayscale-light); font-size:0.75rem;
+        }
+        .login-forms{grid-gap:40px;}
+    }
+}

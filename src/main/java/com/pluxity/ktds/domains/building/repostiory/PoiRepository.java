@@ -21,4 +21,5 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     void deleteByBuilding(Building building);
     Optional<Poi> findByFloorId(@Param(value = "id") Long id);
     List<Poi> findPoisByPoiCategoryId(@Param(value = "id") Long id);
+    List<Poi> findPoisByfloorId(@Param(value = "id") Long id);
 }

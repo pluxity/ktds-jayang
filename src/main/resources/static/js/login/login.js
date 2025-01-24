@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const idInput = document.getElementById("id");
     const pwInput = document.getElementById("pw");
 
-    // 입력 감지 및 상태 업데이트 함수
     const updateErrorState = (input, errorClass) => {
         const parentDiv = input.closest(`.${errorClass}`);
         const errorText = parentDiv.querySelector(".input-error__text");
@@ -21,9 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
     pwInput.addEventListener("input", () => updateErrorState(pwInput, "input-error"));
 });
 
+let loginFailCnt = 0;
 document.getElementById('btn_login').onclick = () => {
     const username = document.getElementById("id").value;
     const password = document.getElementById("pw").value;
+    const failMessage = document.querySelector('.login-footer__warning');
     const param = {
         username: username,
         password: password
@@ -31,5 +32,12 @@ document.getElementById('btn_login').onclick = () => {
 
     api.post('/auth/sign-in', param).then((res) => {
         window.location.href = '/viewer';
+    }).catch(() => {
+        loginFailCnt++
+        failMessage.style.display = 'block';
+        failMessage.innerHTML = `
+            로그인 정보가 일치하지 않습니다.<br>
+            5회 이상 불일치 시 로그인이 제한됩니다.(${loginFailCnt}/5)
+        `;
     });
 }

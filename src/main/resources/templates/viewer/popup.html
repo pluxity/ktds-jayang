@@ -7,14 +7,14 @@
 </head>
 <body>
 
-<div class="popup-basic popup-basic--group" th:fragment="popup-template" id="layerPopup" style="display: none">
+<div class="popup-basic" th:fragment="popup-template" id="layerPopup" style="display: none">
     <div class="popup-basic__head">
         <h2 class="name">CCTV</h2>
         <button type="button" class="close"><span class="hide">close</span></button>
     </div>
     <!-- 장비 목록 영역 -->
-    <div class="equip-list">
-        <div class="equip-list__search">
+    <div id="viewerResult" class="search-result">
+        <div class="search-result__filter">
             <!-- select-box -->
             <!-- [D] width값 지정 -->
             <div id="buildingSelect" class="select-box" style="width:100px;">
@@ -37,20 +37,18 @@
             </div>
             <!-- input[type="text"]-->
             <!-- [D] width값 지정 -->
-            <input type="text" placeholder="장비명" style="width:100px;">
+            <input name="searchText" type="text" placeholder="장비명" style="width:100px;">
             <button id="searchBtn" type="button" class="button button--solid-middle">검색</button>
         </div>
-        <div class="equip-list__contents">
+        <div class="search-result__contents">
             <div class="title">
                 총 0<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
             </div>
             <!-- Accordion -->
             <div class="accordion">
             </div>
-
         </div>
     </div>
 </div>
-
 </body>
 </html>

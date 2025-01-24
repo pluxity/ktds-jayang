@@ -7,7 +7,6 @@ const NoticeManager = (function () {
 
         return new Promise((resolve) => {
             api.get(uri).then((result) => {
-                console.log("result : ", result);
                 const { result: data } = result.data;
                 noticeList = data.map((notice) => new Notice(notice.id, notice.title, notice.content, notice.isUrgent, notice.expiredAt, notice.createdAt));
                 resolve(noticeList);

@@ -4,6 +4,7 @@ package com.pluxity.ktds.domains.patrol.controller;
 import com.pluxity.ktds.domains.patrol.dto.CreatePatrolDTO;
 import com.pluxity.ktds.domains.patrol.dto.CreatePatrolPointDTO;
 import com.pluxity.ktds.domains.patrol.dto.PatrolResponseDTO;
+import com.pluxity.ktds.domains.patrol.dto.UpdatePatrolPointDTO;
 import com.pluxity.ktds.domains.patrol.service.PatrolService;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import jakarta.validation.Valid;
@@ -64,7 +65,7 @@ public class PatrolController {
 
     @PatchMapping("/points/{id}/name")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchPatrolPointModifyName(@PathVariable Long id, @Valid @NotNull @RequestBody CreatePatrolPointDTO dto) {
+    public ResponseBody patchPatrolPointModifyName(@PathVariable Long id, @Valid @NotNull @RequestBody UpdatePatrolPointDTO dto) {
         service.updateName(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }

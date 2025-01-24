@@ -61,6 +61,20 @@ public class PoiService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<PoiDetailResponseDTO> findPoisByBuildingId(@NotNull final Long id) {
+        return buildingRepository.findPoisByBuildingId(id).stream()
+                .map(Poi::toDetailResponseDTO)
+                .toList();
+    }
+
+    // floorId로 조회
+    @Transactional(readOnly = true)
+    public List<PoiDetailResponseDTO> findPoisByFloorId(@NotNull final Long id) {
+        return poiRepository.findPoisByfloorId(id).stream()
+                .map(Poi::toDetailResponseDTO)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public PoiDetailResponseDTO findById(@NotNull final Long id) {

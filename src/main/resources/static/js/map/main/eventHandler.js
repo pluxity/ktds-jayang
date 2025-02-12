@@ -2,7 +2,6 @@
 // TODO 버튼 상호 작용 등 을 넣으시오
 
 (function () {
-    // location에 따라 분기처리 할지 말지..
     const locationPath = window.location.pathname;
     // 미니맵
     const zoomInButton = document.querySelector('.tool-box__list .plus');
@@ -11,10 +10,11 @@
     const firstViewButton = document.querySelector('.tool-box__list .pov');
     const camera2D = document.querySelector('.tool-box__list .twd');
 
+    let categoryList = [];
+
     const defaultStyle = ['bg-gray-100', 'border-gray-70'];
     const activeStyle = ['bg-primary-80', 'border-primary-60'];
 
-    let categoryList = [];
     const headerTabList = document.querySelector('.header__tab');
 
     const equipmentList = document.querySelector('#toggle-menu');
@@ -29,6 +29,8 @@
 
     const closeButtons = document.querySelectorAll('.popup-basic .close');
     const popup = document.getElementById('layerPopup');
+    const systemTabs = document.querySelectorAll('.system-tap li');
+    
     // 팝업 close
     const closePop = () => {
         const subPopupList = ['elevatorPop', 'equipmentPop']
@@ -42,6 +44,9 @@
                         const subPopup = target.querySelector(`#${subId}`);
                         if (subPopup) {
                             subPopup.style.display = 'none';
+                            systemTabs.forEach(tab => {
+                                tab.classList.remove('active')
+                            });
                         }
                     });
                 }
@@ -55,6 +60,8 @@
             const headerTab = event.target.closest('li');
             const buildingId = headerTab.getAttribute('data-building-id');
             window.location.href = `/map?buildingId=${buildingId}`;
+
+            // init할때..
             if (headerTab && headerTabList.contains(headerTab)) {
                 event.preventDefault();
 
@@ -72,18 +79,31 @@
 
     const viewEquipment = () => {
         equipmentGroup.forEach(equipment => {
-            equipment.addEventListener('click', function (event) {
-                event.preventDefault();
-                const categoryId = event.target.getAttribute('data-category-id');
-                if (event.target.classList.contains('active')) {
-                    event.target.classList.remove('active');
-                    Px.Poi.HideByProperty("poiCategoryId", Number(categoryId));
-                } else {
-                    event.target.classList.add('active');
-                    Px.Poi.ShowByProperty("poiCategoryId", Number(categoryId));
-                }
-            });
+            equipment.removeEventListener('click', handleEquipmentClick);
+            equipment.addEventListener('click', handleEquipmentClick);
         });
+    }
+
+    const handleEquipmentClick = (event) => {
+        event.preventDefault();
+        const categoryId = Number(event.target.getAttribute('data-category-id'));
+        const floor = document.querySelector('#floor-info .floor-info__detail ul li.active');
+        const floorId = floor ? Number(floor.getAttribute('floor-id')) : null;
+        const isActive = event.target.classList.toggle('active');
+
+        if (floorId !== null) {
+            if (isActive) {
+                Px.Poi.ShowByPropertyArray({ "floorId": floorId, "poiCategoryId": categoryId });
+            } else {
+                Px.Poi.HideByPropertyArray({ "floorId": floorId, "poiCategoryId": categoryId });
+            }
+        } else {
+            if (isActive) {
+                Px.Poi.ShowByProperty("poiCategoryId", categoryId);
+            } else {
+                Px.Poi.HideByProperty("poiCategoryId", categoryId);
+            }
+        }
     }
 
     const viewEquipmentList = () => {
@@ -91,7 +111,6 @@
             if (equipmentListPop.style.display === 'none') {
                 equipmentListPop.style.display = 'inline-block';
                 categoryList = PoiCategoryManager.findAll();
-
                 equipGroupLinks.forEach(link => {
                     const linkClass = link.className.toLowerCase();
                     const matchedCategory = categoryList.find(category =>
@@ -108,7 +127,6 @@
     }
 
     // system tab
-    const systemTabs = document.querySelectorAll('.system-tap li');
     const systemPopup = document.getElementById('systemPopup');
     const systemPopView = () => {
         systemTabs.forEach(tab => {
@@ -118,6 +136,7 @@
             })
         })
     }
+
     const elevatorPop = document.getElementById('elevatorPop');
     const equipmentPop = document.getElementById('equipmentPop');
     // 하단 systemTab handle
@@ -155,6 +174,7 @@
         const actions = {
             equipmentTab: () => {
                 console.log("equipmentTab");
+                layerPopup.setEquipmentTab();
                 equipmentPop.style.display = 'block';
             },
             parkTab: () => {
@@ -170,7 +190,7 @@
             }
         };
         const matchedAction = Object.keys(actions).find(action => clickedItem.id === action);
-        console.log("matchedAction : ", matchedAction);
+
         if (matchedAction) {
             actions[matchedAction]();
         }
@@ -238,7 +258,6 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 patrolPopup.style.display = 'block';
-                console.log("patrol");
             },
             sop: () => {
                 // sop popup
@@ -247,7 +266,6 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic', 'popup-basic--middle');
                 sopPopup.style.display = 'block';
-                console.log("sop");
             },
             maintenance: () => {
                 // maintenance popup
@@ -256,7 +274,6 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 maintenancePopup.style.display = 'block';
-                console.log("maintenance");
             },
             shelter: () => {
                 // shelter popup
@@ -392,11 +409,16 @@
 
     const allCheck = document.getElementById('check');
     allCheck.addEventListener('change', () => {
+        // floorid도 고려해서
         if (allCheck.checked) {
-            equipmentGroup.forEach(equipment => equipment.classList.add('active'));
+            equipmentGroup.forEach(equipment => {
+                equipment.classList.add('active')
+            });
             Px.Poi.ShowAll();
         } else {
-            equipmentGroup.forEach(equipment => equipment.classList.remove('active'));
+            equipmentGroup.forEach(equipment => {
+                equipment.classList.remove('active')
+            });
             Px.Poi.HideAll();
         }
     })
@@ -942,7 +964,6 @@
         });
 
     };
-
 
     function getBuilding(buildingId) {
         const container = document.getElementById('webGLContainer');

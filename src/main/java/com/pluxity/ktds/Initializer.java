@@ -44,8 +44,9 @@ public class Initializer implements CommandLineRunner {
         if (!userRepository.existsByUsername("admin")) {
             List<UserGroup> userGroups = getUserGroups();
 
+//            UserGroup userGroup = getOrCreateUserGroup("관리자", "ADMIN");
             User user = User.builder()
-                    .userGroup(userGroups.get(0))
+                    .userGroup(userGroups.getFirst())
                     .username("admin")
                     .password(passwordEncoder.encode("pluxity123!@#"))
                     .name("관리자")
@@ -79,17 +80,8 @@ public class Initializer implements CommandLineRunner {
                     .build();
             adminAuthority.assignToUserGroup(savedUserGroup);
             userAuthorityRepository.save(adminAuthority);
-//            List<UserAuthority> authorities = Arrays.asList(
-//                    UserAuthority.builder().name("ADMIN").build(),
-//                    UserAuthority.builder().name("USER").build()
-//            );
-//            for (UserAuthority authority : authorities) {
-//                authority.assignToUserGroup(savedUserGroup);
-//            }
-//            userAuthorityRepository.saveAll(authorities);
         }
 
         return userGroups;
     }
-
 }

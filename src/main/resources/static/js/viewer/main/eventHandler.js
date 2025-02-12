@@ -2,44 +2,6 @@
 // TODO 버튼 상호 작용 등 을 넣으시오
 
 (function () {
-    const initializeTexture = () => {
-        Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
-            console.log('화살표 로딩완료');
-        });
-
-        Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
-            console.log('가상순찰 캐릭터 로딩 완료');
-        });
-    }
-    const initPoi = async (buildingId) => {
-        await getPoiRenderingAndList(buildingId);
-        PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
-    };
-
-    // test중
-    const getPoiRenderingAndList = async (buildingId) => {
-        await PoiManager.getPoiList().then(() => {
-            let filteredList = PoiManager.findByBuilding(buildingId)
-
-            if (filteredList === undefined || filteredList.length < 1) {
-                console.warn('POI 가 한 개도 없습니다.');
-                return;
-            }
-
-            Px.Poi.HideAll();
-            filteredList.forEach((poiInfo) => {
-                Px.Poi.Show(poiInfo.id);
-            });
-        });
-
-    };
-    const renderingPoiList = (filteredList) => {
-        Px.Poi.HideAll();
-        filteredList.forEach((poiInfo) => {
-            Px.Poi.Show(poiInfo.id);
-        });
-    };
-
     // 미니맵
     const zoomInButton = document.querySelector('.tool-box__list .plus');
     const zoomOutButton = document.querySelector('.tool-box__list .minus');
@@ -596,14 +558,14 @@
 
         });
     });
-    const popupBtn = document.querySelector('#toggle-menu')
-    popupBtn.addEventListener('click', (event) => {
+    const equipmentList = document.querySelector('#toggle-menu')
+    equipmentList.addEventListener('click', (event) => {
         event.preventDefault();
-        const popupGroup = document.getElementById('equipmentListPop');
+        const equipmentListPop = document.getElementById('equipmentListPop');
         const equipGroupLinks = document.querySelectorAll('#equipmentListPop .equip-group a');
 
-        if (popupGroup.style.display === 'none') {
-            popupGroup.style.display = 'inline-block';
+        if (equipmentListPop.style.display === 'none') {
+            equipmentListPop.style.display = 'inline-block';
             categoryList = PoiCategoryManager.findAll();
 
             equipGroupLinks.forEach(link => {
@@ -616,7 +578,7 @@
                 }
             });
         } else {
-            popupGroup.style.display = 'none';
+            equipmentListPop.style.display = 'none';
         }
     });
 
@@ -675,49 +637,6 @@
     closeButton.addEventListener('click', () => {
         popup.style.display = 'none';
     });
-
-    function getBuilding(buildingId) {
-        const container = document.getElementById('webGLContainer');
-        container.innerHTML = '';
-        Px.Core.Initialize(container, async () => {
-
-            const { buildingFile, floors } = await BuildingManager.findById(buildingId);
-            const { directory } = buildingFile;
-
-            const sbmDataArray = floors.map((floor) => {
-
-                const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
-                const sbmData = {
-                    url,
-                    id: floor.sbmFloor[0].id,
-                    displayName: floor.sbmFloor[0].sbmFileName,
-                    baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                    groupId: floor.sbmFloor[0].sbmFloorGroup,
-                };
-                return sbmData;
-            });
-
-            Px.Loader.LoadSbmUrlArray({
-                urlDataList: sbmDataArray,
-                center: "",
-                onLoad: function() {
-                    initPoi(buildingId);
-                    Px.Util.SetBackgroundColor('#333333');
-                    Px.Camera.FPS.SetHeightOffset(15);
-                    Px.Camera.FPS.SetMoveSpeed(500);
-
-                    Px.Event.On();
-                    Px.Event.AddEventListener('dblclick', 'sbm', Init.buildingDblclick);
-                    initializeTexture();
-                }
-            });
-        });
-        handleZoomIn();
-        handleZoomOut();
-        handleExtendView();
-        handleFirstView(buildingId);
-        handle2D(buildingId);
-    }
 
     // profile btn
     const profileBtn = document.querySelector('.header__info .profile .profile__btn');
@@ -827,10 +746,4 @@
             Px.Poi.HideAll();
         }
     })
-
-    // handleZoomIn();
-    // handleZoomOut();
-    // handleExtendView();
-    // handleFirstView();
-    // handle2D();
 })();

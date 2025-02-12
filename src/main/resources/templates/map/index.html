@@ -93,7 +93,7 @@
                 <div id="poiMenuListMap" class="poi-menu__list poi-menu__list--map">
                     <ul>
                         <!-- [D] 선택 시 active 클래스 추가 -->
-                        <li class="patrol active">
+                        <li class="patrol">
                             <a href="javascript:void(0)"><span class="hide">가상순찰</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--right">가상순찰</span>
@@ -131,7 +131,7 @@
             </div>
             <div>
                 <!--  floor-info--active 추가 여부 -->
-                <div id="floor-info" class="floor-info">
+                <div id="floor-info" class="floor-info floor-info--active">
                     <div class="floor-info__inner">
                         <!-- [D] 버튼 클릭 시 floor-info__detail show/hide 적용 -->
                         <button type="button" class="floor-info__button">층별</button>
@@ -151,7 +151,8 @@
                     </div>
                 </div>
                 <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
-<!--                <aside class="event-state event-state&#45;&#45;active"></aside>-->
+                <!-- floor-info--active 될때 같이 event-state--active -->
+                <aside class="event-state event-state--active"></aside>
             </div>
 
             <template th:replace="viewer/popup :: popup-template"></template>
@@ -223,6 +224,19 @@
             <div id="noticeAlert" class="alert" style="display: none">
                 <p>등록된 공지가 없습니다.</p>
                 <button type="button" class="button button--solid-middle" disabled>확인</button>
+            </div>
+            <!-- toast toast--active 클래스 추가 -->
+            <!-- event -> toast active -->
+            <div class="toast">
+                <div class="toast__box">
+                    <button type="button" class="toast__close"><span class="hide">close</span></button>
+                    <div class="toast__texts">
+                        <strong>제목1</strong>
+                        <p>
+                            내용1
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

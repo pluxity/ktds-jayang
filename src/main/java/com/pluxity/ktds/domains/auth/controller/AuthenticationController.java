@@ -7,11 +7,9 @@ import com.pluxity.ktds.domains.auth.service.AuthenticationService;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import com.pluxity.ktds.global.response.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.pluxity.ktds.global.constant.SuccessCode.*;
 
@@ -30,7 +28,7 @@ public class AuthenticationController {
 
   @PostMapping(value = "/sign-in")
   public DataResponseBody<SignInResponseDTO> signIn(
-      @RequestBody SignInRequestDTO signInRequestDto) {
-    return DataResponseBody.of(authenticationService.signIn(signInRequestDto));
+          @RequestBody SignInRequestDTO signInRequestDto, HttpServletResponse response) {
+    return DataResponseBody.of(authenticationService.signIn(signInRequestDto, response));
   }
 }

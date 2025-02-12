@@ -789,14 +789,14 @@ const layerPopup = (function () {
         let buildingInfo = BuildingManager.findById(poi.buildingId);
 
         const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
-        const accordionElement = document.querySelector('.accordion');
+        const accordionElement = document.getElementById('mainAccordion');
         // 버튼
         const accordionBtn = document.createElement('div');
         accordionBtn.classList.add('accordion__btn');
         accordionBtn.innerHTML = `${poi.name}`;
 
         accordionBtn.addEventListener('click', () => {
-            const allBtns = document.querySelectorAll('.accordion__btn');
+            const allBtns = accordionElement.querySelectorAll('.accordion__btn');
             if (accordionBtn.classList.contains('accordion__btn--active')) {
                 accordionBtn.classList.remove('accordion__btn--active');
             } else {
@@ -984,15 +984,45 @@ const layerPopup = (function () {
         }
     }
 
+    const elevatorPopup = document.getElementById('elevatorPop');
     const setElevatorTab = () => {
-        const elevatorPopup = document.getElementById('elevatorPop');
         const popupUl = elevatorPopup.querySelector('.section--contents ul')
+        // popupUl.innerHTML = '';
+        popupUl.replaceChildren()
+
+        // 전체 탭
+        const allTabLi = document.createElement('li');
+        allTabLi.setAttribute('role', 'tab');
+        allTabLi.setAttribute('aria-controls', 'tabpanelAll');
+        allTabLi.setAttribute('id', 'elevTabAll');
+        allTabLi.setAttribute('aria-selected', 'false');
+        allTabLi.setAttribute('tabindex', '0');
+
+        const allTabA = document.createElement('a');
+        allTabA.setAttribute('href', 'javascript:void(0);');
+        allTabA.textContent = '전체';
+
+        allTabLi.appendChild(allTabA);
+        // all tab은 default로 맨앞에
+        popupUl.prepend(allTabLi);
+
+        allTabLi.addEventListener('click', () => {
+            const poiList = PoiManager.findAll();
+            PoiManager.getPoiList().then(poiList => {
+                const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
+                console.log('filteredPoiList : ', filteredPoiList);
+                addElevators(filteredPoiList);
+            })
+        });
+
+        // 건물 탭
         BuildingManager.getBuildingList().then(buildings => {
             buildings.forEach(building => {
                 const popupLi = document.createElement('li')
                 popupLi.setAttribute('role', 'tab');
                 popupLi.setAttribute('aria-controls', `tabpanel${building.id}`);
-                popupLi.setAttribute('id', `tab${building.id}`);
+                popupLi.setAttribute('id', `elevTab${building.id}`);
+                popupLi.setAttribute('building-id', `${building.id}`);
                 popupLi.setAttribute('aria-selected', 'false');
                 popupLi.setAttribute('tabindex', '0');
                 const popupAtag = document.createElement('a')
@@ -1000,18 +1030,264 @@ const layerPopup = (function () {
                 popupAtag.textContent = building.name;
                 popupLi.appendChild(popupAtag);
                 popupUl.appendChild(popupLi);
+                popupLi.addEventListener('click', () => {
+                    PoiManager.getPoisByBuildingId(building.id).then(poiList => {
+                        const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
+                        console.log('filteredPoiList : ', filteredPoiList);
+                        addElevators(filteredPoiList);
+                    })
+                });
             })
-        })
-    }
-
-    // tab click이벤트에 넣으면 될듯.....
-    const setElevatorData = (buildingId) => {
-        const cctvList = document.querySelector('.facility-area__list');
+        });
 
     }
+
+    const addElevators = (filteredPoiList) => {
+        const facilityList = document.querySelector('.facility-area__list');
+        facilityList.innerHTML = '';
+
+        let player = null;
+        filteredPoiList.forEach((poi) => {
+            const li = document.createElement('li');
+
+            const canvasId = `canvas_poi_${poi.id}`;
+            li.innerHTML = `
+                <div class="head">
+                    <div class="head__title">
+                        <span>${poi.property.buildingName}</span>
+                        <span>${poi.name}</span>
+                    </div>
+                    <div class="head__state">
+                        <span class="label label--standby">대기</span>
+                        <button id="playBtn" type="button" class="button-move">도면 이동</button>
+                    </div>
+                </div>
+                <div class="detail">
+                    <div class="elevator-info">
+                        <div class="elevator-info__view">
+                            <canvas id="${canvasId}" width="auto" height="auto"></canvas>  
+                        </div>
+                        <div class="elevator-info__detail">
+                            <div class="info info--floor">
+                                <dl>
+                                    <dt class="info__title">운행층수</dt>
+                                    <dd>
+                                        <strong class="info__floor">B4F ~ 31F</strong>
+                                        <br>
+                                        <span class="info__text">전층운행</span>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div class="info info--location">
+                                <dl>
+                                    <dt class="info__title">현재 위치</dt>
+                                    <dd class="info__floor">25F</dd>
+                                </dl>
+                                <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            facilityList.appendChild(li);
+            const canvasElement = document.getElementById(canvasId);
+        });
+
+    }
+
+    // 설비 popup
+    const equipmentPopup = document.getElementById('equipmentPop');
+    const setEquipmentTab = () => {
+        const popupUl = equipmentPopup.querySelector('.section--select ul')
+        popupUl.replaceChildren()
+        const eqAccordion = document.getElementById("eqAccordion");
+        eqAccordion.replaceChildren();
+
+        // 전체 탭
+        const allTabLi = document.createElement('li');
+        allTabLi.setAttribute('role', 'tab');
+        allTabLi.setAttribute('aria-controls', 'tabpanelAll');
+        allTabLi.setAttribute('id', 'eqTabAll');
+        allTabLi.setAttribute('tabindex', '0');
+        allTabLi.classList.add("active");
+        allTabLi.setAttribute("aria-selected", "true");
+
+        const allTabA = document.createElement('a');
+        allTabA.setAttribute('href', 'javascript:void(0);');
+        allTabA.textContent = '전체';
+        allTabA.addEventListener("click", () => {
+            updateActiveTab(allTabLi);
+            setEquipmentData("");
+        });
+
+        allTabLi.appendChild(allTabA);
+        // all tab은 default로 맨앞에
+        popupUl.prepend(allTabLi);
+
+        // 건물 탭
+        BuildingManager.getBuildingList().then((buildings) => {
+            buildings.forEach((building) => {
+                const popupLi = document.createElement("li");
+                popupLi.setAttribute("role", "tab");
+                popupLi.setAttribute("aria-controls", `tabpanel${building.id}`);
+                popupLi.setAttribute("id", `eqTab${building.id}`);
+                popupLi.setAttribute("aria-selected", "false");
+                popupLi.setAttribute("tabindex", "0");
+
+                const popupAtag = document.createElement("a");
+                popupAtag.setAttribute("href", "javascript:void(0);");
+                popupAtag.textContent = building.name;
+
+                popupAtag.addEventListener("click", () => {
+                    updateActiveTab(popupLi);
+                    setEquipmentData(building.id);
+                });
+
+                popupLi.appendChild(popupAtag);
+                popupUl.appendChild(popupLi);
+            });
+            updateActiveTab(allTabLi);
+            setEquipmentData("");
+        });
+    }
+
+    const setEquipmentData = (buildingId) => {
+        const eqAccordion = document.getElementById("eqAccordion");
+        eqAccordion.replaceChildren();
+
+        const poiCategories = PoiCategoryManager.findAll();
+
+        let firstAccordionBtn = null;
+        let firstPoi = null;
+
+        poiCategories.forEach((category, categoryIndex) => {
+            const pois = PoiManager.findByPoiCategory(buildingId, "", category.id);
+            const poiCount = pois.length;
+
+            const btn = document.createElement("button");
+            btn.classList.add("accordion__btn");
+            btn.textContent = `${category.name} (${poiCount})`;
+
+            if (categoryIndex === 0) {
+                firstAccordionBtn = btn;
+            }
+
+            const detailDiv = document.createElement("div");
+            detailDiv.classList.add("accordion__detail");
+            detailDiv.style.display = "none";
+
+            if (pois.length > 0) {
+                const table = document.createElement("table");
+                const tbody = document.createElement("tbody");
+
+                pois.forEach((poi, poiIndex) => {
+                    const tr = document.createElement("tr");
+                    const td = document.createElement("td");
+                    td.classList.add("align-left");
+                    td.textContent = poi.name;
+                    td.setAttribute("td-poi-id", poi.id);
+
+                    if (categoryIndex === 0 && poiIndex === 0) {
+                        firstPoi = poi;
+                    }
+
+                    td.addEventListener("click", () => {
+                        updatePoiDetail(poi);
+                    });
+
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(tbody);
+                detailDiv.appendChild(table);
+            } else {
+                const emptyMessage = document.createElement("p");
+                emptyMessage.classList.add("empty");
+                emptyMessage.textContent = "검색 결과가 없습니다.";
+                detailDiv.appendChild(emptyMessage);
+            }
+
+            btn.addEventListener("click", function () {
+                const isActive = btn.classList.contains("accordion__btn--active");
+
+                document.querySelectorAll(".accordion__btn").forEach(b => b.classList.remove("accordion__btn--active"));
+                document.querySelectorAll(".accordion__detail").forEach(d => d.style.display = "none");
+
+                if (!isActive) {
+                    btn.classList.add("accordion__btn--active");
+                    detailDiv.style.display = "block";
+                }
+            });
+
+            eqAccordion.appendChild(btn);
+            eqAccordion.appendChild(detailDiv);
+        });
+
+        if (firstAccordionBtn) {
+            firstAccordionBtn.classList.add("accordion__btn--active");
+            firstAccordionBtn.nextElementSibling.style.display = "block";
+        }
+
+        if (firstPoi) {
+            updatePoiDetail(firstPoi);
+        }
+    };
+
+    const updateActiveTab = (selectedTab) => {
+        document.querySelectorAll(".section--select ul li").forEach(tab => {
+            tab.classList.remove("active");
+            tab.setAttribute("aria-selected", "false");
+        });
+
+        selectedTab.classList.add("active");
+        selectedTab.setAttribute("aria-selected", "true");
+    };
+
+    const systemPop = document.getElementById("systemPopup");
+    const updatePoiDetail = (poi) => {
+        const sectionHead = equipmentPopup.querySelector(".section__head");
+        const title = equipmentPopup.querySelector(".section__head .title");
+        const sectionDetail = equipmentPopup.querySelector(".section__detail");
+
+        title.textContent = `${poi.name} | ${poi.property.buildingName} | ${poi.property.floorNo}`;
+
+        const moveBtn = sectionHead.querySelector(".button-move");
+        moveBtn.setAttribute("btn-poi-id", poi.id);
+
+        moveBtn.addEventListener("click", (event) => {
+            elevatorPopup.style.display = "none";
+            systemPop.style.display = "none";
+            console.log("poi : ", poi);
+            movePoi(poi.id);
+        });
+    }
+
+    const movePoi = (id) => {
+        let poiId;
+        if (id.constructor.name === 'PointerEvent') {
+            poiId = id.currentTarget.getAttribute('poiid');
+        } else {
+            poiId = id;
+        }
+        const poiData = Px.Poi.GetData(poiId);
+
+        if (poiData) {
+            Px.Model.Visible.HideAll();
+            Px.Model.Visible.Show(Number(poiData.property.floorId));
+            Px.Camera.MoveToPoi({
+                id: poiId,
+                isAnimation: true,
+                duration: 500,
+            });
+        } else {
+            alertSwal('POI를 배치해주세요');
+        }
+    };
 
     return {
         setElevatorTab,
+        setEquipmentTab,
         createRecentPopup,
         createEarthquakePopup,
         createSensorPopup,

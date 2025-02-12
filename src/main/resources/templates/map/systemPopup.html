@@ -18,9 +18,7 @@
             <div class="section section--contents">
                 <ul class="tab-list" role="tablist">
                     <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                    <li class="active" role="tab" id="allTab" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="javascript:void(0);">전체</a></li>
-<!--                    <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 A</a></li>-->
-<!--                    <li role="tab" id="tab3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">건물 B</a></li>-->
+<!--                    <li class="active" role="tab" id="allTab" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="javascript:void(0);">전체</a></li>-->
                 </ul>
                 <div class="section__detail">
                     <div class="facility-area facility-area--elevator">
@@ -397,12 +395,12 @@
             <div class="section section--select">
                 <ul class="tab-list tab-list--border" role="tablist">
                     <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                    <li class="active" role="tab" id="tab_1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">전체</a></li>
-                    <li role="tab" id="tab_2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 A</a></li>
-                    <li role="tab" id="tab_3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">건물 B</a></li>
-                    <li role="tab" id="tab_3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">주차장</a></li>
+<!--                    <li class="active" role="tab" id="tab_1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">전체</a></li>-->
+<!--                    <li role="tab" id="tab_2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 A</a></li>-->
+<!--                    <li role="tab" id="tab_3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">건물 B</a></li>-->
+<!--                    <li role="tab" id="tab_4" aria-controls="tabpanel4" aria-selected="false" tabindex="0"><a href="#tab3">주차장</a></li>-->
                 </ul>
-                <div class="accordion">
+                <div id="eqAccordion" class="accordion">
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
                     <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
                     <div class="accordion__detail">
@@ -415,31 +413,16 @@
                             <tr>
                                 <td class="align-left">기계종류</td>
                             </tr>
-                            <tr>
-                                <td class="align-left">기계종류</td>
-                            </tr>
-                            <tr>
-                                <td class="align-left">기계종류</td>
-                            </tr>
-                            <tr>
-                                <td class="align-left">기계종류</td>
-                            </tr>
-                            <tr>
-                                <td class="align-left">기계종류</td>
-                            </tr>
-                            <tr>
-                                <td class="align-left">기계종류</td>
-                            </tr>
                             </tbody>
                         </table>
                     </div>
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                    <button class="accordion__btn accordion__btn--active" type="button">에스컬레이터 (125)</button>
+                    <button class="accordion__btn" type="button">에스컬레이터 (125)</button>
                     <div class="accordion__detail">
                         <p class="empty">검색 결과가 없습니다.</p>
                     </div>
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                    <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                    <button class="accordion__btn" type="button">기계설비</button>
                     <div class="accordion__detail">
                         <table>
                             <caption class="hide">출입구</caption>
@@ -469,7 +452,7 @@
                         </table>
                     </div>
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                    <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                    <button class="accordion__btn" type="button">기계설비</button>
                     <div class="accordion__detail">
                         <table>
                             <caption class="hide">출입구</caption>
@@ -499,7 +482,7 @@
                         </table>
                     </div>
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                    <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                    <button class="accordion__btn" type="button">기계설비</button>
                     <div class="accordion__detail">
                         <table>
                             <caption class="hide">출입구</caption>
@@ -529,7 +512,7 @@
                         </table>
                     </div>
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                    <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                    <button class="accordion__btn" type="button">기계설비</button>
                     <div class="accordion__detail">
                         <table>
                             <caption class="hide">출입구</caption>
@@ -559,7 +542,7 @@
                         </table>
                     </div>
                     <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                    <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                    <button class="accordion__btn" type="button">기계설비</button>
                     <div class="accordion__detail">
                         <table>
                             <caption class="hide">출입구</caption>
@@ -592,10 +575,12 @@
             </div>
             <div class="section section--contents">
                 <div class=section__head>
-                    <h3 class="title">정보제목</h3>
+                    <h3 class="title">장비명 | 배치 건물 | 배치 층</h3>
                     <div class="sub"><button type="button" class="button-move">도면 이동</button></div>
                 </div>
-                <div class="section__detail"></div>
+                <div class="section__detail">
+
+                </div>
             </div>
         </div>
     </div>

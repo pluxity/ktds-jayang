@@ -1,15 +1,19 @@
 'use strict';
 (async function () {
-    // // 로그인 후 처리
-    // const USER_ID = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)')[2];
-    // api.get(`/users/userid/${USER_ID}`).then((result) => {
-    //     const {result: data} = result.data;
-    //     document.querySelector('.header__info .head__name').innerHTML = data.name;
-    //     document.querySelector('.header__info .head__level').innerHTML = data.groupName;
-    //     // if (data.role !== 'ADMIN') {
-    //     //     document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
-    //     // }
-    // });
+    const cookieMatch = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)');
+    const USER_ID = cookieMatch ? cookieMatch[2] : null;
+    if (!USER_ID) {
+        window.location.href = '/login';
+    }
+    api.get(`/users/userid/${USER_ID}`).then((result) => {
+        const {result: data} = result.data;
+        document.querySelector('.header__info .head__name').innerHTML = data.name;
+        document.querySelector('.header__info .head__level').innerHTML = data.groupName;
+        // if (data.role !== 'ADMIN') {
+        //     document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
+        // }
+    });
+
     const floorInfo = document.querySelector('#floor-info .floor-info__button');
     const floorDetail = document.querySelector('#floor-info .floor-info__detail');
     floorInfo.addEventListener('click', event => {
@@ -22,7 +26,7 @@
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
         const { } = systemSetting;
     });
-    await NoticeManager.getNotices()
+    await NoticeManager.getNotices();
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
 
@@ -34,6 +38,8 @@
             });
         })
     });
+
+    // viewer에만
     await BuildingManager.getOutdoorBuilding().then((outdoorBuilding) => {
         loadBuildingInfo(outdoorBuilding.id, async () => {
             // camPos.setData(mapInfo.camPosJson);
@@ -46,7 +52,6 @@
                 });
         });
     })
-
     function loadBuildingInfo(buildingId, callback) {
         BuildingManager.getBuildingById(buildingId).then((building) => {
             const buildingList = BuildingManager.findAll();
@@ -57,36 +62,11 @@
         });
     }
 
-    await PatrolManager.getPatrolList();
-
-    const setDateTime = () => {
-        const renderDateTime = () => {
-            const dateTimeFormat = new Intl.DateTimeFormat('ko', {
-                dateStyle: 'short',
-                timeStyle: 'short',
-            });
-            const dateTimeString = dateTimeFormat.format(new Date());
-        };
-
-        renderDateTime();
-
-        Cron.addCronjob('* * * * * *', renderDateTime);
-    };
-
-    setInterval(Init.updateCurrentTime, 1000);
-    // await Init.initializeOutdoorBuilding();
-    Init.initCategoryId();
-    setDateTime();
     await PoiManager.getPoiList();
-    // Px.Event.AddEventListener('dblclick', 'poi', Init.poiDblclick);
-
-})();
-
-const Init = (function () {
-
+    await PatrolManager.getPatrolList();
     const updateCurrentTime = () => {
-
         const dateElement = document.querySelector('.header__info .date');
+
         const now = new Date();
 
         const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
@@ -104,6 +84,35 @@ const Init = (function () {
         dateElement.textContent = formattedTime;
     }
 
+    const setDateTime = () => {
+        const renderDateTime = () => {
+            const dateTimeFormat = new Intl.DateTimeFormat('ko', {
+                dateStyle: 'short',
+                timeStyle: 'short',
+            });
+            const dateTimeString = dateTimeFormat.format(new Date());
+        };
+
+        renderDateTime();
+
+        Cron.addCronjob('* * * * * *', renderDateTime);
+    };
+
+    Init.initCategoryId();
+    setDateTime();
+    setInterval(updateCurrentTime, 1000);
+
+})();
+
+const Init = (function () {
+    const zoomInButton = document.querySelector('.tool-box__list .plus');
+    const zoomOutButton = document.querySelector('.tool-box__list .minus');
+    const homeButton = document.querySelector('.tool-box__list .home');
+    const firstViewButton = document.querySelector('.tool-box__list .pov');
+    const camera2D = document.querySelector('.tool-box__list .twd');
+    const defaultStyle = ['bg-gray-100', 'border-gray-70'];
+    const activeStyle = ['bg-primary-80', 'border-primary-60'];
+
     const initializeTexture = () => {
         Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
             console.log('화살표 로딩완료');
@@ -112,6 +121,71 @@ const Init = (function () {
         Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
             console.log('가상순찰 캐릭터 로딩 완료');
         });
+    }
+
+    const initializeIndoorBuilding = async (onComplete) => {
+        try {
+            document.getElementById('loadingLayer').classList.add('on');
+            const buildingName = document.getElementById('buildingName');
+            buildingName.style.display = 'none';
+            buildingName.style.zIndex = '0';
+            buildingName.style.left = '';
+            buildingName.style.top = '';
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            Px.Core.Initialize(container, async () => {
+                const {buildingFile, floors, code, camera3d, lod} = BuildingManager.findById(BUILDING_ID);
+                const {directory, storedName, extension} = buildingFile;
+
+                const minimap = document.getElementById('minimapBox');
+                minimap.className = "B"+code.split('-')[1];
+
+                Px.Loader.LoadFbx({
+                    url: `/Building/${directory}/${storedName}.${extension}`,
+                    onLoad: async () => {
+                        Px.Util.SetBackgroundColor('#333333');
+                        Px.Camera.FPS.SetHeightOffset(15);
+                        Px.Camera.FPS.SetMoveSpeed(500);
+                        PoiManager.renderAllPoiToEngineByBuildingId(BUILDING_ID);
+                        Px.Lod.SetLodData(lod);
+                        if (floors.length > 1) {
+                            Px.Model.Expand({
+                                duration: 200,
+                                interval: 200,
+                                name: floors[0].floorName,
+                                onComplete: () => {
+                                    if(camera3d) {
+                                        Px.Camera.SetState(JSON.parse(camera3d));
+                                    }
+
+                                }
+                            });
+                        } else {
+                            if(camera3d) {
+                                Px.Camera.SetState(JSON.parse(camera3d));
+                            }
+                        }
+
+                        resetFloorName();
+
+                        Px.Event.On();
+                        Px.Event.RemoveEventListener('dblclick', 'sbm', buildingDblclick);
+                        Px.Effect.Outline.HoverEventOff();
+                        Px.Effect.Outline.RemoveHoverEventCallback(renderingBuildingNameDom);
+                        initializeTexture();
+
+                        document.getElementById('loadingLayer').classList.remove('on');
+                        if (onComplete) onComplete();
+                        renderingPoiList();
+                        Init.setBuildingNameAndFloors();
+
+                        if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
+                    },
+                });
+            });
+        } catch (error) {
+            console.error('PX Engine Initial', error);
+        }
     }
 
     // 분리
@@ -243,25 +317,23 @@ const Init = (function () {
                         Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                             // Px.Effect.Outline 참고
                             // Px.Effect.Outline.HoverEventOn('area_no');
-
                             window.location.href = `/map?buildingId=${buildingId}`;
                         });
-                        // position relative로 되잇어서 임시 처리
+
                         contents.style.position = 'static';
                         if (onComplete) onComplete();
 
                     }
                 });
             });
+            handleZoomIn();
+            handleZoomOut();
+            handleExtendView();
+            handleFirstView(buildingId);
+            handle2D(buildingId);
         } catch (error) {
             console.error('PX Engine Initial', error);
         }
-
-        handleZoomIn();
-        handleZoomOut();
-        handleExtendView();
-        handleFirstView(buildingId);
-        handle2D(buildingId);
     }
 
     function throttle(callback, interval) {
@@ -430,7 +502,7 @@ const Init = (function () {
 
         if (poiData) {
             // Px.Model.Visible.HideAll();
-            Px.Model.Visible.Show(String(poiData.property.floorId));
+            Px.Model.Visible.Show(Number(poiData.property.floorId));
             Px.Camera.MoveToPoi({
                 id: poiId,
                 isAnimation: true,
@@ -484,74 +556,9 @@ const Init = (function () {
             patrolPointOnComplete(() => {
                 Px.VirtualPatrol.Editor.On();
             });
-
         });
     }
 
-    const initializeIndoorBuilding = async (onComplete) => {
-        try {
-            document.getElementById('loadingLayer').classList.add('on');
-            const buildingName = document.getElementById('buildingName');
-            buildingName.style.display = 'none';
-            buildingName.style.zIndex = '0';
-            buildingName.style.left = '';
-            buildingName.style.top = '';
-            const container = document.getElementById('container');
-            container.innerHTML = '';
-            Px.Core.Initialize(container, async () => {
-                const {buildingFile, floors, code, camera3d, lod} = BuildingManager.findById(BUILDING_ID);
-                const {directory, storedName, extension} = buildingFile;
-
-                const minimap = document.getElementById('minimapBox');
-                minimap.className = "B"+code.split('-')[1];
-
-                Px.Loader.LoadFbx({
-                    url: `/Building/${directory}/${storedName}.${extension}`,
-                    onLoad: async () => {
-                        Px.Util.SetBackgroundColor('#333333');
-                        Px.Camera.FPS.SetHeightOffset(15);
-                        Px.Camera.FPS.SetMoveSpeed(500);
-                        PoiManager.renderAllPoiToEngineByBuildingId(BUILDING_ID);
-                        Px.Lod.SetLodData(lod);
-                        if (floors.length > 1) {
-                            Px.Model.Expand({
-                                duration: 200,
-                                interval: 200,
-                                name: floors[0].floorName,
-                                onComplete: () => {
-                                    if(camera3d) {
-                                        Px.Camera.SetState(JSON.parse(camera3d));
-                                    }
-
-                                }
-                            });
-                        } else {
-                            if(camera3d) {
-                                Px.Camera.SetState(JSON.parse(camera3d));
-                            }
-                        }
-
-                        resetFloorName();
-
-                        Px.Event.On();
-                        Px.Event.RemoveEventListener('dblclick', 'sbm', buildingDblclick);
-                        Px.Effect.Outline.HoverEventOff();
-                        Px.Effect.Outline.RemoveHoverEventCallback(renderingBuildingNameDom);
-                        initializeTexture();
-
-                        document.getElementById('loadingLayer').classList.remove('on');
-                        if (onComplete) onComplete();
-                        renderingPoiList();
-                        Init.setBuildingNameAndFloors();
-
-                        if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
-                    },
-                });
-            });
-        } catch (error) {
-            console.error('PX Engine Initial', error);
-        }
-    }
     const poiDblclick = (poiInfo) => {
         const {id} = poiInfo.property;
 
@@ -810,6 +817,5 @@ const Init = (function () {
         poiDblclick,
         setBuildingNameAndFloors,
         changeFloor,
-        updateCurrentTime
     }
 })();

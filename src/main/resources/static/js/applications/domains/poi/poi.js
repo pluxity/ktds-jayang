@@ -40,7 +40,9 @@ class Poi {
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
-        property.floorNo = BuildingManager.findById(buildingId).floors.find(floor => floor.id === floorId)?.floorNo
+        property.floorNo = BuildingManager.findById(buildingId).floors.find(floor => floor.id === floorId)?.name
+        property.buildingName = BuildingManager.findById(buildingId)?.name
+        property.poiCategoryName = PoiCategoryManager.findById(poiCategoryId)?.name
         this.#property = property;
         this.assignYn = property.assignYn;
         this.#buildingId = buildingId;

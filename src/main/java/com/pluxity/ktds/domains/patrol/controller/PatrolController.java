@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import com.pluxity.ktds.global.response.ResponseBody;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,7 +66,7 @@ public class PatrolController {
 
     @PatchMapping("/points/{id}/name")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchPatrolPointModifyName(@PathVariable Long id, @Valid @NotNull @RequestBody UpdatePatrolPointDTO dto) {
+    public ResponseBody patchPatrolPointModifyName(@PathVariable Long id, @Valid @RequestBody UpdatePatrolPointDTO dto) {
         service.updateName(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }

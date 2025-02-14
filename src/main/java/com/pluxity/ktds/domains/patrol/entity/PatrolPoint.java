@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.patrol.entity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.patrol.dto.PatrolPointResponseDTO;
@@ -43,6 +44,14 @@ public class PatrolPoint {
     @AttributeOverride(name = "z", column = @Column(name = "z"))
     private Spatial point;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "patrol_point_and_poi",
+            joinColumns = @JoinColumn(name = "patrol_point_id"),
+            inverseJoinColumns = @JoinColumn(name = "poi_id")
+    )
+    private final List<Poi> pois = new ArrayList<>();
+
     @Builder
     public PatrolPoint(String name, Integer sortOrder, Spatial point) {
         this.name = name;
@@ -56,6 +65,11 @@ public class PatrolPoint {
 
     public void updateName(@NotNull String name) {
         this.name = name;
+    }
+
+    public void updatePois(@NotNull List<Poi> pois) {
+        this.pois.clear();
+        this.pois.addAll(pois);
     }
 
     public void changeSortOrder(@NotNull int sortOrder) {
@@ -73,7 +87,20 @@ public class PatrolPoint {
                 .floorId(floor.getId())
                 .sortOrder(sortOrder)
                 .name(name)
-                .pois(new ArrayList<>())
+                .pointLocation(convertPointToString(point))
+                .pois(pois.size() > 0 ? pois.stream().map(Poi::getId).toList() : new ArrayList<>())
                 .build();
+    }
+
+    private String convertPointToString(Object point) {
+        if (point != null) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.writeValueAsString(point);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

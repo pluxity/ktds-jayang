@@ -44,7 +44,7 @@ public class PatrolService {
     public List<PatrolResponseDTO> findAll() {
 
         return patrolRepository.findAll().stream()
-                .map(this::convertPatrolToResponseDTO)
+                .map(Patrol::toResponseDto)
                 .toList();
     }
 
@@ -126,8 +126,8 @@ public class PatrolService {
     public void updatePois(Long id, CreatePatrolPointDTO dto) {
 
         PatrolPoint patrolPoint = getPatrolPointById(id);
-
-        List<Poi> pois = new ArrayList<>();
+        List<Poi> poiList = dto.pois().stream().map(this::getPoiById).toList();
+        patrolPoint.updatePois(poiList);
     }
 
     @Transactional
@@ -174,45 +174,6 @@ public class PatrolService {
         return poiRepository.findByFloorId(id).orElseThrow(() -> {
            throw new CustomException(NOT_FOUND_POI);
         });
-    }
-
-    // test
-    private PatrolResponseDTO convertPatrolToResponseDTO(Patrol patrol) {
-        List<PatrolPointResponseDTO> patrolPointDTOs = patrol.getPatrolPoints().stream()
-                .map(this::convertPatrolPointToResponseDTO)
-                .collect(Collectors.toList());
-
-        return PatrolResponseDTO.builder()
-                .id(patrol.getId())
-                .name(patrol.getName())
-                .buildingId(patrol.getBuilding().getId())
-                .patrolPoints(patrolPointDTOs)
-                .build();
-    }
-
-    private PatrolPointResponseDTO convertPatrolPointToResponseDTO(PatrolPoint patrolPoint) {
-        String pointLocation = convertPointToString(patrolPoint.getPoint());
-
-        return PatrolPointResponseDTO.builder()
-                .id(patrolPoint.getId())
-                .floorId(patrolPoint.getFloor().getId())
-                .sortOrder(patrolPoint.getSortOrder())
-                .name(patrolPoint.getName())
-                .pointLocation(pointLocation)
-                .pois(new ArrayList<>())
-                .build();
-    }
-
-    private String convertPointToString(Object point) {
-        if (point != null) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.writeValueAsString(point);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
     }
 
     private Poi getPoiById(Long id) {

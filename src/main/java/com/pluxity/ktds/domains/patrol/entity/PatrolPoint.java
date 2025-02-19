@@ -44,7 +44,8 @@ public class PatrolPoint {
     @AttributeOverride(name = "z", column = @Column(name = "z"))
     private Spatial point;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    //@ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "patrol_point_and_poi",
             joinColumns = @JoinColumn(name = "patrol_point_id"),

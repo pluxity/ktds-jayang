@@ -51,7 +51,7 @@ public class Patrol {
 
     public void removePatrolPoint(PatrolPoint patrolPoint) {
         this.patrolPoints.remove(patrolPoint);
-        patrolPoint.changePatrol(null);
+        //patrolPoint.changePatrol(null);
     }
 
     public PatrolResponseDTO toResponseDto() {

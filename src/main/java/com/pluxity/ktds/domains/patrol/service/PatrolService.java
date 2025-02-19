@@ -139,11 +139,10 @@ public class PatrolService {
 
     @Transactional
     public void deletePoint(Long id) {
-
         PatrolPoint patrolPoint = getPatrolPointById(id);
         Patrol patrol = patrolPoint.getPatrol();
         patrol.removePatrolPoint(patrolPoint);
-
+        patrolPointRepository.deleteById(id);
     }
 
     private PatrolPoint getPatrolPointById(Long id) {

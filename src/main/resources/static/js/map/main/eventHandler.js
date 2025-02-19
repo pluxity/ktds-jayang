@@ -77,6 +77,14 @@
         });
     }
 
+    const getBuildingId = () =>{
+        const activeTab = headerTabList.querySelector("li.active");
+        if(activeTab){
+            return activeTab.getAttribute("data-building-id");
+        }
+        return null;
+    }
+
     const viewEquipment = () => {
         equipmentGroup.forEach(equipment => {
             equipment.removeEventListener('click', handleEquipmentClick);
@@ -258,6 +266,7 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 patrolPopup.style.display = 'block';
+                renderPatrol();
             },
             sop: () => {
                 // sop popup
@@ -585,33 +594,20 @@
     // 사이드바
 
     function renderPatrol() {
-        const patrolList = PatrolManager.findByBuildingId(BUILDING_ID);
-        const patrolContentList = document.querySelector('.patrol-list');
-        const buildingInfo = BuildingManager.findById(BUILDING_ID)
+
+        const buildingId = getBuildingId();
+        const patrolList = PatrolManager.findByBuildingId(buildingId);
+        const patrolContentList = document.querySelector('#patrolPopup .accordion');
+        const poiList = PoiManager.findAll();
 
         patrolContentList.innerHTML = '';
 
         const patrolControl = `
-           <li class="player-controls">
-               <button class="patrol-control-button play-button" data-btn-type="play">
-                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 14L9 22L9 6L21 14Z" fill="#919193" />
-                    </svg>
-                </button>
-               <button class="patrol-control-button pause-button" data-btn-type="pause">
-                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect opacity="0.9" x="9" y="7" width="2" height="14" fill="#919193" />
-                        <rect opacity="0.9" x="17" y="7" width="2" height="14" fill="#919193" />
-                    </svg>
-                </button>
-               <button class="patrol-control-button stop-button" data-btn-type="stop">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g id="state=default, type=reset">
-                        <rect id="Rectangle 243" x="7" y="7" width="14" height="14" fill="#919193" />
-                    </g>
-                </svg>
-            </button>
-           </li>
+            <div class="patrol-info__ctrl">
+                <button type="button" class="play" data-btn-type="play"><span class="hide">play</span></button>
+                <button type="button" class="pause" data-btn-type="pause"><span class="hide">pause</span></button>
+                <button type="button" class="stop" data-btn-type="stop"><span class="hide">stop</span></button>
+            </div>
         `;
 
         if (patrolList.length === 0) {
@@ -619,81 +615,63 @@
         }
 
         patrolList.forEach((patrol) => {
-            const {id, name, patrolPoints} = patrol;
-            const filterPatrol = patrolPoints;
 
-            const patrolPointsHTML = filterPatrol.map((point) => {
-                const floorName = buildingInfo.floors.find(floor => floor.id === point.floorId).floorName;
+            // pointName 별로 그룹화된 리스트 생성
+            let pointsHTML = patrol.patrolPoints.map((point) => {
+
+                // pois 배열을 기반으로 <li> 태그 생성
+
+                let poisHTML = point.pois
+                    .map((poiId) =>{
+                        const poiData = poiList.find((poi) => poi.id === poiId);
+                        return poiData ? `<li>${poiData.name}</li>` : `` ;
+                    })
+                    .join('');
 
                 return `
-                         <li class="patrol-path" data-sort-order=${point.sortOrder}>
-                            <span>${(point.sortOrder + 1).toString().padStart(2, '0')}</span>
-                            <span>
-                              <img src="/static/images/viewer/icons/location.svg" alt="location" />
-                            </span>
-                            <span>${point.sortOrder + 1}_${buildingInfo.name} ${floorName}</span>
-                         </li>
-                    `;
-            })
-                .join('');
+                    <li>
+                        <div class="location">
+                            <div class="location__title">${point.name}</div>
+                            <ul>
+                                ${poisHTML}
+                            </ul>
+                        </div>
+                    </li>
+                `;
+            }).join('');
 
             patrolContentList.innerHTML += `
-                <div class="accordion">
-                    <hi class="title" data-id=${id}>${name}
-                        <span class="accordion-button">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" >
-                            <path d="M2 5H14L8 12L2 5Z" fill="#919193" />
-                        </span>
-                    </hi>
-                    <ul class="content">
-                      ${filterPatrol.length === 0
-                        ? '<li class="error-text">저장된 가상순찰 목록이 없습니다.</li>'
-                        : (patrolControl + patrolPointsHTML)}
-                    </ul>
-                </div>
-            `
-        })
-
+        <button class="accordion__btn" type="button" data-id="${patrol.id}">
+            ${patrol.name} <span class="sub">보안팀</span>
+        </button>
+        <div class="accordion__detail">
+            <div class="patrol-info">
+                ${patrolControl}
+                <div class="patrol-info__output">
+                <ol>
+                    ${pointsHTML}
+                </ol>
+            </div>
+            </div>
+        </div>
+    `;
+        });
         accordionTab();
         controlPatrolPlay();
     }
 
     function accordionTab() {
-        const patrolTitle = document.querySelectorAll('.accordion .title');
-
-        patrolTitle.forEach((title) => {
-            title.addEventListener('click', (event) => {
+        document.querySelectorAll('#patrolPopup .accordion__btn').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
                 const target = event.currentTarget;
-                const content = target.nextElementSibling;
-                const isShowing = target.classList.contains('show');
 
-                patrolTitle.forEach((otherTitle) => {
-                    if (otherTitle !== target) {
-                        const otherContent = otherTitle.nextElementSibling;
-                        otherTitle.classList.remove('show');
-                        otherContent.classList.remove('show');
+                // 다른 아코디언 버튼이 열려 있으면 닫기
+                document.querySelectorAll('#patrolPopup .accordion__btn').forEach((otherBtn) => {
+                    if (otherBtn !== target) {
+                        otherBtn.classList.remove('accordion__btn--active');
                     }
                 });
-
-                target.classList.toggle('show');
-                content.classList.toggle('show');
-
-                if (!isShowing && target.classList.contains('show')) {
-                    const patrolPoints = document.querySelectorAll('.patrol-path');
-                    patrolPoints.forEach((point) => {
-                        point.classList.remove('active');
-                    });
-
-                    renderPatrolPath();
-                    stop();
-                    return;
-                }
-
-                content.querySelectorAll('.patrol-control-button').forEach((button) => {
-                   button.classList.remove('on');
-                });
-
-                Px.VirtualPatrol.Clear();
+                target.classList.toggle('accordion__btn--active');
             });
         });
     }
@@ -702,10 +680,19 @@
     let isPaused = false;
     let index = 0;
 	let timeoutId;
+    let currentPatrol = 0;
 
     const loopPatrolPoints = async (id) => {
+        // 다른 patrol 선택시 위치 초기화
+        if (currentPatrol !== id) {
+            resetPatrolView(); //새로운 Patrol 시작 전 화면 초기화
+            currentPatrolIndex = 0;
+            currentPatrol = id;
+        }
+
         const patrol = PatrolManager.findById(id);
         Px.Model.Collapse({duration: 0});
+
         for (let i = currentPatrolIndex; i < patrol.patrolPoints.length; i++) {
             currentPatrolIndex = i;
             if (isPaused) {
@@ -713,63 +700,57 @@
             }
             await moveVirtualPatrol(id, patrol);
         }
-    }
+    };
+
+    const resetPatrolView = () => {
+        // POI 및 3D 모델 초기화
+        Px.VirtualPatrol.RemoveAll();
+        Px.VirtualPatrol.Editor.Off();
+        Px.Model.Visible.HideAll();
+        Px.Poi.HideAll();
+
+        // 기존 `.active` 클래스 제거
+        document.querySelectorAll(".floor-info__detail li").forEach(li => li.classList.remove("active"));
+    };
 
     const moveVirtualPatrol = async (id, patrol) => {
-        CctvEventHandler.cctvPlayerClose();
+        // CctvEventHandler.cctvPlayerClose();
         return new Promise(function (resolve, reject) {
             const point = patrol.patrolPoints[currentPatrolIndex];
+
+            const floor = BuildingManager.findById(patrol.buildingId).floors.find(floor => floor.id === point.floorId);
+
 
             if (isPaused) {
                 return resolve();
             }
+            const floorElement = document.querySelector(".floor-info__detail .active");
 
+               //층 이동 또는 처음시작할때 화면 렌더링
+            if(!floorElement || floor.id !== Number(floorElement.getAttribute("floor-id"))){
 
+                // 기존 `active` 제거
+                document.querySelectorAll(".floor-info__detail li").forEach(li => li.classList.remove("active"));
 
-            const floor = BuildingManager.findById(patrol.buildingId).floors.find(floor => floor.id === point.floorId);
+                // 새롭게 선택된 `li`에 `active` 추가
+                const currentFloor = document.querySelector(`.floor-info__detail li[floor-id="${floor.id}"]`);
+                if (currentFloor) {
+                    currentFloor.classList.add("active");
+                }
 
-            const currentFloorName = document.querySelector("body > main > div.left-information > div.floor").dataset.floorName;
-
-            if(currentFloorName !== floor.floorName) {
                 Px.VirtualPatrol.RemoveAll();
                 Px.VirtualPatrol.Editor.Off();
                 Px.VirtualPatrol.Import(PatrolManager.findByIdByImport(id, point.floorId));
                 index = 0;
 
-                document.querySelector("body > main > div.left-information > div.floor").dataset.floorName = floor.floorName;
                 Px.Model.Visible.HideAll();
-                Px.Model.Visible.Show(floor.floorName);
+                Px.Model.Visible.Show(floor.id);
                 Px.Poi.HideAll();
                 Px.Poi.ShowByProperty("floorId",floor.id);
             }
 
-
-            const pointLocation = JSON.parse(point.pointLocation);
-            // Px.Camera.MoveToPosition(0, 200, pointLocation.x, pointLocation.y, pointLocation.z);
-
-            Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
-
-                const patrolPointsEle = document.querySelectorAll('.patrol-path');
-
-                patrolPointsEle.forEach((ele) => {
-                    const pointSortOrder = Number(ele.getAttribute('data-sort-order'));
-                    if (pointSortOrder === point.sortOrder) {
-                        ele.classList.add('active');
-                        return;
-                    }
-                    ele.classList.remove('active');
-                });
-
-
+            Px.VirtualPatrol.MoveTo(0, index, 200, 1000, async () => {
                 index++;
-                let cctvId = [];
-                if (point.pois.length > 0) {
-                    const getCctvIdFromPoi = poi => Number(PoiManager.findById(Number(poi)).code.split('-')[1]);
-                    cctvId.push(...point.pois.map(getCctvIdFromPoi));
-                    CctvEventHandler.cctvPlayerOpen("play", cctvId);
-                }
-                await sleep();
-
                 return resolve();
             });
         })
@@ -788,7 +769,7 @@
         currentPatrolIndex = 0;
         index = 0;
         isPaused = true;
-
+        currentPatrol = 0;
     }
 
     const sleep = (ms= 6000) => {
@@ -798,12 +779,12 @@
 
     }
 
-    function controlPatrolPlay() {
-        const controlButtons = document.querySelectorAll(".player-controls button");
+    const controlPatrolPlay = () => {
+        const controlButtons = document.querySelectorAll(".patrol-info__ctrl button");
 
         controlButtons.forEach((item) => {
             item.addEventListener('click', (event) => {
-                const id = document.querySelector(".accordion .title.show")?.dataset.id;
+                const id = document.querySelector("#patrolPopup .accordion__btn--active")?.dataset.id;
                 const target = event.currentTarget;
 
                 controlButtons.forEach((button) => {
@@ -1015,4 +996,5 @@
     closePop();
     systemPopView();
     viewSopDetail();
+    controlPatrolPlay();
 })();

@@ -685,13 +685,15 @@
     let index = 0;
 	let timeoutId;
     let currentPatrol = -1;
+    let isFinished = false;
 
     const loopPatrolPoints = async (id) => {
-        // 다른 patrol 선택시 위치 초기화
-        if (currentPatrol !== id) {
+        // 다른 patrol 선택시 위치 초기화 또는 순찰이 끝나면 초기화
+        if (currentPatrol !== id || isFinished) {
             resetPatrolView(); //새로운 Patrol 시작 전 화면 초기화
             currentPatrolIndex = 0;
             currentPatrol = id;
+            isFinished = false;
         }
 
         const patrol = PatrolManager.findById(id);
@@ -703,6 +705,10 @@
                 break;
             }
             await moveVirtualPatrol(id, patrol);
+        }
+
+        if (!isPaused) {
+            isFinished = true;
         }
     };
 
@@ -751,7 +757,7 @@
                 Px.Poi.ShowByProperty("floorId",point.floorId);
             }
 
-            Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
+            Px.VirtualPatrol.MoveTo(0, index, 200, 1000, async () => {
                 index++;
                 return resolve();
             });

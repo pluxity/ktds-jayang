@@ -626,15 +626,15 @@
                 let poisHTML = point.pois
                     .map((poiId) =>{
                         const poiData = poiList.find((poi) => poi.id === poiId);
-                        return poiData ? `<li>${poiData.name}</li>` : `` ;
+                        return poiData ? `<li data-id="${poiData.id}">${poiData.name}</li>` : `` ;
                     })
                     .join('');
 
                 return `
                     <li>
                         <div class="location">
-                            <div class="location__title">${point.name}</div>
-                            <ul>
+                            <div class="location__title" data-id="${point.id}">${point.name}</div>
+                            <ul class="poi__title">
                                 ${poisHTML}
                             </ul>
                         </div>
@@ -757,12 +757,28 @@
                 Px.Poi.ShowByProperty("floorId",point.floorId);
             }
 
-            Px.VirtualPatrol.MoveTo(0, index, 200, 1000, async () => {
+            Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
                 index++;
+                highlightCurrentPatrolPoint(point.id);
                 return resolve();
             });
+
         })
+
     }
+
+    const highlightCurrentPatrolPoint = (pointId) => {
+
+        const locationTitles = document.querySelectorAll('.location__title');
+        locationTitles.forEach(title => {
+            if (title.getAttribute('data-id') === pointId.toString()) {
+                title.style.color = 'red'; // 텍스트 강조 색상
+            } else {
+                title.style.color = ''; // 기본 색상으로 복원
+            }
+        });
+    }
+
 
     const play = (id) => {
         isPaused = false;

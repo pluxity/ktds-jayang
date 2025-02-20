@@ -36,6 +36,7 @@
         const subPopupList = ['elevatorPop', 'equipmentPop']
         closeButtons.forEach(btn => {
             btn.addEventListener('click', (event) => {
+                Px.VirtualPatrol.Clear();
                 const target = event.target.closest('.popup-basic');
                 target.style.display = 'none';
                 const hasSubPopup = subPopupList.some(subId => target.querySelector(`#${subId}`));
@@ -256,6 +257,7 @@
                     const popup = mapPopup.querySelector(`#${id}`);
                     if (popup) {
                         popup.style.display = 'none';
+                        Px.VirtualPatrol.Clear();
                     }
                 });
             },

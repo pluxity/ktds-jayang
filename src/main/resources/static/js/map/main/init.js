@@ -175,6 +175,7 @@
             floorBtn.addEventListener('click', event => {
                 floorBtns.forEach(btn => btn.classList.remove('active'));
                 floorBtn.classList.add('active');
+                Px.VirtualPatrol.Clear();
                 Px.Model.Visible.HideAll();
                 Px.Poi.HideAll();
                 let floorId = floorBtn.getAttribute('floor-id');
@@ -191,6 +192,7 @@
         allFloor.addEventListener('click', event => {
             floorBtns.forEach(btn => btn.classList.remove('active'));
             Px.Model.Visible.ShowAll();
+            Px.VirtualPatrol.Clear();
         })
     }
 

@@ -672,6 +672,8 @@
                     }
                 });
                 target.classList.toggle('accordion__btn--active');
+                Px.VirtualPatrol.Clear();
+                currentPatrol = -1;
             });
         });
     }
@@ -680,7 +682,7 @@
     let isPaused = false;
     let index = 0;
 	let timeoutId;
-    let currentPatrol = 0;
+    let currentPatrol = -1;
 
     const loopPatrolPoints = async (id) => {
         // 다른 patrol 선택시 위치 초기화
@@ -718,8 +720,6 @@
         return new Promise(function (resolve, reject) {
             const point = patrol.patrolPoints[currentPatrolIndex];
 
-            const floor = BuildingManager.findById(patrol.buildingId).floors.find(floor => floor.id === point.floorId);
-
 
             if (isPaused) {
                 return resolve();
@@ -727,13 +727,13 @@
             const floorElement = document.querySelector(".floor-info__detail .active");
 
                //층 이동 또는 처음시작할때 화면 렌더링
-            if(!floorElement || floor.id !== Number(floorElement.getAttribute("floor-id"))){
+            if(!floorElement || point.floorId !== Number(floorElement.getAttribute("floor-id"))){
 
                 // 기존 `active` 제거
                 document.querySelectorAll(".floor-info__detail li").forEach(li => li.classList.remove("active"));
 
                 // 새롭게 선택된 `li`에 `active` 추가
-                const currentFloor = document.querySelector(`.floor-info__detail li[floor-id="${floor.id}"]`);
+                const currentFloor = document.querySelector(`.floor-info__detail li[floor-id="${point.floorId}"]`);
                 if (currentFloor) {
                     currentFloor.classList.add("active");
                 }
@@ -744,12 +744,12 @@
                 index = 0;
 
                 Px.Model.Visible.HideAll();
-                Px.Model.Visible.Show(floor.id);
+                Px.Model.Visible.Show(point.floorId);
                 Px.Poi.HideAll();
-                Px.Poi.ShowByProperty("floorId",floor.id);
+                Px.Poi.ShowByProperty("floorId",point.floorId);
             }
 
-            Px.VirtualPatrol.MoveTo(0, index, 200, 1000, async () => {
+            Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
                 index++;
                 return resolve();
             });

@@ -8,6 +8,8 @@ const adminPatrolButtonEvent = (() => {
 
     let index = 0;
 
+    let currentPatrol = -1;
+
     const init = () => {
         this.currentPatrolNumber = 0;
         this.isPaused = false;
@@ -21,6 +23,9 @@ const adminPatrolButtonEvent = (() => {
         this.currentPatrolNumber = Number(value);
     }
 
+    const initializeIndex = () => {
+        this.index = 0;
+    }
     const getIsPaused = () => {
         return this.isPaused;
     }
@@ -31,13 +36,19 @@ const adminPatrolButtonEvent = (() => {
     }
 
     const play = (id) => {
-
+        console.log("play")
         this.isPaused = false;
 
         loop(id);
     }
 
     const loop = async (id) => {
+        if(currentPatrol !== id){
+            index = 0;
+            currentPatrol = id;
+            setCurrentPatrolNumber(0);
+        }
+
         const patrol = PatrolManager.findById(Number(id));
 
         for( let i = getCurrentPatrolNumber(); i < patrol.patrolPoints.length; i++) {
@@ -91,6 +102,7 @@ const adminPatrolButtonEvent = (() => {
 
     const stop = () => {
         setCurrentPatrolNumber(0);
+        initializeIndex();
         this.isPaused = false;
     }
 

@@ -2,22 +2,15 @@ package com.pluxity.ktds.domains.tag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
-import com.pluxity.ktds.global.response.ResponseBody;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.*;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.w3c.dom.html.HTMLParagraphElement;
-import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class TagClientService {

@@ -1,9 +1,6 @@
 package com.pluxity.ktds.domains.tag.dto;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.pluxity.ktds.domains.tag.CustomDeserializer;
 import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
 
 import java.util.List;

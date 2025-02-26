@@ -854,6 +854,7 @@ $base-img-path:"/static/images/viewer/";
                 width:100%; height:100%;
             }
         }
+        .ellipsis{max-width:95px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
     }
 }
 
@@ -1261,11 +1262,48 @@ $base-img-path:"/static/images/viewer/";
 // 이벤트 현황 영역 추후 추가 작업 예정
 @mixin eventState{
     .event-state{
-        position:absolute; top:80px; right:-25.625rem; transition:right 0.3s ease; z-index:50;
-        width:25.625rem; height:calc(100% - 5rem);
-        background-color:#34343C; box-shadow:-4px 2px 5px 0 rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px);
+        position:fixed; top:80px; right:-24.625rem; transition:right 0.3s ease; z-index:50;
+        width:25.625rem; height:calc(100% - 5rem); padding:20px 20px 30px; box-sizing:border-box;
+        background-color:#34343C; box-shadow:-4px 2px 5px 0 rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px); border-bottom-left-radius:20px;
+
+        &__ctrl{
+            content:'';
+            position:absolute; top:0; left:-20px;
+            width:20px; height:78px; 
+            background-color:#34343c; box-shadow:-4px 2px 5px 0 rgba(0, 0, 0, 0.35); backdrop-filter:blur(10px);
+            border-bottom-left-radius:10px; border-top-left-radius:10px;
+            cursor:pointer;
+            &::before{
+                content:'';
+                display:inline-block; vertical-align:middle;
+                margin:-3px 0 0 5px;
+                width:14px; height:14px;
+                -webkit-mask-image:url('#{$base-img-path}icon14/Icon14.svg'); mask-image:url('#{$base-img-path}icon14/Icon14.svg'); 
+                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                -webkit-mask-position:-350px -10px; mask-position:-350px -10px;
+                background-color:var(--color-grayscale02);
+            }
+        }
+
         
         &--active{right:0;}
+        &__button{
+            display:inline-block;
+            width:20px; height:20px; 
+            background:url('#{$base-img-path}icon20/icon_go.svg') no-repeat center center; 
+            cursor:pointer;
+        }
+        &__group + &__group{margin-top:35px;}
+        &__title, &__subtitle{color:#fff;}
+        &__title{
+            display:flex; align-items:center; grid-gap:5px; 
+            margin-bottom:10px;
+            font-size:1.125rem; font-weight:700;
+        }
+        &__subtitle{margin-bottom:10px;}
+        &__chart{
+            width:100%; height:180px; 
+        }
     }
 }
 

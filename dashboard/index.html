@@ -164,7 +164,93 @@
                 </ul>
             </div>
             <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
-            <aside class="event-state event-state--active"></aside>
+            <aside class="event-state event-state--active">
+                <button type="button" class=event-state__ctrl><span class="hide">ctrl button</span></button>
+                <div class="event-state__title">
+                    이벤트 통계
+                    <a href="#none" class="event-state__button">
+                        <span class="hide">이벤트 통계 전체보기</span>
+                    </a>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
+                    <table class="table">
+                        <caption class="hide">출입구</caption>
+                        <colgroup>
+                            <col style="width:60px">
+                            <col style="width:25px">
+                            <col style="width:95px">
+                            <col style="width:95px">
+                            <col style="width:70px">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">건물</th>
+                                <th scope="col">층</th>
+                                <th scope="col">이벤트명</th>
+                                <th scope="col">장비명</th>
+                                <th scope="col">발생시각</th>
+                            </tr>
+                        </thead>
+                            <tbody>
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>     
+                        </tbody>
+                    </table>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
+                    <!-- [D] 차트 들어갈 영역 ---->
+                    <div class="event-state__chart">
+                    </div>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
+                    <!-- [D] 차트 들어갈 영역 ---->
+                    <div class="event-state__chart">
+                    </div>
+                </div>
+            </aside>
         </div>
     </div>
 

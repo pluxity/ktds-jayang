@@ -1,13 +1,15 @@
-window.addEventListener('DOMContentLoaded', function(){
-    // Toast
+/* Toast */
+function Toast(){
     let toast = document.querySelector('.toast');
     let toastCloseBtn = document.querySelector('.toast__close');
-    
-    toast.classList.add('toast--active');
-    toastCloseBtn.addEventListener('click', function() {
-        toast.classList.remove('toast--active');
-    });
-});
+    if(toast){
+        toast.classList.add('toast--active');
+        toastCloseBtn.addEventListener('click', function() {
+            toast.classList.remove('toast--active');
+        });
+    }
+}
+Toast();
 
 /* Header */
 const profileBtn = document.querySelectorAll(".profile .profile__btn");
@@ -33,7 +35,30 @@ function PoiMenuAll() {
     }); 
   }
   PoiMenuAll();
-  
 
+
+  /* Event State */
+  function EventState(){
+    const eventStateCtrl = document.querySelector('.event-state__ctrl');
+    const eventStateLayer = document.querySelector('.event-state');
+    const floorInfo = document.querySelector('.floor-info');
+    const toolBox = document.querySelector('.tool-box');
+
+    if(eventStateLayer){
+        eventStateCtrl.addEventListener('click', function () {
+            eventStateLayer.classList.toggle('event-state--active');
+            
+            if (eventStateLayer.classList.contains('event-state--active')) {
+                toolBox.classList.add('tool-box--active');
+                floorInfo.classList.add('floor-info--active');
+            } else {
+                toolBox.classList.remove('tool-box--active');
+                floorInfo.classList.remove('floor-info--active');
+            }
+        });
+
+    }
+  }
+  EventState();
 
   

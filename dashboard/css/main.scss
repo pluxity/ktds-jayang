@@ -37,7 +37,11 @@ $base-img-path:"/static/images/viewer/";
 
 
 /* Main */ 
-.tool-box--active{right:430px;}
+.tool-box{
+    right:40px;
+    transition:right 0.3s ease;
+    &--active{right:430px;}
+}
 
 
 

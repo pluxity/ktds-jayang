@@ -38,6 +38,10 @@ public class Alarm {
     @Comment("층")
     private String floorNm;
 
+    @Column(name = "process")
+    @Comment("공정명")
+    private String process;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "alarm_type", columnDefinition = "VARCHAR(255) DEFAULT 'NORMAL'")
     @Comment("알람 종류")

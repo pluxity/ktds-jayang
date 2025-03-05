@@ -77,6 +77,34 @@
             }
         });
     }
+    
+
+
+
+    (async () => {
+        console.log('SSE 이벤트 핸들러 실행');
+        const eventSource = new EventSource('http://localhost:8085/events/subscribe');
+        
+        eventSource.addEventListener('alarm', (event) => {
+            const alarm = JSON.parse(event.data);
+            console.log(alarm);
+        });
+
+        eventSource.addEventListener('chart', (event) => {
+            const chart = JSON.parse(event.data);
+            console.log(chart['24h']);
+            console.log(chart['7d']);
+        });
+
+        eventSource.onerror = (event) => {
+            console.log(event);
+            eventSource.close();
+        }
+    })();
+
+
+    
+    
 
     const getBuildingId = () =>{
         const activeTab = headerTabList.querySelector("li.active");
@@ -601,6 +629,7 @@
         const patrolList = PatrolManager.findByBuildingId(buildingId);
         const patrolContentList = document.querySelector('#patrolPopup .accordion');
         const poiList = PoiManager.findAll();
+        const managerName = document.querySelector('.header__info .head__name').innerHTML;
 
         patrolContentList.innerHTML = '';
 
@@ -644,7 +673,7 @@
 
             patrolContentList.innerHTML += `
         <button class="accordion__btn" type="button" data-id="${patrol.id}">
-            ${patrol.name} <span class="sub">보안팀</span>
+            ${patrol.name} <span class="sub">${managerName}</span>
         </button>
         <div class="accordion__detail">
             <div class="patrol-info">

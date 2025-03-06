@@ -1,40 +1,37 @@
 package com.pluxity.ktds.domains.event.controller;
 
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import com.pluxity.ktds.domains.event.service.EventEmitterService;
+import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
+import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
+import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
+import com.pluxity.ktds.domains.event.service.EventService;
+import com.pluxity.ktds.global.response.DataResponseBody;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/events")
 public class EventController {
 
-    @CrossOrigin("*")
-    @GetMapping(value = "/events/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe() {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+    private final EventService eventService;
 
-        emitter.onCompletion(() ->  {
-            EventEmitterService.removeEmitter(emitter);
-        });
-        
-        emitter.onTimeout(() ->  {
-            EventEmitterService.removeEmitter(emitter);
-        });
-
-        emitter.onError((e) -> {
-            EventEmitterService.removeEmitter(emitter);
-        });
-
-        EventEmitterService.addEmitter(emitter);
-
-        return emitter;
+    @GetMapping("/process-counts")
+    public DataResponseBody<List<Last7DaysProcessCountDTO>> getProcessCountsForLast7Days() {
+        return DataResponseBody.of(eventService.findProcessCountsForLast7Days());
     }
 
+    @GetMapping("/date-counts")
+    public DataResponseBody<List<Last7DaysDateCountDTO>> getDateCountsForLast7Days() {
+        return DataResponseBody.of(eventService.findDateCountsForLast7Days());
+    }
 
+    @GetMapping("/latest-24-hours")
+    public DataResponseBody<List<Last24HoursEventDTO>> getLatest24HoursEventList() {
+        return DataResponseBody.of(eventService.findLatest24HoursEventList());
+    }
 
 }

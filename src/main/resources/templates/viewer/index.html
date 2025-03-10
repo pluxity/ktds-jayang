@@ -93,7 +93,7 @@
             </div>
             <template th:replace="viewer/popup :: popup-template"></template>
             <!-- toolBox -->
-            <div class="tool-box" style="position: fixed;bottom: 2rem;right: 2rem;">
+            <div class="tool-box tool-box--active">
                 <ul class="tool-box__list">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <li class="home active">
@@ -128,9 +128,62 @@
                     </li>
                 </ul>
             </div>
+
+            <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
+            <!-- floor-info--active 될때 같이 event-state--active -->
+            <aside class="event-state event-state--active">
+                <button type="button" class=event-state__ctrl><span class="hide">ctrl button</span></button>
+                <div class="event-state__title">
+                    이벤트 통계
+                    <a href="#none" class="event-state__button">
+                        <span class="hide">이벤트 통계 전체보기</span>
+                    </a>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
+                    <table class="table">
+                        <caption class="hide">출입구</caption>
+                        <colgroup>
+                            <col style="width:60px">
+                            <col style="width:25px">
+                            <col style="width:95px">
+                            <col style="width:95px">
+                            <col style="width:70px">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th scope="col">건물</th>
+                            <th scope="col">층</th>
+                            <th scope="col">이벤트명</th>
+                            <th scope="col">장비명</th>
+                            <th scope="col">발생시각</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
+                    <!-- [D] 차트 들어갈 영역 ---->
+                    <div class="event-state__chart">
+                        <canvas id="chart_doughnut"></canvas>
+                        <div class="douut-inner"></div>
+                    </div>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
+                    <!-- [D] 차트 들어갈 영역 ---->
+                    <div class="event-state__chart">
+                        <canvas id="chart_bar"></canvas>
+                    </div>
+                </div>
+            </aside>
+
             <!-- floor -->
             <!--  floor-info--active 추가 여부 -->
-            <div id="floor-info" class="floor-info">
+            <div id="floor-info" class="floor-info floor-info--active">
                 <div class="floor-info__inner">
                     <!-- [D] 버튼 클릭 시 floor-info__detail show/hide 적용 -->
                     <button type="button" class="floor-info__button">층별</button>
@@ -178,6 +231,10 @@
             <div id="noticeAlert" class="alert" style="display: none">
                 <p>등록된 공지가 없습니다.</p>
                 <button type="button" class="button button--solid-middle" disabled>확인</button>
+            </div>
+            <!-- toast toast--active 클래스 추가 -->
+            <!-- event -> toast active -->
+            <div class="toast">       
             </div>
         </div>
     </div>

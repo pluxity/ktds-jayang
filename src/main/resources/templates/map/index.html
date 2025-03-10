@@ -184,20 +184,6 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart">
-                        <canvas id="chart_doughnut"></canvas>
-                    </div>
-                </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart">
-                        <canvas id="chart_bar"></canvas>
-                    </div>
-                </div>
             </aside>
 
             <template th:replace="viewer/popup :: popup-template"></template>
@@ -205,7 +191,7 @@
             <template th:replace="map/sopPopup :: popup-template"></template>
             <template th:replace="map/systemPopup :: popup-template"></template>
             <!-- toolBox -->
-            <div class="tool-box" style="position: fixed;bottom: 2rem;right: 2rem;">
+            <div class="tool-box">
                 <ul class="tool-box__list">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <li class="home active">
@@ -273,15 +259,6 @@
             <!-- toast toast--active 클래스 추가 -->
             <!-- event -> toast active -->
             <div class="toast">
-                <div class="toast__box">
-                    <button type="button" class="toast__close"><span class="hide">close</span></button>
-                    <div class="toast__texts">
-                        <strong>제목1</strong>
-                        <p>
-                            내용1
-                        </p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

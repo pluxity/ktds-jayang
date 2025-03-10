@@ -77,120 +77,6 @@
             }
         });
     }
-    
-
-    const initializeProcessChart = async () => {
-        try{
-            // 프로세스 차트
-            const processResponse = await fetch('http://localhost:8085/events/process-counts')
-            const processData = await processResponse.json();
-
-            // 프로세스 차트
-            const chartDoughunt = document.getElementById('chart_doughnut');
-            new Chart(chartDoughunt, {
-                type: 'doughnut',
-                data: {
-                    labels: processData.result.map(item => item.process),
-                    datasets: [{
-                        data: processData.result.map(item => item.count)
-                    }]
-                },
-                options: {
-                    layout: {
-                        padding: {
-                            left: 20,
-                            right: 20
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'left',
-                            align: 'center',
-                            labels: {
-                                padding: 20,
-                                boxWidth: 40,
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    return data.labels.map((label, i) => ({
-                                        text: `${label}: ${data.datasets[0].data[i]}`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        index: i
-                                    }));
-                                }
-                            }
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        } catch (error) {
-            console.error('차트 초기화 오류:', error);
-        }
-    }
-
-    const initializeDateChart = async () => {
-        try {
-            // 1. 데이터 가져오기
-            const response = await fetch('http://localhost:8085/events/date-counts');
-            const dateData = await response.json();
-    
-            // 2. 최근 7일 날짜 배열 생성
-            const last7Days = Array.from({length: 7}, (_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - (6 - i));
-                return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-            });
-    
-            // 3. 데이터 매핑 (없는 날짜는 0으로)
-            const countMap = new Map(
-                dateData.result.map(item => {
-                    const date = new Date(item.occurrenceDate);
-                    const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-                    return [formattedDate, item.count];
-                })
-            );
-
-            // 4. 최종 데이터 준비
-            const counts = last7Days.map(date => {
-                const count = countMap.get(date) || 0;
-                return count;
-            });
-    
-            // 5. 차트 그리기
-            const chartBar = document.getElementById('chart_bar');
-            new Chart(chartBar, {
-                type: 'bar',
-                data: {
-                    labels: last7Days,
-                    datasets: [{
-                        data: counts,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1,
-                                precision: 0
-                            }
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        } catch (error) {
-            console.error('차트 초기화 오류:', error);
-        }
-    };
 
     const initializeLatest24HoursList = async () => {
         try {
@@ -226,22 +112,17 @@
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
     };
 
-    (async () => {
-        initializeProcessChart();
-        initializeDateChart();  
-        initializeLatest24HoursList();
-        const eventSource = new EventSource('http://localhost:8085/events/subscribe');
-        
-        eventSource.addEventListener('alarm', (event) => {
-            const alarm = JSON.parse(event.data);
-            // 차트, 리스트, sms 업데이트
-        });
-
-        eventSource.onerror = (event) => {
-            eventSource.close();        
+    /* Toast */
+    function Toast(){
+        let toast = document.querySelector('.toast');
+        let toastCloseBtn = document.querySelector('.toast__close');
+        if(toast){
+            toast.classList.add('toast--active');
+            toastCloseBtn.addEventListener('click', function() {
+                toast.classList.remove('toast--active');
+            });
         }
-    })();
-
+    }
 
     /* Event State */
     function EventState(){
@@ -266,6 +147,26 @@
         }
     }
     EventState();
+
+    (async () => {
+        initializeLatest24HoursList();
+
+        const eventSource = new EventSource('http://localhost:8085/events/subscribe');
+
+        eventSource.addEventListener('alarm', (event) => {
+            const alarm = JSON.parse(event.data);
+            Toast();
+        });
+
+        eventSource.onerror = (event) => {
+            eventSource.close();        
+        }
+    })();
+
+
+
+
+
 
 
 

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+
+<div class="popup-basic popup-basic--wide" th:fragment="popup-template" id="eventLayerPopup" style="display: none">
+    <div class="popup-basic__head">
+        <h2 class="name">이벤트 현황 전체</h2>
+        <button type="button" class="close"><span class="hide">close</span></button>
+    </div>
+    <div class="search-result">
+        <div class="search-result__filter">
+            <!-- select-box -->
+            <!-- [D] width값 지정 -->
+            <div id="eventBuildingSelect" class="select-box" style="width:100px;">
+                <!-- [D]
+                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                 -->
+                <span class="select-box__btn"></span>
+                <div class="select-box__content">
+                    <ul>
+                    </ul>
+                </div>
+            </div>
+            <div id="eventFloorSelect" class="select-box" style="width:80px;">
+                <!-- [D]
+                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                 -->
+                <span class="select-box__btn"></span>
+                <div class="select-box__content">
+                    <ul>
+                    </ul>
+                </div>
+            </div>
+            <div id="eventPoiSelect" class="select-box" style="width:120px;">
+                <!-- [D]
+                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                 -->
+                <span class="select-box__btn"></span>
+                <div class="select-box__content">
+                    <ul>
+                    </ul>
+                </div>
+            </div>
+            <div class="date-pickerwrap">
+                <div class="date-picker">
+                    <input type="date" id="start-date">
+                </div>
+                <span>~</span>
+                <div class="date-picker">
+                    <input type="date" id="end-date">
+                </div>
+            </div>
+            <!-- input[type="text"]-->
+            <!-- [D] width값 지정 -->
+            <input id="eventSearchInput" type="text" placeholder="" style="width:277px;">
+            <button type="button" class="button button--solid-middle">검색</button>
+        </div>
+        <div class="search-result__checkbox -search-result__checkbox--active">
+            <div class="inner">
+                <!-- [D] 아래 펼침 버튼 클릭 시 btn--open 및 부모에 search-result__checkbox--active 클래스 추가 -->
+                <button type="button" class="btn btn--open"><span class="hide">펼침</span></button>
+                <ul id="eventCheckBoxList">
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check01">
+                                <label for="check01">이벤트 전체</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check02">
+                                <label for="check02">수위 상승</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check03">
+                                <label for="check03">화재감지</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check04">
+                                <label for="check04">온도상승</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check05">
+                                <label for="check05">불꽃감지</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check06">
+                                <label for="check06">정전</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check07">
+                                <label for="check07">엘리베이터 끼임 사고</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check08">
+                                <label for="check08">쓰러짐 발생</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check09">
+                                <label for="check09">침입 탐지</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check10">
+                                <label for="check10">이벤트 명칭 1</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check11">
+                                <label for="check11">이벤트 명칭 B</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check12">
+                                <label for="check12">이벤트 명칭 C</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check13">
+                                <label for="check13">이벤트 명칭 F</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check14">
+                                <label for="check14">이벤트 명칭 5555</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check15">
+                                <label for="check15">이벤트 명칭 6666</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check16">
+                                <label for="check16">이벤트 명칭 7777</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check17">
+                                <label for="check17">이벤트 명칭 8888</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check18">
+                                <label for="check18">이벤트 명칭 9999</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check19">
+                                <label for="check19">이벤트 명칭 101010</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check20">
+                                <label for="check20">이벤트 명칭 B</label>
+                            </span>
+                    </li>
+                    <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check21">
+                                <label for="check21">이벤트 명칭 B</label>
+                            </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="search-result__contents">
+            <div class="title">
+                총 <span id="alarmCount">0</span><button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+            </div>
+            <div class="event-info">
+                <table>
+                    <caption class="hide">출입구</caption>
+                    <colgroup>
+                        <col style="width:8%">
+                        <col style="width:5%">
+                        <col style="width:12%">
+                        <col style="width:14%">
+                        <col style="width:17%">
+                        <col style="width:17%">
+                        <col style="width:17%">
+                        <col style="width:10%">
+                    </colgroup>
+                    <thead>
+                    <th scope="col">건물</th>
+                    <th scope="col">층</th>
+                    <th scope="col">이벤트명</th>
+                    <th scope="col">장비 분류</th>
+                    <th scope="col">장비명</th>
+                    <th scope="col">발생 일시</th>
+                    <th scope="col">해제 일시</th>
+                    <th scope="col">도면 이동</th>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="search-result__footer">
+            <div class="search-result__paging">
+                <button type="button" class="left"><span class="hide">left</span></button>
+                <div class="number"></div>
+                <button type="button" class="right"><span class="hide">right</span></button>
+            </div>
+            <button type="button" class="download">데이터 다운로드</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

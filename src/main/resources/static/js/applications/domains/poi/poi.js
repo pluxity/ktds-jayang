@@ -9,6 +9,7 @@ class Poi {
     #iconSet;
 
     #poiCategory;
+    #poiMiddleCategory;
 
     #floorId;
 
@@ -25,6 +26,7 @@ class Poi {
         buildingId,
         floorId,
         poiCategoryId,
+        poiMiddleCategoryId,
         iconSetId,
         position,
         rotation,
@@ -35,6 +37,8 @@ class Poi {
         this.#name = name;
         this.#code = code;
         this.#poiCategory = PoiCategoryManager.findById(poiCategoryId);
+        // this.#poiMiddleCategory = PoiMiddleCategoryManager.findById(poiMiddleCategoryId);
+        this.#poiMiddleCategory = poiMiddleCategoryId ? PoiMiddleCategoryManager.findById(poiMiddleCategoryId) : null;
         this.#iconSet = IconSetManager.findById(iconSetId);
         this.#iconUrl = this.getIcon2DUrl();
         this.position = position;
@@ -43,6 +47,7 @@ class Poi {
         property.floorNo = BuildingManager.findById(buildingId).floors.find(floor => floor.id === floorId)?.name
         property.buildingName = BuildingManager.findById(buildingId)?.name
         property.poiCategoryName = PoiCategoryManager.findById(poiCategoryId)?.name
+        property.poiMiddleCategoryName = PoiMiddleCategoryManager.findById(poiMiddleCategoryId)?.name
         this.#property = property;
         this.assignYn = property.assignYn;
         this.#buildingId = buildingId;
@@ -66,8 +71,16 @@ class Poi {
         return this.#poiCategory.id;
     }
 
+    get poiMiddleCategory() {
+        return this.#poiMiddleCategory ? this.#poiMiddleCategory.id : null;
+    }
+
     get poiCategoryDetail() {
         return this.#poiCategory;
+    }
+
+    get poiMiddleCategoryDetail() {
+        return this.#poiMiddleCategory;
     }
 
     get iconUrl() {

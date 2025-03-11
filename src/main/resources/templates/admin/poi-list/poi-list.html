@@ -112,6 +112,14 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>중분류</th>
+                                <td colspan="3">
+                                    <select name="poiMiddleCategoryId" id="selectPoiMiddleCategoryIdRegister" class="form-select" title="중분류" required data-rules="required" data-tagname="중분류">
+                                        <option class="selected" value="">중분류</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>POI 이름</th>
                                 <td colspan="3">
                                     <input type="text" name="poiName" id="poiNameRegister" class="form-control" placeholder="POI 이름을 입력해주세요." maxlength="32" required data-rules="required" data-tagname="POI 이름">
@@ -121,6 +129,12 @@
                                 <th>POI 코드</th>
                                 <td colspan="3">
                                     <input type="text" name="code" id="poiCodeRegister" class="form-control" placeholder="POI 코드를 입력해주세요." maxlength="10" required data-rules="required" data-tagname="POI 코드">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>태그</th>
+                                <td colspan="3">
+                                    <textarea name="tagName" id="tagRegister" class="form-control input-sm" placeholder="태그를 입력해주세요." style="height:200px;" title="태그 이름" data-tagname="태그 이름"></textarea>
                                 </td>
                             </tr>
                             <tr class="selectCctv hidden">
@@ -210,6 +224,14 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>중분류</th>
+                                <td colspan="3">
+                                    <select name="poiMiddleCategoryId" id="selectPoiMiddleCategoryIdModify" class="form-select" title="중분류" required data-rules="required" data-tagname="중분류">
+                                        <option class="selected" value="">중분류</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>POI 이름</th>
                                 <td colspan="3">
                                     <input type="text" name="poiName" id="poiNameModify" class="form-control" placeholder="POI 이름을 입력해주세요." required data-rules="required" data-tagname="POI 이름" maxlength="32">
@@ -219,6 +241,12 @@
                                 <th>POI 코드</th>
                                 <td colspan="3">
                                     <input type="text" name="code" id="poiCodeModify" class="form-control" placeholder="POI 코드를 입력해주세요." required data-rules="required" data-tagname="POI 코드" maxlength="10">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>태그</th>
+                                <td colspan="3">
+                                    <input type="text" name="tagName" id="tagModify" class="form-control" placeholder="태그를 입력해주세요." maxlength="10" required data-rules="required" data-tagname="태그">
                                 </td>
                             </tr>
                             <tr class="selectCctv hidden">

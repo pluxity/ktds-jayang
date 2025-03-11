@@ -101,6 +101,11 @@ const getCategorySelectTags = () => [
     document.querySelector('.search-select-category'),
 ];
 
+const getMiddleCategorySelectTags = () => [
+    document.querySelector('#selectPoiMiddleCategoryIdRegister'),
+    document.querySelector('#selectPoiMiddleCategoryIdModify'),
+];
+
 const removeAllChildElements = (selectTags) => {
     selectTags.forEach((select) => {
         while (select.childElementCount > 1) {
@@ -185,7 +190,30 @@ const initializePoiAndBuildingAndPoiCategory = async () => {
     await initializeBuildings();
     await initPoiCategory();
     await initPoiList();
+    await initPoiMiddleCategory();
 };
+
+const initPoiMiddleCategory = async () => {
+    await api.get('/poi-middle-categories').then(res => {
+        data.poiMiddleCategory = res.data.result;
+    });
+};
+
+document.getElementById('selectPoiCategoryIdRegister').addEventListener('change', function() {
+    const selectedCategoryId = this.value;
+    console.log("선택된 POI 카테고리 ID:", selectedCategoryId);
+
+    const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == selectedCategoryId);
+    initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
+});
+
+document.getElementById('selectPoiCategoryIdModify').addEventListener('change', function() {
+    const selectedCategoryId = this.value;
+    console.log("선택된 POI 카테고리 ID:", selectedCategoryId);
+
+    const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == selectedCategoryId);
+    initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
+});
 
 const registerModal = document.querySelector('#poiRegisterModal');
 registerModal.addEventListener('show.bs.modal', () => {
@@ -250,10 +278,16 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
         params.poiCategoryId = Number(document.querySelector(`#selectPoiCategoryId${type}`).value);
         const poiCategory = data.poiCategory.find((poiCategory) =>
             poiCategory.id === params.poiCategoryId);
+
+        params.poiMiddleCategoryId = Number(document.querySelector(`#selectPoiMiddleCategoryId${type}`).value);
+        const poiMiddleCategory = data.poiMiddleCategory.find((poiMiddleCategory) =>
+            poiMiddleCategory.id === params.poiMiddleCategoryId);
+        console.log("poiMiddleCategory : ", poiMiddleCategory);
         params.iconSetId = poiCategory.iconSets[0].id;
 
         params.code = document.querySelector(`#poiCode${type}`).value;
         params.name = document.querySelector(`#poiName${type}`).value;
+        params.tagName = document.querySelector(`#tag${type}`).value;
 
         if(poiCategory.name.includes('센서')) {
             params.poiCameraIds = data.poi.filter((poi) => getAllTagValues(type).indexOf(poi.code) > -1).map(poi => poi.id);

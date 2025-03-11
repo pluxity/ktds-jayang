@@ -45,4 +45,15 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             ORDER BY a.occurrenceDate DESC
         """)
     List<Last24HoursEventDTO> findLatest24HoursEventList(@Param("last24Hours") LocalDateTime last24Hours);
+
+    @Query("SELECT a FROM Alarm a WHERE (:startDate IS NULL OR a.occurrenceDate >= :startDate) AND (:endDate IS NULL OR a.occurrenceDate <= :endDate)")
+    List<Alarm> getAlarmsByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT a FROM Alarm a WHERE "
+            + "(STR_TO_DATE(a.occurrenceDate, '%Y/%m/%d %H:%i:%s') >= :startDate OR :startDate IS NULL) "
+            + "AND (STR_TO_DATE(a.occurrenceDate, '%Y/%m/%d %H:%i:%s') <= :endDate OR :endDate IS NULL)")
+    List<Alarm> findAlarmsByDateRange(@Param("startDate") LocalDateTime startDate,
+                                      @Param("endDate") LocalDateTime endDate);
+
+    List<Alarm> findByOccurrenceDateBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

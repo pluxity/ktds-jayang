@@ -28,6 +28,9 @@ public record CreatePoiDTO(
         @NotNull(message = "카테고리 아이디는 필수 입니다.")
         @Digits(integer = 20, fraction = 0, message = "카테고리 아이디는 20자리 이하의 숫자 입니다.")
         Long poiCategoryId,
+        @NotNull(message = "카테고리 아이디는 필수 입니다.")
+        @Digits(integer = 20, fraction = 0, message = "카테고리 아이디는 20자리 이하의 숫자 입니다.")
+        Long poiMiddleCategoryId,
         @NotNull(message = "아이콘셋 아이디는 필수 입니다.")
         @Digits(integer = 20, fraction = 0, message = "아이콘셋 아이디는 20자리 이하의 숫자 입니다.")
         Long iconSetId

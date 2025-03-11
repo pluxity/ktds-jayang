@@ -722,6 +722,8 @@ const layerPopup = (function () {
         const buildingSet = new Set();
         const floorSet = new Set();
 
+        // // 중분류 추가
+
         // accordion data set
         pois.forEach(poi => {
             const buildingInfo = BuildingManager.findById(poi.buildingId);
@@ -785,69 +787,83 @@ const layerPopup = (function () {
     }
 
     function createAccordion(poi) {
-
-        let buildingInfo = BuildingManager.findById(poi.buildingId);
-
-        const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
         const accordionElement = document.getElementById('mainAccordion');
-        // 버튼
-        const accordionBtn = document.createElement('div');
-        accordionBtn.classList.add('accordion__btn');
-        accordionBtn.innerHTML = `${poi.name}`;
+        const categoryName = poi.poiMiddleCategoryDetail?.name || '기타';
 
-        accordionBtn.addEventListener('click', () => {
-            const allBtns = accordionElement.querySelectorAll('.accordion__btn');
-            if (accordionBtn.classList.contains('accordion__btn--active')) {
-                accordionBtn.classList.remove('accordion__btn--active');
-            } else {
-                allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
-                accordionBtn.classList.add('accordion__btn--active');
-            }
-        });
+        let existingBtn = accordionElement.querySelector(`.accordion__btn[data-category="${categoryName}"]`);
+        let accordionDetail;
 
-        // 상세
-        const accordionDetail = document.createElement('div');
-        accordionDetail.classList.add('accordion__detail');
+        if (!existingBtn) {
+            const accordionBtn = document.createElement('div');
+            accordionBtn.classList.add('accordion__btn');
+            accordionBtn.dataset.category = categoryName;
+            accordionBtn.textContent = categoryName;
 
-        // 상세 > 테이블
-        const table = document.createElement('table');
-        const caption = document.createElement('caption');
-        caption.classList.add('hide');
-        caption.textContent = `${poi.name}`;
-        table.appendChild(caption);
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
+            accordionBtn.addEventListener('click', () => {
+                const allBtns = accordionElement.querySelectorAll('.accordion__btn');
+                if (accordionBtn.classList.contains('accordion__btn--active')) {
+                    accordionBtn.classList.remove('accordion__btn--active');
+                } else {
+                    allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
+                    accordionBtn.classList.add('accordion__btn--active');
+                }
+            });
 
-        ['건물', '층', '장비명'].forEach(text => {
-            const th = document.createElement('th');
-            th.setAttribute('scope', 'col');
-            th.textContent = text;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
+            // 상세 영역 생성
+            accordionDetail = document.createElement('div');
+            accordionDetail.classList.add('accordion__detail');
 
-        const tbody = document.createElement('tbody');
+            // 테이블 생성
+            const table = document.createElement('table');
+            const caption = document.createElement('caption');
+            caption.classList.add('hide');
+            caption.textContent = categoryName;
+            table.appendChild(caption);
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            ['건물', '층', '장비명'].forEach(text => {
+                const th = document.createElement('th');
+                th.setAttribute('scope', 'col');
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            table.appendChild(tbody);
+            accordionDetail.appendChild(table);
+
+            accordionElement.appendChild(accordionBtn);
+            accordionElement.appendChild(accordionDetail);
+        } else {
+            accordionDetail = existingBtn.nextElementSibling;
+        }
+
+        const tbody = accordionDetail.querySelector('tbody');
         const tr = document.createElement('tr');
-        const tdBuilding = document.createElement('td');
 
+        const buildingInfo = BuildingManager.findById(poi.buildingId);
+        const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
+
+        const tdBuilding = document.createElement('td');
         tdBuilding.textContent = buildingInfo.name;
+
         const tdFloor = document.createElement('td');
         tdFloor.textContent = floorInfo.name;
+
         const tdEquipment = document.createElement('td');
-        // 수정 필요
         tdEquipment.classList.add('align-left');
         tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
-        // node 추가
+
         tr.appendChild(tdBuilding);
         tr.appendChild(tdFloor);
         tr.appendChild(tdEquipment);
+
         tbody.appendChild(tr);
-        table.appendChild(tbody);
-        accordionDetail.appendChild(table);
-        accordionElement.appendChild(accordionBtn);
-        accordionElement.appendChild(accordionDetail);
     }
+
 
     // 검색폼
     const buildingSelectBtn = document.querySelector('#buildingSelect .select-box__btn');
@@ -997,6 +1013,7 @@ const layerPopup = (function () {
         allTabLi.setAttribute('id', 'elevTabAll');
         allTabLi.setAttribute('aria-selected', 'false');
         allTabLi.setAttribute('tabindex', '0');
+        allTabLi.classList.add("active");
 
         const allTabA = document.createElement('a');
         allTabA.setAttribute('href', 'javascript:void(0);');
@@ -1006,11 +1023,22 @@ const layerPopup = (function () {
         // all tab은 default로 맨앞에
         popupUl.prepend(allTabLi);
 
-        allTabLi.addEventListener('click', () => {
+        const handleTabClick = (event) => {
+            const clickedTab = event.currentTarget;
+            const parentUl = clickedTab.closest('ul');
+            if (parentUl) {
+                parentUl.querySelectorAll('li').forEach(tab => {
+                    tab.classList.remove("active");
+                });
+                clickedTab.classList.add("active");
+            }
+        }
+
+        allTabLi.addEventListener('click', (event) => {
+            handleTabClick(event);
             const poiList = PoiManager.findAll();
             PoiManager.getPoiList().then(poiList => {
                 const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
-                console.log('filteredPoiList : ', filteredPoiList);
                 addElevators(filteredPoiList);
             })
         });
@@ -1030,23 +1058,24 @@ const layerPopup = (function () {
                 popupAtag.textContent = building.name;
                 popupLi.appendChild(popupAtag);
                 popupUl.appendChild(popupLi);
-                popupLi.addEventListener('click', () => {
+                popupLi.addEventListener('click', (event) => {
+                    handleTabClick(event);
                     PoiManager.getPoisByBuildingId(building.id).then(poiList => {
                         const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
-                        console.log('filteredPoiList : ', filteredPoiList);
                         addElevators(filteredPoiList);
                     })
                 });
             })
         });
-
+        allTabLi.click();
     }
 
+    const livePlayers = [];
     const addElevators = (filteredPoiList) => {
         const facilityList = document.querySelector('.facility-area__list');
         facilityList.innerHTML = '';
 
-        let player = null;
+        console.log("filteredPoiList : ", filteredPoiList);
         filteredPoiList.forEach((poi) => {
             const li = document.createElement('li');
 
@@ -1091,8 +1120,18 @@ const layerPopup = (function () {
             `;
             facilityList.appendChild(li);
             const canvasElement = document.getElementById(canvasId);
-        });
+            let livePlayer = new PluxPlayer({
+                relayServerUrl: "ws://127.0.0.1:4001",
+                destinationIp: "192.168.4.45", //릴레이 서버 기준 LG ipsolute ip
+                destinationPort: "555", //릴레이 서버 기준 LG ipsolute 녹화서버 포트
+                canvasDom: canvasElement, //캔버스 dom
+            })
 
+            // cctv id를 어떻게....
+            // livePlayer.livePlay("c06dedd40ac202") // live play
+
+            livePlayers.push({ id: poi.id, player: livePlayer });
+        });
     }
 
     // 설비 popup
@@ -1285,7 +1324,290 @@ const layerPopup = (function () {
         }
     };
 
+    const closePlayers = () => {
+        livePlayers.forEach(({player}) => {
+            player.cctvClose();
+        })
+        livePlayers.length = 0;
+    }
+
+    // date picker default setting
+    const setDatePicker = () => {
+        const startDateInput = document.getElementById("start-date");
+        const endDateInput = document.getElementById("end-date");
+
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const formatToDateInput = (date) =>
+            `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+        startDateInput.value = formatToDateInput(firstDayOfMonth);
+        endDateInput.value = formatToDateInput(now);
+
+        console.log("start :", getTimestamp(startDateInput.value));
+        console.log("end :", getTimestamp(endDateInput.value));
+    }
+
+    const updateBuildingSelectBox = (buildingList) => {
+        const buildingSelect = document.getElementById("eventBuildingSelect");
+        const buildingBtn = buildingSelect.querySelector(".select-box__btn");
+        const buildingContent = buildingSelect.querySelector(".select-box__content ul");
+        const currentBuildingId = new URLSearchParams(window.location.search).get("buildingId");
+        buildingContent.innerHTML = '';
+
+        buildingList.forEach((building) => {
+            const li = document.createElement('li');
+            li.textContent = building.name;
+
+            if (currentBuildingId == building.id) {
+                buildingBtn.textContent = building.name;
+                updateFloorSelectBox(building.floors);
+            }
+            li.onclick = () => {
+                buildingBtn.textContent = building.name;
+                buildingBtn.classList.remove("select-box__btn--active");
+                buildingSelect.querySelector(".select-box__content").classList.remove("active");
+                updateFloorSelectBox(building.floors, building.id);
+            }
+
+            buildingContent.appendChild(li);
+        });
+        if (buildingList.length > 0) {
+            buildingBtn.textContent = buildingList[0].name;
+            updateFloorSelectBox(buildingList[0].floors, buildingList[0].id);
+        }
+
+        buildingBtn.onclick = (event) => {
+            toggleSelectBox(buildingSelect);
+        };
+    }
+
+    const updateFloorSelectBox = (floorList, buildingId) => {
+        const floorSelect = document.getElementById("eventFloorSelect");
+        const floorBtn = floorSelect.querySelector(".select-box__btn");
+        const floorContent = floorSelect.querySelector(".select-box__content ul");
+        floorContent.innerHTML = '';
+
+        const liAll = document.createElement('li');
+        liAll.textContent = "전체";
+        liAll.onclick = () => {
+            floorBtn.textContent = "전체";
+            floorBtn.classList.remove("select-box__btn--active");
+            floorSelect.querySelector(".select-box__content").classList.remove("active");
+            PoiManager.getPoisByBuildingId(buildingId).then((pois) => {
+                updatePoiSelectBox(pois);
+            });
+        };
+        floorContent.appendChild(liAll);
+
+        floorList.forEach(floor => {
+            const li = document.createElement('li');
+            li.textContent = floor.name;
+
+            li.onclick = () => {
+                floorBtn.textContent = floor.name;
+                floorBtn.classList.remove("select-box__btn--active");
+                floorSelect.querySelector(".select-box__content").classList.remove("active");
+
+                PoiManager.getPoisByFloorId(floor.id).then((pois) => {
+                    updatePoiSelectBox(pois);
+                });
+            }
+
+            floorContent.appendChild(li);
+        });
+        if (floorList.length > 0) {
+            // floorBtn.textContent = floorList[0].name;
+            floorBtn.textContent = "전체";
+            PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
+                updatePoiSelectBox(pois);
+            });
+        }
+        floorBtn.onclick = () => {
+            toggleSelectBox(floorSelect);
+        }
+    }
+
+    const updatePoiSelectBox = (poiList) => {
+        const poiSelect = document.getElementById("eventPoiSelect");
+        const poiBtn = poiSelect.querySelector(".select-box__btn");
+        const poiContent = poiSelect.querySelector(".select-box__content ul");
+        poiContent.innerHTML = '';
+
+        if (poiList.length == 0) {
+            poiBtn.textContent = "없음";
+            poiBtn.classList.add("select__btn--disabled");
+        } else {
+            poiBtn.classList.remove("select__btn--disabled");
+
+            const poiCategories = Array.from(
+                new Map(poiList.map(poi => [poi.poiCategoryDetail.id, poi.poiCategoryDetail])).values()
+            );
+
+            const liAll = document.createElement('li');
+            liAll.textContent = "전체";
+            liAll.onclick = () => {
+                poiBtn.textContent = "전체";
+                poiBtn.classList.remove("select-box__btn--active");
+                poiSelect.querySelector(".select-box__content").classList.remove("active");
+            };
+            poiContent.appendChild(liAll);
+
+            poiCategories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category.name;
+                li.dataset.id = category.id;
+                li.onclick = () => {
+                    poiBtn.textContent = category.name;
+                    poiBtn.classList.remove("select-box__btn--active");
+                    poiSelect.querySelector(".select-box__content").classList.remove("active");
+                };
+                poiContent.appendChild(li);
+            });
+            poiBtn.textContent = "전체";
+        }
+
+        poiBtn.onclick = () => {
+            if (poiBtn.classList.contains("select__btn--disabled")) return;
+            toggleSelectBox(poiSelect);
+        };
+    }
+
+    const toggleSelectBox = (selectBoxElement) => {
+        const btn = selectBoxElement.querySelector('.select-box__btn');
+        const content = selectBoxElement.querySelector('.select-box__content');
+        btn.classList.toggle("select-box__btn--active");
+        content.classList.toggle("active");
+    };
+
+    const startDateInput = document.getElementById("start-date");
+    const endDateInput = document.getElementById("end-date");
+    const getTimestamp = (dateString) => Math.floor(new Date(dateString).getTime() / 1000);
+    startDateInput.addEventListener("change", event => {
+        console.log("start : ", getTimestamp(event.target.value));
+        if (startDateInput.value) {
+            endDateInput.min = startDateInput.value;
+        }
+    });
+
+    endDateInput.addEventListener("change", event => {
+        console.log("start : ", getTimestamp(event.target.value));
+    });
+
+    let globalAlarmList = [];
+    let poiList = [];
+
+    const createEventPopup = async () => {
+        BuildingManager.getBuildingList().then((buildingList) => {
+            updateBuildingSelectBox(buildingList);
+        });
+        poiList = await PoiManager.getPoiList();
+
+        const tableBody = document.querySelector('.event-info table tbody');
+        const alarmCountEl = document.getElementById('alarmCount');
+        tableBody.innerHTML = "";
+        setDatePicker();
+
+        const startDateString = document.getElementById("start-date").value;
+        const endDateString = document.getElementById("end-date").value;
+
+        const params = new URLSearchParams();
+        params.append('startDateString', startDateString);
+        params.append('endDateString', endDateString);
+
+        api.get(`/alarms?${params.toString()}`).then((res) => {
+            const { result: data } = res.data;
+            globalAlarmList = data;
+            const eventPopup = document.querySelector('#eventLayerPopup');
+            eventPopup.style.position = 'absolute';
+            eventPopup.style.top = '50%';
+            eventPopup.style.left = '50%';
+            eventPopup.style.transform = 'translate(-50%, -50%)';
+            eventPopup.style.display = 'inline-block';
+            alarmCountEl.textContent = data.length.toLocaleString();
+            // 페이지당 10개씩
+            const itemsPerPage = 10;
+            let currentPage = 1;
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+            const paginationContainer = document.querySelector(".search-result__paging .number");
+
+            const renderTable = (page) => {
+                tableBody.innerHTML = "";
+                const startIndex = (page - 1) * itemsPerPage;
+                const pageAlarms = data.slice(startIndex, startIndex + itemsPerPage);
+                pageAlarms.forEach((data) => {
+                    const eventRow = document.createElement('tr');
+                    const [formattedOccurrenceDate, formattedConfirmTime] =
+                        [data.occurrenceDate, data.confirmTime].map(dateStr => dateStr ? dateStr.replace(/\//g, '-') : '-');
+                    let deviceType = data.deviceNm.split("-")[0];
+                    // const tagNameParts = data.tagName.split("-");
+                    // let deviceType = `${tagNameParts[2]}-${tagNameParts[3]}`;
+                    // let deviceName = `${tagNameParts[2]}-${tagNameParts[3]}-${tagNameParts[4]}`;
+
+                    const device = poiList.find(poi => poi.name === data.deviceNm);
+
+                    eventRow.innerHTML = `
+                        <td>${data.buildingNm || '-'}</td>
+                        <td>${data.floorNm || '-'}</td>
+                        <td>${data.alarmType || '-'}</td>
+                        <td>${deviceType || '-'}</td>
+                        <td>${data.deviceNm || '-'}</td>
+                        <td>${formattedOccurrenceDate || '-'}</td>
+                        <td>${formattedConfirmTime || '-'}</td>
+                        <td><a href="#none" class="icon-move"><span class="hide">도면 이동</span></a></td>
+                    `;
+                    tableBody.appendChild(eventRow);
+                });
+            };
+
+            const renderPagination = () => {
+                paginationContainer.innerHTML = "";
+                for (let i = 1; i <= totalPages; i++) {
+                    const span = document.createElement('span');
+                    span.textContent = i;
+                    if (i === currentPage) {
+                        span.classList.add("active");
+                    }
+                    span.addEventListener('click', () => {
+                        currentPage = i;
+                        renderTable(currentPage);
+                        renderPagination();
+                    });
+                    paginationContainer.appendChild(span);
+                }
+            };
+
+            document.querySelector(".search-result__paging .left").onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable(currentPage);
+                    renderPagination();
+                }
+            };
+            document.querySelector(".search-result__paging .right").onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable(currentPage);
+                    renderPagination();
+                }
+            };
+
+            renderTable(currentPage);
+            renderPagination();
+        });
+    }
+
+    const closeButtons = document.querySelectorAll('.popup-basic .close');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            const target = event.target.closest('.popup-basic');
+            target.style.display = 'none';
+        });
+    })
+
     return {
+        closePlayers,
         setElevatorTab,
         setEquipmentTab,
         createRecentPopup,
@@ -1298,6 +1620,7 @@ const layerPopup = (function () {
         setCategoryData,
         moveToPoi,
         setPoiEvent,
+        createEventPopup
     }
 })();
 

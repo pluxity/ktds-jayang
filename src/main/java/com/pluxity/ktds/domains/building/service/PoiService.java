@@ -15,6 +15,7 @@ import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
+import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -48,6 +49,7 @@ public class PoiService {
     private final FloorRepository floorRepository;
     private final PoiCategoryRepository poiCategoryRepository;
     private final IconSetRepository iconSetRepository;
+    private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -99,6 +101,11 @@ public class PoiService {
     @Transactional
     public Long save(@NotNull @Valid final CreatePoiDTO dto) {
         validateSaveCode(dto.code());
+        // 임시 추가
+        poiRepository.findByName(dto.name())
+                .ifPresent(found -> {
+                    throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + dto.name());
+                });
         Poi poi = Poi.builder()
                 .code(dto.code())
                 .name(dto.name())
@@ -109,6 +116,7 @@ public class PoiService {
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
+        updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
 
         return poiRepository.save(poi).getId();

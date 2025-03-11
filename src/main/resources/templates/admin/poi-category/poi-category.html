@@ -105,6 +105,95 @@
     </div>
 </div>
 
+<!-- 중분류 추가 -->
+<div class="modal fade" id="poiMiddleCategoryRegisterModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">중분류 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiMiddleCategoryRegisterForm" id="poiMiddleCategoryRegisterForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>대분류</th>
+                                <td>
+                                    <select name="majorCategory" id="middleRegisterMajorId" class="form-select" title="대분류 선택" required data-rules="required" data-tagname="대분류">
+                                        <option value="">대분류 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr class="modify-select-icon-set">
+                                <th>분류명</th>
+                                <td>
+                                    <input type="text" name="name" id="middleRegisterName" class="form-control input-sm" maxlength="30" title="분류 이름" required data-rules="required" data-tagname="분류 이름">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnPoiMiddleCategoryRegister">등록
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="poiMiddleCategoryModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">POI 분류 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiCategoryModifyForm" id="poiMiddleCategoryModifyForm" autocomplete="off">
+                    <input type="hidden" id="middleModifyId" name="id">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>대분류</th>
+                                <td>
+                                    <select name="majorCategory" id="middleModifyMajorId" class="form-select" title="대분류 선택" required data-rules="required" data-tagname="대분류">
+                                        <option value="">대분류 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr class="modify-select-icon-set">
+                                <th>분류명</th>
+                                <td>
+                                    <input type="text" name="name" id="middleModifyName" class="form-control input-sm" maxlength="30" title="분류 이름" required data-rules="required" data-tagname="분류 이름">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnPoiMiddleCategoryModify">수정
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <th:block th:replace="~{admin/fragments/script :: script }"></th:block>
 <script th:src="@{/static/js/admin/poi-category/poi-category.js}"></script>
 

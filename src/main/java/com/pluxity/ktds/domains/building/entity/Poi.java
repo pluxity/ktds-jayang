@@ -4,12 +4,15 @@ import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
+import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -31,6 +34,10 @@ public class Poi {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poi_category_id")
     private PoiCategory poiCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "poi_middle_category_id")
+    private PoiMiddleCategory poiMiddleCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "icon_set_id")
@@ -88,6 +95,9 @@ public class Poi {
     public void changePoiCategory(PoiCategory poiCategory) {
         this.poiCategory = poiCategory;
     }
+    public void changePoiMiddleCategory(PoiMiddleCategory poiMiddleCategory) {
+        this.poiMiddleCategory = poiMiddleCategory;
+    }
 
     public void changeIconSet(IconSet iconSet) {
         this.iconSet = iconSet;
@@ -111,6 +121,9 @@ public class Poi {
                 .buildingId(this.getBuilding().getId())
                 .floorId(this.getFloor().getId())
                 .poiCategoryId(this.getPoiCategory().getId())
+                .poiMiddleCategoryId(Optional.ofNullable(this.getPoiMiddleCategory())
+                        .map(PoiMiddleCategory::getId)
+                        .orElse(null))
                 .iconSetId(this.getIconSet().getId())
                 .position(this.getPosition())
                 .rotation(this.getRotation())

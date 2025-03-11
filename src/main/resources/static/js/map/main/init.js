@@ -114,7 +114,8 @@
         const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
         const upButton = document.querySelector('#floor-info .floor-info__detail .up');
         const downButton = document.querySelector('#floor-info .floor-info__detail .down');
-
+        // upButton.style.transform = "rotate(-90deg)";
+        // downButton.style.transform = "rotate(-90deg)";
         floors.forEach(floor => {
             const floorLi = document.createElement('li');
             floorLi.setAttribute('floor-id', floor.id);
@@ -130,39 +131,20 @@
         updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
 
         // 1층단위
-        // upButton.addEventListener('click', () => {
-        //     if (startIndex > 0) {
-        //         startIndex--;
-        //         updateFloorPage(floorUl, startIndex, itemsPerPage);
-        //         updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
-        //     }
-        // });
-        //
-        // downButton.addEventListener('click', () => {
-        //     if (startIndex + itemsPerPage < totalItems) {
-        //         startIndex++;
-        //         updateFloorPage(floorUl, startIndex, itemsPerPage);
-        //         updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
-        //     }
-        // });
-
-        // 10층단위
         upButton.addEventListener('click', () => {
-            if (startIndex >= itemsPerPage) {
-                startIndex -= itemsPerPage;
-            } else {
-                startIndex = 0;
+            if (startIndex > 0) {
+                startIndex--;
+                updateFloorPage(floorUl, startIndex, itemsPerPage);
+                updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
             }
-            updateFloorPage(floorUl, startIndex, itemsPerPage);
-            updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
         });
 
         downButton.addEventListener('click', () => {
             if (startIndex + itemsPerPage < totalItems) {
-                startIndex += itemsPerPage;
+                startIndex++;
+                updateFloorPage(floorUl, startIndex, itemsPerPage);
+                updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
             }
-            updateFloorPage(floorUl, startIndex, itemsPerPage);
-            updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
         });
 
         clickFloor();
@@ -188,11 +170,31 @@
             })
         })
         // allFloor
-        const allFloor = document.querySelector('.floor-info__ctrl');
+        const allFloor = document.querySelector('.floor-info__ctrl .all');
         allFloor.addEventListener('click', event => {
             floorBtns.forEach(btn => btn.classList.remove('active'));
             Px.Model.Visible.ShowAll();
             Px.VirtualPatrol.Clear();
+        })
+
+        const expandBtn = document.querySelector('.floor-info__ctrl .scale');
+        expandBtn.addEventListener('click', event => {
+            const params = new URLSearchParams(window.location.search);
+            let buildingId = params.get('buildingId');
+            const {floors} = BuildingManager.findById(buildingId);
+            if (expandBtn.classList.contains("scale--down")) {
+                Px.Model.Expand({
+                    duration: 1000,
+                    interval: 100,
+                    name: floors[0].id,
+                });
+                expandBtn.classList.remove("scale--down");
+            } else {
+                Px.Model.Collapse({
+                    duration: 1000,
+                });
+                expandBtn.classList.add("scale--down");
+            }
         })
     }
 
@@ -203,6 +205,7 @@
     await NoticeManager.getNotices();
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
+    await PoiMiddleCategoryManager.getPoiCategoryList();
 
     await BuildingManager.getBuildingList().then((buildingList) => {
         buildingList.forEach(async (building) => {

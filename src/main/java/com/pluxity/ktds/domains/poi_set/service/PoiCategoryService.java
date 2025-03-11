@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryRequestDTO;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryResponseDTO;
+import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
@@ -11,6 +12,7 @@ import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveImage;
+import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
 import com.pluxity.ktds.global.exception.CustomException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
@@ -68,8 +70,11 @@ public class PoiCategoryService {
         PoiCategory poiCategory = PoiCategory.builder()
                 .name(dto.name())
                 .build();
-
-        updateIconFile(poiCategory, dto.imageFileId());
+        Optional<IconSet> iconSet = iconSetRepository.findById(dto.iconSetIds().get(0));
+        Long imageFileId = iconSet.map(IconSet::getIconFile2D)
+                .map(FileInfo::getId)
+                .orElse(null);
+        updateIconFile(poiCategory, imageFileId);
         updateIconSets(poiCategory, dto.iconSetIds());
 
         PoiCategory savePoiCategory = repository.save(poiCategory);
@@ -85,8 +90,12 @@ public class PoiCategoryService {
         if (StringUtils.isNotBlank(dto.name())) {
             fetchPoiCategory.updateName(dto.name());
         }
+        Optional<IconSet> iconSet = iconSetRepository.findById(dto.iconSetIds().get(0));
+        Long imageFileId = iconSet.map(IconSet::getIconFile2D)
+                .map(FileInfo::getId)
+                .orElse(null);
 
-        updateIconFile(fetchPoiCategory, dto.imageFileId());
+        updateIconFile(fetchPoiCategory, imageFileId);
         updateIconSets(fetchPoiCategory, dto.iconSetIds());
     }
 

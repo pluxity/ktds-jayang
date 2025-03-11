@@ -2,7 +2,7 @@ const PoiManager = (() => {
     let poiList = [];
 
     const dtoToModel = (poiDto) => {
-        const { id, name, code, poiCategoryId, iconSetId, buildingId, floorId, position, rotation, scale } = poiDto;
+        const { id, name, code, poiCategoryId, poiMiddleCategoryId, iconSetId, buildingId, floorId, position, rotation, scale } = poiDto;
         return new Poi(
             id,
             name,
@@ -10,6 +10,7 @@ const PoiManager = (() => {
             buildingId,
             floorId,
             poiCategoryId,
+            poiMiddleCategoryId,
             iconSetId,
             position,
             rotation,

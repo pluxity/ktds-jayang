@@ -9,6 +9,7 @@ public record PoiDetailResponseDTO(
         Long buildingId,
         Long floorId,
         Long poiCategoryId,
+        Long poiMiddleCategoryId,
         Long iconSetId,
         Spatial position,
         Spatial rotation,

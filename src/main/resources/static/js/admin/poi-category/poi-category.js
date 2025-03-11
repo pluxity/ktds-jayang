@@ -23,6 +23,20 @@ const getPoiCategoryInfoList = async () => {
         const {result: resData} = res.data;
         data.poiCategory = resData;
 
+        // 대분류 select추가
+        const categorySelectTagInRegister =
+            document.querySelector('#middleRegisterMajorId');
+        const categorySelectTagInModify =
+            document.querySelector('#middleModifyMajorId');
+        data.poiCategory.forEach(category => {
+            categorySelectTagInRegister.appendChild(
+                new Option(category.name, category.id),
+            );
+            categorySelectTagInModify.appendChild(
+                new Option(category.name, category.id),
+            );
+        })
+
         let html = '';
 
         let optionHtml = '';
@@ -37,23 +51,71 @@ const getPoiCategoryInfoList = async () => {
             optionHtml =
                 '<option disabled>조회된 내용이 없습니다.</option>';
 
-        html += `<div class="col-md-4 bg-light">
-                            <div class="form-group mb-1">
-                                <select class="form-select category" id="category1" size="15" name="category1">
-                                    ${optionHtml}
-                                </select>
-                            </div>
-                            <div class="float-left">
-                            </div>
-                            <div class="float-right">
-                                <i class="cursor-pointer fa-lg fa-regular fa-square-plus" data-bs-toggle="modal" data-bs-target="#poiCategoryRegisterModal"></i>
-                                <i class="cursor-pointer fa-lg fa-regular fa-square-minus" onclick="minusCategory();"></i>
-                                <i class="cursor-pointer fa-lg fa-regular fa-square-check" onclick="modifyCategory(this);"></i>
-                            </div>
-                        </div>`;
+        html += `<div id="categoryFlex" class="d-flex">
+                 
+                    <div class="col-md-4 bg-light">
+                        <h2>대분류</h2>
+                        <div class="form-group mb-1">
+                            <select class="form-select category" id="category1" size="15" name="category1">
+                                ${optionHtml}
+                            </select>
+                        </div>
+                        <div class="float-left">
+                        </div>
+                        <div class="float-right">
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-plus" data-bs-toggle="modal" data-bs-target="#poiCategoryRegisterModal"></i>
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-minus" onclick="minusCategory();"></i>
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-check" onclick="modifyCategory(this);"></i>
+                        </div>
+                    </div>
+                    <div id="middleCategoryContainer"></div>
+                </div>
+                `;
 
         document.getElementById('category').innerHTML = html;
         // feather.replace();
+    });
+
+    await initializeIconSetInSelect();
+    await getPoiMiddleCategoryInfoList();
+};
+
+// add middleCategory
+const getPoiMiddleCategoryInfoList = async () => {
+    await api.get('/poi-middle-categories').then((res) => {
+        const {result: resData} = res.data;
+        data.poiCategory = resData;
+
+        let optionHtml = '';
+
+        resData.forEach((poiCategory, index) => {
+            let selected = '';
+            if (index === 0) selected = 'selected';
+            optionHtml += `<option value="${poiCategory.id}" ${selected}>${poiCategory.name}</option>`;
+        });
+
+        if (resData.length === 0)
+            optionHtml =
+                '<option disabled>조회된 내용이 없습니다.</option>';
+
+        let middleCategoryHtml = `<div class="col-md-4 bg-light">
+                        <h2>중분류</h2>
+                        <div class="form-group mb-1">
+                            <select class="form-select category" id="category2" size="15" name="category1">
+                                ${optionHtml}
+                            </select>
+                        </div>
+                        <div class="float-left">
+                        </div>
+                        <div class="float-right">
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-plus" data-bs-toggle="modal" data-bs-target="#poiMiddleCategoryRegisterModal"></i>
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-minus" onclick="minusCategory();"></i>
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-check" onclick="modifyCategory(this);"></i>
+                        </div>
+                    </div>
+                `;
+
+        document.getElementById('categoryFlex').innerHTML += middleCategoryHtml;
     });
 
     await initializeIconSetInSelect();
@@ -96,6 +158,31 @@ const modifyCategory = () => {
         poiCategory.iconSets[0].id ?? '';
 
     let myModal = new bootstrap.Modal(document.getElementById('poiCategoryModifyModal'), {
+        keyboard: false
+    });
+    myModal.show();
+};
+
+const modifyMiddleCategory = () => {
+    const selectedCategory = document.querySelector('#category2 option:checked');
+
+    if (selectedCategory === null || selectedCategory.value === '' || selectedCategory.value === undefined) {
+        alertSwal('선택된 내용이 없습니다.');
+        return;
+    }
+
+    const poiCategory = data.poiCategory.find(
+        (category) => category.id === Number(selectedCategory.value),
+    );
+
+    const modal = document.getElementById('poiCategoryModifyModal');
+
+    modal.querySelector('#middleModifyId').value = poiCategory.id;
+    modal.querySelector('#middleModifyName').value = poiCategory.name;
+    modal.querySelector('#middleModifyMajorId').value =
+        poiCategory.iconSets[0].id ?? '';
+
+    let myModal = new bootstrap.Modal(document.getElementById('poiMiddleCategoryModifyModal'), {
         keyboard: false
     });
     myModal.show();
@@ -160,3 +247,28 @@ const registerModal = document.getElementById('poiCategoryRegisterModal');
 registerModal.addEventListener('shown.bs.modal', () => {
     registerModal.querySelector('form').reset();
 });
+
+// 추가
+const btnPoiMiddleCategoryRegister = document.getElementById(
+    'btnPoiMiddleCategoryRegister',
+);
+btnPoiMiddleCategoryRegister.onclick = () => {
+    const form = document.getElementById('poiMiddleCategoryRegisterForm');
+    const formData = new FormData(form);
+
+    if (!validationForm(form)) return;
+
+    formData.set('poiCategoryIds[]', [document.getElementById('middleRegisterMajorId').value]);
+    formData.delete('poiCategoryId');
+
+    api.post('/poi-middle-categories', formData, {
+        headers: {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        },
+    }).then(() => {
+        alertSwal('등록되었습니다.').then(() => {
+            window.location.reload();
+        });
+    });
+};

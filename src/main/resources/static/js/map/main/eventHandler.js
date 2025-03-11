@@ -78,158 +78,6 @@
         });
     }
 
-    const ITEMS_PER_PAGE = 17;
-    let currentPage = 1;
-    let allEvents = [];
-
-    const initializeLatest24HoursList = async () => {
-        try {
-            const response = await fetch('http://localhost:8085/events/latest-24-hours');
-            allEvents = await response.json();
-            
-            // 페이징 UI 추가
-            const paginationHTML = `
-                <div class="event-state__pagination">
-                    <button class="prev-btn" ${currentPage === 1 ? 'disabled' : ''}>이전</button>
-                    <span class="current-page">${currentPage}</span>
-                    <button class="next-btn" ${currentPage >= Math.ceil(allEvents.result.length / ITEMS_PER_PAGE) ? 'disabled' : ''}>다음</button>
-                </div>
-            `;
-            
-            const tableContainer = document.querySelector('.event-state .table').parentElement;
-            tableContainer.insertAdjacentHTML('beforeend', paginationHTML);
-
-            // 페이징 버튼 이벤트 리스너
-            document.querySelector('.prev-btn').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPage();
-                }
-            });
-
-            document.querySelector('.next-btn').addEventListener('click', () => {
-                if (currentPage < Math.ceil(allEvents.result.length / ITEMS_PER_PAGE)) {
-                    currentPage++;
-                    renderPage();
-                }
-            });
-
-            renderPage();
-
-        } catch (error) {
-            console.error('24시간 이벤트 목록 로딩 실패:', error);
-        }
-    };
-
-    const renderPage = () => {
-        const tableBody = document.querySelector('.event-state .table tbody');
-        tableBody.innerHTML = '';
-
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        const pageItems = allEvents.result.slice(startIndex, endIndex);
-
-        pageItems.forEach(event => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${event.buildingNm || '-'}</td>
-                <td>${event.floorNm +'F' || '-'}</td>
-                <td class="ellipsis">${event.alarmType || '-'}</td>
-                <td class="ellipsis">${event.deviceNm || '-'}</td>
-                <td>${formatTime(event.occurrenceDate)}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-
-        // 빈 행 추가하여 높이 유지
-        const emptyRowsNeeded = ITEMS_PER_PAGE - pageItems.length;
-        for (let i = 0; i < emptyRowsNeeded; i++) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            `;
-            tableBody.appendChild(emptyRow);
-        }
-
-        // 페이징 UI 업데이트
-        const prevBtn = document.querySelector('.prev-btn');
-        const nextBtn = document.querySelector('.next-btn');
-        const currentPageSpan = document.querySelector('.current-page');
-
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage >= Math.ceil(allEvents.result.length / ITEMS_PER_PAGE);
-        currentPageSpan.textContent = currentPage;
-    };
-
-    // 시간 포맷팅 함수
-    const formatTime = (dateString) => {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
-    };
-
-    /* Toast */
-    function Toast(){
-        let toast = document.querySelector('.toast');
-        let toastCloseBtn = document.querySelector('.toast__close');
-        if(toast){
-            toast.classList.add('toast--active');
-            toastCloseBtn.addEventListener('click', function() {
-                toast.classList.remove('toast--active');
-            });
-        }
-    }
-
-    /* Event State */
-    function EventState(){
-        const eventStateCtrl = document.querySelector('.event-state__ctrl');
-        const eventStateLayer = document.querySelector('.event-state');
-        const floorInfo = document.querySelector('.floor-info');
-        const toolBox = document.querySelector('.tool-box');
-
-        if(eventStateLayer){
-            eventStateCtrl.addEventListener('click', function () {
-                eventStateLayer.classList.toggle('event-state--active');
-
-                if (eventStateLayer.classList.contains('event-state--active')) {
-                    toolBox.classList.add('tool-box--active');
-                    floorInfo.classList.add('floor-info--active');
-                } else {
-                    toolBox.classList.remove('tool-box--active');
-                    floorInfo.classList.remove('floor-info--active');
-                }
-            });
-
-        }
-    }
-    EventState();
-
-    (async () => {
-        initializeLatest24HoursList();
-
-        const eventSource = new EventSource('http://localhost:8085/events/subscribe');
-
-        eventSource.addEventListener('alarm', (event) => {
-            const alarm = JSON.parse(event.data);
-            Toast();
-        });
-
-        eventSource.onerror = (event) => {
-            eventSource.close();        
-        }
-    })();
-
-
-
-
-
-
-
-
     const getBuildingId = () =>{
         const activeTab = headerTabList.querySelector("li.active");
         if(activeTab){
@@ -1164,6 +1012,18 @@
         handleFirstView(buildingId);
         handle2D(buildingId);
     }
+
+    // event 관련
+    (async function initializeEvent() {
+        await Promise.all([
+            EventManager.initializeLatest24HoursList(17)
+        ]);
+
+        EventManager.eventState();
+        EventManager.connectToSSE();
+
+    })();
+
 
     initTab();
     viewEquipmentList();

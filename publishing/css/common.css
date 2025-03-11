@@ -156,13 +156,69 @@ button {
   font-display: swap;
 }
 
+@font-face {
+  font-family: "SUITE";
+  font-weight: 300;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-Light.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SUITE";
+  font-weight: 400;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-Regular.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SUITE";
+  font-weight: 500;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-Medium.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SUITE";
+  font-weight: 600;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-SemiBold.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SUITE";
+  font-weight: 700;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-Bold.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SUITE";
+  font-weight: 800;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-ExtraBold.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SUITE";
+  font-weight: 900;
+  font-style: normal;
+  src: url("/publishing/webfonts/SUITE-Heavy.otf") format("opentype");
+  font-display: swap;
+}
+
 html {
   font-family: 'SUIT', sans-serif;
   font-size: 16px;
 }
 
 body {
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   overflow-x: hidden;
 }

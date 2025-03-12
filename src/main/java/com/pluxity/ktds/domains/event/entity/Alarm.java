@@ -56,4 +56,12 @@ public class Alarm {
     @Comment("발생 시간")
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime occurrenceDate;
+
+    @Column(name = "tag_name")
+    @Comment("태그 이름")
+    private String tagName;
+
+    public void updateConfirmTime(LocalDateTime confirmTime) {
+        this.confirmTime = confirmTime;
+    }
 }

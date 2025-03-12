@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -19,12 +20,11 @@ public class EventReceiveService {
     private final EventEmitterService eventEmitterService;
     private final ObjectMapper mapper;
 
-//    @RabbitListener(queues = "alarm.exchange")
+//    @RabbitListener(queues = "alarm.queue")
 //    public void receiveEvent(String alarm) {
-//        log.info("Received event: {}", alarm);
 //        try{
 //            AlarmResponseDTO alarmResponseDTO = mapper.readValue(alarm, AlarmResponseDTO.class);
-//            log.info("Received event: {}", alarmResponseDTO);
+//            log.info("alarmResponseDTO: {}", alarmResponseDTO);
 //            eventEmitterService.sendEvent("newAlarm", alarmResponseDTO);
 //        }catch (JsonProcessingException e) {
 //            log.error("Failed to parse event: {}", alarm);
@@ -33,10 +33,11 @@ public class EventReceiveService {
 //    }
 
     // 테스트용 30초마다 알람 발생
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 10000)
     public void sendTestEvent() {
         try {
             AlarmResponseDTO testAlarm = AlarmResponseDTO.builder()
+                .id(1)
                 .deviceCd("TEST-001")
                 .deviceNm("테스트장비-001")
                 .buildingNm("A동")

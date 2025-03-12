@@ -1,5 +1,6 @@
 const EventManager = (()=>{
 
+    // 이벤트 사이드바 토글
     const eventState =() => {
         const eventStateCtrl = document.querySelector('.event-state__ctrl');
         const eventStateLayer = document.querySelector('.event-state');
@@ -22,10 +23,13 @@ const EventManager = (()=>{
         }
     }
 
+    // SSE 연결
     const connectToSSE = () => {
         const url = 'http://localhost:8085/events/subscribe';
 
         const eventSource = new EventSource(url);
+
+        // 이벤트 발생 시
         eventSource.addEventListener('newAlarm', async (event) => {
             const alarm = JSON.parse(event.data);
 
@@ -33,14 +37,36 @@ const EventManager = (()=>{
             warningPopup(alarm);
         });
 
+        // 이벤트 해제 시
+        eventSource.addEventListener('disableAlarm', async (event) => {
+            const disableAlarmId = JSON.parse(event.data);
+
+            document.querySelectorAll('.popup-warning').forEach((popup) => {
+                const popupAlarmId = popup.querySelector('.alarm-id').value;
+                if (Number(popupAlarmId) === Number(disableAlarmId)) {
+                    popup.remove();
+                }
+            });
+
+
+            const toastBoxes = document.querySelectorAll('.toast__box');
+            toastBoxes.forEach((box) => {
+                const toastAlarmId = box.querySelector('.alarm-id')?.value;
+                if (Number(toastAlarmId) === Number(disableAlarmId)) {
+                    box.remove();
+                }
+            });
+
+        });
+
         eventSource.onerror = () => {
-            console.error("SSE 연결 끊김. 5초 후 재연결 시도...");
+            console.error("SSE 연결 끊김. 0.5초 후 재연결 시도...");
             eventSource.close();
-            setTimeout(connectToSSE, 5000); // 5초 후 재연결
+            setTimeout(connectToSSE, 500); // 0.5초 후 재연결
         };
     };
 
-    /* Toast */
+    // 토스트 알림
     function Toast(alarm){
 
         const toast = document.querySelector('.toast');
@@ -50,6 +76,7 @@ const EventManager = (()=>{
         newToastBox.className = 'toast__box';
         newToastBox.innerHTML = `
             <button type="button" class="toast__close"><span class="hide">close</span></button>
+            <input type="hidden" class="alarm-id" value="${alarm.id}">
             <div class="toast__texts">
                 <strong>[SMS] ${alarmFormatTime(alarm.occurrenceDate)} </strong>
                 <p>[${alarm.alarmType}] ${alarm.buildingNm} ${alarm.floorNm} </p>
@@ -69,7 +96,7 @@ const EventManager = (()=>{
         //         newToastBox.remove();
         //     }
         // }, 10000);
-    
+
     }
 
     function alarmFormatTime(dateString) {
@@ -77,6 +104,7 @@ const EventManager = (()=>{
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
     }
 
+    // 경고 팝업
     function warningPopup(alarm){
         // 새로운 팝업 요소 생성
         const popupTemplate = document.createElement('div');
@@ -84,6 +112,7 @@ const EventManager = (()=>{
         popupTemplate.innerHTML = `
             <h2 class="popup-warning__head">[${alarm.alarmType}] ${alarm.deviceNm}</h2>
             <div class="popup-warning__content">
+                <input type="hidden" class="alarm-id" value="${alarm.id}">
                 <table>
                     <caption class="hide">경고 알림</caption>
                     <colgroup>
@@ -119,7 +148,7 @@ const EventManager = (()=>{
         // 팝업 위치 계산 (기존 팝업들의 개수에 따라 위치 조정)
         const existingPopups = document.querySelectorAll('.popup-warning');
         const offset = existingPopups.length * 30;
-        
+
         // 팝업 스타일 설정
         popupTemplate.style.display = 'block';
         popupTemplate.style.position = 'fixed';
@@ -128,11 +157,31 @@ const EventManager = (()=>{
         popupTemplate.style.transform = 'translate(-50%, -50%)';
         popupTemplate.style.zIndex = '9999';
 
-        // 버튼 이벤트 설정
+
         const buttons = popupTemplate.querySelector('.buttons');
-        buttons.querySelector('.button--ghost-middle').onclick = () => {
-            popupTemplate.remove(); // DOM에서 완전히 제거
-        };
+
+        // 이벤트 해제
+        buttons.querySelector('.button--ghost-middle').onclick = async () => {
+
+            const alarmId = popupTemplate.querySelector('.alarm-id').value;
+
+            try {
+                const confirmResponse = await fetch(`http://localhost:8085/events/disable/${alarmId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!confirmResponse.ok) throw new Error("confirm-time 업데이트 실패!");
+
+
+                } catch (error) {
+                    console.error("에러 발생:", error);
+                }
+
+
+            };
 
         buttons.querySelector('.button--solid-middle').onclick = () => {
             // 3D Map 이동 로직 구현
@@ -146,6 +195,7 @@ const EventManager = (()=>{
     let currentPage = 1;
     let allEvents = [];
 
+    // 24시간 이벤트 목록 초기화
     const initializeLatest24HoursList = async (itemsPerPage) => {
         try {
             const response = await fetch('http://localhost:8085/events/latest-24-hours');
@@ -185,6 +235,7 @@ const EventManager = (()=>{
         }
     };
 
+    // 페이지 렌더링 함수
     const renderPage = (itemsPerPage) => {
         const tableBody = document.querySelector('.event-state .table tbody');
         tableBody.innerHTML = '';
@@ -236,6 +287,7 @@ const EventManager = (()=>{
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
     };
 
+    // 차트 초기화
     const initializeProcessChart = async () => {
         try{
             // 프로세스 차트
@@ -286,6 +338,7 @@ const EventManager = (()=>{
         }
     }
 
+    // 날짜별 이벤트 통계 차트 초기화
     const initializeDateChart = async () => {
         try {
             // 1. 데이터 가져오기

@@ -4,12 +4,16 @@ import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
 import com.pluxity.ktds.domains.event.entity.Alarm;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Alarm, Long> {
     @Query("""
@@ -56,4 +60,8 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
                                       @Param("endDate") LocalDateTime endDate);
 
     List<Alarm> findByOccurrenceDateBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM Alarm a WHERE a.id = :id")
+    Optional<Alarm> findByIdForUpdate(Long id);
 }

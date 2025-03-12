@@ -11,19 +11,19 @@
     <div class="kiosk-main">
         <button type="button" class="kiosk-main__close"><span class="hide">close</span></button>
 
-        <!-- [Case] 3d view 화면 
+        <!-- [Case] 3d 화면 -->
         <div class="kiosk-3d" style="background-image:url(/dashboard/img/bg_kiosk.png)">
             <span class="kiosk-3d__floor">B3</span>
         </div>
         <div class="kiosk-control">
             <button type="button" class="home"><span class="hide">처음으로</span></button>
-            <button type="button" class="minus"><span class="hide">축소</span></button>
             <button type="button" class="plus"><span class="hide">확대</span></button>
+            <button type="button" class="minus"><span class="hide">축소</span></button>
         </div>
-        -->
+        
 
         <!-- [Case] 매장 정보 화면 -->
-         <div class="kiosk-list">
+         <div class="kiosk-list" style="display:none;">
              <ul class="kiosk-list__tab" role="tablist">
                  <!-- tab과 content 의 id와 aria-labelledby의 값이 동일해야합니다.
                  li 의 id값과 아래 kiosk-contents__detail tabpanel의 aria-labelledby의 값을 동일하게 적용 부탁드립니다.
@@ -49,7 +49,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list01.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">최대 두 줄까지 처리 가능합니다 최대 두 줄까지 처리 가능합니다</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -64,7 +66,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list02.png)" role="img" aria-label="나이키 매장 이미지 2"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -79,7 +83,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -94,7 +100,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list04.png)" role="img" aria-label="나이키 매장 이미지 3"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -109,7 +117,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list01.png)" role="img" aria-label="나이키 매장 이미지 4"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -124,7 +134,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list02.png)" role="img" aria-label="나이키 매장 이미지 5"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -139,7 +151,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list03.png)" role="img" aria-label="나이키 매장 이미지 6"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -154,7 +168,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list04.png)" role="img" aria-label="나이키 매장 이미지 7"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -169,7 +185,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list01.png)" role="img" aria-label="나이키 매장 이미지 8"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -184,7 +202,9 @@
                         <li>
                             <div class="list__header">
                                 <div class="list__thumbnail" style="background-image:url(/dashboard/img/img_kiosk_list02.png)" role="img" aria-label="나이키 매장 이미지 9"></div>
-                                <p class="list__title">나이키</p>
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
                                 <span class="list__desc">02-1234-5678</span>
                             </div>
                             <ul class="list__footer">
@@ -197,29 +217,192 @@
                             </ul>
                         </li>
                     </ul>
+                    <ul style="display:none;">
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키2</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키 나이키 나이키 나이키 나이키 나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <div class="list__header">
+                                <div class="list__title">
+                                    <p class="name">나이키</p>
+                                </div>
+                                <span class="list__desc">02-1234-5678</span>
+                            </div>
+                            <ul class="list__footer">
+                                <li>
+                                    <button type="button" class="button">B1-1120호</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="button button--location">위치 확인</button>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>                    
+                    <div class="kiosk-list__paging">
+                        <button type="button" class="button"><span class="hide">page1</span></button>
+                        <!-- [D] 선택된 버튼 button--active 클래스 추가 -->
+                        <button type="button" class="button button--active"><span class="hide">page2</span></button>
+                        <button type="button" class="button"><span class="hide">page3</span></button>
+                        <button type="button" class="button"><span class="hide">page4</span></button>
+                        <button type="button" class="button"><span class="hide">page5</span></button>
+                    </div>
                 </div>
                 <button class="kiosk-list__button kiosk-list__button--right"><span class="hide">left</span></button>
-                <!--
-                    <div class="kiosk-list__paging">
-                        <button type="button" class="button">page1</button>
-                        <button type="button" class="button">page2</button>
-                        <button type="button" class="button">page3</button>
-                        <button type="button" class="button">page4</button>
-                        <button type="button" class="button">page5</button>
-                    </div>
-                -->
+                
+               
              </div>
          </div>
+    </div>
 
-        </div>
-        <footer class="kiosk-footer">
-            <div class="kiosk-footer__buttons" role="tablist">
+    <footer class="kiosk-footer">
+        <div class="kiosk-footer__buttons" role="tablist">
             <!-- tab과 content 의 id와 aria-labelledby의 값이 동일해야합니다.
-             button 의 id값과 아래 tabpanel의 aria-labelledby의 값을 동일하게 적용 부탁드립니다.
-             -->
-             <!-- [D] 버튼 클릭 시 active 클래스 추가 -->
-            <button type="button" role="tab" id="floor_info">층별 안내</button>
-            <button class="active" type="button" role="tab" id="store_info">매장 검색</button>
+                button 의 id값과 아래 tabpanel의 aria-labelledby의 값을 동일하게 적용 부탁드립니다.
+                -->
+                <!-- [D] 버튼 클릭 시 active 클래스 추가 -->
+            <button class="active" type="button" role="tab" id="floor_info">층별 안내</button>
+            <button type="button" role="tab" id="store_info">매장 검색</button>
         </div>
         <div class="kiosk-footer__contents" role="tabpanel" aria-labelledby="floor_info">
             <ul class="floor">
@@ -293,7 +476,7 @@
     </footer>
 
     <!-- [Case] 리스트 클릭 시 레이어 노출 -->
-    <div class="kiosk-layer">
+    <div class="kiosk-layer" style="display:none;">
         <div class="kiosk-layer__inner">
             <div class="kiosk-layer__content">
                 <button type="button" class="kiosk-layer__close"><span class="hide">숨김</span></button>
@@ -324,4 +507,5 @@
         </div>
     </div>
 </body>
+<script src="../kiosk/js/index.js"></script>
 </html>

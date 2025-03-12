@@ -152,8 +152,10 @@
 
     const clickFloor = () => {
         const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
+
         // btnClick
         floorBtns.forEach(floorBtn => {
+            floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', event => {
                 floorBtns.forEach(btn => btn.classList.remove('active'));
                 floorBtn.classList.add('active');
@@ -171,6 +173,7 @@
         })
         // allFloor
         const allFloor = document.querySelector('.floor-info__ctrl .all');
+        allFloor.style.cursor = 'pointer';
         allFloor.addEventListener('click', event => {
             floorBtns.forEach(btn => btn.classList.remove('active'));
             Px.Model.Visible.ShowAll();

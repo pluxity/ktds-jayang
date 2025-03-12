@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Valid
 public record CreateNoticeDTO(
@@ -19,8 +22,10 @@ public record CreateNoticeDTO(
         String content,
         @NotNull(message = "긴급 여부는 필수 입니다.")
         Boolean isUrgent,
+        Boolean isActive,
         @NotNull(message = "종료 날짜는 필수 입니다.")
-        LocalDateTime expiredAt
+        LocalDateTime expiredAt,
+        List<Long> buildingIds
 ) {
 
     public static Notice toEntity(CreateNoticeDTO dto) {
@@ -28,7 +33,9 @@ public record CreateNoticeDTO(
                 dto.title(),
                 dto.content(),
                 dto.isUrgent(),
-                dto.expiredAt()
+                dto.isActive(),
+                dto.expiredAt(),
+                dto.buildingIds()
         );
     }
 

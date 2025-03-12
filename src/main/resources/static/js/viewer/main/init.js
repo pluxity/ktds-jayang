@@ -229,6 +229,7 @@ const Init = (function () {
         const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
         // btnClick
         floorBtns.forEach(floorBtn => {
+            floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', event => {
                 Px.Model.Visible.HideAll();
                 Px.Poi.HideAll();

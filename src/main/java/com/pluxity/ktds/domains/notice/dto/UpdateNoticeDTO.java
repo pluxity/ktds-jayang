@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Valid
 public record UpdateNoticeDTO(
@@ -19,8 +20,10 @@ public record UpdateNoticeDTO(
         String content,
         @NotNull(message = "긴급 여부는 필수 입니다.")
         Boolean isUrgent,
+        Boolean isActive,
         @NotNull(message = "종료 날짜는 필수 입니다.")
-        LocalDateTime expiredAt
+        LocalDateTime expiredAt,
+        List<Long> buildingIds
 ) {
 
     public static Notice toEntity(UpdateNoticeDTO dto) {
@@ -28,7 +31,9 @@ public record UpdateNoticeDTO(
                 dto.title(),
                 dto.content(),
                 dto.isUrgent(),
-                dto.expiredAt()
+                dto.isActive(),
+                dto.expiredAt(),
+                dto.buildingIds()
         );
     }
 }

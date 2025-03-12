@@ -722,7 +722,11 @@ const layerPopup = (function () {
         const buildingSet = new Set();
         const floorSet = new Set();
 
-        // // 중분류 추가
+        const categoryCounts = pois.reduce((acc, poi) => {
+            const category = poi.poiMiddleCategoryDetail?.name || '기타';
+            acc[category] = (acc[category] || 0) + 1;
+            return acc;
+        }, {});
 
         // accordion data set
         pois.forEach(poi => {
@@ -734,7 +738,9 @@ const layerPopup = (function () {
                     floorSet.add(JSON.stringify({ id: floorInfo.id, name: floorInfo.name }));
                 }
             }
-            createAccordion(poi);
+
+            const category = poi.poiMiddleCategoryDetail?.name || '기타';
+            createAccordion(poi, categoryCounts[category]);
         })
 
         // select
@@ -786,7 +792,7 @@ const layerPopup = (function () {
         totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
     }
 
-    function createAccordion(poi) {
+    function createAccordion2(poi, categoryCount) {
         const accordionElement = document.getElementById('mainAccordion');
         const categoryName = poi.poiMiddleCategoryDetail?.name || '기타';
 
@@ -797,7 +803,7 @@ const layerPopup = (function () {
             const accordionBtn = document.createElement('div');
             accordionBtn.classList.add('accordion__btn');
             accordionBtn.dataset.category = categoryName;
-            accordionBtn.textContent = categoryName;
+            accordionBtn.textContent =  `${categoryName} (${categoryCount})`;
 
             accordionBtn.addEventListener('click', () => {
                 const allBtns = accordionElement.querySelectorAll('.accordion__btn');
@@ -839,6 +845,7 @@ const layerPopup = (function () {
             accordionElement.appendChild(accordionDetail);
         } else {
             accordionDetail = existingBtn.nextElementSibling;
+            existingBtn.textContent = `${categoryName} (${categoryCount})`;
         }
 
         const tbody = accordionDetail.querySelector('tbody');
@@ -863,6 +870,87 @@ const layerPopup = (function () {
 
         tbody.appendChild(tr);
     }
+
+    // accordion data set
+    function createAccordion(poi, categoryCount) {
+        const accordionElement = document.getElementById('mainAccordion');
+        const categoryName = poi.poiMiddleCategoryDetail?.name || '기타';
+
+        let accordionBtn = accordionElement.querySelector(`.accordion__btn[data-category="${categoryName}"]`);
+        let accordionDetail;
+
+        if (!accordionBtn) {
+            accordionBtn = document.createElement('div');
+            accordionBtn.classList.add('accordion__btn');
+            accordionBtn.dataset.category = categoryName;
+            accordionBtn.textContent = `${categoryName} (${categoryCount})`;
+
+            accordionBtn.addEventListener('click', () => {
+                const allBtns = accordionElement.querySelectorAll('.accordion__btn');
+                if (accordionBtn.classList.contains('accordion__btn--active')) {
+                    accordionBtn.classList.remove('accordion__btn--active');
+                } else {
+                    allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
+                    accordionBtn.classList.add('accordion__btn--active');
+                }
+            });
+
+            accordionDetail = document.createElement('div');
+            accordionDetail.classList.add('accordion__detail');
+
+            const table = document.createElement('table');
+            const caption = document.createElement('caption');
+            caption.classList.add('hide');
+            caption.textContent = categoryName;
+            table.appendChild(caption);
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            ['건물', '층', '장비명'].forEach(text => {
+                const th = document.createElement('th');
+                th.setAttribute('scope', 'col');
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            table.appendChild(tbody);
+            accordionDetail.appendChild(table);
+
+            accordionElement.appendChild(accordionBtn);
+            accordionElement.appendChild(accordionDetail);
+        } else {
+            accordionDetail = accordionBtn.nextElementSibling;
+            accordionBtn.textContent = `${categoryName} (${categoryCount})`;
+        }
+
+        const tbody = accordionDetail.querySelector('tbody');
+        const tr = document.createElement('tr');
+
+        const buildingInfo = BuildingManager.findById(poi.buildingId);
+        const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
+
+        const tdBuilding = document.createElement('td');
+        tdBuilding.textContent = buildingInfo.name;
+
+        const tdFloor = document.createElement('td');
+        tdFloor.textContent = floorInfo.name;
+
+        const tdEquipment = document.createElement('td');
+        tdEquipment.classList.add('align-left');
+        tdEquipment.setAttribute('data-poi-id', poi.id);
+        tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
+        tdEquipment.addEventListener('dblclick', function() {
+            movePoi(poi.id);
+        });
+        tr.appendChild(tdBuilding);
+        tr.appendChild(tdFloor);
+        tr.appendChild(tdEquipment);
+        tbody.appendChild(tr);
+    }
+
 
 
     // 검색폼

@@ -17,6 +17,7 @@ public enum ViewPath {
     ADMIN_USER("/admin/user", "admin/user/user"),
     ADMIN_USER_GROUP("/admin/user-group", "admin/user-group/user-group"),
     ADMIN_SYSTEM_SETTING("/admin/system-setting", "admin/system-setting/system-setting"),
+    ADMIN_NOTICE("/admin/notice", "admin/notice/notice"),
 
     LOGIN("/login", "login/login"),
     LOGIN_FAILURE("/login/failure", "login/failure/accessDenied"),

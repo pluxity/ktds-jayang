@@ -3,14 +3,17 @@ package com.pluxity.ktds.domains.notice.dto;
 import com.pluxity.ktds.domains.notice.entity.Notice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record NoticeResponseDTO(
         Long id,
         String title,
         String content,
         Boolean isUrgent,
+        Boolean isActive,
         LocalDateTime expiredAt,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        List<Long> buildingIds
 ) {
 
     public static NoticeResponseDTO from(Notice notice) {
@@ -19,8 +22,10 @@ public record NoticeResponseDTO(
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getIsUrgent(),
+                notice.getIsActive(),
                 notice.getExpiredAt(),
-                notice.getCreatedAt()
+                notice.getCreatedAt(),
+                notice.getBuildingIds()
         );
     }
 }

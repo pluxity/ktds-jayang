@@ -4,16 +4,20 @@ class Notice {
     #title;
     #content;
     #isUrgent;
+    #isActive;
     #expiredAt;
     #createdAt;
+    #buildingIds
 
-    constructor(id, title, content, isUrgent, expiredAt, createdAt) {
+    constructor(id, title, content, isUrgent, isActive, expiredAt, createdAt, buildingIds) {
         this.#id = id;
         this.#title = title;
         this.#content = content;
         this.#isUrgent = isUrgent;
+        this.#isActive = isActive;
         this.#expiredAt = expiredAt;
         this.#createdAt = createdAt;
+        this.#buildingIds = buildingIds;
     }
 
     get id() {
@@ -32,11 +36,19 @@ class Notice {
         return this.#isUrgent;
     }
 
+    get isActive() {
+        return this.#isActive;
+    }
+
     get expiredAt() {
         return this.#expiredAt;
     }
 
     get createdAt() {
         return this.#createdAt;
+    }
+
+    get buildingIds() {
+        return this.#buildingIds;
     }
 }

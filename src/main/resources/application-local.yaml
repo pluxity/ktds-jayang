@@ -48,6 +48,19 @@ spring:
       host: localhost
       port: 6379
       timeout: 1000
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  queue:
+    alarm-was1: alarm.queue.was1
+    alarm-was2: alarm.queue.was2
+    notice-was1: notice.queue.was1
+    notice-was2: notice.queue.was2
+  exchange:
+    alarm: alarm.exchange
+    notice: notice.exchange
 
 logging:
   level:

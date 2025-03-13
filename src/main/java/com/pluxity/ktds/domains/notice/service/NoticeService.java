@@ -7,28 +7,40 @@ import com.pluxity.ktds.domains.notice.entity.Notice;
 import com.pluxity.ktds.domains.notice.repository.NoticeRepository;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.StyledEditorKit;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NoticeService {
 
     private final NoticeRepository repository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public NoticeService(NoticeRepository repository) {
-        this.repository = repository;
-    }
+    @Value("${rabbitmq.exchange.notice}")
+    private String noticeExchangeName;
+
+//    public NoticeService(NoticeRepository repository) {
+//        this.repository = repository;
+//    }
 
     @Transactional
     public void createNotice(CreateNoticeDTO dto) {
 
         var notice = CreateNoticeDTO.toEntity(dto);
-        repository.save(notice);
+        Notice savedNotice = repository.save(notice);
+        if (savedNotice.getIsUrgent()) {
+            rabbitTemplate.convertAndSend(noticeExchangeName, "", savedNotice);
+        }
     }
     @Transactional
     public List<NoticeResponseDTO> getNotices() {
@@ -55,5 +67,10 @@ public class NoticeService {
     @Transactional
     public void deleteNotice(Long id) {
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllById(@NotNull List<Long> ids) {
+        repository.deleteAllById(ids);
     }
 }

@@ -1694,6 +1694,67 @@ const layerPopup = (function () {
         });
     })
 
+    function pagingNotice(noticeList, itemsPerPage = 1) {
+        let currentPage = 1; // 초기 페이지
+        const totalPages = Math.ceil(noticeList.length / itemsPerPage);
+
+        const updatePaging = (page) => {
+            const startIndex = (page - 1) * itemsPerPage;
+            const currentNotice = noticeList[startIndex];
+
+            const noticeTitle = document.querySelector('.notice-info__title p');
+            const urgentLabel = document.querySelector('.notice-info__title .label');
+            const noticeDate = document.querySelector('.notice-info__date');
+            const pagingNumber = document.querySelector('.popup-event__paging .number');
+            const noticeContent = document.querySelector('.notice-info__contents p');
+
+            console.log("noticeList : ", noticeList);
+            console.log("currentNotice : ", currentNotice);
+            if (currentNotice) {
+                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
+                noticeDate.textContent = formatDate(currentNotice.createdAt);
+                noticeContent.textContent = currentNotice.content;
+            }
+
+            pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
+        };
+
+        updatePaging(currentPage);
+
+        document.querySelector('.popup-event__paging .left').addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePaging(currentPage);
+            }
+        });
+
+        document.querySelector('.popup-event__paging .right').addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePaging(currentPage);
+            }
+        });
+
+        const closeBtn = document.querySelector('#noticePopup .close');
+        closeBtn.addEventListener('click', function () {
+            const popup = document.getElementById('noticePopup');
+            popup.style.display = 'none'; // 팝업 숨기기
+        });
+    }
+
+    // date format
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
     return {
         closePlayers,
         setElevatorTab,
@@ -1708,7 +1769,8 @@ const layerPopup = (function () {
         setCategoryData,
         moveToPoi,
         setPoiEvent,
-        createEventPopup
+        createEventPopup,
+        pagingNotice
     }
 })();
 

@@ -4,8 +4,10 @@ import com.pluxity.ktds.domains.notice.dto.CreateNoticeDTO;
 import com.pluxity.ktds.domains.notice.dto.NoticeResponseDTO;
 import com.pluxity.ktds.domains.notice.dto.UpdateNoticeDTO;
 import com.pluxity.ktds.domains.notice.service.NoticeService;
+import com.pluxity.ktds.global.constant.SuccessCode;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import com.pluxity.ktds.global.response.ResponseBody;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,4 +57,10 @@ public class NoticeController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
+    @DeleteMapping("/id-list/{ids}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody deletePois(@PathVariable List<Long> ids) {
+        service.deleteAllById(ids);
+        return ResponseBody.of(SuccessCode.SUCCESS_DELETE);
+    }
 }

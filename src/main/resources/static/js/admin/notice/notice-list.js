@@ -164,10 +164,13 @@ const dataManufacturer = (rowData) =>
             rowData.length - index,
             title,
             `${formatDate(createdAt)} ~ ${formatDate(expiredAt)}`,
-            isUrgent === null ? 'N' : 'Y',
+            isUrgent ? 'Y' : 'N',
             gridjs.html(`
-                    <input type="checkbox" name="isActive" id="isActiveCheck" class="form-check-input" title="활성화" required data-rules="required" data-tagname="활성화"
-                    ${isActive === 'Y' ? 'checked' : ''} />`),
+                    <div class="form-check form-switch">
+                        <input type="checkbox" name="isActive" id="isActiveCheck" class="form-check-input" title="활성화" required data-rules="required" data-tagname="활성화"
+                        ${isActive ? 'checked' : ''} />
+                    </div>
+                    `),
             gridjs.html(`
                     <button class="btn btn-warning modifyModalButton" data-bs-toggle="modal" data-bs-target="#noticeModifyModal" data-id="${id}">수정</button>
                     <button class="btn btn-danger deleteButton"  onclick="deleteNotice(${id})" data-id="${id}">삭제</button>`),
@@ -267,7 +270,7 @@ document
             },
         }).then(() => {
             alertSwal('등록되었습니다.').then(() => {
-                // window.location.reload();
+                window.location.reload();
             });
         });
     });
@@ -297,12 +300,13 @@ document
             },
         }).then(() => {
             alertSwal('수정이 완료 되었습니다.').then(() => {
-                // window.location.reload();
+                window.location.reload();
             });
         });
     });
 
 const deleteNotice = (noticeId) => {
+    console.log("noticeId : ", noticeId);
     const id = Number(noticeId);
     confirmSwal('정말 삭제 하시겠습니까?').then(() => {
         api.delete(`/notices/${id}`).then(() => {
@@ -312,6 +316,25 @@ const deleteNotice = (noticeId) => {
         });
     });
 };
+
+const deleteAllNotice = () => {
+    const idList = getSelectedId();
+    if (idList.length === 0) {
+        alertSwal('체크 된 항목이 존재하지 않습니다.');
+        return;
+    }
+    confirmSwal('체크 하신 항목을 모두 삭제 하시겠습니까?').then(() => {
+        api.delete(`/notices/id-list/${idList}`).then(() => {
+            alertSwal('삭제가 완료 되었습니다.').then(() => {
+                initNoticeList();
+            });
+        });
+    });
+};
+
+document
+    .querySelector('#btnDeleteNotice')
+    .addEventListener('pointerup', deleteAllNotice);
 
 const formatDateTime = (isoString) => {
     if (!isoString) return "";

@@ -673,68 +673,9 @@
             popup.style.transform = 'translate(-50%, -50%)';
             popup.style.zIndex = '30';
 
-            pagingNotice(noticeList, 1);
+            layerPopup.pagingNotice(noticeList, 1);
         }
     });
-
-    function pagingNotice(noticeList, itemsPerPage = 1) {
-        let currentPage = 1; // 초기 페이지
-        const totalPages = Math.ceil(noticeList.length / itemsPerPage);
-
-        const updatePaging = (page) => {
-            const startIndex = (page - 1) * itemsPerPage;
-            const currentNotice = noticeList[startIndex];
-
-            const noticeTitle = document.querySelector('.notice-info__title p');
-            const urgentLabel = document.querySelector('.notice-info__title .label');
-            const noticeDate = document.querySelector('.notice-info__date');
-            const pagingNumber = document.querySelector('.popup-event__paging .number');
-            const noticeContent = document.querySelector('.notice-info__contents p');
-
-            if (currentNotice) {
-                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
-                urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
-                noticeDate.textContent = formatDate(currentNotice.createdAt);
-                noticeContent.textContent = currentNotice.content;
-            }
-
-            pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
-        };
-
-        updatePaging(currentPage);
-
-        document.querySelector('.popup-event__paging .left').addEventListener('click', function () {
-            if (currentPage > 1) {
-                currentPage--;
-                updatePaging(currentPage);
-            }
-        });
-
-        document.querySelector('.popup-event__paging .right').addEventListener('click', function () {
-            if (currentPage < totalPages) {
-                currentPage++;
-                updatePaging(currentPage);
-            }
-        });
-
-        const closeBtn = document.querySelector('#noticePopup .close');
-        closeBtn.addEventListener('click', function () {
-            const popup = document.getElementById('noticePopup');
-            popup.style.display = 'none'; // 팝업 숨기기
-        });
-    }
-
-    // date format
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-
-        return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    }
 
     const allCheck = document.getElementById('check');
     allCheck.addEventListener('change', () => {
@@ -759,4 +700,49 @@
         EventManager.connectToSSE();
 
     })();
+
+    // 추 후 공통으로 합칠 예정
+    function createSseConnection(url, eventName, onEvent, onError) {
+        const eventSource = new EventSource(url);
+
+        eventSource.addEventListener(eventName, (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                onEvent(data);
+            } catch (err) {
+                console.error("SSE 이벤트 데이터 파싱 오류:", err);
+            }
+        });
+
+        eventSource.onerror = (error) => {
+            if (typeof onError === 'function') {
+                onError(error);
+            } else {
+                console.error("SSE 오류 발생:", error);
+            }
+        };
+
+        return eventSource;
+    }
+
+    // 여기서 popup 1회 호출(
+    const sse = createSseConnection(
+        '/sse/notice',
+        'notice',
+        function (notice) {
+            const popup = document.getElementById('noticePopup');
+            popup.style.display = 'inline-block';
+            popup.style.position = 'absolute';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.zIndex = '999';
+
+            layerPopup.pagingNotice([notice], 1);
+        },
+        function (error) {
+            console.error('SSE Connection Error:', error);
+        }
+    );
+
 })();

@@ -20,6 +20,20 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
     password: 1234
+  rabbitmq:
+    host : 192.168.4.149
+    port : 5672
+    username : guest
+    password : guest
+    queue:
+      alarm: alarm.queue
+      notice: notice.queue
+      alarm-disable-1: alarm.disable.queue.1
+      alarm-disable-2: alarm.disable.queue.2
+    exchange:
+      alarm: alarm.exchange
+      notice: notice.exchange
+      alarm-disable: alarm.disable.exchange
   jpa:
     hibernate:
       ddl-auto: update

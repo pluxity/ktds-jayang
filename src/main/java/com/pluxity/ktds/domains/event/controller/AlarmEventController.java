@@ -8,6 +8,7 @@ import com.pluxity.ktds.global.response.DataResponseBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 
@@ -35,7 +36,8 @@ public class AlarmEventController {
 
     @PatchMapping("/disable/{id}")
     public DataResponseBody<Long> disableAlarm(@PathVariable Long id){
-        eventService.disableAlarm(id);
-        return DataResponseBody.of(id);
+        Long disableAlarmId = eventService.disableAlarm(id);
+        return DataResponseBody.of(disableAlarmId);
+            
     }
 }

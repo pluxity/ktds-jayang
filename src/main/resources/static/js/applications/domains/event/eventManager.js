@@ -40,23 +40,7 @@ const EventManager = (()=>{
         // 이벤트 해제 시
         eventSource.addEventListener('disableAlarm', async (event) => {
             const disableAlarmId = JSON.parse(event.data);
-
-            document.querySelectorAll('.popup-warning').forEach((popup) => {
-                const popupAlarmId = popup.querySelector('.alarm-id').value;
-                if (Number(popupAlarmId) === Number(disableAlarmId)) {
-                    popup.remove();
-                }
-            });
-
-
-            const toastBoxes = document.querySelectorAll('.toast__box');
-            toastBoxes.forEach((box) => {
-                const toastAlarmId = box.querySelector('.alarm-id')?.value;
-                if (Number(toastAlarmId) === Number(disableAlarmId)) {
-                    box.remove();
-                }
-            });
-
+            removeAlarmElements(disableAlarmId);
         });
 
         eventSource.onerror = () => {
@@ -175,6 +159,10 @@ const EventManager = (()=>{
 
                 if (!confirmResponse.ok) throw new Error("confirm-time 업데이트 실패!");
 
+                const responseData = await confirmResponse.json();
+                if (responseData.result) {
+                    removeAlarmElements(responseData.result);
+                }
 
                 } catch (error) {
                     console.error("에러 발생:", error);
@@ -400,6 +388,24 @@ const EventManager = (()=>{
         } catch (error) {
             console.error('차트 초기화 오류:', error);
         }
+    };
+
+    const removeAlarmElements = (alarmId) => {
+        // 팝업 제거
+        document.querySelectorAll('.popup-warning').forEach((popup) => {
+            const popupAlarmId = popup.querySelector('.alarm-id').value;
+            if (Number(popupAlarmId) === Number(alarmId)) {
+                popup.remove();
+            }
+        });
+
+        // 토스트 제거
+        document.querySelectorAll('.toast__box').forEach((box) => {
+            const toastAlarmId = box.querySelector('.alarm-id')?.value;
+            if (Number(toastAlarmId) === Number(alarmId)) {
+                box.remove();
+            }
+        });
     };
 
 

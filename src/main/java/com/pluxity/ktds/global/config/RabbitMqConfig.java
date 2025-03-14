@@ -37,6 +37,15 @@ public class RabbitMqConfig {
     @Value("${rabbitmq.exchange.notice}")
     private String noticeExchangeName;
 
+    @Value("${rabbitmq.queue.alarm-disable-was1}")
+    private String was1AlarmDisableQueueName;
+    @Value("${rabbitmq.queue.alarm-disable-was2}")
+    private String was2AlarmDisableQueueName;
+    @Value("${rabbitmq.exchange.alarm-disable}")
+    private String alarmDisableExchangeName;
+
+
+
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory(rabbitMqHost, rabbitMqPort);
@@ -109,5 +118,26 @@ public class RabbitMqConfig {
     @Bean
     public RabbitAdmin amqpAdmin(ConnectionFactory connectionFactory) {
         return new RabbitAdmin(connectionFactory);
+    }
+
+    @Bean
+    public Queue was1AlarmDisableQueue() {
+        return new Queue(was1AlarmDisableQueueName, true);
+    }
+    @Bean
+    public Queue was2AlarmDisableQueue() {
+        return new Queue(was2AlarmDisableQueueName, true);
+    }
+    @Bean
+    public FanoutExchange alarmDisableExchange() {
+        return new FanoutExchange(alarmDisableExchangeName, true, false);
+    }
+    @Bean
+    public Binding was1AlarmDisableBinding(Queue was1AlarmDisableQueue, FanoutExchange alarmDisableExchange) {
+        return BindingBuilder.bind(was1AlarmDisableQueue).to(alarmDisableExchange);
+    }
+    @Bean
+    public Binding was2AlarmDisableBinding(Queue was2AlarmDisableQueue, FanoutExchange alarmDisableExchange) {
+        return BindingBuilder.bind(was2AlarmDisableQueue).to(alarmDisableExchange);
     }
 }

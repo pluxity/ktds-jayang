@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
@@ -20,25 +20,10 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
     password: 1234
-  rabbitmq:
-    host : 192.168.4.149
-    port : 5672
-    username : guest
-    password : guest
-    queue:
-      alarm: alarm.queue
-      notice: notice.queue
-      alarm-disable-1: alarm.disable.queue.1
-      alarm-disable-2: alarm.disable.queue.2
-    exchange:
-      alarm: alarm.exchange
-      notice: notice.exchange
-      alarm-disable: alarm.disable.exchange
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
-    database-platform: org.hibernate.dialect.MariaDBDialect
+      database-platform: org.hibernate.dialect.MariaDBDialect
 #    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
@@ -58,9 +43,12 @@ rabbitmq:
     alarm-was2: alarm.queue.was2
     notice-was1: notice.queue.was1
     notice-was2: notice.queue.was2
+    alarm-disable-was1: alarm.disable.queue.was1
+    alarm-disable-was2: alarm.disable.queue.was2
   exchange:
     alarm: alarm.exchange
     notice: notice.exchange
+    alarm-disable: alarm.disable.exchange
 
 logging:
   level:

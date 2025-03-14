@@ -11,6 +11,7 @@ public record NoticeResponseDTO(
         String content,
         Boolean isUrgent,
         Boolean isActive,
+        Boolean isRead,
         LocalDateTime expiredAt,
         LocalDateTime createdAt,
         List<Long> buildingIds
@@ -23,6 +24,7 @@ public record NoticeResponseDTO(
                 notice.getContent(),
                 notice.getIsUrgent(),
                 notice.getIsActive(),
+                notice.getIsRead(),
                 notice.getExpiredAt(),
                 notice.getCreatedAt(),
                 notice.getBuildingIds()

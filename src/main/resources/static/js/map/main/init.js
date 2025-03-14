@@ -16,6 +16,27 @@
         // }
     });
 
+    function getCookie(name) {
+        const cookies = document.cookie.split("; ");
+        for (const cookie of cookies) {
+            const [key, value] = cookie.split("=");
+            if (key === name) {
+                return decodeURIComponent(value);
+            }
+        }
+        return null;
+    }
+    // 관리자 여부
+    const userRole = getCookie("USER_ROLE");
+    const roles = userRole ? userRole.split(",") : [];
+    const adminButton = document.querySelector(".profile__layer .head img");
+    adminButton.addEventListener("click", event => {
+        window.location.href = "/admin/system-setting";
+    })
+    if (!roles.includes("ADMIN")) {
+        adminButton.style.display = "none";
+    }
+
     const floorInfo = document.querySelector('#floor-info .floor-info__button');
     const floorDetail = document.querySelector('#floor-info .floor-info__detail');
     floorInfo.addEventListener('click', event => {
@@ -176,6 +197,7 @@
         allFloor.style.cursor = 'pointer';
         allFloor.addEventListener('click', event => {
             floorBtns.forEach(btn => btn.classList.remove('active'));
+            Px.Poi.ShowAll();
             Px.Model.Visible.ShowAll();
             Px.VirtualPatrol.Clear();
         })

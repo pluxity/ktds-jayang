@@ -14,6 +14,7 @@ const NoticeManager = (function () {
                         notice.content,
                         notice.isUrgent,
                         notice.isActive,
+                        notice.isRead,
                         notice.expiredAt,
                         notice.createdAt,
                         notice.buildingIds));

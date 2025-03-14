@@ -21,6 +21,7 @@ public record UpdateNoticeDTO(
         @NotNull(message = "긴급 여부는 필수 입니다.")
         Boolean isUrgent,
         Boolean isActive,
+        Boolean isRead,
         @NotNull(message = "종료 날짜는 필수 입니다.")
         LocalDateTime expiredAt,
         List<Long> buildingIds
@@ -32,6 +33,7 @@ public record UpdateNoticeDTO(
                 dto.content(),
                 dto.isUrgent(),
                 dto.isActive(),
+                dto.isRead(),
                 dto.expiredAt(),
                 dto.buildingIds()
         );

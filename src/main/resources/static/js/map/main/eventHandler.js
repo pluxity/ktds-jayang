@@ -38,6 +38,7 @@
             btn.addEventListener('click', (event) => {
                 Px.VirtualPatrol.Clear();
                 const target = event.target.closest('.popup-basic');
+                layerPopup.closePlayers()
                 target.style.display = 'none';
                 const hasSubPopup = subPopupList.some(subId => target.querySelector(`#${subId}`));
                 if (hasSubPopup) {
@@ -164,6 +165,7 @@
             systemTabs.forEach(tab => {
                 tab.classList.remove('active')
             });
+            layerPopup.closePlayers()
         };
 
         if (isActive) {
@@ -332,7 +334,13 @@
 
     const noticePopup = document.querySelector('.header__info .profile #notice');
     const noticeAlert = document.getElementById('noticeAlert');
+    const popupNotice = document.getElementById("noticePopup");
     noticePopup.addEventListener('click', async function () {
+        if (popupNotice.style.display === 'inline-block') {
+            console.log("style : ", popupNotice.style.display);
+            popupNotice.style.display = 'none';
+            return;
+        }
         const noticeList = await NoticeManager.getNotices();
         if (noticeList.length === 0) {
             noticeAlert.style.display = 'flex'
@@ -347,12 +355,11 @@
                 noticeAlert.style.display = 'none';
             });
         } else {
-            const popup = document.getElementById('noticePopup');
-            popup.style.display = 'inline-block';
-            popup.style.position = 'absolute';
-            popup.style.top = '50%';
-            popup.style.left = '50%';
-            popup.style.transform = 'translate(-50%, -50%)';
+            popupNotice.style.display = 'inline-block';
+            popupNotice.style.position = 'absolute';
+            popupNotice.style.top = '50%';
+            popupNotice.style.left = '50%';
+            popupNotice.style.transform = 'translate(-50%, -50%)';
             // popup.style.zIndex = '30';
 
             pagingNotice(noticeList, 1);
@@ -398,13 +405,12 @@
                 updatePaging(currentPage);
             }
         });
-
-        const closeBtn = document.querySelector('#noticePopup .close');
-        closeBtn.addEventListener('click', function () {
-            const popup = document.getElementById('noticePopup');
-            popup.style.display = 'none'; // 팝업 숨기기
-        });
     }
+    const closeBtn = document.querySelector('#noticePopup .close');
+    closeBtn.addEventListener('click', function () {
+        const popup = document.getElementById('noticePopup');
+        popup.style.display = 'none';
+    });
 
     // date format
     function formatDate(dateString) {
@@ -1077,6 +1083,11 @@
             console.error('SSE Connection Error:', error);
         }
     );
+
+    const eventStateBtn = document.querySelector(".event-state__title .event-state__button");
+    eventStateBtn.addEventListener('click', async event => {
+        await layerPopup.createEventPopup();
+    });
 
     initTab();
     viewEquipmentList();

@@ -209,7 +209,6 @@ document.getElementById('selectPoiCategoryIdRegister').addEventListener('change'
 
 document.getElementById('selectPoiCategoryIdModify').addEventListener('change', function() {
     const selectedCategoryId = this.value;
-    console.log("선택된 POI 카테고리 ID:", selectedCategoryId);
 
     const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == selectedCategoryId);
     initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
@@ -240,9 +239,10 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
         building.floors.find(floor => floor.id === modifyPoiData.floorId).id;
 
     modifyModal.querySelector('#selectPoiCategoryIdModify').value = modifyPoiData.poiCategoryId;
-
     const poiCategory = data.poiCategory.find((category) => category.id === modifyPoiData.poiCategoryId);
-
+    const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == modifyPoiData.poiCategoryId);
+    initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
+    modifyModal.querySelector('#selectPoiMiddleCategoryIdModify').value = modifyPoiData.poiMiddleCategoryId;
     const form = document.querySelector('#poiModifyForm');
     form.dataset.id = modifyPoiData.id;
 
@@ -282,7 +282,6 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
         params.poiMiddleCategoryId = Number(document.querySelector(`#selectPoiMiddleCategoryId${type}`).value);
         const poiMiddleCategory = data.poiMiddleCategory.find((poiMiddleCategory) =>
             poiMiddleCategory.id === params.poiMiddleCategoryId);
-        console.log("poiMiddleCategory : ", poiMiddleCategory);
         params.iconSetId = poiCategory.iconSets[0].id;
 
         params.code = document.querySelector(`#poiCode${type}`).value;

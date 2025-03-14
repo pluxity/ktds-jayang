@@ -5,6 +5,7 @@ import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.FileUtil;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ public interface SaveStrategy {
 
 
     FileInfo fileSave(MultipartFile file, Path directoryPath) throws IOException;
+    FileInfo fileSave(File file, Path directoryPath) throws IOException;
 
     default FileInfo saveFileInfo(MultipartFile file, Path directoryPath) throws IOException {
         String storedName = UUID.randomUUID().toString();
@@ -27,6 +29,19 @@ public interface SaveStrategy {
 
         return FileInfo.builder()
                 .originName(file.getOriginalFilename())
+                .extension(extension)
+                .storedName(storedName)
+                .directoryName(directoryPath.getParent().relativize(directoryPath).toString())
+                .build();
+    }
+
+    default FileInfo saveFileInfo(File file, Path directoryPath) throws IOException {
+        String storedName = UUID.randomUUID().toString();
+        String extension = FileUtil.getExtension(file.getName());
+        Files.copy(file.toPath(), directoryPath.resolve(storedName + "." + extension));
+
+        return FileInfo.builder()
+                .originName(file.getName())
                 .extension(extension)
                 .storedName(storedName)
                 .directoryName(directoryPath.getParent().relativize(directoryPath).toString())

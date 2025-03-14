@@ -941,7 +941,8 @@ const layerPopup = (function () {
         const tdEquipment = document.createElement('td');
         tdEquipment.classList.add('align-left');
         tdEquipment.setAttribute('data-poi-id', poi.id);
-        tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
+        tdEquipment.innerHTML = `<em class="text-accent">${poi.name}</em>`;
+        // tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
         tdEquipment.addEventListener('dblclick', function() {
             movePoi(poi.id);
         });
@@ -1694,6 +1695,21 @@ const layerPopup = (function () {
         });
     })
 
+    function markNoticeAsRead(noticeId) {
+        const readNotices = JSON.parse(localStorage.getItem('readNotices')) || [];
+        if (!readNotices.includes(noticeId)) {
+            readNotices.push(noticeId);
+            localStorage.setItem('readNotices', JSON.stringify(readNotices));
+        }
+    }
+
+    function isNoticeRead(noticeId) {
+        const readNotices = JSON.parse(localStorage.getItem('readNotices')) || [];
+        return readNotices.includes(noticeId);
+    }
+
+    let unreadNoticeIds = [];
+
     function pagingNotice(noticeList, itemsPerPage = 1) {
         let currentPage = 1; // 초기 페이지
         const totalPages = Math.ceil(noticeList.length / itemsPerPage);
@@ -1702,19 +1718,27 @@ const layerPopup = (function () {
             const startIndex = (page - 1) * itemsPerPage;
             const currentNotice = noticeList[startIndex];
 
+            // if (currentNotice && !isNoticeRead(currentNotice.id)) {
+            //     markNoticeAsRead(currentNotice.id);
+            // }
+
             const noticeTitle = document.querySelector('.notice-info__title p');
             const urgentLabel = document.querySelector('.notice-info__title .label');
             const noticeDate = document.querySelector('.notice-info__date');
             const pagingNumber = document.querySelector('.popup-event__paging .number');
             const noticeContent = document.querySelector('.notice-info__contents p');
 
-            console.log("noticeList : ", noticeList);
-            console.log("currentNotice : ", currentNotice);
             if (currentNotice) {
-                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                const badgeText = (isNoticeRead(currentNotice.id) || currentNotice.isRead) ? '' : '<span class="badge">N</span>';
+                noticeTitle.innerHTML = `${currentNotice.title} ${badgeText}`;
                 urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
                 noticeDate.textContent = formatDate(currentNotice.createdAt);
                 noticeContent.textContent = currentNotice.content;
+
+                if (!isNoticeRead(currentNotice.id) && !unreadNoticeIds.includes(currentNotice.id)) {
+                    unreadNoticeIds.push(currentNotice.id);
+                    markNoticeAsRead(currentNotice.id);
+                }
             }
 
             pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
@@ -1738,9 +1762,25 @@ const layerPopup = (function () {
 
         const closeBtn = document.querySelector('#noticePopup .close');
         closeBtn.addEventListener('click', function () {
+            saveReadNoticesBatch();
             const popup = document.getElementById('noticePopup');
-            popup.style.display = 'none'; // 팝업 숨기기
+            popup.style.display = 'none';
         });
+    }
+
+    function saveReadNoticesBatch() {
+        const readIds = JSON.parse(localStorage.getItem('readNotices')) || [];
+
+        localStorage.setItem('readNotices', JSON.stringify(readIds));
+
+        api.put(`/notices/id-list/${readIds}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+            },
+        }).then(res => {
+            localStorage.removeItem("readNotices");
+        })
     }
 
     // date format

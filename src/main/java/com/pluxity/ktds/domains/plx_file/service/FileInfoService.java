@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,7 +58,20 @@ public class FileInfoService {
         fileInfoRepository.save(fileInfo);
         return fileInfo.toDto();
     }
+    public FileInfoDTO saveFile(File file, FileEntityType type, SaveStrategy saveStrategy) throws IOException {
+        Objects.requireNonNull(saveStrategy, () -> {
+            log.error(INVALID_FILE_IO_STRATEGY.getMessage());
+            throw new CustomException(INVALID_FILE_IO_STRATEGY);
+        });
 
+        String uuid = UUID.randomUUID().toString();
+        Path targetDirectoryPath = Path.of(uploadRootPath, type.getType(), uuid);
+
+        FileInfo fileInfo = saveStrategy.fileSave(file, targetDirectoryPath);
+        fileInfo.changeFileEntityType(type);
+        fileInfoRepository.save(fileInfo);
+        return fileInfo.toDto();
+    }
 
     public void deleteDirectoryByDirectory(Path path) {
         FileInfo fileInfo = fileInfoRepository.findByDirectoryName(path.toString())
@@ -104,5 +118,4 @@ public class FileInfoService {
         }
 
     }
-
 }

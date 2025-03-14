@@ -57,10 +57,10 @@ public class NoticeController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
-    @DeleteMapping("/id-list/{ids}")
+    @PutMapping("/id-list/{readIds}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody deletePois(@PathVariable List<Long> ids) {
-        service.deleteAllById(ids);
+    public ResponseBody readNotices(@PathVariable List<Long> readIds) {
+        service.markNoticesAsRead(readIds);
         return ResponseBody.of(SuccessCode.SUCCESS_DELETE);
     }
 }

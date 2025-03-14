@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.poi_set.service;
 
+import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryRequestDTO;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryResponseDTO;
@@ -27,6 +28,7 @@ public class PoiMiddleCategoryService {
 
     private final PoiCategoryRepository poiCategoryRepository;
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
+    private final PoiRepository poiRepository;
 
     public PoiMiddleCategoryResponseDTO findById(Long id) {
         PoiMiddleCategory fetchPoiCategory = poiMiddleCategoryRepository.findById(id)
@@ -79,7 +81,7 @@ public class PoiMiddleCategoryService {
 
     @Transactional
     public void delete(Long id) {
-        poiMiddleCategoryRepository.findByPoiCategoryId(id).ifPresent(poiCategory -> {
+        poiRepository.findByPoiCategoryId(id).ifPresent(poiCategory -> {
             throw new CustomException(EXIST_POI_CONTAINING_CATEGORY);
         });
         poiMiddleCategoryRepository.deleteById(id);

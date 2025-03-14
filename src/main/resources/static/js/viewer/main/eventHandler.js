@@ -648,6 +648,7 @@
         }
     })
 
+
     const noticePopup = document.querySelector('.header__info .profile #notice');
     const noticeAlert = document.getElementById('noticeAlert');
     noticePopup.addEventListener('click', async function () {
@@ -744,5 +745,10 @@
             console.error('SSE Connection Error:', error);
         }
     );
+
+    const eventStateBtn = document.querySelector(".event-state__title .event-state__button");
+    eventStateBtn.addEventListener('click', async event => {
+        await layerPopup.createEventPopup();
+    });
 
 })();

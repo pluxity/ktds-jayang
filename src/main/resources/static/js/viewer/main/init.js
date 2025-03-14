@@ -7,12 +7,34 @@
     }
     api.get(`/users/userid/${USER_ID}`).then((result) => {
         const {result: data} = result.data;
+
         document.querySelector('.header__info .head__name').innerHTML = data.name;
         document.querySelector('.header__info .head__level').innerHTML = data.groupName;
         // if (data.role !== 'ADMIN') {
         //     document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
         // }
     });
+    function getCookie(name) {
+        const cookies = document.cookie.split("; ");
+        for (const cookie of cookies) {
+            const [key, value] = cookie.split("=");
+            if (key === name) {
+                return decodeURIComponent(value);
+            }
+        }
+        return null;
+    }
+    // 관리자 여부
+    const userRole = getCookie("USER_ROLE");
+    const roles = userRole ? userRole.split(",") : [];
+    const adminButton = document.querySelector(".profile__layer .head img");
+    adminButton.addEventListener("click", event => {
+        window.location.href = "/admin/system-setting";
+    })
+    if (!roles.includes("ADMIN")) {
+        adminButton.style.display = "none";
+    }
+
 
     const floorInfo = document.querySelector('#floor-info .floor-info__button');
     const floorDetail = document.querySelector('#floor-info .floor-info__detail');

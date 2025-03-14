@@ -36,7 +36,8 @@ public class Notice extends AuditableEntity {
 
     @Column(name = "is_active")
     private Boolean isActive;
-
+    @Column(name = "is_read")
+    private Boolean isRead;
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
@@ -47,22 +48,24 @@ public class Notice extends AuditableEntity {
 
 
     @Builder
-    public Notice(String title, String content, Boolean isUrgent, Boolean isActive, LocalDateTime expiredAt, List<Long> buildingIds) {
+    public Notice(String title, String content, Boolean isUrgent, Boolean isActive, Boolean isRead, LocalDateTime expiredAt, List<Long> buildingIds) {
         this.title = title;
         this.content = content;
         this.isUrgent = isUrgent;
         this.isActive = isActive;
+        this.isRead = isRead;
         this.expiredAt = expiredAt;
         if (buildingIds != null) {
             this.buildingIds = buildingIds;
         }
     }
 
-    public void update(String title, String content, Boolean isUrgent, Boolean isActive, LocalDateTime expiredAt, List<Long> buildingIds) {
+    public void update(String title, String content, Boolean isUrgent, Boolean isActive, Boolean isRead, LocalDateTime expiredAt, List<Long> buildingIds) {
         this.title = title;
         this.content = content;
         this.isUrgent = isUrgent;
         this.isActive = isActive;
+        this.isRead = isRead;
         this.expiredAt = expiredAt;
         this.buildingIds.clear();
         if (buildingIds != null) {
@@ -70,4 +73,7 @@ public class Notice extends AuditableEntity {
         }
     }
 
+    public void updateRead(Boolean isRead) {
+        this.isRead = isRead;
+    }
 }

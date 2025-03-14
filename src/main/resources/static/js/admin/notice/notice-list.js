@@ -166,7 +166,7 @@ const dataManufacturer = (rowData) =>
             `${formatDate(createdAt)} ~ ${formatDate(expiredAt)}`,
             isUrgent ? 'Y' : 'N',
             gridjs.html(`
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch" style="display: inline-block">
                         <input type="checkbox" name="isActive" id="isActiveCheck" class="form-check-input" title="활성화" required data-rules="required" data-tagname="활성화"
                         ${isActive ? 'checked' : ''} />
                     </div>

@@ -62,7 +62,7 @@ public class NoticeService {
         var notice = repository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ID));
 
-        notice.update(dto.title(), dto.content(), dto.isUrgent(), dto.isActive(), dto.expiredAt(), dto.buildingIds());
+        notice.update(dto.title(), dto.content(), dto.isUrgent(), dto.isActive(), dto.isRead(), dto.expiredAt(), dto.buildingIds());
     }
     @Transactional
     public void deleteNotice(Long id) {
@@ -72,5 +72,13 @@ public class NoticeService {
     @Transactional
     public void deleteAllById(@NotNull List<Long> ids) {
         repository.deleteAllById(ids);
+    }
+
+    @Transactional
+    public int markNoticesAsRead(List<Long> noticeIds) {
+        if (noticeIds == null || noticeIds.isEmpty()) {
+            return 0;
+        }
+        return repository.markNoticesAsRead(noticeIds);
     }
 }

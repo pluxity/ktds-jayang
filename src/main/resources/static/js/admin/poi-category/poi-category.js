@@ -8,6 +8,7 @@ async function initializeIconSetInSelect() {
         const iconSetSelectTagInModify =
             document.querySelector('#modifyIconSetId');
         data.iconSet.forEach((iconset) => {
+            console.log("iconset : ", iconset);
             iconSetSelectTagInRegister.appendChild(
                 new Option(iconset.name, iconset.id),
             );
@@ -84,14 +85,14 @@ const getPoiCategoryInfoList = async () => {
 const getPoiMiddleCategoryInfoList = async () => {
     await api.get('/poi-middle-categories').then((res) => {
         const {result: resData} = res.data;
-        data.poiCategory = resData;
+        data.poiMiddleCategory = resData;
 
         let optionHtml = '';
 
-        resData.forEach((poiCategory, index) => {
+        resData.forEach((poiMiddleCategory, index) => {
             let selected = '';
             if (index === 0) selected = 'selected';
-            optionHtml += `<option value="${poiCategory.id}" ${selected}>${poiCategory.name}</option>`;
+            optionHtml += `<option value="${poiMiddleCategory.id}" ${selected}>${poiMiddleCategory.name}</option>`;
         });
 
         if (resData.length === 0)
@@ -109,8 +110,8 @@ const getPoiMiddleCategoryInfoList = async () => {
                         </div>
                         <div class="float-right">
                             <i class="cursor-pointer fa-lg fa-regular fa-square-plus" data-bs-toggle="modal" data-bs-target="#poiMiddleCategoryRegisterModal"></i>
-                            <i class="cursor-pointer fa-lg fa-regular fa-square-minus" onclick="minusCategory();"></i>
-                            <i class="cursor-pointer fa-lg fa-regular fa-square-check" onclick="modifyCategory(this);"></i>
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-minus" onclick="minusMiddleCategory();"></i>
+                            <i class="cursor-pointer fa-lg fa-regular fa-square-check" onclick="modifyMiddleCategory(this);"></i>
                         </div>
                     </div>
                 `;
@@ -118,7 +119,7 @@ const getPoiMiddleCategoryInfoList = async () => {
         document.getElementById('categoryFlex').innerHTML += middleCategoryHtml;
     });
 
-    await initializeIconSetInSelect();
+    // await initializeIconSetInSelect();
 };
 
 const minusCategory = () => {
@@ -163,6 +164,24 @@ const modifyCategory = () => {
     myModal.show();
 };
 
+const minusMiddleCategory = () => {
+    const selectedMiddleCategory = document.querySelector('#category2 option:checked');
+
+    if (selectedMiddleCategory === null || selectedMiddleCategory.value === '' || selectedMiddleCategory.value === undefined) {
+        alertSwal('선택된 내용이 없습니다.');
+        return;
+    }
+
+
+    api.delete(`/poi-middle-categories/${selectedMiddleCategory.value}`).then((res) => {
+        const { code } = res.data;
+        alertSwal('삭제되었습니다.').then((res) => {
+            window.location.reload();
+        });
+    });
+};
+
+
 const modifyMiddleCategory = () => {
     const selectedCategory = document.querySelector('#category2 option:checked');
 
@@ -171,16 +190,16 @@ const modifyMiddleCategory = () => {
         return;
     }
 
-    const poiCategory = data.poiCategory.find(
+    const poiMiddleCategory = data.poiMiddleCategory.find(
         (category) => category.id === Number(selectedCategory.value),
     );
 
-    const modal = document.getElementById('poiCategoryModifyModal');
+    const modal = document.getElementById('poiMiddleCategoryModifyModal');
 
-    modal.querySelector('#middleModifyId').value = poiCategory.id;
-    modal.querySelector('#middleModifyName').value = poiCategory.name;
+    modal.querySelector('#middleModifyId').value = poiMiddleCategory.id;
+    modal.querySelector('#middleModifyName').value = poiMiddleCategory.name;
     modal.querySelector('#middleModifyMajorId').value =
-        poiCategory.iconSets[0].id ?? '';
+        poiMiddleCategory.poiCategory.id ?? '';
 
     let myModal = new bootstrap.Modal(document.getElementById('poiMiddleCategoryModifyModal'), {
         keyboard: false

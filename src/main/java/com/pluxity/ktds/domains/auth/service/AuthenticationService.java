@@ -17,9 +17,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
@@ -60,10 +63,14 @@ public class AuthenticationService {
       User user = userService.findUserByUsername(userDetails.getUsername());
 
       Cookie cookie = new Cookie("USER_ID", userDetails.getUsername());
-//      cookie.setHttpOnly(true);
+      Cookie cookieRole = new Cookie("USER_ROLE", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+      cookieRole.setMaxAge(60 * 60 * 24);
+      cookieRole.setPath("/");
+      //      cookie.setHttpOnly(true);
       cookie.setMaxAge(60 * 60 * 24);
       cookie.setPath("/");
       response.addCookie(cookie);
+      response.addCookie(cookieRole);
 
       return SignInResponseDTO.builder()
               .username(user.getUsername())

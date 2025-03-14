@@ -11,7 +11,7 @@ public class AlarmDisablePublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${spring.rabbitmq.exchange.alarm-disable}")
+    @Value("${rabbitmq.exchange.alarm-disable}")
     private String alarmDisableExchange = "alarm-disable";
 
     public AlarmDisablePublisher(RabbitTemplate rabbitTemplate) {

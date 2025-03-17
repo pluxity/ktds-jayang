@@ -253,6 +253,15 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
         renderCctvPoi(form);
     }
 });
+function getTagNames(type) {
+    const tagInput = document.querySelector(`#tag${type}`);
+    console.log("tagInput : ", tagInput);
+    if (!tagInput) return [];
+    return tagInput.value
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+}
 
 // POST and modify
 [
@@ -286,7 +295,8 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
 
         params.code = document.querySelector(`#poiCode${type}`).value;
         params.name = document.querySelector(`#poiName${type}`).value;
-        params.tagName = document.querySelector(`#tag${type}`).value;
+        // params.tagNames = document.querySelector(`#tag${type}`).value;
+        params.tagNames = getTagNames(`${type}`);
 
         if(poiCategory.name.includes('센서')) {
             params.poiCameraIds = data.poi.filter((poi) => getAllTagValues(type).indexOf(poi.code) > -1).map(poi => poi.id);

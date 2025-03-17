@@ -11,6 +11,7 @@ import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
@@ -50,7 +51,7 @@ public class PoiService {
     private final PoiCategoryRepository poiCategoryRepository;
     private final IconSetRepository iconSetRepository;
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
-
+    private final EventRepository eventRepository;
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI));
@@ -109,6 +110,7 @@ public class PoiService {
         Poi poi = Poi.builder()
                 .code(dto.code())
                 .name(dto.name())
+                .tagNames(dto.tagNames() != null ? new ArrayList<>(dto.tagNames()) : new ArrayList<>())
                 .build();
 
         validateAssociation(dto);
@@ -130,6 +132,7 @@ public class PoiService {
                         .iconSetId(dto.iconSetId())
                         .build());
     }
+
     private void validateAssociation(UpdatePoiDTO dto) {
 
         Building building = buildingRepository.findById(dto.buildingId())
@@ -163,7 +166,7 @@ public class PoiService {
         validateUpdateCode(dto, poi);
         validateAssociation(dto);
 
-        poi.update(dto.name(), dto.code());
+        poi.update(dto.name(), dto.code(), dto.tagNames());
 
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);

@@ -46,8 +46,7 @@ public class PoiMiddleCategoryService {
 
     @Transactional
     public Long save(PoiMiddleCategoryRequestDTO dto) {
-        Optional<PoiMiddleCategory> fetchPoiCategory = poiMiddleCategoryRepository.findByName(dto.name());
-        if (fetchPoiCategory.isPresent()) {
+        if (poiMiddleCategoryRepository.existsByNameAndPoiCategoryId(dto.name(), dto.majorCategory())) {
             throw new CustomException(DUPLICATE_NAME);
         }
         PoiCategory poiCategory = poiCategoryRepository.findById(dto.majorCategory())
@@ -59,7 +58,6 @@ public class PoiMiddleCategoryService {
                 .build();
 
         PoiMiddleCategory savedEntity = poiMiddleCategoryRepository.save(poiMiddleCategory);
-        System.out.println("savedEntity.getId() : " + savedEntity.getId());
         return savedEntity.getId();
     }
 

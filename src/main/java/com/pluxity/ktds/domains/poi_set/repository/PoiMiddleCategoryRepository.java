@@ -10,5 +10,7 @@ import java.util.Optional;
 
 public interface PoiMiddleCategoryRepository extends JpaRepository<PoiMiddleCategory, Long> {
     Optional<PoiMiddleCategory> findByName(String name);
+
+    boolean existsByNameAndPoiCategoryId(String name, Long poiCategoryId);
     Optional<PoiCategory> findByPoiCategoryId(@Param(value = "id") Long id);
 }

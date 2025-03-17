@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.building.entity;
 
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
+import com.pluxity.ktds.domains.event.entity.Alarm;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
@@ -10,8 +11,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -61,27 +65,41 @@ public class Poi {
     @AttributeOverride(name = "z", column = @Column(name = "scale_z"))
     private Spatial scale;
 
-
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
     @Column(name = "code", nullable = false, length = 20)
     private String code;
 
+    @ElementCollection
+    @CollectionTable(name = "poi_tags", joinColumns = @JoinColumn(name = "poi_id"))
+    @Column(name = "tag_names")
+    private List<String> tagNames = new ArrayList<>();
 
     @Builder
-    public Poi(String name, String code) {
+    public Poi(String name, String code, List<String> tagNames) {
         this.name = name;
         this.code = code;
+        this.tagNames = tagNames != null ? new ArrayList<>(tagNames) : new ArrayList<>();
     }
 
-    public void update(String name, String code) {
+    public void update(String name, String code, List<String> tagNames) {
         if (StringUtils.hasText(name)) {
             this.name = name;
         }
         if (StringUtils.hasText(code)) {
             this.code = code;
         }
+        if (tagNames != null) {
+            this.tagNames.clear();
+            this.tagNames.addAll(tagNames);
+        }
+    }
+
+    public void changeTags(List<String> tagNames) {
+        this.tagNames.clear();
+        this.tagNames.addAll(tagNames);
+        this.tagNames = new ArrayList<>(tagNames);
     }
 
     public void changeBuilding(Building building) {

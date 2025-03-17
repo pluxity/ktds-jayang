@@ -4,7 +4,10 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jdk.dynalink.linker.LinkerServices;
 import lombok.Builder;
+
+import java.util.List;
 
 @Builder
 public record CreatePoiDTO(
@@ -33,7 +36,8 @@ public record CreatePoiDTO(
         Long poiMiddleCategoryId,
         @NotNull(message = "아이콘셋 아이디는 필수 입니다.")
         @Digits(integer = 20, fraction = 0, message = "아이콘셋 아이디는 20자리 이하의 숫자 입니다.")
-        Long iconSetId
+        Long iconSetId,
+        List<String> tagNames
 
 ) {
 }

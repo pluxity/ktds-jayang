@@ -293,6 +293,7 @@ const Init = (function () {
             container.innerHTML = '';
             const contents = document.querySelector('.contents');
             const outdoorBuilding = await BuildingManager.getOutdoorBuilding();
+            const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
             let buildingId = outdoorBuilding.id;
             initFloors(buildingId);
             setActiveEquipment(buildingId);
@@ -341,7 +342,7 @@ const Init = (function () {
                         Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                             // Px.Effect.Outline 참고
                             // Px.Effect.Outline.HoverEventOn('area_no');
-                            window.location.href = `/map?buildingId=${buildingId}`;
+                            window.location.href = `/map?buildingId=${firstIndoorBuilding.id}`;
                         });
 
                         contents.style.position = 'static';

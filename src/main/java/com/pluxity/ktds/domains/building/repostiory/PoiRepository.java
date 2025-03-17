@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     Optional<Poi> findByFloorId(@Param(value = "id") Long id);
     List<Poi> findPoisByPoiCategoryId(@Param(value = "id") Long id);
     List<Poi> findPoisByfloorId(@Param(value = "id") Long id);
+    @Query("SELECT p.id FROM Poi p JOIN p.tagNames t WHERE t = :tagName")
+    List<Long> findPoiIdsByTagName(@Param("tagName") String tagName);
 }

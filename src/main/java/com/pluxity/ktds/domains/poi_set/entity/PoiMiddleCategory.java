@@ -12,7 +12,10 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "poi_middle_category")
+@Table(name = "poi_middle_category",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"name", "poi_category_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PoiMiddleCategory {
 

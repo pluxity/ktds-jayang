@@ -22,9 +22,10 @@ class Building {
     #camera3d;
 
     #topology;
+    #isIndoor;
 
     constructor(buildingListDto) {
-        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology } =
+        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology, isIndoor } =
             buildingListDto;
 
         this.#id = id;
@@ -37,6 +38,7 @@ class Building {
         this.#camera2d = camera2d;
         this.#camera3d = camera3d;
         this.#topology = topology;
+        this.#isIndoor = isIndoor;
     }
 
     get id() {
@@ -125,17 +127,24 @@ class Building {
     set topology(topology) {
         this.#topology = topology;
     }
+    get isIndoor() {
+        return this.#isIndoor;
+    }
 
+    set isIndoor(isIndoor) {
+        this.#isIndoor = isIndoor;
+    }
     getDetail() {
         return new Promise((resolve) => {
             api.get(`/buildings/${this.id}`).then((result) => {
                 const { result: data } = result.data;
 
-                const { floors, evacuationRoute, lod, buildingFile } = data;
+                const { floors, evacuationRoute, lod, buildingFile, isIndoor } = data;
                 this.#floors = floors;
                 this.#evacuationRoute = evacuationRoute ?? '';
                 this.#lod = JSON.stringify(lod) ?? '';
                 this.#buildingFile = buildingFile;
+                this.#isIndoor = isIndoor;
                 resolve(data);
             });
         });

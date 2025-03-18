@@ -169,11 +169,31 @@ const EventManager = (()=>{
                 }
 
 
-            };
-
-        buttons.querySelector('.button--solid-middle').onclick = () => {
-            // 3D Map 이동 로직 구현
-            popupTemplate.remove();
+        };
+        // 3D 맵이동
+        buttons.querySelector('.button--solid-middle').onclick = async () => {
+            try {
+                const response = await fetch(`http://localhost:8085/poi/tagNames/${alarm.tagName}`);
+                const data = await response.json();
+                const poi = data.result;
+            
+                const poiData = Px.Poi.GetData(poi.id);
+                const isViewerPage = window.location.pathname.includes('/viewer');
+                
+                if(!poiData || isViewerPage){
+                    window.location.href = `/map?buildingId=${poi.building.id}&poiId=${poi.id}`;
+                }else{
+                    Px.Model.Visible.Show(String(poiData.property.floorId));
+                    Px.Camera.MoveToPoi({
+                        id: poi.id,
+                        isAnimation: true,
+                        duration: 500,
+                    });
+                    popupTemplate.remove();
+                }
+            } catch (error) {
+                console.error('카메라 이동 실패:', error);
+            }
         };
 
         // 문서에 팝업 추가

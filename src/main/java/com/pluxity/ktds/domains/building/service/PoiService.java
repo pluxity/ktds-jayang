@@ -99,6 +99,11 @@ public class PoiService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Poi findPoiIdsByTagName(String tagName){
+        return poiRepository.findPoiByTagName(tagName);
+    }
+
     @Transactional
     public Long save(@NotNull @Valid final CreatePoiDTO dto) {
         validateSaveCode(dto.code());

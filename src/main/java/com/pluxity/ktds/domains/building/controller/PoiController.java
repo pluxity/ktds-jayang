@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
+import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.service.PoiService;
 import com.pluxity.ktds.global.constant.SuccessCode;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,6 +57,11 @@ public class PoiController {
     @GetMapping("/{id}")
     public DataResponseBody<PoiDetailResponseDTO> getPoi(@PathVariable Long id) {
         return DataResponseBody.of(service.findById(id));
+    }
+
+    @GetMapping("/tagNames/{tagName}")
+    public DataResponseBody<Poi> findPoiByTagName(@PathVariable String tagName) {
+        return DataResponseBody.of(service.findPoiIdsByTagName(tagName));
     }
 
     @PostMapping

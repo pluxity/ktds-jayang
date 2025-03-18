@@ -12,7 +12,7 @@ public class AlarmDisablePublisher {
     private final RabbitTemplate rabbitTemplate;
 
     @Value("${rabbitmq.exchange.alarm-disable}")
-    private String alarmDisableExchange = "alarm-disable";
+    private String alarmDisableExchange;
 
     public AlarmDisablePublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;

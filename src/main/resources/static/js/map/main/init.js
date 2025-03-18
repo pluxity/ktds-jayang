@@ -457,6 +457,9 @@ const Init = (function () {
 
                     contents.style.position = 'static';
                     initializeTexture();
+
+                    setTimeout(moveToPoiFromUrl,500);
+
                 }
             });
         });
@@ -466,6 +469,23 @@ const Init = (function () {
         handleExtendView();
         handleFirstView(buildingId);
         handle2D(buildingId);
+    };
+
+    const moveToPoiFromUrl = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const poiId = urlParams.get('poiId');
+    
+        if (poiId) {
+            const poiData = Px.Poi.GetData(poiId);
+            if (poiData) {
+                Px.Model.Visible.Show(String(poiData.property.floorId));
+                Px.Camera.MoveToPoi({
+                    id: poiId,
+                    isAnimation: true,
+                    duration: 500,
+                });
+            }
+        }
     };
 
     const moveToPoi = (id) => {

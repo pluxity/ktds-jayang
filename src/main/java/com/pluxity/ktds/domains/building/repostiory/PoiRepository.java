@@ -23,6 +23,7 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     Optional<Poi> findByFloorId(@Param(value = "id") Long id);
     List<Poi> findPoisByPoiCategoryId(@Param(value = "id") Long id);
     List<Poi> findPoisByfloorId(@Param(value = "id") Long id);
-    @Query("SELECT p.id FROM Poi p JOIN p.tagNames t WHERE t = :tagName")
-    List<Long> findPoiIdsByTagName(@Param("tagName") String tagName);
+    @Query("SELECT p FROM Poi p JOIN p.tagNames t WHERE t = :tagName")
+    Poi findPoiByTagName(@Param("tagName") String tagName);
+
 }

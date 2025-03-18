@@ -13,6 +13,7 @@ public record AlarmResponseDTO(
         String floorNm,
         String alarmType,
         String process,
+        String tagName,
         LocalDateTime occurrenceDate,
         LocalDateTime confirmDate
 ){}

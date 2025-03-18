@@ -122,4 +122,11 @@ public class BuildingController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
+    @PatchMapping("/{id}/camera2d")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchBuildingCamera2d(@PathVariable Long id,
+                                              @RequestBody Map<String, String> camera2dMap) {
+        service.updateCamera2d(id, camera2dMap.get("camera"));
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
 }

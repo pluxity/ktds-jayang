@@ -56,6 +56,9 @@ public class Building {
     @Column(name = "is_indoor", nullable = false)
     private String isIndoor;
 
+    @Column(name = "camera_2d", columnDefinition = "LONGTEXT")
+    private String camera2d;
+
     @Builder
     public Building(String code, String name, String description, String isIndoor) {
         this.code = code;
@@ -72,7 +75,9 @@ public class Building {
         this.isIndoor = validString(other.isIndoor()) ? other.isIndoor() : this.isIndoor;
         this.description = validString(other.description()) ? other.description() : this.description;
 
-
+    }
+    public void changeCamera2d(String camera2d) {
+        this.camera2d = camera2d;
     }
 
     public void changeEvacuationRoute(String evacuationRoute) {
@@ -115,6 +120,7 @@ public class Building {
                 .name(this.name)
                 .isIndoor(this.isIndoor)
                 .description(this.description)
+                .camera2d(this.camera2d)
                 .build();
     }
 
@@ -131,6 +137,7 @@ public class Building {
                 .buildingFile(this.fileInfo == null ? null : this.fileInfo.toDto())
                 .floorIds(this.floors.stream().map(Floor::getId).toList())
                 .isIndoor(this.isIndoor)
+                .camera2d(this.camera2d)
                 .build();
 
     }

@@ -69,7 +69,7 @@ const getPoiCategoryInfoList = async () => {
                             <i class="cursor-pointer fa-lg fa-regular fa-square-check" onclick="modifyCategory(this);"></i>
                         </div>
                     </div>
-                    <div id="middleCategoryContainer"></div>
+<!--                    <div id="middleCategoryContainer"></div>-->
                 </div>
                 `;
 
@@ -78,6 +78,7 @@ const getPoiCategoryInfoList = async () => {
     });
 
     await initializeIconSetInSelect();
+    // 중분류에 전체 리스트 다나오게
     await getPoiMiddleCategoryInfoList();
 };
 
@@ -99,7 +100,7 @@ const getPoiMiddleCategoryInfoList = async () => {
             optionHtml =
                 '<option disabled>조회된 내용이 없습니다.</option>';
 
-        let middleCategoryHtml = `<div class="col-md-4 bg-light">
+        let middleCategoryHtml = `<div class="col-md-4 bg-light" id="middleCategoryContainer">
                         <h2>중분류</h2>
                         <div class="form-group mb-1">
                             <select class="form-select category" id="category2" size="15" name="category1">
@@ -117,6 +118,31 @@ const getPoiMiddleCategoryInfoList = async () => {
                 `;
 
         document.getElementById('categoryFlex').innerHTML += middleCategoryHtml;
+
+        const updateMiddleCategoryOptions = () => {
+            const selectedMajorId = document.getElementById('category1').value;
+
+            const filteredMiddleCategories = data.poiMiddleCategory.filter(
+                middle => middle.poiCategory.id == selectedMajorId
+            );
+            console.log("filteredMiddleCategories : ", filteredMiddleCategories);
+            console.log("selectedMajorId : ", selectedMajorId);
+
+            let optionHtml = '';
+            if (filteredMiddleCategories.length > 0) {
+                filteredMiddleCategories.forEach((item, index) => {
+                    const selected = index === 0 ? 'selected' : '';
+                    optionHtml += `<option value="${item.id}" ${selected}>${item.name}</option>`;
+                });
+            } else {
+                optionHtml = '<option disabled>조회된 내용이 없습니다.</option>';
+            }
+            document.getElementById('category2').innerHTML = optionHtml;
+        };
+
+        updateMiddleCategoryOptions();
+
+        document.getElementById('category1').addEventListener('change', updateMiddleCategoryOptions);
     });
 
     // await initializeIconSetInSelect();

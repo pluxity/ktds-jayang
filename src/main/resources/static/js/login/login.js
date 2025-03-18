@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let loginFailCnt = 0;
-document.getElementById('btn_login').onclick = () => {
+function doLogin() {
     const username = document.getElementById("id").value;
     const password = document.getElementById("pw").value;
     const failMessage = document.querySelector('.login-footer__warning');
@@ -30,14 +30,26 @@ document.getElementById('btn_login').onclick = () => {
         password: password
     };
 
-    api.post('/auth/sign-in', param).then((res) => {
-        window.location.href = '/viewer';
-    }).catch(() => {
-        loginFailCnt++
-        failMessage.style.display = 'block';
-        failMessage.innerHTML = `
-            로그인 정보가 일치하지 않습니다.<br>
-            5회 이상 불일치 시 로그인이 제한됩니다.(${loginFailCnt}/5)
-        `;
-    });
+    api.post('/auth/sign-in', param)
+        .then((res) => {
+            window.location.href = '/viewer';
+        })
+        .catch(() => {
+            loginFailCnt++;
+            failMessage.style.display = 'block';
+            failMessage.innerHTML = `
+                로그인 정보가 일치하지 않습니다.<br>
+                5회 이상 불일치 시 로그인이 제한됩니다.(${loginFailCnt}/5)
+            `;
+        });
 }
+document.getElementById('btn_login').onclick = doLogin;
+
+const inputFields = document.querySelectorAll('#id, #pw');
+inputFields.forEach(input => {
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            doLogin();
+        }
+    });
+});

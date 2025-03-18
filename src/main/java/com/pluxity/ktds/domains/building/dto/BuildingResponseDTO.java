@@ -8,6 +8,7 @@ public record BuildingResponseDTO(
         String code,
         String name,
         String description,
-        String isIndoor
+        String isIndoor,
+        String camera2d
 ) {
 }

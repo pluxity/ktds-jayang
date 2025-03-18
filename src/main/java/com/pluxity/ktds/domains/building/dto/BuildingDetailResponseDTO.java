@@ -18,7 +18,8 @@ public record BuildingDetailResponseDTO(
         FileInfoDTO buildingFile,
         List<Long> floorIds,
         List<FloorResponseDTO> floors,
-        String isIndoor
+        String isIndoor,
+        String camera2d
 //        Long poiSetId
 ) {
 }

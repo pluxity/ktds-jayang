@@ -476,4 +476,11 @@ public class BuildingService {
                         .toList())
                 .build();
     }
+
+    @Transactional
+    public void updateCamera2d(Long id, String camera2d) {
+        buildingRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
+                .changeCamera2d(camera2d);
+    }
 }

@@ -3,7 +3,8 @@ const RECORD_SIZE = 10;
 
 const dataManufacturer = (rowData) =>
     rowData.map((poi) => {
-        const { id, name, code, buildingId, floorId, poiCategoryId, position } = poi;
+        console.log("data : ", data);
+        const { id, name, code, buildingId, floorId, poiCategoryId, poiMiddleCategoryId, position } = poi;
         return [
             id,
             name,
@@ -12,6 +13,7 @@ const dataManufacturer = (rowData) =>
             data.building.find(building => building.id === buildingId)
                 .floors.find(floor => floor.id === floorId).name,
             data.poiCategory.find(category => category.id === poiCategoryId).name,
+            data.poiMiddleCategory.find(middleCategory => middleCategory.id === poiMiddleCategoryId).name,
             position === null ? 'N' : 'Y',
             gridjs.html(`
                     <button class="btn btn-warning modifyModalButton" data-bs-toggle="modal" data-bs-target="#poiModifyModal" data-id="${id}">수정</button>
@@ -25,7 +27,7 @@ const renderPoi = (rawData = []) => {
         {
             id: 'checkbox',
             name: '선택',
-            width: '6%',
+            width: '4%',
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
@@ -48,19 +50,23 @@ const renderPoi = (rawData = []) => {
         },
         {
             name: '도면 이름',
-            width: '10%',
+            width: '8%',
         },
         {
             name: '층 이름',
-            width: '10%',
+            width: '5%',
         },
         {
             name: 'POI 카테고리 이름',
-            width: '10%',
+            width: '8%',
+        },
+        {
+            name: '중분류',
+            width: '8%',
         },
         {
             name: '배치 여부',
-            width: '5%',
+            width: '3%',
         },
         {
             name: '관리',
@@ -178,6 +184,11 @@ const initPoiCategory = async () => {
         );
     })
 }
+const initPoiMiddleCategory = async () => {
+    await api.get('/poi-middle-categories').then(res => {
+        data.poiMiddleCategory = res.data.result;
+    });
+};
 
 const initPoiList = () => {
     api.get('/poi').then((result) => {
@@ -189,14 +200,8 @@ const initPoiList = () => {
 const initializePoiAndBuildingAndPoiCategory = async () => {
     await initializeBuildings();
     await initPoiCategory();
-    await initPoiList();
     await initPoiMiddleCategory();
-};
-
-const initPoiMiddleCategory = async () => {
-    await api.get('/poi-middle-categories').then(res => {
-        data.poiMiddleCategory = res.data.result;
-    });
+    await initPoiList();
 };
 
 document.getElementById('selectPoiCategoryIdRegister').addEventListener('change', function() {
@@ -243,6 +248,7 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
     const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == modifyPoiData.poiCategoryId);
     initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
     modifyModal.querySelector('#selectPoiMiddleCategoryIdModify').value = modifyPoiData.poiMiddleCategoryId;
+    modifyModal.querySelector('#tagModify').value = modifyPoiData.tagNames;
     const form = document.querySelector('#poiModifyForm');
     form.dataset.id = modifyPoiData.id;
 
@@ -255,10 +261,9 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
 });
 function getTagNames(type) {
     const tagInput = document.querySelector(`#tag${type}`);
-    console.log("tagInput : ", tagInput);
     if (!tagInput) return [];
     return tagInput.value
-        .split(",")
+        .split(/[\n,]/)
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 }
@@ -445,7 +450,7 @@ const searchPoi = () => {
         {
             id: 'checkbox',
             name: '체크',
-            width: '6%',
+            width: '4%',
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
@@ -468,15 +473,19 @@ const searchPoi = () => {
         },
         {
             name: '도면 이름',
-            width: '10%',
+            width: '8%',
         },
         {
             name: '층 이름',
-            width: '10%',
+            width: '5%',
         },
         {
             name: 'POI 카테고리 이름',
-            width: '10%',
+            width: '8%',
+        },
+        {
+            name: '중분류',
+            width: '8%',
         },
         {
             name: '배치 여부',

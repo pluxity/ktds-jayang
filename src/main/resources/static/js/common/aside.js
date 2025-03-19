@@ -10,7 +10,9 @@ const _CURRENT_URL = window.location.pathname;
     });
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
-            event.preventDefault();
+            if (!['descriptionRegister', 'descriptionModify', 'tagModify', 'tagRegister'].includes(event.target.id)) {
+                event.preventDefault();
+            }
         }
     }, true);
 

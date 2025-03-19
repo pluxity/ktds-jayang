@@ -3,6 +3,8 @@ package com.pluxity.ktds.domains.building.dto;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import lombok.Builder;
 
+import java.util.List;
+
 @Builder
 public record PoiDetailResponseDTO(
         Long id,
@@ -15,7 +17,8 @@ public record PoiDetailResponseDTO(
         Spatial rotation,
         Spatial scale,
         String name,
-        String code
+        String code,
+        List<String> tagNames
 
 ) {
 }

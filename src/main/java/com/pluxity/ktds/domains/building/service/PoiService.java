@@ -14,6 +14,7 @@ import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
+import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
@@ -28,6 +29,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +38,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -177,6 +180,7 @@ public class PoiService {
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
+        updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
     }
 
 
@@ -248,6 +252,7 @@ public class PoiService {
 
             // 엑셀 가져오기
             List<Map<String, Object>> rows = ExcelUtil.readExcelBatch(file);
+
             int headerLength = rows.get(0).size();
 
             List<Poi> result = new ArrayList<>();
@@ -258,6 +263,7 @@ public class PoiService {
 
             List<PoiCategory> poiCategoryList = poiCategoryRepository.findAll();
             List<IconSet> iconSetList = iconSetRepository.findAll();
+            List<PoiMiddleCategory> poiMiddleCategoryList = poiMiddleCategoryRepository.findAll();
 
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
@@ -284,12 +290,23 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ICON_SET, "NotFound Iconset Name: " + poiMap.get(POI_ICONSET_NAME.value)));
 
+                PoiMiddleCategory poiMiddleCategory = poiMiddleCategoryList.stream()
+                        .filter(m -> m.getPoiCategory().getId().equals(poiCategory.getId()))
+                        .filter(m -> m.getName().equalsIgnoreCase(poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)))
+                        .limit(1)
+                        .findFirst()
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiMiddleCategory Name: " + poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)));
+
                 if(poiCategory.getIconSets().get(0).getId() != iconSet.getId()) {
                     throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
                             "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
                                     + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));
                 }
 
+                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split(","))
+                        .map(String::trim)
+                        .filter(StringUtils::hasText)
+                        .toList();
                 CreatePoiDTO poiDto = CreatePoiDTO.builder()
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
@@ -297,17 +314,22 @@ public class PoiService {
                         .floorId(floor.getId())
                         .poiCategoryId(poiCategory.getId())
                         .iconSetId(iconSet.getId())
+                        .poiMiddleCategoryId(poiMiddleCategory.getId())
+                        .tagNames(tags)
                         .build();
 
                 Poi poi = Poi.builder()
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
+                        .tagNames(tags)
                         .build();
 
                 changeField(poiDto, poi);
 
                 result.add(poi);
             }
+
+
 
             try {
                 poiRepository.saveAll(result);
@@ -341,11 +363,11 @@ public class PoiService {
             String o = String.valueOf(rows.get(i).get(String.valueOf(j)));
             workMap.put(String.valueOf(rows.get(0).get(String.valueOf(j))), o);
         }
-
         return workMap;
     }
 
     private void existValidCheck(Map<String, String> poiMap) {
+
         if (poiMap.get(POI_CATEGORY_NAME.value) == null || poiMap.get(POI_CATEGORY_NAME.value).equals("")) {
             throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
         } else if (poiMap.get(POI_ICONSET_NAME.value) == null || poiMap.get(POI_ICONSET_NAME.value).equals("")) {
@@ -353,6 +375,8 @@ public class PoiService {
         } else if (poiMap.get(POI_CODE.value) == null || poiMap.get(POI_CODE.value).equals("")) {
             throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
         } else if (poiMap.get(POI_NAME.value) == null || poiMap.get(POI_NAME.value).equals("")) {
+            throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
+        } else if (poiMap.get(POI_MIDDLE_CATEGORY_NAME.value) == null || poiMap.get(POI_MIDDLE_CATEGORY_NAME.value).equals("")) {
             throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
         }
     }
@@ -362,5 +386,6 @@ public class PoiService {
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
+        updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
     }
 }

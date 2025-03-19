@@ -209,13 +209,13 @@
 
     // side
     const handlePoiMenuClick = (event) => {
-        event.preventDefault();
+        // event.preventDefault();
 
         if (searchText && searchText.value.trim() !== '') {
             searchText.value = '';
         }
 
-        poiMenuList.forEach(li => li.classList.remove('active'));
+        // poiMenuList.forEach(li => li.classList.remove('active'));
 
         selectBtn.forEach(btn => {
             if (btn.classList.contains('select-box__btn--active')) {
@@ -224,6 +224,7 @@
         });
 
         const clickedItem = event.target.closest('li');
+
         const title = clickedItem.querySelector('span').textContent;
         const id = clickedItem.getAttribute('data-category-id');
 
@@ -233,7 +234,12 @@
             handlePoiMapClick(clickedItem, title);
         }
 
-        clickedItem.classList.toggle('active');
+        if (clickedItem.classList.contains('active')) {
+            clickedItem.classList.remove('active');
+        } else {
+            poiMenuList.forEach(li => li.classList.remove('active'));
+            clickedItem.classList.add('active');
+        }
     };
 
     const handlePoiCategoryClick = (title, id) => {
@@ -250,6 +256,8 @@
         mapPopup.style.position = 'absolute';
         mapPopup.style.transform = 'translate(80px, 5%)';
         // mapPopup.style.zIndex = '50';
+
+        poiMapMenuList.forEach(li => li.classList.remove('active'));
 
         titleElement.textContent = title;
         const actions = {
@@ -1093,7 +1101,7 @@
     viewEquipmentList();
     poiMenuListView();
     viewEquipment();
-    closePop();
+    // closePop();
     systemPopView();
     viewSopDetail();
     controlPatrolPlay();

@@ -204,14 +204,19 @@
 
         const expandBtn = document.querySelector('.floor-info__ctrl .scale');
         expandBtn.addEventListener('click', event => {
+            event.target.closest('.floor-info__ctrl')
             const params = new URLSearchParams(window.location.search);
             let buildingId = params.get('buildingId');
             const {floors} = BuildingManager.findById(buildingId);
+            const activeLi = document.querySelector('.floor-info__detail ul li.active');
+            const targetFloorId = activeLi
+                ? activeLi.getAttribute('floor-id')
+                : floors[0].id;
             if (expandBtn.classList.contains("scale--down")) {
                 Px.Model.Expand({
                     duration: 1000,
                     interval: 100,
-                    name: floors[0].id,
+                    name: Number(targetFloorId),
                 });
                 expandBtn.classList.remove("scale--down");
             } else {

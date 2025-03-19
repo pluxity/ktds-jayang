@@ -148,6 +148,7 @@ public class Poi {
                 .scale(this.getScale())
                 .name(this.getName())
                 .code(this.getCode())
+                .tagNames(this.getTagNames())
                 .build();
     }
 

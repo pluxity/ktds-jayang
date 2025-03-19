@@ -25,7 +25,7 @@ public class PoiCategory {
     @Column(name = "name", nullable = false, length = 20)
     private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_info_id")
     private FileInfo imageFile;
 

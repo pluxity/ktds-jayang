@@ -1217,7 +1217,7 @@ const layerPopup = (function () {
             })
 
             // cctv id를 어떻게....
-            // livePlayer.livePlay("c06dedd40ac202") // live play
+            livePlayer.livePlay("c06dedd40ac202") // live play
 
             livePlayers.push({ id: poi.id, player: livePlayer });
         });
@@ -1691,9 +1691,28 @@ const layerPopup = (function () {
     closeButtons.forEach(btn => {
         btn.addEventListener('click', (event) => {
             const target = event.target.closest('.popup-basic');
-            target.style.display = 'none';
+            if (target) {
+                target.style.display = 'none';
+
+                const popupParent = target.closest('#layerPopup.popup-basic, #mapLayerPopup.popup-basic');
+                if (popupParent) {
+                    const container = popupParent.parentElement;
+                    if (container) {
+                        const poiMenu = container.querySelector('.poi-menu');
+                        if (poiMenu) {
+                            const menuDiv = poiMenu.querySelector('#poiMenuList, #poiMenuListMap');
+                            if (menuDiv) {
+                                menuDiv.querySelectorAll('ul li.active').forEach(li => {
+                                    console.log("li : ", li);
+                                    li.classList.remove('active');
+                                });
+                            }
+                        }
+                    }
+                }
+            }
         });
-    })
+    });
 
     function markNoticeAsRead(noticeId) {
         const readNotices = JSON.parse(localStorage.getItem('readNotices')) || [];

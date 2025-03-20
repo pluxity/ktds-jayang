@@ -698,7 +698,7 @@
         ]);
 
         EventManager.eventState();
-        EventManager.connectToSSE();
+        EventManager.initializeAlarms();
 
     })();
 

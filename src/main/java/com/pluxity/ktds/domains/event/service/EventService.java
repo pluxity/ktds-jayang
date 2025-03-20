@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.event.service;
 
+import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
@@ -13,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Collator;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.INVALID_REQUEST;
 import static com.pluxity.ktds.global.constant.ErrorCode.NOT_FOUND_EVENT_DATA;
@@ -28,6 +31,28 @@ public class EventService {
     private final TagClientService tagClientService;
 //    private final PollingClientService pollingClientService;
     private final AlarmDisablePublisher alarmDisablePublisher;
+
+    @Transactional(readOnly = true)
+    public List<AlarmResponseDTO> findUnDisableAlarms() {
+        return eventRepository.findUnDisableAlarms()
+        .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    private AlarmResponseDTO toDto(Alarm alarm) {
+        return AlarmResponseDTO.builder()
+                .id(alarm.getId())
+                .deviceCd(alarm.getDeviceCd())
+                .deviceNm(alarm.getDeviceNm())
+                .buildingNm(alarm.getBuildingNm())
+                .floorNm(alarm.getFloorNm())
+                .alarmType(alarm.getAlarmType().getStatus())
+                .process(alarm.getProcess())
+                .tagName(alarm.getTagName())
+                .occurrenceDate(alarm.getOccurrenceDate())
+                .build();
+    }
 
     @Transactional(readOnly = true)
     public List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days() {

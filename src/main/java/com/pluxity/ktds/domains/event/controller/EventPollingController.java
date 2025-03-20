@@ -1,6 +1,5 @@
 package com.pluxity.ktds.domains.event.controller;
 
-import com.pluxity.ktds.domains.event.listener.EventConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,7 +20,6 @@ public class EventPollingController {
     @CrossOrigin("*")
     @GetMapping(value = "/events/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe() {
-        log.info("SSE 연결 요청 받음");
         return eventEmitterService.createEmitter();
     }
 }

@@ -23,6 +23,32 @@ const EventManager = (()=>{
         }
     }
 
+    const receivedAlarmIds = new Set();
+    
+    async function initializeAlarms() {
+        try {
+            // 기존 미해제 알람 조회
+            const response = await fetch('http://localhost:8085/events/unconfirmed');
+            const unconfirmedAlarms = await response.json();
+
+            // 미해제 알람 표시
+            unconfirmedAlarms.result.forEach(alarm => {
+                if (!receivedAlarmIds.has(alarm.id)) {
+                    receivedAlarmIds.add(alarm.id);
+                    toast(alarm);
+                    warningPopup(alarm);
+                }
+            });
+
+            // SSE 연결 시작
+            connectToSSE();
+
+        } catch (error) {
+            console.error('미해제 알람 조회 실패:', error);
+        }
+    }
+
+
     // SSE 연결
     const connectToSSE = () => {
         const url = 'http://localhost:8085/events/subscribe';
@@ -31,14 +57,22 @@ const EventManager = (()=>{
         // 이벤트 발생 시
         eventSource.addEventListener('newAlarm', async (event) => {
             const alarm = JSON.parse(event.data);
-            toast(alarm);
-            warningPopup(alarm);
+
+            // 화면에 있는 알람 제외하고 표시
+            if (!receivedAlarmIds.has(alarm.id)) {
+                console.log("receivedAlarmIds : ",receivedAlarmIds);
+                receivedAlarmIds.add(alarm.id);
+                toast(alarm);
+                warningPopup(alarm);
+            }
         });
 
         // 이벤트 해제 시
         eventSource.addEventListener('disableAlarm', async (event) => {
             const disableAlarmId = JSON.parse(event.data);
             removeAlarmElements(disableAlarmId);
+            // 해제된 알람은 Set에서도 제거
+            receivedAlarmIds.delete(disableAlarmId);
         });
 
         eventSource.onerror = () => {
@@ -429,7 +463,7 @@ const EventManager = (()=>{
 
     return {
         eventState,
-        connectToSSE,
+        initializeAlarms,
         initializeLatest24HoursList,
         initializeProcessChart,
         initializeDateChart

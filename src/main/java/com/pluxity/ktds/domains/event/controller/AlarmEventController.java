@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.event.controller;
 
+import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
@@ -18,6 +19,11 @@ import java.util.List;
 public class AlarmEventController {
 
     private final EventService eventService;
+
+    @GetMapping("/unconfirmed")
+    public DataResponseBody<List<AlarmResponseDTO>> getUnDisableAlarms(){
+        return DataResponseBody.of(eventService.findUnDisableAlarms());
+    }
 
     @GetMapping("/process-counts")
     public DataResponseBody<List<Last7DaysProcessCountDTO>> getProcessCountsForLast7Days() {

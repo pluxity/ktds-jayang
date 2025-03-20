@@ -64,4 +64,6 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Alarm a WHERE a.id = :id")
     Optional<Alarm> findByIdForUpdate(Long id);
+    @Query("SELECT a FROM Alarm a WHERE a.confirmTime IS NULL ORDER BY a.occurrenceDate ASC")
+    List<Alarm> findUnDisableAlarms();
 }

@@ -5,44 +5,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
-import java.util.List;
-import java.util.ArrayList;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @Service
 public class EventEmitterService {
-    
-    private static final List<SseEmitter> emitters = new ArrayList<>();
+    private static final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
-    public static void addEmitter(SseEmitter emitter) {
+    public SseEmitter createEmitter() {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+
+        emitter.onTimeout(() -> removeEmitter(emitter));
+        emitter.onCompletion(() -> removeEmitter(emitter));
+        emitter.onError(e -> removeEmitter(emitter));
+
         emitters.add(emitter);
+        return emitter;
     }
 
-    public static void removeEmitter(SseEmitter emitter) {
+    private void removeEmitter(SseEmitter emitter) {
         emitters.remove(emitter);
     }
 
     public void sendEvent(String eventName, Object event) {
-        log.info("Send Event: {}", event);
-        List<SseEmitter> deadEmitters = new ArrayList<>();
 
         emitters.forEach(emitter -> {
+                log.info("send emitter : {}",emitter);
             try {
                 emitter.send(SseEmitter.event()
-                .name(eventName)
-                .data(event));
+                        .name(eventName)
+                        .data(event));
             } catch (IOException e) {
-                deadEmitters.add(emitter);
+                removeEmitter(emitter);
             }
         });
-
-        emitters.removeAll(deadEmitters);
     }
-
-    public static int getEmitterCount() {
-        return emitters.size();
-    }
-
 }
-

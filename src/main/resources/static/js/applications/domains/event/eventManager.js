@@ -26,14 +26,12 @@ const EventManager = (()=>{
     // SSE 연결
     const connectToSSE = () => {
         const url = 'http://localhost:8085/events/subscribe';
-
         const eventSource = new EventSource(url);
 
         // 이벤트 발생 시
         eventSource.addEventListener('newAlarm', async (event) => {
             const alarm = JSON.parse(event.data);
-
-            Toast(alarm);
+            toast(alarm);
             warningPopup(alarm);
         });
 
@@ -46,12 +44,12 @@ const EventManager = (()=>{
         eventSource.onerror = () => {
             console.error("SSE 연결 끊김. 0.5초 후 재연결 시도...");
             eventSource.close();
-            setTimeout(connectToSSE, 500); // 0.5초 후 재연결
+            setTimeout(connectToSSE, 500);
         };
     };
 
     // 토스트 알림
-    function Toast(alarm){
+    function toast(alarm){
 
         const toast = document.querySelector('.toast');
         
@@ -63,7 +61,7 @@ const EventManager = (()=>{
             <input type="hidden" class="alarm-id" value="${alarm.id}">
             <div class="toast__texts">
                 <strong>[SMS] ${alarmFormatTime(alarm.occurrenceDate)} </strong>
-                <p>[${alarm.alarmType}] ${alarm.buildingNm} ${alarm.floorNm} </p>
+                <p>[${alarm.alarmType}] ${alarm.buildingNm} ${alarm.floorNm} F </p>
             </div>
         `;
 
@@ -94,7 +92,7 @@ const EventManager = (()=>{
         const popupTemplate = document.createElement('div');
         popupTemplate.className = 'popup-warning';
         popupTemplate.innerHTML = `
-            <h2 class="popup-warning__head">[${alarm.alarmType}] ${alarm.deviceNm}</h2>
+            <h2 class="popup-warning__head">[${alarm.process}] ${alarm.alarmType}</h2>
             <div class="popup-warning__content">
                 <input type="hidden" class="alarm-id" value="${alarm.id}">
                 <table>

@@ -233,6 +233,7 @@
         if(mapLayerPopup || layerPopup){
             mapLayerPopup.style.display = 'none';
             layerPopup.style.display = 'none';
+            Px.VirtualPatrol.Clear();
         }
 
         if (clickedItem.classList.contains('active')) {
@@ -286,7 +287,8 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 patrolPopup.style.display = 'block';
-                renderPatrol();
+                radioLive.checked = true; // live default
+                radioLive.dispatchEvent(new Event("change"));// 강제 실행
             },
             sop: () => {
                 // sop popup
@@ -616,10 +618,91 @@
 
     // 사이드바
 
-    function renderPatrol() {
+    function initializePatrolRadio() {
+        const patrolRadioLive = document.getElementById('radioLive');
+        const patrolRadioHistory = document.getElementById('radioHistory');
+        const patrolDateInput = document.getElementById('patrol-date-input');
+        const patrolTimeInput = document.getElementById('patrol-time-input');
+        const patrolHistorySearchBtn = document.getElementById('patrol-history-btn');
+    
+        function handleLiveMode() {
+            Px.VirtualPatrol.Clear();
+            renderPatrol(true);
+            setInputsState(true);
+            clearInputValues();
+        }
+    
+        function handleHistoryMode() {
+            Px.VirtualPatrol.Clear();
+            renderPatrol(true);
+            setInputsState(false);
+            setCurrentDateTime();
+        }
+    
+        function setInputsState(disabled) {
+            patrolDateInput.disabled = disabled;
+            patrolTimeInput.disabled = disabled;
+            patrolHistorySearchBtn.disabled = disabled;
+    
+            const cursor = disabled ? "not-allowed" : "pointer";
+            patrolTimeInput.style.cursor = cursor;
+            patrolDateInput.style.cursor = cursor;
+            patrolHistorySearchBtn.style.cursor = cursor;
+    
+            if (disabled) {
+                patrolHistorySearchBtn.classList.add("button--solid-disabled");
+            } else {
+                patrolHistorySearchBtn.classList.remove("button--solid-disabled");
+            }
+        }
+    
+        function clearInputValues() {
+            patrolDateInput.value = "";
+            patrolTimeInput.value = "";
+        }
+    
+        function setCurrentDateTime() {
+            const now = new Date();
+            patrolDateInput.value = now.toISOString().split('T')[0];
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            patrolTimeInput.value = `${hours}:${minutes}`;
+        }
+    
+        function handleHistorySearch() {
+            if (patrolRadioHistory.checked) {
+                Px.VirtualPatrol.Clear();
+                renderPatrol(false, `${patrolDateInput.value} ${patrolTimeInput.value}`);
+            }
+        }
+    
+        // 이벤트 리스너 등록
+        patrolRadioLive.addEventListener('change', () => {
+            if (patrolRadioLive.checked) handleLiveMode();
+        });
+    
+        patrolRadioHistory.addEventListener('change', () => {
+            if (patrolRadioHistory.checked) handleHistoryMode();
+        });
+    
+        patrolHistorySearchBtn.addEventListener('click', handleHistorySearch);
+    }
 
+    function renderPatrol(isLive = true, timestamp = null) {
         const buildingId = getBuildingId();
-        const patrolList = PatrolManager.findByBuildingId(buildingId);
+        let patrolList = PatrolManager.findByBuildingId(buildingId);
+        console.log("patrolList : ",patrolList);
+        // 실시간이 아닌 경우 timestamp 이전의 순찰 목록만 필터링
+        if (!isLive && timestamp) {
+            const filterTimeStamp = new Date(timestamp);
+
+            patrolList = patrolList.filter(patrol => {
+                const patrolCreateAt = new Date(patrol.createdAt);
+                return patrolCreateAt < filterTimeStamp;
+            });
+        }
+
         const patrolContentList = document.querySelector('#patrolPopup .accordion');
         const poiList = PoiManager.findAll();
         const managerName = document.querySelector('.header__info .head__name').innerHTML;
@@ -639,12 +722,9 @@
         }
 
         patrolList.forEach((patrol) => {
-
             // pointName 별로 그룹화된 리스트 생성
             let pointsHTML = patrol.patrolPoints.map((point) => {
-
                 // pois 배열을 기반으로 <li> 태그 생성
-
                 let poisHTML = point.pois
                     .map((poiId) =>{
                         const poiData = poiList.find((poi) => poi.id === poiId);
@@ -1110,6 +1190,7 @@
     poiMenuListView();
     viewEquipment();
     // closePop();
+    initializePatrolRadio();
     systemPopView();
     viewSopDetail();
     controlPatrolPlay();

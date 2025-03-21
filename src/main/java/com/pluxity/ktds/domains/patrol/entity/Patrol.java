@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.patrol.entity;
 
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.patrol.dto.PatrolResponseDTO;
+import com.pluxity.ktds.global.auditing.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -16,7 +17,7 @@ import java.util.List;
 @Getter
 @Table(name = "patrol")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Patrol {
+public class Patrol extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +61,7 @@ public class Patrol {
                 .name(name)
                 .buildingId(building.getId())
                 .patrolPoints(patrolPoints.stream().map(PatrolPoint::toResponseDTO).toList())
+                .createdAt(getCreatedAt())
                 .build();
     }
 }

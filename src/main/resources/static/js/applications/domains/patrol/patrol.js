@@ -8,12 +8,14 @@ class Patrol {
 
     #patrolPoints
 
+    #createdAt
 
-    constructor(id, name, buildingId, patrolPoints) {
+    constructor(id, name, buildingId, patrolPoints, createdAt) {
         this.#id = id;
         this.#name = name;
         this.#buildingId = buildingId;
         this.#patrolPoints = patrolPoints;
+        this.#createdAt = createdAt;
 
     }
 
@@ -31,6 +33,10 @@ class Patrol {
 
     get patrolPoints() {
         return this.#patrolPoints;
+    }
+
+    get createdAt() {
+        return this.#createdAt;
     }
 
 }

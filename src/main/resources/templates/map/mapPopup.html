@@ -17,22 +17,22 @@
     <div id="patrolPopup" class="search-result" style="display: none">
         <div class="search-result__filter">
                 <span class="radiobox-wrap">
-                    <input type="radio" id="radio">
-                    <label for="radio">실시간</label>
+                    <input type="radio" id="radioLive" name="timeType" checked>
+                    <label for="radioLive">실시간</label>
                 </span>
             <span class="radiobox-wrap">
-                    <input type="radio" id="radio">
-                    <label for="radio">이전</label>
+                    <input type="radio" id="radioHistory" name="timeType">
+                    <label for="radioHistory">이전</label>
                 </span>
-            <div class="date-picker">
+            <div class="date-picker patrol-picker" >
                 <!-- [D] 클릭 시 selected 클래스 추가 -->
-                <input type="date">
+                <input type="date" id="patrol-date-input">
             </div>
-            <div class="time-picker">
+            <div class="time-picker patrol-picker">
                 <!-- [D] 클릭 시 selected 클래스 추가 -->
-                <input type="time">
+                <input type="time" id="patrol-time-input">
             </div>
-            <button type="button" class="button button--solid-middle">조회</button>
+            <button type="button" class="button button--solid-middle" id="patrol-history-btn">조회</button>
         </div>
         <div class="search-result__contents">
             <!-- Accordion -->

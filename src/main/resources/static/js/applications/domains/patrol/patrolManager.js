@@ -18,7 +18,7 @@ const PatrolManager = (function () {
                         if(prev.sortOrder === next.sortOrder) return 0;
                     });
                     const patrolPoints = patrols.patrolPoints.map((patrolPointData) => new PatrolPoint(patrolPointData.id, patrolPointData.name, patrolPointData.floorId, order++, patrolPointData.pointLocation, patrolPointData.pois));
-                    return new Patrol(patrols.id, patrols.name, patrols.buildingId, patrolPoints);
+                    return new Patrol(patrols.id, patrols.name, patrols.buildingId, patrolPoints, patrols.createdAt);
                 });
                 resolve(patrolList);
             });

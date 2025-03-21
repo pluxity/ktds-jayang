@@ -1859,6 +1859,8 @@ const layerPopup = (function () {
     function closePopup(target) {
         if (!target) return;
         target.style.display = 'none';
+        Px.VirtualPatrol.Clear();
+
         if (target.id === 'mapLayerPopup') {
             document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));
         } else if (target.id === 'layerPopup') {

@@ -224,14 +224,15 @@
         });
 
         const clickedItem = event.target.closest('li');
-
         const title = clickedItem.querySelector('span').textContent;
         const id = clickedItem.getAttribute('data-category-id');
 
-        if (!clickedItem.closest('div').classList.contains('poi-menu__list--map')) {
-            handlePoiCategoryClick(title, id);
-        } else {
-            handlePoiMapClick(clickedItem, title);
+        // 기존 팝업 닫기
+        const mapLayerPopup = document.getElementById("mapLayerPopup");
+        const layerPopup = document.getElementById("layerPopup");
+        if(mapLayerPopup || layerPopup){
+            mapLayerPopup.style.display = 'none';
+            layerPopup.style.display = 'none';
         }
 
         if (clickedItem.classList.contains('active')) {
@@ -239,6 +240,13 @@
         } else {
             poiMenuList.forEach(li => li.classList.remove('active'));
             clickedItem.classList.add('active');
+
+            // 새로운 팝업 표시
+            if (!clickedItem.closest('div').classList.contains('poi-menu__list--map')) {
+                handlePoiCategoryClick(title, id);  // 상단 메뉴
+            } else {
+                handlePoiMapClick(clickedItem, title);  // 하단 메뉴
+            }
         }
     };
 
@@ -258,8 +266,6 @@
         mapPopup.style.position = 'absolute';
         mapPopup.style.transform = 'translate(80px, 5%)';
         // mapPopup.style.zIndex = '50';
-
-        poiMapMenuList.forEach(li => li.classList.remove('active'));
 
         titleElement.textContent = title;
         const actions = {

@@ -66,4 +66,11 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
     Optional<Alarm> findByIdForUpdate(Long id);
     @Query("SELECT a FROM Alarm a WHERE a.confirmTime IS NULL ORDER BY a.occurrenceDate ASC")
     List<Alarm> findUnDisableAlarms();
+
+    List<Alarm> findByOccurrenceDateBetweenAndBuildingNm(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String buildingNm);
+
+    List<Alarm> findByOccurrenceDateBetweenAndBuildingNmAndFloorNm(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String buildingNm, String floorNm);
+
+    List<Alarm> findByOccurrenceDateBetweenAndFloorNm(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String floorNm);
+    List<Alarm> findByOccurrenceDateBetweenAndFloorNmAndAlarmType(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String floorNm, String eventNm);
 }

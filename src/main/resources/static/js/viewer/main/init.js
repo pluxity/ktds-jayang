@@ -296,6 +296,8 @@ const Init = (function () {
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
             let buildingId = outdoorBuilding.id;
             initFloors(buildingId);
+            document.getElementById("buildingName").setAttribute("building-id", buildingId);
+            document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
             setActiveEquipment(buildingId);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
@@ -339,6 +341,16 @@ const Init = (function () {
                             moveToPoi(poiInfo.id)
                         });
                         Px.Effect.Outline.HoverEventOn('area_no');
+                        Px.Effect.Outline.AddHoverEventCallback(
+                            throttle(async (event) => {
+
+                                if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
+                                    const firstFloorId = outdoorBuilding.floors[0].id;
+                                    Px.Effect.Outline.Add(firstFloorId);
+                                }
+                            }, 10)
+                        );
+                        // Px.Effect.Outline.Add(sbmDataArray[0].baseFloor)
                         Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                             // Px.Effect.Outline 참고
                             // Px.Effect.Outline.HoverEventOn('area_no');

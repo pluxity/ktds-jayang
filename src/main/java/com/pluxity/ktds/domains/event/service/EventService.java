@@ -7,6 +7,7 @@ import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
 import com.pluxity.ktds.domains.event.entity.Alarm;
 import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.tag.TagClientService;
+import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
 import com.pluxity.ktds.global.client.PollingClientService;
 import com.pluxity.ktds.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Collator;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,7 @@ public class EventService {
     private final TagClientService tagClientService;
 //    private final PollingClientService pollingClientService;
     private final AlarmDisablePublisher alarmDisablePublisher;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Transactional(readOnly = true)
     public List<AlarmResponseDTO> findUnDisableAlarms() {
@@ -93,5 +98,59 @@ public class EventService {
             }
         }
         return id;
+    }
+
+
+    public List<Alarm> getAlarmsWithinDateRangeAndBuildingFloor(
+            String startDateString, String endDateString, String buildingNm, String floorNm, String deviceType, String alarmType) {
+        LocalDateTime startDate = LocalDate.parse(startDateString, dateFormatter).atStartOfDay();
+        LocalDateTime endDate = LocalDate.parse(endDateString, dateFormatter).atTime(23, 59, 59);
+
+        if (buildingNm == null && floorNm == null) {
+            return eventRepository.findByOccurrenceDateBetween(startDate, endDate);
+        } else if (buildingNm != null && floorNm == null) {
+            return eventRepository.findByOccurrenceDateBetweenAndBuildingNm(startDate, endDate, buildingNm);
+        } else if (buildingNm != null && floorNm != null) {
+            return eventRepository.findByOccurrenceDateBetweenAndBuildingNmAndFloorNm(startDate, endDate, buildingNm, floorNm);
+        } else {
+            return eventRepository.findByOccurrenceDateBetweenAndFloorNm(startDate, endDate, floorNm);
+        }
+    }
+
+    public List<Alarm> getAlarms(String startDateString, String endDateString,
+                                 String buildingNm, String floorNm,
+                                 String deviceType, String alarmType) {
+        LocalDateTime startDate = LocalDate.parse(startDateString, dateFormatter).atStartOfDay();
+        LocalDateTime endDate = LocalDate.parse(endDateString, dateFormatter).atTime(23, 59, 59);
+
+        List<Alarm> alarms = eventRepository.findByOccurrenceDateBetween(startDate, endDate);
+
+        if (buildingNm != null && !buildingNm.isEmpty()) {
+            alarms = alarms.stream()
+                    .filter(alarm -> buildingNm.equals(alarm.getBuildingNm()))
+                    .toList();
+        }
+        if (floorNm != null && !floorNm.isEmpty()) {
+            alarms = alarms.stream()
+                    .filter(alarm -> floorNm.equals(alarm.getFloorNm()))
+                    .collect(Collectors.toList());
+        }
+        if (deviceType != null && !deviceType.isEmpty()) {
+            alarms = alarms.stream()
+                    .filter(alarm -> alarm.getDeviceNm() != null && alarm.getDeviceNm().startsWith(deviceType + "-"))
+                    .collect(Collectors.toList());
+        }
+        if (alarmType != null && !alarmType.isEmpty()) {
+            try {
+                AlarmStatus status = AlarmStatus.valueOf(alarmType.toUpperCase());
+                alarms = alarms.stream()
+                        .filter(alarm -> status.equals(alarm.getAlarmType()))
+                        .collect(Collectors.toList());
+            } catch (IllegalArgumentException e) {
+
+                alarms = new ArrayList<>();
+            }
+        }
+        return alarms;
     }
 }

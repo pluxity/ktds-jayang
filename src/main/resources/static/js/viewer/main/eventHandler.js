@@ -607,9 +607,9 @@
             if (searchText && searchText.value.trim() !== '') {
                 searchText.value = '';
             }
-            poiMenuList.forEach(li => {
-                li.classList.remove('active');
-            });
+            // poiMenuList.forEach(li => {
+            //     li.classList.remove('active');
+            // });
             selectBtn.forEach(btn => {
                 if (btn.classList.contains('select-box__btn--active')) {
                     btn.classList.remove('select-box__btn--active');
@@ -621,6 +621,8 @@
 
             let title = clickedItem.querySelector('span').textContent;
             let id = clickedItem.getAttribute('data-category-id');
+            const viewResult = document.querySelector('#viewerResult');
+            viewResult.setAttribute('data-category-id', id);
             PoiManager.getPoiByCategoryId(id).then(pois => {
                 layerPopup.setCategoryData(title, pois);
             })
@@ -634,9 +636,9 @@
 
     const closeButton = document.querySelector('#layerPopup .close');
     const popup = document.getElementById('layerPopup');
-    closeButton.addEventListener('click', () => {
-        popup.style.display = 'none';
-    });
+    // closeButton.addEventListener('click', () => {
+    //     popup.style.display = 'none';
+    // });
 
     // profile btn
     const profileBtn = document.querySelector('.header__info .profile .profile__btn');

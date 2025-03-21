@@ -110,6 +110,7 @@ public class PoiService {
     @Transactional
     public Long save(@NotNull @Valid final CreatePoiDTO dto) {
         validateSaveCode(dto.code());
+        validateSaveName(dto.name());
         // 임시 추가
         poiRepository.findByName(dto.name())
                 .ifPresent(found -> {
@@ -165,6 +166,12 @@ public class PoiService {
     private void validateSaveCode(String code) {
         if (poiRepository.existsByCode(code)) {
             throw new CustomException(ErrorCode.DUPLICATED_POI_CODE);
+        }
+    }
+
+    private void validateSaveName(String name) {
+        if (poiRepository.existsByName(name)) {
+            throw new CustomException(DUPLICATE_NAME);
         }
     }
 

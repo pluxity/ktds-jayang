@@ -1,23 +1,15 @@
 class Poi {
-
     #id;
-
     #name;
-
     #code;
-
-    #iconSet;
-
+    #buildingId;
+    #floorId;
     #poiCategory;
     #poiMiddleCategory;
-
-    #floorId;
-
+    #iconSet;
     #iconUrl;
-
     #property;
-
-    #buildingId;
+    #tagNames;
 
     constructor(
         id,
@@ -32,6 +24,7 @@ class Poi {
         rotation,
         scale,
         property,
+        tagNames,
     ) {
         this.#id = id;
         this.#name = name;
@@ -52,6 +45,7 @@ class Poi {
         this.assignYn = property.assignYn;
         this.#buildingId = buildingId;
         this.#floorId = floorId;
+        this.#tagNames = tagNames;
 
     }
 
@@ -95,6 +89,9 @@ class Poi {
     }
     get floorId() {
         return this.#floorId;
+    }
+    get tagNames() {
+        return this.#tagNames;
     }
     // Px.Poi.Add 용
     get poiOptions() {

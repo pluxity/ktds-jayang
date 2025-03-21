@@ -243,6 +243,8 @@
     };
 
     const handlePoiCategoryClick = (title, id) => {
+        const viewResult = document.querySelector('#viewerResult');
+        viewResult.setAttribute('data-category-id', id);
         PoiManager.getPoiByCategoryId(id).then(pois => {
             layerPopup.setCategoryData(title, pois);
         });

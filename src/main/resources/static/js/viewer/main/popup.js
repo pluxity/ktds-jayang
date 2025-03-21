@@ -1,6 +1,8 @@
 'use strict';
 
 const layerPopup = (function () {
+    const systemTabs = document.querySelectorAll('.system-tap li');
+    const systemPop = document.getElementById("systemPopup");
     // 센서
     const createSensorPopup = (title, state, eventData) => {
 
@@ -705,8 +707,7 @@ const layerPopup = (function () {
     }
 
     // category list click > popup mapping
-    function setCategoryData(title, pois, clickedItem = null) {
-
+    function setCategoryData(title, pois, clickedItem = null, refresh = false) {
         const titleElement = document.querySelector('#layerPopup .popup-basic__head .name');
         const popup = document.getElementById('layerPopup');
         const currentTitle = titleElement.textContent;
@@ -778,7 +779,7 @@ const layerPopup = (function () {
             });
         }
 
-        if ((currentTitle !== newTitle)) {
+        if ((refresh || currentTitle !== newTitle)) {
             titleElement.textContent = newTitle;
             popup.style.display = 'inline-block';
             const viewerResult = document.getElementById('viewerResult');
@@ -944,6 +945,8 @@ const layerPopup = (function () {
         tdEquipment.innerHTML = `<em class="text-accent">${poi.name}</em>`;
         // tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
         tdEquipment.addEventListener('dblclick', function() {
+            // popup close추가
+            closePopup();
             movePoi(poi.id);
         });
         tr.appendChild(tdBuilding);
@@ -1089,6 +1092,31 @@ const layerPopup = (function () {
         }
     }
 
+    const closeAllPopups = () => {
+        ['equipmentPop', 'elevatorPop'].forEach(id => {
+            const popup = document.getElementById(id);
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        });
+        systemPop.style.display = 'none';
+        systemTabs.forEach(tab => {
+            tab.classList.remove('active')
+        });
+        layerPopup.closePlayers();
+    };
+
+    document.querySelector('#viewerResult').addEventListener('click', event => {
+        if (event.target.closest('.reflesh')) {
+            const viewerResult = event.target.closest('#viewerResult');
+            const id = viewerResult.getAttribute('data-category-id')
+            const title = document.querySelector('#layerPopup .popup-basic__head .name').textContent;
+            PoiManager.getPoiByCategoryId(id).then(pois => {
+                layerPopup.setCategoryData(title, pois, null, true);
+            });
+        }
+    })
+
     const elevatorPopup = document.getElementById('elevatorPop');
     const setElevatorTab = () => {
         const popupUl = elevatorPopup.querySelector('.section--contents ul')
@@ -1127,6 +1155,7 @@ const layerPopup = (function () {
             handleTabClick(event);
             const poiList = PoiManager.findAll();
             PoiManager.getPoiList().then(poiList => {
+                console.log("poiList : ", poiList);
                 const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
                 addElevators(filteredPoiList);
             })
@@ -1164,11 +1193,11 @@ const layerPopup = (function () {
         const facilityList = document.querySelector('.facility-area__list');
         facilityList.innerHTML = '';
 
-        console.log("filteredPoiList : ", filteredPoiList);
         filteredPoiList.forEach((poi) => {
             const li = document.createElement('li');
 
             const canvasId = `canvas_poi_${poi.id}`;
+            const buttonId = `playBtn_${poi.id}`;
             li.innerHTML = `
                 <div class="head">
                     <div class="head__title">
@@ -1177,7 +1206,7 @@ const layerPopup = (function () {
                     </div>
                     <div class="head__state">
                         <span class="label label--standby">대기</span>
-                        <button id="playBtn" type="button" class="button-move">도면 이동</button>
+                        <button id="${buttonId}" type="button" class="button-move">도면 이동</button>
                     </div>
                 </div>
                 <div class="detail">
@@ -1208,6 +1237,15 @@ const layerPopup = (function () {
                 </div>
             `;
             facilityList.appendChild(li);
+            document.getElementById(buttonId).addEventListener('click', function() {
+                if (poi.position !== null) {
+                    closeAllPopups();
+                    movePoi(poi.id);
+                } else {
+                    alertSwal('POI를 배치해주세요');
+                }
+            });
+
             const canvasElement = document.getElementById(canvasId);
             let livePlayer = new PluxPlayer({
                 relayServerUrl: "ws://127.0.0.1:4001",
@@ -1372,7 +1410,6 @@ const layerPopup = (function () {
         selectedTab.setAttribute("aria-selected", "true");
     };
 
-    const systemPop = document.getElementById("systemPopup");
     const updatePoiDetail = (poi) => {
         const sectionHead = equipmentPopup.querySelector(".section__head");
         const title = equipmentPopup.querySelector(".section__head .title");
@@ -1386,7 +1423,6 @@ const layerPopup = (function () {
         moveBtn.addEventListener("click", (event) => {
             elevatorPopup.style.display = "none";
             systemPop.style.display = "none";
-            console.log("poi : ", poi);
             movePoi(poi.id);
         });
     }
@@ -1414,6 +1450,7 @@ const layerPopup = (function () {
     };
 
     const closePlayers = () => {
+        console.log("livePlayers : ", livePlayers);
         livePlayers.forEach(({player}) => {
             player.cctvClose();
         })
@@ -1445,6 +1482,20 @@ const layerPopup = (function () {
         const currentBuildingId = new URLSearchParams(window.location.search).get("buildingId");
         buildingContent.innerHTML = '';
 
+        const allFloors = buildingList.reduce((acc, building) => {
+            return acc.concat(building.floors);
+        }, []);
+        console.log("allFloors : ", allFloors);
+        const liAll = document.createElement('li');
+        liAll.textContent = '전체';
+        liAll.onclick = () => {
+            buildingBtn.textContent = '전체';
+            buildingBtn.classList.remove("select-box__btn--active");
+            buildingSelect.querySelector(".select-box__content").classList.remove("active");
+            updateFloorSelectBox(allFloors);
+        };
+        buildingContent.appendChild(liAll);
+
         buildingList.forEach((building) => {
             const li = document.createElement('li');
             li.textContent = building.name;
@@ -1462,11 +1513,12 @@ const layerPopup = (function () {
 
             buildingContent.appendChild(li);
         });
-        if (buildingList.length > 0) {
-            buildingBtn.textContent = buildingList[0].name;
-            updateFloorSelectBox(buildingList[0].floors, buildingList[0].id);
-        }
-
+        // if (buildingList.length > 0) {
+        //     buildingBtn.textContent = buildingList[0].name;
+        //     updateFloorSelectBox(buildingList[0].floors, buildingList[0].id);
+        // }
+        buildingBtn.textContent = '전체';
+        updateFloorSelectBox(allFloors);
         buildingBtn.onclick = (event) => {
             toggleSelectBox(buildingSelect);
         };
@@ -1484,9 +1536,15 @@ const layerPopup = (function () {
             floorBtn.textContent = "전체";
             floorBtn.classList.remove("select-box__btn--active");
             floorSelect.querySelector(".select-box__content").classList.remove("active");
-            PoiManager.getPoisByBuildingId(buildingId).then((pois) => {
-                updatePoiSelectBox(pois);
-            });
+            if (buildingId) {
+                PoiManager.getPoisByBuildingId(buildingId).then((pois) => {
+                    updatePoiSelectBox(pois);
+                });
+            } else {
+                PoiManager.getPoiList().then((pois) => {
+                    updatePoiSelectBox(pois);
+                })
+            }
         };
         floorContent.appendChild(liAll);
 
@@ -1509,9 +1567,12 @@ const layerPopup = (function () {
         if (floorList.length > 0) {
             // floorBtn.textContent = floorList[0].name;
             floorBtn.textContent = "전체";
-            PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
+            PoiManager.getPoiList().then((pois) => {
                 updatePoiSelectBox(pois);
-            });
+            })
+            // PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
+            //     updatePoiSelectBox(pois);
+            // });
         }
         floorBtn.onclick = () => {
             toggleSelectBox(floorSelect);
@@ -1587,12 +1648,23 @@ const layerPopup = (function () {
     let globalAlarmList = [];
     let poiList = [];
 
+    const deviceMap = new Map();
     const createEventPopup = async () => {
-        BuildingManager.getBuildingList().then((buildingList) => {
-            updateBuildingSelectBox(buildingList);
-        });
-        poiList = await PoiManager.getPoiList();
+        // BuildingManager.getBuildingList().then((buildingList) => {
+        //     updateBuildingSelectBox(buildingList);
+        // });
+        const buildingList = await BuildingManager.getBuildingList();
+        updateBuildingSelectBox(buildingList);
 
+        const buildingBtn = document.querySelector('#eventBuildingSelect .select-box__btn');
+        const floorBtn = document.querySelector('#eventFloorSelect .select-box__btn');
+        const poiBtn = document.querySelector('#eventPoiSelect .select-box__btn');
+        const selectedBuilding = buildingBtn.textContent.trim();
+        const selectedFloor = floorBtn.textContent.trim();
+        const selectedDeviceType = poiBtn.textContent.trim();
+        const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
+
+        poiList = await PoiManager.getPoiList();
         const tableBody = document.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";
@@ -1604,6 +1676,22 @@ const layerPopup = (function () {
         const params = new URLSearchParams();
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
+
+        console.log("selectedBuilding : ", selectedBuilding);
+        console.log("selectedFloor : ", selectedFloor);
+        console.log("selectedDeviceType : ", selectedDeviceType);
+        if (selectedBuilding !== '전체') {
+            params.append('buildingNm', selectedBuilding);
+        }
+        if (selectedFloor !== '전체') {
+            params.append('floorNm', selectedFloor);
+        }
+        if (selectedDeviceType !== '전체' && selectedDeviceType !== '' && selectedDeviceType !== '없음') {
+            params.append('deviceType', selectedDeviceType);
+        }
+        if (alarmTypeInput !== '') {
+            params.append('alarmType', alarmTypeInput);
+        }
 
         api.get(`/alarms?${params.toString()}`).then((res) => {
             const { result: data } = res.data;
@@ -1628,14 +1716,14 @@ const layerPopup = (function () {
                 pageAlarms.forEach((data) => {
                     const eventRow = document.createElement('tr');
                     const [formattedOccurrenceDate, formattedConfirmTime] =
-                        [data.occurrenceDate, data.confirmTime].map(dateStr => dateStr ? dateStr.replace(/\//g, '-') : '-');
+                        [data.occurrenceDate, data.confirmTime].map(formatDateTime);
+
                     let deviceType = data.deviceNm.split("-")[0];
-                    // const tagNameParts = data.tagName.split("-");
-                    // let deviceType = `${tagNameParts[2]}-${tagNameParts[3]}`;
-                    // let deviceName = `${tagNameParts[2]}-${tagNameParts[3]}-${tagNameParts[4]}`;
 
-                    const device = poiList.find(poi => poi.name === data.deviceNm);
-
+                    const device = poiList.find(poi => poi.tagNames.some(tag => tag === data.tagName));
+                    if (device) {
+                        deviceMap.set(device.id, device);
+                    }
                     eventRow.innerHTML = `
                         <td>${data.buildingNm || '-'}</td>
                         <td>${data.floorNm || '-'}</td>
@@ -1644,7 +1732,11 @@ const layerPopup = (function () {
                         <td>${data.deviceNm || '-'}</td>
                         <td>${formattedOccurrenceDate || '-'}</td>
                         <td>${formattedConfirmTime || '-'}</td>
-                        <td><a href="#none" class="icon-move"><span class="hide">도면 이동</span></a></td>
+                        <td>
+                            <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${device ? device.id : ''}">
+                                <span class="hide">도면 이동</span>
+                            </a>
+                        </td>
                     `;
                     tableBody.appendChild(eventRow);
                 });
@@ -1686,33 +1778,85 @@ const layerPopup = (function () {
             renderPagination();
         });
     }
+    document.getElementById('eventSearchBtn').addEventListener('click', createEventPopup);
 
-    const closeButtons = document.querySelectorAll('.popup-basic .close');
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            const target = event.target.closest('.popup-basic');
-            if (target) {
-                target.style.display = 'none';
+    const formatDateTime = (isoString) => {
+        if (!isoString) return '-';
 
-                const popupParent = target.closest('#layerPopup.popup-basic, #mapLayerPopup.popup-basic');
-                if (popupParent) {
-                    const container = popupParent.parentElement;
-                    if (container) {
-                        const poiMenu = container.querySelector('.poi-menu');
-                        if (poiMenu) {
-                            const menuDiv = poiMenu.querySelector('#poiMenuList, #poiMenuListMap');
-                            if (menuDiv) {
-                                menuDiv.querySelectorAll('ul li.active').forEach(li => {
-                                    console.log("li : ", li);
-                                    li.classList.remove('active');
-                                });
-                            }
-                        }
+        const date = new Date(isoString);
+        if (isNaN(date.getTime())) return '-';
+        const pad = (num) => num.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    };
+
+    const eventLayerPopup = document.getElementById('eventLayerPopup');
+    const refreshBtn = eventLayerPopup.querySelector('.reflesh');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            await createEventPopup();
+        });
+    }
+    document.querySelector('.event-info').addEventListener('click', event => {
+        const moveLink = event.target.closest('#moveToMap');
+        if (moveLink) {
+            event.preventDefault();
+            const poiId = moveLink.getAttribute('data-poi-id');
+            const poi = deviceMap.get(Number(poiId));
+            if (poi && poi.position !== null) {
+                if (eventLayerPopup) {
+                    eventLayerPopup.style.display = 'none';
+                }
+                movePoi(poi.id);
+            } else {
+                alertSwal('POI를 배치해주세요');
+            }
+        }
+    })
+
+    function closePopup2(target) {
+        if (!target) return;
+        target.style.display = 'none';
+        console.log("target : ", target);
+        const popupParent = target.closest('#layerPopup.popup-basic, #mapLayerPopup.popup-basic');
+        if (popupParent) {
+            const container = popupParent.parentElement;
+            if (container) {
+                const poiMenu = container.querySelector('.poi-menu');
+                if (poiMenu) {
+                    const menuDiv = poiMenu.querySelector('#poiMenuList, #poiMenuListMap');
+                    if (menuDiv) {
+                        menuDiv.querySelectorAll('ul li.active').forEach(li => {
+                            li.classList.remove('active');
+                        });
                     }
                 }
             }
+        }
+    }
+
+    function closePopup(target) {
+        if (!target) return;
+        target.style.display = 'none';
+        if (target.id === 'mapLayerPopup') {
+            document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));
+        } else if (target.id === 'layerPopup') {
+            document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
+        } else if (target.id === 'systemPopup') {
+            document.querySelectorAll('.system-tab ul li').forEach(li => console.log("li : ", li));
+            closeAllPopups();
+        }
+    }
+
+
+    function addClosePopup() {
+        document.querySelectorAll('.popup-basic .close').forEach(btn => {
+            btn.addEventListener('click', (event) => {
+                const target = event.target.closest('.popup-basic');
+                closePopup(target);
+            });
         });
-    });
+    }
 
     function markNoticeAsRead(noticeId) {
         const readNotices = JSON.parse(localStorage.getItem('readNotices')) || [];
@@ -1813,6 +1957,7 @@ const layerPopup = (function () {
 
         return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
+    addClosePopup();
 
     return {
         closePlayers,
@@ -1829,7 +1974,8 @@ const layerPopup = (function () {
         moveToPoi,
         setPoiEvent,
         createEventPopup,
-        pagingNotice
+        pagingNotice,
+        addClosePopup
     }
 })();
 

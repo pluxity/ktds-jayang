@@ -26,4 +26,5 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     @Query("SELECT p FROM Poi p JOIN p.tagNames t WHERE t = :tagName")
     Poi findPoiByTagName(@Param("tagName") String tagName);
 
+    boolean existsByName(String name);
 }

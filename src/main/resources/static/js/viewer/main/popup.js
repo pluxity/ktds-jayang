@@ -1485,7 +1485,6 @@ const layerPopup = (function () {
         const allFloors = buildingList.reduce((acc, building) => {
             return acc.concat(building.floors);
         }, []);
-        console.log("allFloors : ", allFloors);
         const liAll = document.createElement('li');
         liAll.textContent = '전체';
         liAll.onclick = () => {
@@ -1591,9 +1590,13 @@ const layerPopup = (function () {
         } else {
             poiBtn.classList.remove("select__btn--disabled");
 
+            // const poiCategories = Array.from(
+            //     new Map(poiList.map(poi => [poi.poiCategoryDetail.id, poi.poiCategoryDetail])).values()
+            // );
             const poiCategories = Array.from(
-                new Map(poiList.map(poi => [poi.poiCategoryDetail.id, poi.poiCategoryDetail])).values()
+                new Map(poiList.map(poi => [poi.poiMiddleCategoryDetail.id, poi.poiMiddleCategoryDetail])).values()
             );
+            console.log("poi : ", poiList);
 
             const liAll = document.createElement('li');
             liAll.textContent = "전체";
@@ -1625,6 +1628,14 @@ const layerPopup = (function () {
     }
 
     const toggleSelectBox = (selectBoxElement) => {
+        document.querySelectorAll('#eventPoiSelect, #eventFloorSelect, #eventBuildingSelect').forEach(el => {
+            if (el !== selectBoxElement) {
+                const btn = el.querySelector('.select-box__btn');
+                const content = el.querySelector('.select-box__content');
+                btn.classList.remove('select-box__btn--active');
+                content.classList.remove('active');
+            }
+        });
         const btn = selectBoxElement.querySelector('.select-box__btn');
         const content = selectBoxElement.querySelector('.select-box__content');
         btn.classList.toggle("select-box__btn--active");
@@ -1648,17 +1659,22 @@ const layerPopup = (function () {
     let globalAlarmList = [];
     let poiList = [];
 
-    const deviceMap = new Map();
-    const createEventPopup = async () => {
-        // BuildingManager.getBuildingList().then((buildingList) => {
-        //     updateBuildingSelectBox(buildingList);
-        // });
-        const buildingList = await BuildingManager.getBuildingList();
-        updateBuildingSelectBox(buildingList);
+
+    const taggedPoiMap = new Map();
+    const createEventPopup = async (reinitializeSelectBoxes = false) => {
+        // const buildingList = await BuildingManager.getBuildingList();
+        if (reinitializeSelectBoxes) {
+            const buildingList = await BuildingManager.getBuildingList();
+            updateBuildingSelectBox(buildingList);
+            const poiListData = await PoiManager.getPoiList();
+            updatePoiSelectBox(poiListData);
+            setDatePicker();
+        }
 
         const buildingBtn = document.querySelector('#eventBuildingSelect .select-box__btn');
         const floorBtn = document.querySelector('#eventFloorSelect .select-box__btn');
         const poiBtn = document.querySelector('#eventPoiSelect .select-box__btn');
+
         const selectedBuilding = buildingBtn.textContent.trim();
         const selectedFloor = floorBtn.textContent.trim();
         const selectedDeviceType = poiBtn.textContent.trim();
@@ -1668,7 +1684,6 @@ const layerPopup = (function () {
         const tableBody = document.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";
-        setDatePicker();
 
         const startDateString = document.getElementById("start-date").value;
         const endDateString = document.getElementById("end-date").value;
@@ -1680,20 +1695,20 @@ const layerPopup = (function () {
         console.log("selectedBuilding : ", selectedBuilding);
         console.log("selectedFloor : ", selectedFloor);
         console.log("selectedDeviceType : ", selectedDeviceType);
-        if (selectedBuilding !== '전체') {
+        if (selectedBuilding !== '전체' && selectedBuilding !== '' && selectedBuilding !== '없음') {
             params.append('buildingNm', selectedBuilding);
         }
-        if (selectedFloor !== '전체') {
+        if (selectedFloor !== '전체' && selectedFloor !== '' && selectedFloor !== '없음') {
             params.append('floorNm', selectedFloor);
         }
         if (selectedDeviceType !== '전체' && selectedDeviceType !== '' && selectedDeviceType !== '없음') {
             params.append('deviceType', selectedDeviceType);
         }
         if (alarmTypeInput !== '') {
-            params.append('alarmType', alarmTypeInput);
+            params.append('searchValue', alarmTypeInput);
         }
 
-        api.get(`/alarms?${params.toString()}`).then((res) => {
+        api.get(`/events/alarms?${params.toString()}`).then((res) => {
             const { result: data } = res.data;
             globalAlarmList = data;
             const eventPopup = document.querySelector('#eventLayerPopup');
@@ -1720,10 +1735,14 @@ const layerPopup = (function () {
 
                     let deviceType = data.deviceNm.split("-")[0];
 
-                    const device = poiList.find(poi => poi.tagNames.some(tag => tag === data.tagName));
-                    if (device) {
-                        deviceMap.set(device.id, device);
+                    const taggedPoi = poiList.find(poi =>
+                        poi.tagNames.some(tag => tag.toLowerCase() === data.tagName.toLowerCase())
+                    );
+
+                    if (taggedPoi) {
+                        taggedPoiMap.set(taggedPoi.id, taggedPoi);
                     }
+
                     eventRow.innerHTML = `
                         <td>${data.buildingNm || '-'}</td>
                         <td>${data.floorNm || '-'}</td>
@@ -1733,7 +1752,7 @@ const layerPopup = (function () {
                         <td>${formattedOccurrenceDate || '-'}</td>
                         <td>${formattedConfirmTime || '-'}</td>
                         <td>
-                            <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${device ? device.id : ''}">
+                            <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
                                 <span class="hide">도면 이동</span>
                             </a>
                         </td>
@@ -1778,7 +1797,9 @@ const layerPopup = (function () {
             renderPagination();
         });
     }
-    document.getElementById('eventSearchBtn').addEventListener('click', createEventPopup);
+    document.getElementById('eventSearchBtn').addEventListener('click', async () => {
+        await createEventPopup(false);
+    });
 
     const formatDateTime = (isoString) => {
         if (!isoString) return '-';
@@ -1794,7 +1815,7 @@ const layerPopup = (function () {
     if (refreshBtn) {
         refreshBtn.addEventListener('click', async (event) => {
             event.preventDefault();
-            await createEventPopup();
+            await createEventPopup(false);
         });
     }
     document.querySelector('.event-info').addEventListener('click', event => {
@@ -1802,7 +1823,7 @@ const layerPopup = (function () {
         if (moveLink) {
             event.preventDefault();
             const poiId = moveLink.getAttribute('data-poi-id');
-            const poi = deviceMap.get(Number(poiId));
+            const poi = taggedPoiMap.get(Number(poiId));
             if (poi && poi.position !== null) {
                 if (eventLayerPopup) {
                     eventLayerPopup.style.display = 'none';

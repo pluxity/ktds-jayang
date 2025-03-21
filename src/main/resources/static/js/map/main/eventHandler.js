@@ -1102,7 +1102,7 @@
 
     const eventStateBtn = document.querySelector(".event-state__title .event-state__button");
     eventStateBtn.addEventListener('click', async event => {
-        await layerPopup.createEventPopup();
+        await layerPopup.createEventPopup(true);
     });
 
     initTab();

@@ -1410,6 +1410,15 @@ const layerPopup = (function () {
         selectedTab.setAttribute("aria-selected", "true");
     };
 
+    const moveBtn = equipmentPopup.querySelector(".section__head .button-move");
+        moveBtn.addEventListener("click", () => {
+        const poiId = moveBtn.getAttribute("btn-poi-id");
+        elevatorPopup.style.display = "none";
+        systemPop.style.display = "none";
+        closeSystemPopup();
+        movePoi(poiId);
+    });
+
     const updatePoiDetail = (poi) => {
         const sectionHead = equipmentPopup.querySelector(".section__head");
         const title = equipmentPopup.querySelector(".section__head .title");
@@ -1419,34 +1428,48 @@ const layerPopup = (function () {
 
         const moveBtn = sectionHead.querySelector(".button-move");
         moveBtn.setAttribute("btn-poi-id", poi.id);
-
-        moveBtn.addEventListener("click", (event) => {
-            elevatorPopup.style.display = "none";
-            systemPop.style.display = "none";
-            movePoi(poi.id);
-        });
     }
 
-    const movePoi = (id) => {
+    const closeSystemPopup = () =>{
+        const systemTap = document.querySelectorAll(".system-tap li");
+        systemTap.forEach(element =>{
+            element.classList.remove('active');
+        })
+    }
+
+    const movePoi = async (id) => {
         let poiId;
         if (id.constructor.name === 'PointerEvent') {
             poiId = id.currentTarget.getAttribute('poiid');
         } else {
             poiId = id;
         }
-        const poiData = Px.Poi.GetData(poiId);
+        // 현재 building의 POI 확인
+        let poiData = Px.Poi.GetData(poiId);
+    
+        // 현재 building에서 POI를 찾을 수 없는 경우
+        if (!poiData) {
+            // POI 정보를 서버에서 가져오기
+            const poi = await PoiManager.findById(Number(poiId));
+            if (!poi) {
+                alertSwal('POI 정보를 찾을 수 없습니다.');
+                return;
+            }
+            // 다른 building으로 이동
+            sessionStorage.setItem('selectedPoiId', poi.id);
 
-        if (poiData) {
-            Px.Model.Visible.HideAll();
-            Px.Model.Visible.Show(Number(poiData.property.floorId));
-            Px.Camera.MoveToPoi({
-                id: poiId,
-                isAnimation: true,
-                duration: 500,
-            });
-        } else {
-            alertSwal('POI를 배치해주세요');
+            window.location.href = `/map?buildingId=${poi.buildingId}`;
+            return;
         }
+    
+        // 같은 building 내에서의 이동
+        Px.Model.Visible.HideAll();
+        Px.Model.Visible.Show(Number(poiData.property.floorId));
+        Px.Camera.MoveToPoi({
+            id: poiId,
+            isAnimation: true,
+            duration: 500,
+        });
     };
 
     const closePlayers = () => {
@@ -1860,9 +1883,15 @@ const layerPopup = (function () {
         if (!target) return;
         target.style.display = 'none';
         Px.VirtualPatrol.Clear();
+        Px.Poi.ShowAll();
+        Px.Model.Visible.ShowAll();
 
         if (target.id === 'mapLayerPopup') {
             document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));
+            const sopMiddlePopup = document.querySelector('#sopLayerPopup');
+            if(sopMiddlePopup.style.display === 'inline-block'){
+                sopMiddlePopup.style.display = 'none';
+            }
         } else if (target.id === 'layerPopup') {
             document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
         } else if (target.id === 'systemPopup') {

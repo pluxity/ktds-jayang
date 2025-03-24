@@ -62,6 +62,8 @@ const EventManager = (()=>{
             if (!receivedAlarmIds.has(alarm.id)) {
                 console.log("receivedAlarmIds : ",receivedAlarmIds);
                 receivedAlarmIds.add(alarm.id);
+                Px.VirtualPatrol.Clear();
+                Px.Poi.ShowAll();
                 toast(alarm);
                 warningPopup(alarm);
             }
@@ -82,11 +84,39 @@ const EventManager = (()=>{
         };
     };
 
+    function closeAllPopup() {
+
+        const popups = document.querySelectorAll(".popup-basic");
+        const elementById = document.getElementById("equipmentListPop");
+        const poiMenuList = document.getElementById("poiMenuList");
+        const poiMenuListMap = document.getElementById("poiMenuListMap");
+
+        elementById.style.display = 'none';
+
+        popups.forEach(popup =>{
+            if(popup.style.display ==='inline-block'){
+                popup.style.display = 'none';
+            }
+        });
+
+        poiMenuList.querySelectorAll('.active').forEach(element => {
+            element.classList.remove('active');
+        });
+
+        if(poiMenuListMap){
+            poiMenuListMap.querySelectorAll('.active').forEach(element => {
+                element.classList.remove('active');
+            });
+        }
+    }
+
     // 토스트 알림
     function toast(alarm){
 
         const toast = document.querySelector('.toast');
-        
+
+        closeAllPopup();
+
         // 새로운 토스트 박스 생성
         const newToastBox = document.createElement('div');
         newToastBox.className = 'toast__box';
@@ -204,6 +234,9 @@ const EventManager = (()=>{
         };
         // 3D 맵이동
         buttons.querySelector('.button--solid-middle').onclick = async () => {
+
+            Px.VirtualPatrol.Clear();
+            Px.Poi.ShowAll();
             try {
                 const response = await fetch(`http://localhost:8085/poi/tagNames/${alarm.tagName}`);
                 const data = await response.json();
@@ -213,7 +246,8 @@ const EventManager = (()=>{
                 const isViewerPage = window.location.pathname.includes('/viewer');
                 
                 if(!poiData || isViewerPage){
-                    window.location.href = `/map?buildingId=${poi.building.id}&poiId=${poi.id}`;
+                    sessionStorage.setItem('selectedPoiId', poi.id);
+                    window.location.href = `/map?buildingId=${poi.building.id}`;
                 }else{
                     Px.Model.Visible.Show(String(poiData.property.floorId));
                     Px.Camera.MoveToPoi({

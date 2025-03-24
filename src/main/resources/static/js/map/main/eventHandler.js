@@ -234,6 +234,7 @@
             mapLayerPopup.style.display = 'none';
             layerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
+            Px.Poi.ShowAll();
         }
 
         if (clickedItem.classList.contains('active')) {
@@ -277,6 +278,7 @@
                     if (popup) {
                         popup.style.display = 'none';
                         Px.VirtualPatrol.Clear();
+                        Px.Poi.ShowAll();
                     }
                 });
             },
@@ -627,6 +629,7 @@
     
         function handleLiveMode() {
             Px.VirtualPatrol.Clear();
+            Px.Poi.ShowAll();
             renderPatrol(true);
             setInputsState(true);
             clearInputValues();
@@ -634,6 +637,7 @@
     
         function handleHistoryMode() {
             Px.VirtualPatrol.Clear();
+            Px.Poi.ShowAll();
             renderPatrol(true);
             setInputsState(false);
             setCurrentDateTime();
@@ -673,6 +677,7 @@
         function handleHistorySearch() {
             if (patrolRadioHistory.checked) {
                 Px.VirtualPatrol.Clear();
+                Px.Poi.ShowAll();
                 renderPatrol(false, `${patrolDateInput.value} ${patrolTimeInput.value}`);
             }
         }
@@ -777,6 +782,7 @@
                 });
                 target.classList.toggle('accordion__btn--active');
                 Px.VirtualPatrol.Clear();
+                Px.Poi.ShowAll();
                 currentPatrol = -1;
             });
         });
@@ -852,11 +858,14 @@
                 Px.VirtualPatrol.Editor.Off();
                 Px.VirtualPatrol.Import(PatrolManager.findByIdByImport(id, point.floorId));
                 index = 0;
-
                 Px.Model.Visible.HideAll();
                 Px.Model.Visible.Show(point.floorId);
                 Px.Poi.HideAll();
-                Px.Poi.ShowByProperty("floorId",point.floorId);
+
+                patrol.patrolPoints
+                      .filter(p => p.floorId === point.floorId)
+                      .flatMap(p => p.pois)
+                      .forEach(poiId => Px.Poi.Show(poiId));
             }
 
             Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {

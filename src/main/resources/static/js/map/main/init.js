@@ -463,7 +463,7 @@ const Init = (function () {
                     contents.style.position = 'static';
                     initializeTexture();
 
-                    setTimeout(moveToPoiFromUrl,500);
+                    setTimeout(moveToPoiFromSession,500);
 
                 }
             });
@@ -492,6 +492,14 @@ const Init = (function () {
             }
         }
     };
+
+    const moveToPoiFromSession = () => {
+        const selectedPoiId = sessionStorage.getItem('selectedPoiId');
+        if(selectedPoiId){
+            moveToPoi(selectedPoiId);
+            sessionStorage.removeItem('selectedPoiId');
+        }
+    }
 
     const moveToPoi = (id) => {
         let poiId;

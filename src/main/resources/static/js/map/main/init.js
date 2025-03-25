@@ -69,16 +69,16 @@
             }
         });
         if (isEquipment) {
-            PoiManager.getPoisByBuildingId(buildingId).then(pois => {
-                elements.forEach(element => {
-                    const categoryId = element.getAttribute('data-category-id');
-                    pois.forEach(poi => {
-                        if (poi.poiCategory == categoryId) {
-                            element.classList.add('active');
-                        }
-                    });
+            const allPois = PoiManager.findAll();
+            const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
+            elements.forEach(element => {
+                const categoryId = element.getAttribute('data-category-id');
+                filteredPois.forEach(poi => {
+                    if (poi.poiCategory == categoryId) {
+                        element.classList.add('active');
+                    }
                 });
-            })
+            });
         }
     }
 
@@ -196,11 +196,11 @@
                 Px.Poi.HideAll();
                 let floorId = floorBtn.getAttribute('floor-id');
                 Px.Model.Visible.Show(Number(floorId));
-                PoiManager.getPoisByFloorId(floorId).then(pois => {
-                    pois.forEach(poi => {
-                        Px.Poi.Show(Number(poi.id));
-                    })
-                })
+                const allPois = PoiManager.findAll();
+                const filteredPois = allPois.filter(poi => poi.floorId === Number(floorId));
+                filteredPois.forEach(poi => {
+                    Px.Poi.Show(Number(poi.id));
+                });
             })
         })
         // allFloor

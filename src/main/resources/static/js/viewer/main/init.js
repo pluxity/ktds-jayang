@@ -214,9 +214,15 @@ const Init = (function () {
     // 분리
     const setCategoryId = (elements, categoryList) => {
         elements.forEach(element => {
-            const elementClasses = element.className.split(' ').map(className => className.toLowerCase());
+            let elementText = "";
+            if (element.closest("#poiMenuList")) {
+                elementText = element.querySelector('a span').textContent.trim().toLowerCase();
+            } else {
+                elementText = element.textContent.trim().toLowerCase();
+            }
+
             const matchedCategory = categoryList.find(category =>
-                elementClasses.includes(category.name.toLowerCase())
+                elementText === category.name.toLowerCase()
             );
 
             if (matchedCategory) {
@@ -257,11 +263,16 @@ const Init = (function () {
                 Px.Poi.HideAll();
                 let floorId = floorBtn.getAttribute('floor-id')
                 Px.Model.Visible.Show(Number(floorId));
-                PoiManager.getPoisByFloorId(floorId).then(pois => {
-                    pois.forEach(poi => {
-                        Px.Poi.Show(Number(poi.id));
-                    })
-                })
+                const poiList = PoiManager.findAll();
+                const filteredPois = poiList.filter(poi => poi.floorId === Number(floorId));
+                filteredPois.forEach(poi => {
+                    Px.Poi.Show(Number(poi.id));
+                });
+                // PoiManager.getPoisByFloorId(floorId).then(pois => {
+                //     pois.forEach(poi => {
+                //         Px.Poi.Show(Number(poi.id));
+                //     })
+                // })
             })
         })
         // allFloor
@@ -273,18 +284,18 @@ const Init = (function () {
 
     const setActiveEquipment = (buildingId) => {
         const equipmentGroup = document.querySelectorAll('#equipmentListPop a');
-        PoiManager.getPoisByBuildingId(buildingId).then(pois => {
-            equipmentGroup.forEach(element => {
-                if (element) {
-                    const categoryId = element.getAttribute("data-category-id")
-                    pois.forEach(poi => {
-                        if (categoryId == poi.poiCategory) {
-                            element.classList.add('active');
-                        }
-                    })
-                }
-            })
-        })
+        const allPois = PoiManager.findAll();
+        const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
+        equipmentGroup.forEach(element => {
+            if (element) {
+                const categoryId = element.getAttribute("data-category-id");
+                filteredPois.forEach(poi => {
+                    if (categoryId == poi.poiCategory) {
+                        element.classList.add('active');
+                    }
+                });
+            }
+        });
     }
 
     const initializeOutdoorBuilding = async (onComplete) => {

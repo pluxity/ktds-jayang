@@ -208,9 +208,10 @@
     }
 
     function resetAccordions() {
-        document.querySelectorAll('.accordion__btn').forEach(btn => btn.classList.remove('accordion__btn--active'));
+        const viewerResult = document.getElementById("viewerResult");
 
-        document.querySelectorAll('.accordion__detail').forEach(detail => {
+        viewerResult.querySelectorAll('.accordion__btn').forEach(btn => btn.classList.remove('accordion__btn--active'));
+        viewerResult.querySelectorAll('.accordion__detail').forEach(detail => {
             detail.style.display = 'none';
         });
     }
@@ -280,9 +281,12 @@
     const handlePoiCategoryClick = (title, id) => {
         const viewResult = document.querySelector('#viewerResult');
         viewResult.setAttribute('data-category-id', id);
-        PoiManager.getPoiByCategoryId(id).then(pois => {
-            layerPopup.setCategoryData(title, pois);
-        });
+        const poiList = PoiManager.findAll();
+        const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
+        layerPopup.setCategoryData(title, filteringPoiList);
+        // PoiManager.getPoiByCategoryId(id).then(pois => {
+        //     layerPopup.setCategoryData(title, pois);
+        // });
     };
 
     const handlePoiMapClick = (clickedItem, title) => {

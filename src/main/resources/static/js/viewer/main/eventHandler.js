@@ -623,9 +623,9 @@
             let id = clickedItem.getAttribute('data-category-id');
             const viewResult = document.querySelector('#viewerResult');
             viewResult.setAttribute('data-category-id', id);
-            PoiManager.getPoiByCategoryId(id).then(pois => {
-                layerPopup.setCategoryData(title, pois);
-            })
+            const poiList = PoiManager.findAll();
+            const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
+            layerPopup.setCategoryData(title, filteringPoiList);
             if (clickedItem.classList.contains('active')) {
                 clickedItem.classList.remove('active');
             } else {

@@ -1159,12 +1159,27 @@ const layerPopup = (function () {
 
     document.querySelector('#resultRefreshBtn').addEventListener('click', event => {
         if (event.target.closest('.reflesh')) {
+            const buildingSelectBtn = document.querySelector('#buildingSelect .select-box__btn');
+            const floorSelectBtn = document.querySelector('#floorSelect .select-box__btn');
+            const searchInput = document.querySelector('#floorSelect').parentElement.querySelector('input[name="searchText"]');
+
+            if (buildingSelectBtn) {
+                buildingSelectBtn.textContent = '건물 전체';
+            }
+            if (floorSelectBtn) {
+                floorSelectBtn.textContent = '층 전체';
+            }
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
             const viewerResult = event.target.closest('#viewerResult');
             const id = viewerResult.getAttribute('data-category-id')
             const title = document.querySelector('#layerPopup .popup-basic__head .name').textContent;
-            PoiManager.getPoiByCategoryId(id).then(pois => {
-                layerPopup.setCategoryData(title, pois, null, true);
-            });
+
+            const poiList = PoiManager.findAll();
+            const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
+            layerPopup.setCategoryData(title, filteringPoiList, null, true);
         }
     })
 
@@ -1231,12 +1246,13 @@ const layerPopup = (function () {
                 popupUl.appendChild(popupLi);
                 popupLi.addEventListener('click', (event) => {
                     handleTabClick(event);
-                    PoiManager.getPoisByBuildingId(building.id).then(poiList => {
-                        const filteredPoiList = poiList.filter(poi =>
-                            poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
-                            poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv');
-                        addElevators(filteredPoiList);
-                    })
+                    const allPois = PoiManager.findAll();
+                    const filteredPoiList = allPois.filter(poi =>
+                        poi.buildingId === Number(building.id) &&
+                        poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
+                        poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv'
+                    );
+                    addElevators(filteredPoiList);
                 });
             })
         });
@@ -1474,14 +1490,16 @@ const layerPopup = (function () {
         selectedTab.setAttribute("aria-selected", "true");
     };
 
-    const moveBtn = equipmentPopup.querySelector(".section__head .button-move");
+    if (equipmentPopup) {
+        const moveBtn = equipmentPopup.querySelector(".section__head .button-move");
         moveBtn.addEventListener("click", () => {
-        const poiId = moveBtn.getAttribute("btn-poi-id");
-        elevatorPopup.style.display = "none";
-        systemPop.style.display = "none";
-        closeSystemPopup();
-        movePoi(poiId);
-    });
+            const poiId = moveBtn.getAttribute("btn-poi-id");
+            elevatorPopup.style.display = "none";
+            systemPop.style.display = "none";
+            closeSystemPopup();
+            movePoi(poiId);
+        });
+    }
 
     const updatePoiDetail = (poi) => {
         const sectionHead = equipmentPopup.querySelector(".section__head");
@@ -1623,9 +1641,9 @@ const layerPopup = (function () {
             floorBtn.classList.remove("select-box__btn--active");
             floorSelect.querySelector(".select-box__content").classList.remove("active");
             if (buildingId) {
-                PoiManager.getPoisByBuildingId(buildingId).then((pois) => {
-                    updatePoiSelectBox(pois);
-                });
+                const allPois = PoiManager.findAll();
+                const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
+                updatePoiSelectBox(filteredPois);
             } else {
                 PoiManager.getPoiList().then((pois) => {
                     updatePoiSelectBox(pois);
@@ -1643,9 +1661,9 @@ const layerPopup = (function () {
                 floorBtn.classList.remove("select-box__btn--active");
                 floorSelect.querySelector(".select-box__content").classList.remove("active");
 
-                PoiManager.getPoisByFloorId(floor.id).then((pois) => {
-                    updatePoiSelectBox(pois);
-                });
+                const allPois = PoiManager.findAll();
+                const filteredPois = allPois.filter(poi => poi.floorId === Number(floor.id));
+                updatePoiSelectBox(filteredPois);
             }
 
             floorContent.appendChild(li);

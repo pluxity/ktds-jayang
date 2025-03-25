@@ -50,10 +50,18 @@
     function setCategoryId(elements, categoryIds, isEquipment) {
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
+        console.log("elements : ", elements);
         elements.forEach(element => {
-            const elementClasses = element.className.split(' ').map(className => className.toLowerCase());
+            // const elementClasses = element.className.split(' ').map(className => className.toLowerCase());
+            let elementText = "";
+            if (element.closest("#poiMenuList")) {
+                elementText = element.querySelector('a span').textContent.trim().toLowerCase();
+            } else {
+                elementText = element.textContent.trim().toLowerCase();
+            }
+
             const matchedCategory = categoryIds.find(category =>
-                elementClasses.includes(category.name.toLowerCase())
+                elementText === category.name.toLowerCase()
             );
 
             if (matchedCategory) {
@@ -76,11 +84,14 @@
 
     const initCategory = () => {
         const equipmentGroup = document.querySelectorAll('#equipmentGroup a')
-        const poiMenuList = document.querySelectorAll('#poiMenuList li');
+        const poiMenuList = document.querySelectorAll('#poiMenuList ul li');
+        const systemTabList = document.querySelectorAll('.system-tap ul li');
         let allCategoryIds = PoiCategoryManager.findAll();
         setCategoryId(poiMenuList, allCategoryIds, false);
         setCategoryId(equipmentGroup, allCategoryIds, true);
+        setCategoryId(systemTabList, allCategoryIds, false);
     }
+
 
     const initBuilding = async () => {
         const params = new URLSearchParams(window.location.search);

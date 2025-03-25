@@ -8,7 +8,6 @@ async function initializeIconSetInSelect() {
         const iconSetSelectTagInModify =
             document.querySelector('#modifyIconSetId');
         data.iconSet.forEach((iconset) => {
-            console.log("iconset : ", iconset);
             iconSetSelectTagInRegister.appendChild(
                 new Option(iconset.name, iconset.id),
             );
@@ -18,6 +17,15 @@ async function initializeIconSetInSelect() {
         });
     });
 }
+
+document.getElementById('poiMiddleCategoryRegisterModal')
+    .addEventListener('shown.bs.modal', function () {
+        const categorySelect = document.getElementById('category1');
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        if (selectedOption) {
+            document.getElementById('middleRegisterMajorId').value = selectedOption.value;
+        }
+    });
 
 const getPoiCategoryInfoList = async () => {
     await api.get('/poi-categories').then((res) => {

@@ -207,6 +207,25 @@
         }
     }
 
+    function resetAccordions() {
+        document.querySelectorAll('.accordion__btn').forEach(btn => btn.classList.remove('accordion__btn--active'));
+
+        document.querySelectorAll('.accordion__detail').forEach(detail => {
+            detail.style.display = 'none';
+        });
+    }
+
+    function resetSelectBoxes() {
+        const buildingBtn = document.querySelector('#buildingSelect .select-box__btn');
+        if (buildingBtn) {
+            buildingBtn.textContent = "건물 전체";
+        }
+        const floorBtn = document.querySelector('#floorSelect .select-box__btn');
+        if (floorBtn) {
+            floorBtn.textContent = "층 전체";
+        }
+    }
+
     // side
     const handlePoiMenuClick = (event) => {
         // event.preventDefault();
@@ -235,6 +254,12 @@
             layerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
             Px.Poi.ShowAll();
+            const sopPopup = document.querySelector("#sopLayerPopup");
+            if (sopPopup.style.display !== 'none') {
+                sopPopup.style.display = 'none';
+            }
+            resetSelectBoxes();
+            resetAccordions();
         }
 
         if (clickedItem.classList.contains('active')) {
@@ -326,11 +351,13 @@
         const mapLayerPopup = document.getElementById('mapLayerPopup');
         accordionBtns.forEach(accordionBtn => {
             accordionBtn.addEventListener('click', (event) => {
-                const rect = mapLayerPopup.getBoundingClientRect();
-                sopDetailPopup.style.left = `${rect.right + 10}px`;
-                sopDetailPopup.style.top = `${rect.top}px`;
-                sopDetailPopup.style.display = 'inline-block';
-                sopDetailPopup.style.position = 'absolute';
+                if (accordionBtn.id === 'escalator') {
+                    const rect = mapLayerPopup.getBoundingClientRect();
+                    sopDetailPopup.style.left = `${rect.right + 10}px`;
+                    sopDetailPopup.style.top = `${rect.top}px`;
+                    sopDetailPopup.style.display = 'inline-block';
+                    sopDetailPopup.style.position = 'absolute';
+                }
             })
         })
     }

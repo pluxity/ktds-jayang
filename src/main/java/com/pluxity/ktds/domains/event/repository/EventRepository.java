@@ -67,10 +67,18 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
     @Query("SELECT a FROM Alarm a WHERE a.confirmTime IS NULL ORDER BY a.occurrenceDate ASC")
     List<Alarm> findUnDisableAlarms();
 
-    List<Alarm> findByOccurrenceDateBetweenAndBuildingNm(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String buildingNm);
-
-    List<Alarm> findByOccurrenceDateBetweenAndBuildingNmAndFloorNm(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String buildingNm, String floorNm);
-
-    List<Alarm> findByOccurrenceDateBetweenAndFloorNm(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String floorNm);
-    List<Alarm> findByOccurrenceDateBetweenAndFloorNmAndAlarmType(LocalDateTime occurrenceDateAfter, LocalDateTime occurrenceDateBefore, String floorNm, String eventNm);
+    @Query("SELECT a FROM Alarm a " +
+            "WHERE a.occurrenceDate BETWEEN :startDate AND :endDate " +
+            "AND (:buildingNm IS NULL OR a.buildingNm = :buildingNm) " +
+            "AND (:floorNm IS NULL OR a.floorNm = :floorNm) " +
+            "AND (:deviceType IS NULL OR a.deviceNm LIKE CONCAT(:deviceType, '-%')) " +
+            "AND (:searchValue IS NULL OR (a.deviceNm LIKE CONCAT('%', :searchValue, '%') " +
+            "     OR CONCAT('', a.alarmType) LIKE CONCAT('%', :searchValue, '%')))")
+    List<Alarm> findAlarms(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("buildingNm") String buildingNm,
+            @Param("floorNm") String floorNm,
+            @Param("deviceType") String deviceType,
+            @Param("searchValue") String searchValue);
 }

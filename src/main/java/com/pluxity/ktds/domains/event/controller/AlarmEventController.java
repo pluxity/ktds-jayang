@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
+import com.pluxity.ktds.domains.event.entity.Alarm;
 import com.pluxity.ktds.domains.event.service.EventService;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import lombok.RequiredArgsConstructor;
@@ -45,5 +46,19 @@ public class AlarmEventController {
         Long disableAlarmId = eventService.disableAlarm(id);
         return DataResponseBody.of(disableAlarmId);
             
+    }
+
+    @GetMapping("/alarms")
+    public DataResponseBody<List<Alarm>> getAlarmList(
+            @RequestParam String startDateString,
+            @RequestParam String endDateString,
+            @RequestParam(required = false) String buildingNm,
+            @RequestParam(required = false) String floorNm,
+            @RequestParam(required = false) String deviceType,
+            @RequestParam(required = false) String searchValue) {
+
+        List<Alarm> alarms = eventService.getAlarmList(startDateString, endDateString,
+                buildingNm, floorNm, deviceType, searchValue);
+        return DataResponseBody.of(alarms);
     }
 }

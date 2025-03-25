@@ -708,6 +708,7 @@ const layerPopup = (function () {
 
     // category list click > popup mapping
     function setCategoryData(title, pois, clickedItem = null, refresh = false) {
+        document.body.style.overflow = 'hidden';
         const titleElement = document.querySelector('#layerPopup .popup-basic__head .name');
         const popup = document.getElementById('layerPopup');
         const currentTitle = titleElement.textContent;
@@ -729,17 +730,19 @@ const layerPopup = (function () {
             return acc;
         }, {});
 
+        const allBuildings = BuildingManager.findAll();
+        allBuildings.forEach(building => {
+            buildingSet.add(JSON.stringify({ id: building.id, name: building.name }));
+
+            if (building.floors && Array.isArray(building.floors)) {
+                building.floors.forEach(floor => {
+                    floorSet.add(JSON.stringify({ id: floor.id, name: floor.name }));
+                });
+            }
+        });
+
         // accordion data set
         pois.forEach(poi => {
-            const buildingInfo = BuildingManager.findById(poi.buildingId);
-            if (buildingInfo) {
-                buildingSet.add(JSON.stringify({ id: buildingInfo.id, name: buildingInfo.name }));
-                const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
-                if (floorInfo) {
-                    floorSet.add(JSON.stringify({ id: floorInfo.id, name: floorInfo.name }));
-                }
-            }
-
             const category = poi.poiMiddleCategoryDetail?.name || '기타';
             createAccordion(poi, categoryCounts[category]);
         })
@@ -790,7 +793,8 @@ const layerPopup = (function () {
         popup.style.transform = 'translate(20%, 5%)';
         // popup.style.zIndex = '50';
         // total count
-        totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
+        // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
+        document.getElementById("totalEqCount").textContent = pois.length.toLocaleString();
     }
 
     function createAccordion2(poi, categoryCount) {
@@ -887,11 +891,16 @@ const layerPopup = (function () {
             accordionBtn.textContent = `${categoryName} (${categoryCount})`;
 
             accordionBtn.addEventListener('click', () => {
-                const allBtns = accordionElement.querySelectorAll('.accordion__btn');
+                // const allBtns = accordionElement.querySelectorAll('.accordion__btn');
+                // if (accordionBtn.classList.contains('accordion__btn--active')) {
+                //     accordionBtn.classList.remove('accordion__btn--active');
+                // } else {
+                //     allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
+                //     accordionBtn.classList.add('accordion__btn--active');
+                // }
                 if (accordionBtn.classList.contains('accordion__btn--active')) {
                     accordionBtn.classList.remove('accordion__btn--active');
                 } else {
-                    allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
                     accordionBtn.classList.add('accordion__btn--active');
                 }
             });
@@ -942,9 +951,9 @@ const layerPopup = (function () {
         const tdEquipment = document.createElement('td');
         tdEquipment.classList.add('align-left');
         tdEquipment.setAttribute('data-poi-id', poi.id);
-        tdEquipment.innerHTML = `<em class="text-accent">${poi.name}</em>`;
+        tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
         // tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
-        tdEquipment.addEventListener('dblclick', function() {
+        tdEquipment.addEventListener('click', function() {
             // popup close추가
             closePopup();
             movePoi(poi.id);
@@ -968,6 +977,7 @@ const layerPopup = (function () {
             buildingSelectBtn.classList.remove('select-box__btn--active');
         } else {
             buildingSelectBtn.classList.add('select-box__btn--active');
+            floorSelectBtn.classList.remove('select-box__btn--active');
         }
     });
 
@@ -989,6 +999,7 @@ const layerPopup = (function () {
             floorSelectBtn.classList.remove('select-box__btn--active');
         } else {
             floorSelectBtn.classList.add('select-box__btn--active');
+            buildingSelectBtn.classList.remove('select-box__btn--active');
         }
     });
 
@@ -1014,28 +1025,68 @@ const layerPopup = (function () {
 
         const allAccordionDetails = document.querySelectorAll('#viewerResult .accordion__detail');
         allAccordionDetails.forEach((detail, index) => {
-            const tr = detail.querySelector('tbody > tr');
-            if (!tr)  {
+            const rows = detail.querySelectorAll('tbody > tr');
+            let hasMatch = false;
+
+            if (!rows)  {
                 return;
             }
-            const tdBuilding = tr.querySelector('td:nth-child(1)').textContent.trim();
-            const tdFloor = tr.querySelector('td:nth-child(2)').textContent.trim();
-            const tdEquipment = tr.querySelector('td:nth-child(3)').textContent.trim();
 
-            const matchBuilding = (buildingSelect === '건물 전체' || tdBuilding === buildingSelect);
-            const matchFloor = (floorSelect === '층 전체' || tdFloor === floorSelect);
-            const matchEquipment = (!equipmentName || tdEquipment.includes(equipmentName));
-            const accordionDetail = allAccordionBtns[index].nextElementSibling;
+            rows.forEach(row => {
+                const tdBuilding = row.querySelector('td:nth-child(1)')?.textContent.trim() || "";
+                const tdFloor = row.querySelector('td:nth-child(2)')?.textContent.trim() || "";
+                const tdEquipment = row.querySelector('td:nth-child(3)')?.textContent.trim() || "";
+                const matchBuilding = (buildingSelect === '건물 전체' || tdBuilding === buildingSelect);
+                const matchFloor = (floorSelect === '층 전체' || tdFloor === floorSelect);
+                const matchEquipment = (!equipmentName || tdEquipment.includes(equipmentName));
+                if (matchBuilding && matchFloor && matchEquipment) {
+                    row.style.display = "";
+                    hasMatch = true;
+                } else {
+                    row.style.display = "none";
+                }
+            })
+            const accordionBtn = detail.previousElementSibling;
 
             // 검색
-            if (accordionDetail && accordionDetail.classList.contains('accordion__detail')) {
-                if (matchBuilding && matchFloor && matchEquipment) {
-                    allAccordionBtns[index].classList.add('accordion__btn--active');
-                    handleAccordionDetail(accordionDetail, true);
+            if (accordionBtn && accordionBtn.classList.contains('accordion__btn')) {
+                if (hasMatch) {
+                    accordionBtn.classList.add('accordion__btn--active');
+                    handleAccordionDetail(detail, true);
                 } else {
-                    allAccordionBtns[index].classList.add('accordion__btn--active');
-                    handleAccordionDetail(accordionDetail, false);
+                    accordionBtn.classList.remove('accordion__btn--active');
+                    handleAccordionDetail(detail, false);
                 }
+            }
+        });
+
+        let totalCount = 0;
+        allAccordionDetails.forEach(detail => {
+            const rows = detail.querySelectorAll('tbody > tr');
+            rows.forEach(row => {
+                if (window.getComputedStyle(row).display !== "none") {
+                    totalCount++;
+                }
+            });
+        });
+        document.getElementById("totalEqCount").textContent = totalCount.toLocaleString();
+
+        allAccordionDetails.forEach(detail => {
+            const accordionBtn = detail.previousElementSibling;
+            if (accordionBtn && accordionBtn.classList.contains('accordion__btn')) {
+                let count = 0;
+                const rows = Array.from(detail.querySelectorAll('tbody > tr'));
+                rows.forEach(row => {
+                    if (window.getComputedStyle(row).display !== "none") {
+                        count++;
+                    }
+                });
+                let baseText = accordionBtn.textContent;
+                const idx = baseText.indexOf('(');
+                if (idx !== -1) {
+                    baseText = baseText.substring(0, idx).trim();
+                }
+                accordionBtn.textContent = `${baseText} (${count})`;
             }
         });
     });
@@ -1106,7 +1157,7 @@ const layerPopup = (function () {
         layerPopup.closePlayers();
     };
 
-    document.querySelector('#viewerResult').addEventListener('click', event => {
+    document.querySelector('#resultRefreshBtn').addEventListener('click', event => {
         if (event.target.closest('.reflesh')) {
             const viewerResult = event.target.closest('#viewerResult');
             const id = viewerResult.getAttribute('data-category-id')
@@ -1156,7 +1207,9 @@ const layerPopup = (function () {
             const poiList = PoiManager.findAll();
             PoiManager.getPoiList().then(poiList => {
                 console.log("poiList : ", poiList);
-                const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
+                const filteredPoiList = poiList.filter(poi =>
+                    poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
+                    poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv');
                 addElevators(filteredPoiList);
             })
         });
@@ -1179,7 +1232,9 @@ const layerPopup = (function () {
                 popupLi.addEventListener('click', (event) => {
                     handleTabClick(event);
                     PoiManager.getPoisByBuildingId(building.id).then(poiList => {
-                        const filteredPoiList = poiList.filter(poi => poi.property.poiCategoryName.toLowerCase() === 'cctv');
+                        const filteredPoiList = poiList.filter(poi =>
+                            poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
+                            poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv');
                         addElevators(filteredPoiList);
                     })
                 });
@@ -1277,16 +1332,13 @@ const layerPopup = (function () {
         allTabLi.setAttribute('tabindex', '0');
         allTabLi.classList.add("active");
         allTabLi.setAttribute("aria-selected", "true");
+        allTabLi.textContent = '전체';
 
-        const allTabA = document.createElement('a');
-        allTabA.setAttribute('href', 'javascript:void(0);');
-        allTabA.textContent = '전체';
-        allTabA.addEventListener("click", () => {
+        allTabLi.addEventListener("click", () => {
             updateActiveTab(allTabLi);
             setEquipmentData("");
         });
 
-        allTabLi.appendChild(allTabA);
         // all tab은 default로 맨앞에
         popupUl.prepend(allTabLi);
 
@@ -1300,16 +1352,12 @@ const layerPopup = (function () {
                 popupLi.setAttribute("aria-selected", "false");
                 popupLi.setAttribute("tabindex", "0");
 
-                const popupAtag = document.createElement("a");
-                popupAtag.setAttribute("href", "javascript:void(0);");
-                popupAtag.textContent = building.name;
-
-                popupAtag.addEventListener("click", () => {
+                popupLi.textContent = building.name;
+                popupLi.addEventListener("click", () => {
                     updateActiveTab(popupLi);
                     setEquipmentData(building.id);
                 });
 
-                popupLi.appendChild(popupAtag);
                 popupUl.appendChild(popupLi);
             });
             updateActiveTab(allTabLi);
@@ -1321,20 +1369,33 @@ const layerPopup = (function () {
         const eqAccordion = document.getElementById("eqAccordion");
         eqAccordion.replaceChildren();
 
-        const poiCategories = PoiCategoryManager.findAll();
+        const allCategories = PoiCategoryManager.findAll();
+        const equipmentCategory = allCategories.find(category => category.name.toLowerCase() === "설비");
+        if (!equipmentCategory) return;
+
+        const pois = PoiManager.findByPoiCategory(buildingId, "", equipmentCategory.id);
+
+        const middleMap = new Map();
+        pois.forEach(poi => {
+            const middleName = (poi.poiMiddleCategoryDetail?.name || "기타").trim();
+            if (middleMap.has(middleName)) {
+                middleMap.get(middleName).push(poi);
+            } else {
+                middleMap.set(middleName, [poi]);
+            }
+        });
 
         let firstAccordionBtn = null;
         let firstPoi = null;
+        let groupIndex = 0;
 
-        poiCategories.forEach((category, categoryIndex) => {
-            const pois = PoiManager.findByPoiCategory(buildingId, "", category.id);
-            const poiCount = pois.length;
-
+        middleMap.forEach((poiList, middleName) => {
+            const poiCount = poiList.length;
             const btn = document.createElement("button");
             btn.classList.add("accordion__btn");
-            btn.textContent = `${category.name} (${poiCount})`;
+            btn.textContent = `${middleName} (${poiCount})`;
 
-            if (categoryIndex === 0) {
+            if (groupIndex === 0) {
                 firstAccordionBtn = btn;
             }
 
@@ -1342,18 +1403,19 @@ const layerPopup = (function () {
             detailDiv.classList.add("accordion__detail");
             detailDiv.style.display = "none";
 
-            if (pois.length > 0) {
+            if (poiList.length > 0) {
                 const table = document.createElement("table");
                 const tbody = document.createElement("tbody");
 
-                pois.forEach((poi, poiIndex) => {
+                poiList.forEach((poi, poiIndex) => {
                     const tr = document.createElement("tr");
                     const td = document.createElement("td");
                     td.classList.add("align-left");
+                    td.style.paddingLeft = "10%";
                     td.textContent = poi.name;
                     td.setAttribute("td-poi-id", poi.id);
 
-                    if (categoryIndex === 0 && poiIndex === 0) {
+                    if (groupIndex === 0 && poiIndex === 0) {
                         firstPoi = poi;
                     }
 
@@ -1388,6 +1450,8 @@ const layerPopup = (function () {
 
             eqAccordion.appendChild(btn);
             eqAccordion.appendChild(detailDiv);
+
+            groupIndex++;
         });
 
         if (firstAccordionBtn) {
@@ -1475,7 +1539,7 @@ const layerPopup = (function () {
     const closePlayers = () => {
         console.log("livePlayers : ", livePlayers);
         livePlayers.forEach(({player}) => {
-            player.cctvClose();
+            // player.cctvClose();
         })
         livePlayers.length = 0;
     }
@@ -1894,6 +1958,7 @@ const layerPopup = (function () {
             }
         } else if (target.id === 'layerPopup') {
             document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
+            document.body.style.overflow = '';
         } else if (target.id === 'systemPopup') {
             document.querySelectorAll('.system-tab ul li').forEach(li => console.log("li : ", li));
             closeAllPopups();
@@ -1902,7 +1967,7 @@ const layerPopup = (function () {
 
 
     function addClosePopup() {
-        document.querySelectorAll('.popup-basic .close').forEach(btn => {
+        document.querySelectorAll('.popup-basic .close, .popup-basic .arrow').forEach(btn => {
             btn.addEventListener('click', (event) => {
                 const target = event.target.closest('.popup-basic');
                 closePopup(target);

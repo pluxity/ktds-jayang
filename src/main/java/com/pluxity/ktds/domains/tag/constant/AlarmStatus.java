@@ -42,4 +42,14 @@ public enum AlarmStatus {
     public String toString() {
         return status;
     }
+
+    public static AlarmStatus fromLabel(String label) {
+        if (label == null) return null;
+        for (AlarmStatus s : AlarmStatus.values()) {
+            if (s.getStatus().equalsIgnoreCase(label)) {
+                return s;
+            }
+        }
+        return null;
+    }
 }

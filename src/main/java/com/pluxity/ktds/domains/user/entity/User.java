@@ -1,11 +1,14 @@
 package com.pluxity.ktds.domains.user.entity;
 
+import com.pluxity.ktds.domains.user.dto.UserAuthorityResponseDTO;
 import com.pluxity.ktds.domains.user.dto.UserResponseDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -60,6 +63,10 @@ public class User {
                 .username(username)
                 .name(name)
                 .groupName(getUserGroup().getName())
+                .authorities(getUserGroup().getAuthorities()
+                        .stream()
+                        .map(UserAuthorityResponseDTO::from)
+                        .collect(Collectors.toSet()))
                 .build();
     }
 }

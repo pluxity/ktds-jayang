@@ -100,23 +100,6 @@ public class EventService {
         return id;
     }
 
-
-    public List<Alarm> getAlarmsWithinDateRangeAndBuildingFloor(
-            String startDateString, String endDateString, String buildingNm, String floorNm, String deviceType, String alarmType) {
-        LocalDateTime startDate = LocalDate.parse(startDateString, dateFormatter).atStartOfDay();
-        LocalDateTime endDate = LocalDate.parse(endDateString, dateFormatter).atTime(23, 59, 59);
-
-        if (buildingNm == null && floorNm == null) {
-            return eventRepository.findByOccurrenceDateBetween(startDate, endDate);
-        } else if (buildingNm != null && floorNm == null) {
-            return eventRepository.findByOccurrenceDateBetweenAndBuildingNm(startDate, endDate, buildingNm);
-        } else if (buildingNm != null && floorNm != null) {
-            return eventRepository.findByOccurrenceDateBetweenAndBuildingNmAndFloorNm(startDate, endDate, buildingNm, floorNm);
-        } else {
-            return eventRepository.findByOccurrenceDateBetweenAndFloorNm(startDate, endDate, floorNm);
-        }
-    }
-
     public List<Alarm> getAlarms(String startDateString, String endDateString,
                                  String buildingNm, String floorNm,
                                  String deviceType, String alarmType) {
@@ -137,7 +120,7 @@ public class EventService {
         }
         if (deviceType != null && !deviceType.isEmpty()) {
             alarms = alarms.stream()
-                    .filter(alarm -> alarm.getDeviceNm() != null && alarm.getDeviceNm().startsWith(deviceType + "-"))
+                    .filter(alarm -> alarm.getDeviceNm() != null && alarm.getDeviceNm().startsWith(deviceType))
                     .collect(Collectors.toList());
         }
         if (alarmType != null && !alarmType.isEmpty()) {
@@ -152,5 +135,26 @@ public class EventService {
             }
         }
         return alarms;
+    }
+
+    public List<Alarm> getAlarmList(String startDateString, String endDateString,
+                                 String buildingNm, String floorNm,
+                                 String deviceType, String searchValue) {
+
+        LocalDateTime startDate = LocalDate.parse(startDateString, dateFormatter).atStartOfDay();
+        LocalDateTime endDate = LocalDate.parse(endDateString, dateFormatter).atTime(23, 59, 59);
+
+        buildingNm = (buildingNm != null && !buildingNm.isEmpty()) ? buildingNm : null;
+        floorNm = (floorNm != null && !floorNm.isEmpty()) ? floorNm : null;
+        deviceType = (deviceType != null && !deviceType.isEmpty()) ? deviceType : null;
+        searchValue = (searchValue != null && !searchValue.isEmpty()) ? searchValue : null;
+
+        if (searchValue != null) {
+            AlarmStatus status = AlarmStatus.fromLabel(searchValue);
+            if (status != null) {
+                searchValue = status.name();
+            }
+        }
+        return eventRepository.findAlarms(startDate, endDate, buildingNm, floorNm, deviceType, searchValue);
     }
 }

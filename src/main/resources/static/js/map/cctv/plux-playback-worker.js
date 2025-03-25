@@ -1,5 +1,5 @@
 (function () {
-    console.log("worker start");
+
     class bytesReader {
 
         constructor(buffer) {
@@ -7,7 +7,6 @@
             this.dataView = new DataView(buffer)
             this.byteOffset = 0;
         }
-
         readTypes(type) {
             let parsedData = null
 
@@ -378,21 +377,21 @@
     let bufferQueue = new Uint8Array();
     let lastTime = performance.now();
     function sendFrameInterval(currentTime) {
-        requestAnimationFrame(sendFrameInterval);
+
         if (fps) {
             let interval = 1000 / fps;
 
             if (decodeFrameArr.length > 0) {
-                // console.log(decodeFrameArr.length)
+
                 if (currentTime - lastTime >= interval) {
                     lastTime = currentTime;
                     let frame = decodeFrameArr.shift()
-                    console.log(frame)
+
                     postMessage({ 'function': "decodeFrame", frame: frame }, frame);
                 }
             }
         }
-
+        requestAnimationFrame(sendFrameInterval);
     }
     requestAnimationFrame(sendFrameInterval);
 
@@ -400,11 +399,11 @@
         relaySocket = new WebSocket(`${relayServerUrl}/${destinationIp}/${destinationPort}`)
         relaySocket.binaryType = 'arraybuffer'
         relaySocket.addEventListener('open', () => {
-            console.log("open");
+            console.log("open")
             sendPlayReq()
         })
         relaySocket.addEventListener('message', (e) => {
-            console.log("message : ", e);
+            // console.log(e)
             socketOnMessage(e)
         })
         relaySocket.addEventListener("close", (event) => {
@@ -433,7 +432,7 @@
         }
         // 헤더 추출
         let bufferByteReader = new bytesReader(bufferQueue)
-        console.log("bufferByteReader : ", bufferByteReader);
+
         let dwSeparator = bufferByteReader.readTypes("DWORD")
         let wVersion = bufferByteReader.readTypes("WORD")
         let wHeaderSize = bufferByteReader.readTypes("WORD")
@@ -441,15 +440,11 @@
         let wReqType = bufferByteReader.readTypes("DWORD")
         let dwBodySize = bufferByteReader.readTypes("DWORD")
 
-        console.log("수신된 요청 타입:", wReqType);
-
         // 데이터 부족 확인
         if (bufferQueue.byteLength < HEADER_SIZE + dwBodySize) {
             bufferByteReader = null
             return;
         }
-        console.log("body size: " + dwBodySize, "header size :", wHeaderSize, wReqType)
-        // 버퍼 큐에서 처리한 부분 제거
 
         bufferQueue = bufferQueue.slice(HEADER_SIZE + dwBodySize);
 
@@ -469,6 +464,7 @@
             console.log("unknown request type: ", wReqType)
         }
         // 남은 데이터 처리
+
 
         processBuffer();
     }
@@ -565,6 +561,7 @@
 
     function createPlayPacket(afterFlag = false) {
         // VMS_COMMON_HEADER constants
+
         // let reqtype = speed > 0 ? 101 : 103
         let reqtype, speed
         if (afterFlag) {
@@ -633,7 +630,7 @@
 
         // subHeadBuffer 복사
         packetView.set(new Uint8Array(subHeadBuffer), HeadBuffer.byteLength);
-        console.log("요청 타입:", reqtype);
+
         return packetBuffer;
     }
 
@@ -709,9 +706,6 @@
     let flag = false
     function parsePlaybackBuffer(byteReader) {
         let dwSeparator = byteReader.readTypes("WORD")
-        if (dwSeparator === undefined) {
-            console.error("dwSeparator가 유효하지 않음");
-        }
         let cctvId = byteReader.readTypes("CHAR32");
 
         let type = byteReader.readTypes("WORD")
@@ -733,21 +727,16 @@
         let length2 = byteReader.readTypes(4)
         let frameData = byteReader.readToLasted()
 
-        try {
-            if (type == 105) {
-                if (bufferDate > startDate) {
-                    console.log(bufferDate, startDate)
-                    relaySocket.send(stopPacket)
+        if (type == 105) {
+            if (bufferDate > startDate) {
+                console.log(bufferDate, startDate)
+                relaySocket.send(stopPacket)
 
-                    sendDate.setSeconds(sendDate.getSeconds() - 5)
+                sendDate.setSeconds(sendDate.getSeconds() - 5)
 
-                    return
-                }
+                return
             }
-        } catch (error) {
-            console.error("error : ", error);
         }
-
 
         if (bufferDate <= endDate) {
 
@@ -767,13 +756,10 @@
             decoder.decode(chunk);
 
             setTimeout(() => {
-
                 relaySocket.send(bePacket)
-
             }, 20)
 
         } else {
-
             relaySocket.close()
         }
 
@@ -813,7 +799,7 @@
 
     onmessage = function (event) {
         var eventData = event.data
-        console.log("eventData : ", eventData);
+
         relayServerUrl = eventData.relayServerUrl
         destinationIp = eventData.destinationIp
         destinationPort = eventData.destinationPort
@@ -823,7 +809,6 @@
 
         sendDate = new Date(startDate)
         endTime = eventData.endTime
-        console.log(endTime)
 
         setEndDate()
 

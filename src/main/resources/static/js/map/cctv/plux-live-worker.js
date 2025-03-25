@@ -103,6 +103,7 @@
     let retryCount = 0
     let bePacket
     let keepAllivePacket
+    let keepAlliveCount = 0
     let relayServerUrl
     let destinationIp
     let destinationPort
@@ -175,8 +176,6 @@
         let wReqType = bufferByteReader.readTypes("DWORD")
         let dwBodySize = bufferByteReader.readTypes("DWORD")
 
-        // console.log("Received request type:", wReqType);
-
         // 데이터 부족 확인
         if (bufferQueue.byteLength < HEADER_SIZE + dwBodySize) {
             bufferByteReader = null
@@ -184,7 +183,7 @@
         }
 
         bufferQueue = bufferQueue.slice(HEADER_SIZE + dwBodySize);
-
+        console.log(wReqType)
         if (wReqType == 400) {
             console.log(wReqType)
             // parseLiveBuffer(bufferByteReader)
@@ -301,6 +300,7 @@
     function parseLiveBuffer(byteReader) {
         let dwSeparator = byteReader.readTypes("WORD") //2
         let cctvId = byteReader.readTypes("CHAR32"); // 32
+        // console.log(cctvId)
         let type = byteReader.readTypes("WORD") // 2 
         // console.log(type)
 
@@ -315,11 +315,19 @@
         let height = byteReader.readTypes("WORD")
 
         if (length < 100) {
-            console.log("100 : ", type)
-            relaySocket.send(keepAllivePacket);
+
+
             relaySocket.send(bePacket);
             return
         }
+
+        if (keepAlliveCount > 100) {
+            keepAlliveCount = 0
+            keepAllivePacket = createKeepAllivePacket()
+            console.log("keepAllivePacket")
+            relaySocket.send(keepAllivePacket);
+        }
+        keepAlliveCount++
 
         let timeBuffer = byteReader.readBytes(12)
 
@@ -500,7 +508,6 @@
     }
 
     onmessage = function (event) {
-        console.log("onmessage event : ", event);
         var eventData = event.data
         relayServerUrl = eventData.relayServerUrl
         destinationIp = eventData.destinationIp
@@ -510,7 +517,7 @@
 
         startPacket = createPlayLivePacket()
         bePacket = createPlayLivePacket(true)
-        keepAllivePacket = createKeepAllivePacket()
+
 
         connectionRelay()
     };

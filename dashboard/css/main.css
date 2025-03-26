@@ -6,6 +6,7 @@
 /* 경고 팝업 */
 /* 기본 팝업 */
 /* 이벤트 팝업 - 공지사항/SOP */
+/* POi Pin 정보 팝업 */
 /* DatePicker/TimePicker */
 .date-picker, .time-picker {
   height: 30px;
@@ -107,40 +108,30 @@
 .button--solid-upper {
   background-color: #00ffa1;
   font-weight: 700;
-  color: var(--color-grayscale01);
-  color: var(--color-grayscale-light);
-  color: var(--color-grayscale03);
+  color: var(--color-black);
 }
 
 .button--solid-middle {
   background-color: var(--color-mint);
   font-weight: 700;
-  color: var(--color-grayscale01);
-  color: var(--color-grayscale-light);
-  color: var(--color-grayscale03);
+  color: var(--color-black);
 }
 
 .button--solid-lower {
   background-color: #157f6b;
   font-weight: 700;
   color: var(--color-grayscale01);
-  color: var(--color-grayscale-light);
-  color: var(--color-grayscale03);
 }
 
 .button--solid-unselect {
   background-color: #80858d;
   font-weight: 700;
-  color: var(--color-grayscale01);
   color: var(--color-grayscale-light);
-  color: var(--color-grayscale03);
 }
 
 .button--solid-disabled {
   background-color: #80858d;
   font-weight: 700;
-  color: var(--color-grayscale01);
-  color: var(--color-grayscale-light);
   color: var(--color-grayscale03);
 }
 
@@ -148,18 +139,13 @@
   border-color: #00ffa1;
   background-color: #1c2024;
   color: #00ffa1;
-  color: var(--color-grayscale02);
-  color: var(--color-grayscale01);
-  color: var(--color-grayscale03);
 }
 
 .button--ghost-middle {
   border-color: var(--color-mint);
   background-color: #1c2024;
   color: var(--color-mint);
-  color: var(--color-grayscale02);
-  color: var(--color-grayscale01);
-  color: var(--color-grayscale03);
+  color: var(--color-mint);
 }
 
 .button--ghost-lower {
@@ -167,25 +153,19 @@
   background-color: #1c2024;
   color: #157f6b;
   color: var(--color-grayscale02);
-  color: var(--color-grayscale01);
-  color: var(--color-grayscale03);
 }
 
 .button--ghost-unselect {
   border-color: #80858d;
   background-color: #1c2024;
   color: #80858d;
-  color: var(--color-grayscale02);
   color: var(--color-grayscale01);
-  color: var(--color-grayscale03);
 }
 
 .button--ghost-disabled {
   border-color: #80858d;
   background-color: #1c2024;
   color: #80858d;
-  color: var(--color-grayscale02);
-  color: var(--color-grayscale01);
   color: var(--color-grayscale03);
 }
 
@@ -1931,6 +1911,14 @@
   width: 2.5px;
   height: 2.5px;
   background-color: var(--color-grayscale01);
+}
+
+.popup-info {
+  display: inline-block;
+  min-width: 10.625rem;
+  border-radius: 0 10px 10px 10px;
+  -webkit-box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, 0.7);
+          box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, 0.7);
 }
 
 .checkbox-wrap {

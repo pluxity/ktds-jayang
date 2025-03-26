@@ -677,7 +677,7 @@ $base-img-path:"/static/images/viewer/";
             .close{
                 margin-left:auto;
                 width:14px; height:14px;
-                -webkit-mask-image:url('/dashboard/img/icon14/icon14.svg'); mask-image:url('/dashboard/img/icon14/icon14.svg'); 
+                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
                 -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                 -webkit-mask-position:-146px -10px; mask-position:-146px -10px;
                 background-color:var(--color-navy-dark);
@@ -693,7 +693,7 @@ $base-img-path:"/static/images/viewer/";
                 font-weight:500; color:var(--color-grayscale03); font-size:0.6875rem;
                 &__reflesh{
                     width:14px; height:14px;
-                    -webkit-mask-image:url('/dashboard/img/icon14/icon14.svg'); mask-image:url('/dashboard/img/icon14/icon14.svg'); 
+                    -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
                     -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     -webkit-mask-position:-180px -10px; mask-position:-180px -10px;
                     background-color:var(--color-grayscale02);

@@ -1941,8 +1941,8 @@
   margin-left: auto;
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/dashboard/img/icon14/icon14.svg");
-  mask-image: url("/dashboard/img/icon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -146px -10px;
@@ -1976,8 +1976,8 @@
 .popup-info__content .date__reflesh {
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/dashboard/img/icon14/icon14.svg");
-  mask-image: url("/dashboard/img/icon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -180px -10px;

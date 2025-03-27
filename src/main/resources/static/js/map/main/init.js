@@ -459,7 +459,10 @@ const Init = (function () {
                     PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
                     Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                        moveToPoi(poiInfo.id)
+                        moveToPoi(poiInfo.id);
+                    });
+                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
+                        renderPoiInfo(poiInfo);
                     });
                     Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                     })
@@ -533,6 +536,137 @@ const Init = (function () {
             alertSwal('POI를 배치해주세요');
         }
     };
+
+    // poi-info 팝업 외부 클릭시 모든 poi-info 팝업 정리
+    const handleOutsideClick = (event) => {
+        if (!event.target.closest('.popup-info')) {
+            const popups = document.querySelectorAll('.popup-info');
+            popups.forEach(popup => popup.remove());
+        }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    /**
+     * POI 클릭 시 상태 표시
+     * - 태그 데이터를 실시간으로 조회하여 표시
+     * - 새로고침 버튼으로 갱신
+     */
+    const renderPoiInfo = async (poiInfo) => {
+        const poiProperty = poiInfo.property;
+        const popupInfo = document.createElement('div');
+
+        popupInfo.className = 'popup-info';
+        popupInfo.innerHTML =
+            `<div class="popup-info__head">
+            <h2>${poiProperty.poiCategoryName} ${poiProperty.name}</h2>
+            <button type="button" class="close"><span class="hide">close</span></button>
+        </div>
+        <div class="popup-info__content">
+            <div class="title">${poiProperty.buildingName} - ${poiProperty.floorNo}</div>
+            <div class="date">
+                <span class="timestamp">업데이트 일시 : ${new Date().toLocaleString()}</span>
+                <button type="button" class="date__refresh"><span class="hide date">새로고침</span></button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>수집정보</th>
+                        <th>측정값</th>
+                        <th>상태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     <tr>
+                        <td colspan="3">데이터를 불러오는 중...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>`;
+
+
+        // poi 상태 가져오기
+        const updateTagData = async () => {
+            try {
+                const response = await fetch(`/poi/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(poiProperty.tagNames)
+                });
+                const data = await response.json();
+
+                const tbody = popupInfo.querySelector('tbody');
+                if (data.TAGCNT > 0) {
+                    tbody.innerHTML = data.TAGs.map(tag => `
+                    <tr>
+                        <td>${tag.T}</td>
+                        <td>${tag.V}</td>
+                        <td>${getStatusText(tag.S)}</td>
+                    </tr>
+                `).join('');
+                } else {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3">태그 데이터가 없습니다.</td>
+                    </tr>
+                `;
+                }
+
+                // 업데이트 시간 갱신
+                popupInfo.querySelector('.date .timestamp').textContent = 
+                `업데이트 일시 : ${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error('태그 데이터 조회 실패:', error);
+                const tbody = popupInfo.querySelector('tbody');
+                tbody.innerHTML = `
+                <tr>
+                    <td colspan="3">데이터 조회에 실패했습니다.</td>
+                </tr>
+            `;
+            }
+        };
+
+        // 초기 데이터 로드
+        await updateTagData();
+
+        // 새로고침 이벤트
+        const refreshBtn = popupInfo.querySelector('.date__refresh');
+        refreshBtn.addEventListener('click', updateTagData);
+
+        // 닫기 이벤트
+        const closeBtn = popupInfo.querySelector('.close');
+        closeBtn.addEventListener('click', () => {
+            // 이벤트 리스너 제거
+            refreshBtn.removeEventListener('click', updateTagData);
+            // 팝업 제거
+            popupInfo.remove();
+        });
+        
+        // 위치 설정
+        const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
+        popupInfo.style.position = 'fixed';
+        popupInfo.style.zIndex = '9999';
+        popupInfo.style.left = `${x}px`;
+        popupInfo.style.top = `${y}px`;
+
+        document.body.appendChild(popupInfo);
+       
+    }
+
+    // poi 상태
+    const getStatusText = (code) => {
+        const STATUS = {
+            0: 'Normal',
+            1: 'Failed',
+            2: 'OutOfService',
+            4: 'SystemAlarm',
+            128: 'Unload'
+        };
+        return STATUS[code];
+    }
+
 
     function throttle(callback, interval) {
         let lastCall = 0;

@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.building.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
@@ -7,6 +8,7 @@ import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.service.PoiService;
+import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.global.constant.SuccessCode;
 import com.pluxity.ktds.global.response.ResponseBody;
 import com.pluxity.ktds.global.response.DataResponseBody;
@@ -14,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +31,7 @@ import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
 @RequestMapping("/poi")
 public class PoiController {
     private final PoiService service;
+    private final TagClientService tagClientService;
 
 //    @GetMapping
 //    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
@@ -127,6 +131,11 @@ public class PoiController {
                                      @RequestBody MultipartFile file) {
         service.batchRegisterPoi(buildingId, floorId, file);
         return ResponseBody.of(SuccessCode.SUCCESS_CREATE);
+    }
+
+    @PostMapping("/status")
+    public ResponseEntity<String> getPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
+        return tagClientService.readTags(tags);
     }
 
 }

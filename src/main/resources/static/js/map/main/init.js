@@ -8,7 +8,6 @@
     }
     api.get(`/users/userid/${USER_ID}`).then((result) => {
         const {result: data} = result.data;
-        console.log("data : ", data);
         document.querySelector('.header__info .head__name').innerHTML = data.name;
         document.querySelector('.header__info .head__level').innerHTML = data.groupName;
         // if (data.role !== 'ADMIN') {
@@ -50,7 +49,6 @@
     function setCategoryId(elements, categoryIds, isEquipment) {
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
-        console.log("elements : ", elements);
         elements.forEach(element => {
             // const elementClasses = element.className.split(' ').map(className => className.toLowerCase());
             let elementText = "";

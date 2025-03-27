@@ -2,6 +2,9 @@ package com.pluxity.ktds.domains.building.entity;
 
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
+import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
+import com.pluxity.ktds.domains.cctv.entity.Cctv;
+import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
 import com.pluxity.ktds.domains.event.entity.Alarm;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
@@ -75,6 +78,8 @@ public class Poi {
     @CollectionTable(name = "poi_tags", joinColumns = @JoinColumn(name = "poi_id"))
     @Column(name = "tag_names")
     private List<String> tagNames = new ArrayList<>();
+    @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PoiCctv> poiCctvs = new ArrayList<>();
 
     @Builder
     public Poi(String name, String code, List<String> tagNames) {
@@ -83,7 +88,7 @@ public class Poi {
         this.tagNames = tagNames != null ? new ArrayList<>(tagNames) : new ArrayList<>();
     }
 
-    public void update(String name, String code, List<String> tagNames) {
+    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs) {
         if (StringUtils.hasText(name)) {
             this.name = name;
         }
@@ -93,6 +98,10 @@ public class Poi {
         if (tagNames != null) {
             this.tagNames.clear();
             this.tagNames.addAll(tagNames);
+        }
+        if (poiCctvs != null) {
+            this.poiCctvs.clear();
+            this.poiCctvs.addAll(poiCctvs);
         }
     }
 
@@ -149,6 +158,13 @@ public class Poi {
                 .name(this.getName())
                 .code(this.getCode())
                 .tagNames(this.getTagNames())
+                .cctvList(this.poiCctvs.stream()
+                        .map(cctv -> PoiCctvDTO.builder()
+                                .id(cctv.getId())
+                                .code(cctv.getCode())
+                                .isMain(cctv.getIsMain())
+                                .build())
+                        .toList())
                 .build();
     }
 

@@ -1221,7 +1221,6 @@ const layerPopup = (function () {
             handleTabClick(event);
             const poiList = PoiManager.findAll();
             PoiManager.getPoiList().then(poiList => {
-                console.log("poiList : ", poiList);
                 const filteredPoiList = poiList.filter(poi =>
                     poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
                     poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv');
@@ -1797,9 +1796,6 @@ const layerPopup = (function () {
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
 
-        console.log("selectedBuilding : ", selectedBuilding);
-        console.log("selectedFloor : ", selectedFloor);
-        console.log("selectedDeviceType : ", selectedDeviceType);
         if (selectedBuilding !== '전체' && selectedBuilding !== '' && selectedBuilding !== '없음') {
             params.append('buildingNm', selectedBuilding);
         }
@@ -1943,7 +1939,6 @@ const layerPopup = (function () {
     function closePopup2(target) {
         if (!target) return;
         target.style.display = 'none';
-        console.log("target : ", target);
         const popupParent = target.closest('#layerPopup.popup-basic, #mapLayerPopup.popup-basic');
         if (popupParent) {
             const container = popupParent.parentElement;

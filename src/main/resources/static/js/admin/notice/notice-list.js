@@ -306,7 +306,6 @@ document
     });
 
 const deleteNotice = (noticeId) => {
-    console.log("noticeId : ", noticeId);
     const id = Number(noticeId);
     confirmSwal('정말 삭제 하시겠습니까?').then(() => {
         api.delete(`/notices/${id}`).then(() => {

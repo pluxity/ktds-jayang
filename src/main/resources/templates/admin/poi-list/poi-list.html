@@ -122,13 +122,13 @@
                             <tr>
                                 <th>POI 이름</th>
                                 <td colspan="3">
-                                    <input type="text" name="poiName" id="poiNameRegister" class="form-control" placeholder="POI 이름을 입력해주세요." maxlength="32" required data-rules="required" data-tagname="POI 이름">
+                                    <input type="text" name="poiName" id="poiNameRegister" class="form-control" placeholder="POI 이름을 입력해주세요." required data-rules="required" data-tagname="POI 이름">
                                 </td>
                             </tr>
                             <tr>
                                 <th>POI 코드</th>
                                 <td colspan="3">
-                                    <input type="text" name="code" id="poiCodeRegister" class="form-control" placeholder="POI 코드를 입력해주세요." maxlength="10" required data-rules="required" data-tagname="POI 코드">
+                                    <input type="text" name="code" id="poiCodeRegister" class="form-control" placeholder="POI 코드를 입력해주세요." required data-rules="required" data-tagname="POI 코드">
                                 </td>
                             </tr>
                             <tr>
@@ -138,33 +138,29 @@
                                 </td>
                             </tr>
                             <tr class="selectCctv hidden">
-                                <th>CCTV</th>
+                                <th>지정카메라</th>
                                 <td colspan="3">
-                                    <div class="cctvTag mb-1"></div>
-                                    <div class="searchCctv input-group">
-                                        <select class="SearchCctvType form-select flex-grow-1">
-                                            <option value="name">POI 이름</option>
-                                            <option value="code">POI 코드</option>
-                                        </select>
-                                        <input type="text" name="searchText" class="form-control searchText" style="flex-grow:3;"placeholder="검색어를 입력하세요." aria-label="검색어" aria-describedby="button-addon2"/>
-                                    </div>
-                                    <div class="searchCctvList pt-1 pb-1" style="height:11rem; overflow-y:auto">
-                                        <table class="table table-bordered mb-0">
-                                            <colgroup>
-                                                <col style="width:15%">
-                                                <col style="width:42.5%">
-                                                <col style="width:42.5%">
-                                            </colgroup>
-                                            <thead>
-                                            <tr>
-                                                <th>선택</th>
-                                                <th>POI 이름</th>
-                                                <th>POI 코드</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
+                                    <input type="text" name="mainCctv" id="mainCctvRegister" class="form-control" placeholder="지정카메라를 입력해주세요." data-tagname="지정카메라">
+                                </td>
+                            </tr>
+                            <tr class="selectCctv hidden">
+                                <th>주변카메라</th>
+                                <td colspan="3">
+                                    <input type="text" name="subCctv1" id="subCctv1Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 1"
+                                           data-tagname="주변카메라 1">
+                                    <br>
+                                    <input type="text" name="subCctv2" id="subCctv2Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 2"
+                                           data-tagname="주변카메라 2">
+                                    <br>
+                                    <input type="text" name="subCctv3" id="subCctv3Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 3"
+                                           data-tagname="주변카메라 3">
+                                    <br>
+                                    <input type="text" name="subCctv4" id="subCctv4Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 4"
+                                           data-tagname="주변카메라 4">
                                 </td>
                             </tr>
                             </tbody>
@@ -205,7 +201,6 @@
                                         <option class="dropdown-headerDisable selected" value="">도면 선택</option>
                                     </select>
                                 </td>
-
                             </tr>
                             <tr>
                                 <th>층 선택</th>
@@ -234,13 +229,13 @@
                             <tr>
                                 <th>POI 이름</th>
                                 <td colspan="3">
-                                    <input type="text" name="poiName" id="poiNameModify" class="form-control" placeholder="POI 이름을 입력해주세요." required data-rules="required" data-tagname="POI 이름" maxlength="32">
+                                    <input type="text" name="poiName" id="poiNameModify" class="form-control" placeholder="POI 이름을 입력해주세요." required data-rules="required" data-tagname="POI 이름">
                                 </td>
                             </tr>
                             <tr>
                                 <th>POI 코드</th>
                                 <td colspan="3">
-                                    <input type="text" name="code" id="poiCodeModify" class="form-control" placeholder="POI 코드를 입력해주세요." required data-rules="required" data-tagname="POI 코드" maxlength="10">
+                                    <input type="text" name="code" id="poiCodeModify" class="form-control" placeholder="POI 코드를 입력해주세요." required data-rules="required" data-tagname="POI 코드">
                                 </td>
                             </tr>
                             <tr>
@@ -250,33 +245,29 @@
                                 </td>
                             </tr>
                             <tr class="selectCctv hidden">
-                                <th>CCTV</th>
+                                <th>지정카메라</th>
                                 <td colspan="3">
-                                    <div class="cctvTag mb-1"></div>
-                                    <div class="searchCctv input-group">
-                                        <select class="SearchCctvType form-select flex-grow-1">
-                                            <option value="name">POI 이름</option>
-                                            <option value="code">POI 코드</option>
-                                        </select>
-                                        <input type="text" name="searchText" class="form-control searchText" style="flex-grow:3;"placeholder="검색어를 입력하세요." aria-label="검색어" aria-describedby="button-addon2"/>
-                                    </div>
-                                    <div class="searchCctvList pt-1 pb-1" style="height:11rem; overflow-y:auto">
-                                        <table class="table table-bordered mb-0">
-                                            <colgroup>
-                                                <col style="width:15%">
-                                                <col style="width:42.5%">
-                                                <col style="width:42.5%">
-                                            </colgroup>
-                                            <thead>
-                                            <tr>
-                                                <th>선택</th>
-                                                <th>POI 이름</th>
-                                                <th>POI 코드</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
+                                    <input type="text" name="mainCctv" id="mainCctvModify" class="form-control" placeholder="지정카메라를 입력해주세요." data-tagname="지정카메라">
+                                </td>
+                            </tr>
+                            <tr class="selectCctv hidden">
+                                <th>주변카메라</th>
+                                <td colspan="3">
+                                    <input type="text" name="subCctv1" id="subCctv1Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 1"
+                                           data-tagname="주변카메라 1">
+                                    <br>
+                                    <input type="text" name="subCctv2" id="subCctv2Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 2"
+                                           data-tagname="주변카메라 2">
+                                    <br>
+                                    <input type="text" name="subCctv3" id="subCctv3Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 3"
+                                           data-tagname="주변카메라 3">
+                                    <br>
+                                    <input type="text" name="subCctv4" id="subCctv4Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 4"
+                                           data-tagname="주변카메라 4">
                                 </td>
                             </tr>
                             </tbody>

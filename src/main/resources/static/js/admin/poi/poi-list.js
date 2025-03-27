@@ -1,9 +1,41 @@
 const data = {};
 const RECORD_SIZE = 10;
+initCctv();
+function initCctv() {
+    const dummyCanvas = document.createElement("canvas");
+    dummyCanvas.width = 640;
+    dummyCanvas.height = 480;
+    let pluxPlayer = new PluxPlayer({
+        wsRelayUrl: "http://127.0.0.1",
+        wsRelayPort: 4001,
+        httpRelayUrl: "http://127.0.0.1",
+        httpRelayPort: 4002,
 
+        canvasDom: dummyCanvas,
+        LG_server_ip: "192.168.4.45",
+        LG_server_port: "9100",
+
+        LG_live_port: "555",
+        LG_playback_port: "554"
+    })
+
+    pluxPlayer.getDeviceInfo(function(cameraList) {
+        const params = {
+            cameraList: cameraList.map(camera => ({
+                url: camera["ns1:strIPAddress"],
+                code: camera["ns1:strCameraID"],
+                name: camera["ns1:strName"]
+            }))
+        }
+        console.log("params : ", params);
+
+        // api.post('/cctv', params).then((res) => {
+        //     console.log("parma : ", params)
+        // });
+    });
+}
 const dataManufacturer = (rowData) =>
     rowData.map((poi) => {
-        console.log("data : ", data);
         const { id, name, code, buildingId, floorId, poiCategoryId, poiMiddleCategoryId, position } = poi;
         return [
             id,
@@ -206,7 +238,6 @@ const initializePoiAndBuildingAndPoiCategory = async () => {
 
 document.getElementById('selectPoiCategoryIdRegister').addEventListener('change', function() {
     const selectedCategoryId = this.value;
-    console.log("선택된 POI 카테고리 ID:", selectedCategoryId);
 
     const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == selectedCategoryId);
     initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
@@ -219,10 +250,54 @@ document.getElementById('selectPoiCategoryIdModify').addEventListener('change', 
     initializeSelectTag(filteredMiddleCategories, getMiddleCategorySelectTags());
 });
 
+const dummyCanvas = document.createElement("canvas");
+dummyCanvas.width = 640;
+dummyCanvas.height = 480;
+
+const pluxPlayer = new PluxPlayer({
+    wsRelayUrl: "http://127.0.0.1",
+    wsRelayPort: 4001,
+    httpRelayUrl: "http://127.0.0.1",
+    httpRelayPort: 4002,
+    canvasDom: dummyCanvas,
+    LG_server_ip: "192.168.4.45",
+    LG_server_port: "9100",
+    LG_live_port: "555",
+    LG_playback_port: "554"
+});
+
+function getCctvList(callback) {
+    pluxPlayer.getDeviceInfo(function(cameraList) {
+        const cameraInfoList = cameraList.map(camera => ({
+            ipAddress: camera["ns1:strIPAddress"],
+            cameraID: camera["ns1:strCameraID"],
+            cameraName: camera["ns1:strName"]
+        }));
+        callback(cameraInfoList);
+    });
+}
+
 const registerModal = document.querySelector('#poiRegisterModal');
 registerModal.addEventListener('show.bs.modal', () => {
+
     registerModal.querySelector('form').reset();
-    registerModal.querySelector('.selectCctv').classList.add('hidden');
+    document.querySelectorAll('.selectCctv').forEach(row => {
+        row.classList.add('hidden');
+        row.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = true;
+        });
+    });
+    const form = document.querySelector('#poiRegisterForm');
+    const poiCategorySelect = form.querySelector('#selectPoiCategoryIdRegister');
+
+    poiCategorySelect.addEventListener('change', function(event) {
+        const selectedText = poiCategorySelect.options[poiCategorySelect.selectedIndex].text.trim().toLowerCase();
+        const selectedValue = poiCategorySelect.options[poiCategorySelect.selectedIndex].value;
+        if (!selectedValue) {
+            return;
+        }
+        toggleCctvSectionByCategory(selectedText, "Register");
+    });
 });
 
 const modifyModal = document.querySelector('#poiModifyModal');
@@ -252,13 +327,58 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
     const form = document.querySelector('#poiModifyForm');
     form.dataset.id = modifyPoiData.id;
 
-    if(poiCategory.name.includes('센서')) {
-        form.querySelector('.selectCctv').classList.remove('hidden');
-        removeAllTags('Modify');
-        addTags('Modify', modifyPoiData.poiCameras.map(camera => camera.code));
-        renderCctvPoi(form);
+    const cctvRows = form.querySelectorAll('.selectCctv');
+    if (poiCategory.name.toLowerCase() !== 'cctv') {
+
+        cctvRows.forEach(row => {
+            row.classList.remove('hidden');
+            row.querySelectorAll('input, select, textarea').forEach(field => {
+                field.disabled = false;
+            });
+        });
+        const cctvList = modifyPoiData.cctvList || [];
+        const mainCctv = cctvList.find(c => c.isMain === "Y");
+        modifyModal.querySelector("#mainCctvModify").value = mainCctv ? mainCctv.code : "";
+
+        const subCctvs = cctvList.filter(c => c.isMain !== "Y");
+        const subCctvInputs = modifyModal.querySelectorAll('.sub-cctv');
+
+        subCctvInputs.forEach((input, index) => {
+            input.value = subCctvs[index] ? subCctvs[index].code : "";
+        });
+    } else {
+        cctvRows.forEach(row => {
+            row.classList.add('hidden');
+            row.querySelectorAll('input, select, textarea').forEach(field => {
+                field.disabled = true;
+                field.value = "";
+            });
+        });
     }
+    const poiCategorySelect = modifyModal.querySelector('#selectPoiCategoryIdModify');
+    poiCategorySelect.addEventListener('change', (e) => {
+        const selectedValue = poiCategorySelect.options[poiCategorySelect.selectedIndex].value
+        const selectedText = poiCategorySelect.options[poiCategorySelect.selectedIndex].text.trim().toLowerCase();
+        if (!selectedValue) {
+            return;
+        }
+        toggleCctvSectionByCategory(selectedText, "Modify");
+    });
 });
+
+function toggleCctvSectionByCategory(categoryName, type) {
+    const isCctv = categoryName.toLowerCase() === 'cctv';
+    const form = document.querySelector(`#poi${type}Form`);
+    const cctvRows = form.querySelectorAll('.selectCctv');
+
+    cctvRows.forEach(row => {
+        row.classList.toggle('hidden', isCctv);
+        row.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = isCctv;
+        });
+    });
+}
+
 function getTagNames(type) {
     const tagInput = document.querySelector(`#tag${type}`);
     if (!tagInput) return [];
@@ -302,6 +422,26 @@ function getTagNames(type) {
         params.name = document.querySelector(`#poiName${type}`).value;
         // params.tagNames = document.querySelector(`#tag${type}`).value;
         params.tagNames = getTagNames(`${type}`);
+        if (!poiCategory.name.toLowerCase().includes('cctv')) {
+            params.cctvList = [];
+            const mainCctvValue = document.querySelector(`#mainCctv${type}`).value;
+            if (mainCctvValue.trim() !== "") {
+                params.cctvList.push({
+                    code: mainCctvValue,
+                    isMain: "Y"
+                });
+            }
+            const subCctvFields = document.querySelectorAll('.sub-cctv');
+            subCctvFields.forEach(field => {
+                const val = field.value;
+                if (val.trim() !== "") {
+                    params.cctvList.push({
+                        code: val,
+                        isMain: "N"
+                    });
+                }
+            });
+        }
 
         if(poiCategory.name.includes('센서')) {
             params.poiCameraIds = data.poi.filter((poi) => getAllTagValues(type).indexOf(poi.code) > -1).map(poi => poi.id);
@@ -597,27 +737,27 @@ const renderCctvPoi = (form, searchData = null) => {
         })
     }
 }
-document.querySelectorAll('form select[name=poiCategoryId]').forEach((categorySelect) => {
-    categorySelect.addEventListener('change', (event) => {
-        const form = event.target.closest('form');
-        const selectCctvArea = form.querySelector('.selectCctv');
-
-        if(event.target.selectedOptions[0].innerText.includes('센서')) {
-            selectCctvArea.classList.remove('hidden');
-            if(form.id.includes('Register')) {
-                removeAllTags('Register');
-            }
-            renderCctvPoi(form);
-
-        } else {
-            selectCctvArea.classList.add('hidden');
-            form.querySelector('.searchCctvList tbody').innerHTML = '';
-            if(form.id.includes('Register')) {
-                removeAllTags('Register');
-            }
-        }
-    })
-})
+// document.querySelectorAll('form select[name=poiCategoryId]').forEach((categorySelect) => {
+//     categorySelect.addEventListener('change', (event) => {
+//         const form = event.target.closest('form');
+//         const selectCctvArea = form.querySelector('.selectCctv');
+//
+//         if(event.target.selectedOptions[0].innerText.includes('센서')) {
+//             selectCctvArea.classList.remove('hidden');
+//             if(form.id.includes('Register')) {
+//                 removeAllTags('Register');
+//             }
+//             renderCctvPoi(form);
+//
+//         } else {
+//             selectCctvArea.classList.add('hidden');
+//             form.querySelector('.searchCctvList tbody').innerHTML = '';
+//             if(form.id.includes('Register')) {
+//                 removeAllTags('Register');
+//             }
+//         }
+//     })
+// })
 
 document.querySelectorAll(
     '#selectBuildingIdRegister' +

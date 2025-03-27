@@ -1,5 +1,7 @@
 package com.pluxity.ktds.domains.building.dto;
 
+import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
+import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,7 +38,8 @@ public record UpdatePoiDTO(
         @NotNull(message = "아이콘셋 아이디는 필수 입니다.")
         @Digits(integer = 20, fraction = 0, message = "아이콘셋 아이디는 20자리 이하의 숫자 입니다.")
         Long iconSetId,
-        List<String> tagNames
+        List<String> tagNames,
+        List<PoiCctvDTO> cctvList
 
 ) {
 }

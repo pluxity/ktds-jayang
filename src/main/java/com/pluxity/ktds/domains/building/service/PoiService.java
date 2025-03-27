@@ -11,6 +11,11 @@ import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
+import com.pluxity.ktds.domains.cctv.entity.Cctv;
+import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
+import com.pluxity.ktds.domains.cctv.repository.CctvRepository;
+import com.pluxity.ktds.domains.cctv.repository.PoiCctvRepository;
 import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
@@ -36,6 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -55,6 +61,9 @@ public class PoiService {
     private final IconSetRepository iconSetRepository;
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
     private final EventRepository eventRepository;
+    private final CctvRepository cctvRepository;
+    private final PoiCctvRepository poiCctvRepository;
+
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI));
@@ -97,8 +106,34 @@ public class PoiService {
 
     @Transactional(readOnly = true)
     public List<PoiDetailResponseDTO> findAllDetail() {
-        return poiRepository.findAll().stream()
-                .map(Poi::toDetailResponseDTO)
+        List<Poi> poiList = poiRepository.findAll();
+
+        return poiList.stream()
+                .map(poi -> {
+                    List<PoiCctv> cctvs = poiCctvRepository.findAllByPoi(poi);
+
+                    List<PoiCctvDTO> cctvDtoList = cctvs.stream()
+                            .map(PoiCctvDTO::from)
+                            .toList();
+
+                    PoiDetailResponseDTO base = poi.toDetailResponseDTO();
+
+                    return PoiDetailResponseDTO.builder()
+                            .id(base.id())
+                            .buildingId(base.buildingId())
+                            .floorId(base.floorId())
+                            .poiCategoryId(base.poiCategoryId())
+                            .poiMiddleCategoryId(base.poiMiddleCategoryId())
+                            .iconSetId(base.iconSetId())
+                            .position(base.position())
+                            .rotation(base.rotation())
+                            .scale(base.scale())
+                            .name(base.name())
+                            .code(base.code())
+                            .tagNames(base.tagNames())
+                            .cctvList(cctvDtoList)
+                            .build();
+                })
                 .toList();
     }
 
@@ -130,7 +165,19 @@ public class PoiService {
         updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
 
-        return poiRepository.save(poi).getId();
+        if (dto.cctvList() != null && !dto.cctvList().isEmpty()) {
+            List<PoiCctv> cctvEntities = dto.cctvList().stream()
+                    .map(cctvData -> PoiCctv.builder()
+                            .poi(poi)
+                            .code(cctvData.code())
+                            .isMain(cctvData.isMain())
+                            .build())
+                    .toList();
+            poi.getPoiCctvs().addAll(cctvEntities);
+        }
+        Poi savedPoi = poiRepository.save(poi);
+
+        return savedPoi.getId();
     }
 
     private void validateAssociation(CreatePoiDTO dto) {
@@ -181,7 +228,14 @@ public class PoiService {
         validateUpdateCode(dto, poi);
         validateAssociation(dto);
 
-        poi.update(dto.name(), dto.code(), dto.tagNames());
+        List<PoiCctv> newCctvs = dto.cctvList().stream()
+                .map(c -> PoiCctv.builder()
+                        .poi(poi)
+                        .code(c.code())
+                        .isMain(c.isMain())
+                        .build())
+                .toList();
+        poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs);
 
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);

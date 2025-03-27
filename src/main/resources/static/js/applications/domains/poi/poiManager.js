@@ -2,7 +2,7 @@ const PoiManager = (() => {
     let poiList = [];
 
     const dtoToModel = (poiDto) => {
-        const { id, name, code, poiCategoryId, poiMiddleCategoryId, iconSetId, buildingId, floorId, position, rotation, scale, tagNames } = poiDto;
+        const { id, name, code, poiCategoryId, poiMiddleCategoryId, iconSetId, buildingId, floorId, position, rotation, scale, tagNames, cctvList } = poiDto;
         return new Poi(
             id,
             name,
@@ -17,6 +17,7 @@ const PoiManager = (() => {
             scale,
             poiDto,
             tagNames,
+            cctvList,
         );
     };
 
@@ -183,7 +184,6 @@ const PoiManager = (() => {
 
     const findByPoiCategory = (buildingId = '', floorId = '', poiCategoryId) => {
         let filteringPoiList = poiList;
-
         if (buildingId !== '') {
             filteringPoiList = filteringPoiList.filter((poi) => poi.buildingId === Number(buildingId));
         }

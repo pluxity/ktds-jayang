@@ -133,8 +133,6 @@ const getPoiMiddleCategoryInfoList = async () => {
             const filteredMiddleCategories = data.poiMiddleCategory.filter(
                 middle => middle.poiCategory.id == selectedMajorId
             );
-            console.log("filteredMiddleCategories : ", filteredMiddleCategories);
-            console.log("selectedMajorId : ", selectedMajorId);
 
             let optionHtml = '';
             if (filteredMiddleCategories.length > 0) {

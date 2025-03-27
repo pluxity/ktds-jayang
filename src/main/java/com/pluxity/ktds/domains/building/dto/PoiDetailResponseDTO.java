@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.building.dto;
 
 import com.pluxity.ktds.domains.building.entity.Spatial;
+import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import lombok.Builder;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public record PoiDetailResponseDTO(
         Spatial scale,
         String name,
         String code,
-        List<String> tagNames
-
+        List<String> tagNames,
+        List<PoiCctvDTO> cctvList
 ) {
 }

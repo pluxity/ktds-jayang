@@ -10,6 +10,7 @@ class Poi {
     #iconUrl;
     #property;
     #tagNames;
+    #cctvList;
 
     constructor(
         id,
@@ -25,6 +26,7 @@ class Poi {
         scale,
         property,
         tagNames,
+        cctvList,
     ) {
         this.#id = id;
         this.#name = name;
@@ -46,7 +48,7 @@ class Poi {
         this.#buildingId = buildingId;
         this.#floorId = floorId;
         this.#tagNames = tagNames;
-
+        this.#cctvList = cctvList;
     }
 
     get id() {
@@ -92,6 +94,9 @@ class Poi {
     }
     get tagNames() {
         return this.#tagNames;
+    }
+    get cctvList() {
+        return this.#cctvList;
     }
     // Px.Poi.Add 용
     get poiOptions() {

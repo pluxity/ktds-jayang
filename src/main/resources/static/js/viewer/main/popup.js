@@ -1574,9 +1574,6 @@ const layerPopup = (function () {
 
         startDateInput.value = formatToDateInput(firstDayOfMonth);
         endDateInput.value = formatToDateInput(now);
-
-        console.log("start :", getTimestamp(startDateInput.value));
-        console.log("end :", getTimestamp(endDateInput.value));
     }
 
     const updateBuildingSelectBox = (buildingList) => {
@@ -1774,6 +1771,66 @@ const layerPopup = (function () {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
+    function createEventCheck(alarmTypes, listElementId) {
+        const listEl = document.getElementById(listElementId);
+        if (!listEl) {
+            console.warn(`Element with id "${listElementId}" not found.`);
+            return;
+        }
+        listEl.innerHTML = "";
+
+        const defaultLi = document.createElement("li");
+        defaultLi.innerHTML = `
+            <span class="checkbox-wrap">
+              <input type="checkbox" id="allEventCheck">
+              <label for="allEventCheck">이벤트 전체</label>
+            </span>
+          `;
+        listEl.appendChild(defaultLi);
+
+        const allCheckbox = document.getElementById("allEventCheck");
+        allCheckbox.addEventListener("change", function() {
+            const checked = this.checked;
+            const checkboxes = listEl.querySelectorAll("input[type='checkbox']");
+            checkboxes.forEach(checkbox => {
+                if (checkbox.id !== "allEventCheck") {
+                    checkbox.checked = checked;
+                }
+            });
+        });
+
+        alarmTypes.forEach((alarm, index) => {
+            const checkId = "check" + (index + 1).toString().padStart(2, "0");
+            const li = document.createElement("li");
+            li.innerHTML = `
+              <span class="checkbox-wrap">
+                <input type="checkbox" id="${checkId}">
+                <label for="${checkId}">${alarm.label}</label>
+              </span>
+            `;
+            listEl.appendChild(li);
+        });
+
+        const individualCheckboxes = listEl.querySelectorAll("input[type='checkbox']:not(#allEventCheck)");
+        individualCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", function() {
+                if (!this.checked) {
+                    allCheckbox.checked = false;
+                } else {
+                    const allChecked = Array.from(individualCheckboxes).every(cb => cb.checked);
+                    allCheckbox.checked = allChecked;
+                }
+            });
+        });
+    }
+
+    document.getElementById("eventOpenBtn").addEventListener("click", function() {
+        const container = this.closest(".search-result__checkbox");
+        if (container) {
+            container.classList.toggle("search-result__checkbox--active");
+        }
+    });
+
     let globalAlarmList = [];
     let poiList = [];
 
@@ -1786,6 +1843,19 @@ const layerPopup = (function () {
             const poiListData = await PoiManager.getPoiList();
             updatePoiSelectBox(poiListData);
             setDatePicker();
+            const alarmTypes = [
+                { value: 0, label: "Normal" },
+                { value: 255, label: "복귀" },
+                { value: 1, label: "ON Alarm" },
+                { value: 2, label: "OFF Alarm" },
+                { value: 3, label: "Low-Low Alarm" },
+                { value: 4, label: "Low-High Alarm" },
+                { value: 5, label: "High-Low Alarm" },
+                { value: 6, label: "High-High Alarm" },
+                { value: 7, label: "Off State Alarm" },
+                { value: 8, label: "On State Alarm" }
+            ];
+            createEventCheck(alarmTypes, "eventCheckBoxList");
         }
 
         const buildingBtn = document.querySelector('#eventBuildingSelect .select-box__btn');
@@ -1848,17 +1918,27 @@ const layerPopup = (function () {
                 });
             }
 
-            if (alarmTypeInput !== '') {
-                const searchTerm = alarmTypeInput.toLowerCase();
+            const deviceNmInput = document.getElementById('eventSearchInput').value.trim();
+            if (deviceNmInput !== '') {
+                const searchTerm = deviceNmInput.toLowerCase();
                 searchedAlarms = searchedAlarms.filter((alarm) => {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
-                    return taggedPoi && (
-                        (alarm.alarmType && alarm.alarmType.toLowerCase().includes(searchTerm)) ||
-                        (taggedPoi.property.poiMiddleCategoryName && taggedPoi.property.poiMiddleCategoryName.toLowerCase().includes(searchTerm)) ||
-                        (taggedPoi.name && taggedPoi.name.toLowerCase().includes(searchTerm))
-                    );
+                    return taggedPoi && taggedPoi.name && taggedPoi.name.toLowerCase().includes(searchTerm);
+                });
+            }
+
+            const checkedBoxes = document.querySelectorAll("#eventCheckBoxList input[type='checkbox']:checked");
+            if (checkedBoxes.length > 0) {
+                // 체크된 체크박스의 레이블 텍스트를 소문자 배열로 생성
+                const checkedAlarmTypes = Array.from(checkedBoxes).map(box => {
+                    const labelEl = box.nextElementSibling;
+                    return labelEl ? labelEl.textContent.trim().toLowerCase() : "";
+                });
+                searchedAlarms = searchedAlarms.filter((alarm) => {
+                    // alarm.alarmType가 enum이거나 문자열일 때, 체크된 항목 중 하나와 정확히 일치하는 경우만 필터링
+                    return alarm.alarmType && checkedAlarmTypes.includes(alarm.alarmType.toLowerCase());
                 });
             }
 

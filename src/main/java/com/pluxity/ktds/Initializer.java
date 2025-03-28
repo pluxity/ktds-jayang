@@ -1,6 +1,9 @@
 package com.pluxity.ktds;
 
+import com.pluxity.ktds.domains.building.dto.CreateBuildingDTO;
 import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
+import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
+import com.pluxity.ktds.domains.building.service.BuildingService;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
@@ -21,14 +24,19 @@ import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
+import com.pluxity.ktds.global.utils.CustomMultipartFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -45,6 +53,8 @@ public class Initializer implements CommandLineRunner {
     private final SaveImage imageStrategy;
     private final IconSetRepository iconSetRepository;
     private final PoiCategoryRepository poiCategoryRepository;
+    private final BuildingRepository buildingRepository;
+    private final BuildingService buildingService;
     private static final String ICON_RESOURCE_PATH = "static/images/viewer/categoryIcon";
 
     @Override
@@ -84,6 +94,37 @@ public class Initializer implements CommandLineRunner {
             }
         }
 
+        if (!buildingRepository.existsByIsIndoor("N")) {
+            try {
+                Resource resource = new ClassPathResource("static/assets/modeling/outside/KTDS_Out_All_250109.zip");
+                byte[] fileContent;
+                try (InputStream is = resource.getInputStream()) {
+                    fileContent = is.readAllBytes();
+                }
+
+                MultipartFile multipartFile = new CustomMultipartFile(
+                        resource.getFilename(),
+                        resource.getFilename(),
+                        "application/zip",
+                        fileContent
+                );
+                FileInfoDTO fileInfoDTO = buildingService.saveFile(multipartFile);
+
+                CreateBuildingDTO dto = CreateBuildingDTO.builder()
+                        .code("Outdoor")
+                        .description("외부 전경")
+                        .fileInfoId(fileInfoDTO.id())
+                        .isIndoor("N")
+                        .name("외부 전경")
+                        .build();
+
+                Long buildingId = buildingService.saveBuilding(dto);
+                System.out.println("Outdoor building created with id: " + buildingId);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private List<UserGroup> getUserGroups() {
@@ -109,7 +150,7 @@ public class Initializer implements CommandLineRunner {
 
         try {
             FileInfoDTO fileInfo = fileInfoService.saveFile(file, FileEntityType.ICON2D, imageStrategy);
-            String fileNameWithoutExt = fileInfo.originName().replace("." + fileInfo.extension(), "");
+            String fileNameWithoutExt = fileInfo.originName().replace("." + fileInfo.extension(), "").toUpperCase();
             if ("svg".equalsIgnoreCase(fileInfo.extension())) {
                 IconSetRequestDTO iconSetRequestDTO = IconSetRequestDTO.builder()
                         .name(fileNameWithoutExt)

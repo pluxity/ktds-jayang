@@ -53,4 +53,5 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
 //    Building findFirstByIsIndoorN(Pageable pageable);
 
     Optional<Building> findTop1ByIsIndoorOrderByIdDesc(String isIndoor);
+    boolean existsByIsIndoor(String isIndoor);
 }

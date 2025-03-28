@@ -61,7 +61,7 @@
             });
         })
     });
-    await Init.initializeOutdoorBuilding();
+
     // viewer에만
     await BuildingManager.getOutdoorBuilding().then((outdoorBuilding) => {
         loadBuildingInfo(outdoorBuilding.id, async () => {
@@ -246,14 +246,11 @@ const Init = (function () {
         // floor setting
         const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
         floors.forEach(floor => {
-
-            const floorUl = document.querySelector('#floor-info .floor-info__detail ul');
             const floorLi = document.createElement('li');
             floorLi.setAttribute('floor-id', floor.id);
             floorLi.textContent = floor.name
             floorUl.appendChild(floorLi);
         })
-
         clickFloor();
     }
     const clickFloor = () => {

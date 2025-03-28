@@ -71,7 +71,6 @@ public class BuildingService {
     @Transactional(readOnly = true)
     public List<BuildingResponseDTO> findAll() {
         return buildingRepository.findAll().stream()
-                .filter(building -> "Y".equals(building.getIsIndoor()))
                 .map(Building::toResponseDTO)
                 .toList();
     }
@@ -79,7 +78,6 @@ public class BuildingService {
     @Transactional(readOnly = true)
     public List<BuildingDetailResponseDTO> findDetailAll() {
         return buildingRepository.findAll().stream()
-                .filter(building -> "Y".equals(building.getIsIndoor()))
                 .map(Building::toDetailResponseDTO)
                 .toList();
     }

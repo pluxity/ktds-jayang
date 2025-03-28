@@ -33,10 +33,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -84,13 +83,21 @@ public class Initializer implements CommandLineRunner {
 
         // resources/icon default 추가
         if (iconSetRepository.findAll().isEmpty()) {
-            ClassPathResource resource = new ClassPathResource(ICON_RESOURCE_PATH);
-            File directory = resource.getFile();
-            File[] files = Objects.requireNonNull(directory.listFiles());
-            for (File file : files) {
-                if (file.isFile()) {
-                    uploadFile(file);
+            ClassPathResource listResource = new ClassPathResource("static/images/viewer/categoryIcon/filelist.txt");
+
+            try (InputStream is = listResource.getInputStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+
+                String fileName;
+                while ((fileName = reader.readLine()) != null) {
+                    if (!fileName.trim().isEmpty()) {
+                        ClassPathResource fileResource = new ClassPathResource("static/images/viewer/categoryIcon/" + fileName);
+                        uploadFile(fileResource);
+                    }
                 }
+
+            } catch (IOException e) {
+                throw new CustomException(ErrorCode.INVALID_FILE);
             }
         }
 
@@ -183,6 +190,47 @@ public class Initializer implements CommandLineRunner {
         if (iconFileId != null) {
             FileInfo fileInfo = fileInfoService.findById(iconFileId);
             updater.accept(fileInfo);
+        }
+    }
+
+    private FileInfoDTO uploadFile(ClassPathResource resource) throws IOException {
+        try (InputStream is = resource.getInputStream()) {
+            String fileName = resource.getFilename();
+            MultipartFile multipartFile = new CustomMultipartFile(
+                    fileName,
+                    fileName,
+                    Files.probeContentType(Paths.get(fileName)),
+                    is.readAllBytes()
+            );
+
+            FileInfoDTO fileInfo = fileInfoService.saveFile(multipartFile, FileEntityType.ICON2D, imageStrategy);
+
+            String fileNameWithoutExt = fileInfo.originName().replace("." + fileInfo.extension(), "").toUpperCase();
+            if ("svg".equalsIgnoreCase(fileInfo.extension())) {
+                IconSetRequestDTO iconSetRequestDTO = IconSetRequestDTO.builder()
+                        .name(fileNameWithoutExt)
+                        .iconFile2DId(fileInfo.id())
+                        .build();
+                IconSet iconSet = IconSet.builder()
+                        .name(iconSetRequestDTO.name())
+                        .build();
+
+                updateIcons(iconSetRequestDTO.iconFile2DId(), iconSet::updateFileInfo2D);
+                updateIcons(iconSetRequestDTO.iconFile3DId(), iconSet::updateFileInfo3D);
+
+                IconSet savedIconSet = iconSetRepository.save(iconSet);
+
+                PoiCategory poiCategory = PoiCategory.builder()
+                        .name(fileNameWithoutExt)
+                        .build();
+                poiCategory.updateImageFile(savedIconSet.getIconFile2D());
+                poiCategory.updateIconSets(List.of(savedIconSet));
+                poiCategoryRepository.save(poiCategory);
+            }
+
+            return fileInfo;
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.INVALID_FILE);
         }
     }
 }

@@ -1759,6 +1759,21 @@ const layerPopup = (function () {
         console.log("start : ", getTimestamp(event.target.value));
     });
 
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return "-";
+        const date = new Date(dateTimeStr);
+        const pad = (num) => String(num).padStart(2, '0');
+
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = pad(date.getSeconds());
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
     let globalAlarmList = [];
     let poiList = [];
 
@@ -1829,7 +1844,7 @@ const layerPopup = (function () {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
-                    return taggedPoi && taggedPoi.property.deviceType === selectedDeviceType;
+                    return taggedPoi && taggedPoi.property.poiMiddleCategoryName === selectedDeviceType;
                 });
             }
 
@@ -1883,8 +1898,8 @@ const layerPopup = (function () {
                             <td>${data.alarmType || '-'}</td>
                             <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
                             <td>${taggedPoi.name || '-'}</td>
-                            <td>${formattedOccurrenceDate || '-'}</td>
-                            <td>${formattedConfirmTime || '-'}</td>
+                            <td>${formatDateTime(data.occurrenceDate) || '-'}</td>
+                            <td>${formatDateTime(data.confirmDate) || '-'}</td>
                             <td>
                                 <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
                                     <span class="hide">도면 이동</span>
@@ -1936,15 +1951,6 @@ const layerPopup = (function () {
     document.getElementById('eventSearchBtn').addEventListener('click', async () => {
         await createEventPopup(false);
     });
-
-    const formatDateTime = (isoString) => {
-        if (!isoString) return '-';
-
-        const date = new Date(isoString);
-        if (isNaN(date.getTime())) return '-';
-        const pad = (num) => num.toString().padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-    };
 
     const eventLayerPopup = document.getElementById('eventLayerPopup');
     const refreshBtn = eventLayerPopup.querySelector('.reflesh');

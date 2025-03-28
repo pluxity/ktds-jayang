@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.event.entity;
 
+import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -64,4 +65,20 @@ public class Alarm {
     public void updateConfirmTime(LocalDateTime confirmTime) {
         this.confirmTime = confirmTime;
     }
+
+    public AlarmResponseDTO toResponseDTO() {
+        return AlarmResponseDTO.builder()
+                .id(this.getId())
+                .deviceCd(this.deviceCd)
+                .deviceNm(this.deviceNm)
+                .alarmType(this.alarmType.getStatus())
+                .tagName(this.tagName)
+                .buildingNm(this.buildingNm)
+                .floorNm(this.floorNm)
+                .process(this.process)
+                .occurrenceDate(this.occurrenceDate)
+                .confirmDate(this.confirmTime)
+                .build();
+    }
+
 }

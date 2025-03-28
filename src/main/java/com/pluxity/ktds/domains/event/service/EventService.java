@@ -1,5 +1,8 @@
 package com.pluxity.ktds.domains.event.service;
 
+import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
+import com.pluxity.ktds.domains.building.entity.Poi;
+import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
@@ -20,7 +23,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.INVALID_REQUEST;
@@ -36,6 +41,7 @@ public class EventService {
 //    private final PollingClientService pollingClientService;
     private final AlarmDisablePublisher alarmDisablePublisher;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final PoiRepository poiRepository;
 
     @Transactional(readOnly = true)
     public List<AlarmResponseDTO> findUnDisableAlarms() {
@@ -137,7 +143,7 @@ public class EventService {
         return alarms;
     }
 
-    public List<Alarm> getAlarmList(String startDateString, String endDateString,
+    public List<AlarmResponseDTO> getAlarmList(String startDateString, String endDateString,
                                  String buildingNm, String floorNm,
                                  String deviceType, String searchValue) {
 
@@ -155,6 +161,9 @@ public class EventService {
                 searchValue = status.name();
             }
         }
-        return eventRepository.findAlarms(startDate, endDate, buildingNm, floorNm, deviceType, searchValue);
+
+        return eventRepository.findAlarms(startDate, endDate, buildingNm, floorNm, deviceType, searchValue).stream()
+                .map(Alarm::toResponseDTO)
+                .toList();
     }
 }

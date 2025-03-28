@@ -1,5 +1,7 @@
 package com.pluxity.ktds.domains.event.controller;
 
+import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
+import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
@@ -49,7 +51,7 @@ public class AlarmEventController {
     }
 
     @GetMapping("/alarms")
-    public DataResponseBody<List<Alarm>> getAlarmList(
+    public DataResponseBody<List<AlarmResponseDTO>> getAlarmList(
             @RequestParam String startDateString,
             @RequestParam String endDateString,
             @RequestParam(required = false) String buildingNm,
@@ -57,7 +59,7 @@ public class AlarmEventController {
             @RequestParam(required = false) String deviceType,
             @RequestParam(required = false) String searchValue) {
 
-        List<Alarm> alarms = eventService.getAlarmList(startDateString, endDateString,
+        List<AlarmResponseDTO> alarms = eventService.getAlarmList(startDateString, endDateString,
                 buildingNm, floorNm, deviceType, searchValue);
         return DataResponseBody.of(alarms);
     }

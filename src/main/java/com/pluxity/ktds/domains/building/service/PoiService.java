@@ -23,6 +23,7 @@ import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
+import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -63,6 +64,7 @@ public class PoiService {
     private final EventRepository eventRepository;
     private final CctvRepository cctvRepository;
     private final PoiCctvRepository poiCctvRepository;
+    private final TagClientService tagClientService;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -176,6 +178,9 @@ public class PoiService {
             poi.getPoiCctvs().addAll(cctvEntities);
         }
         Poi savedPoi = poiRepository.save(poi);
+        if (dto.tagNames() != null) {
+            tagClientService.addTags(dto.tagNames());
+        }
 
         return savedPoi.getId();
     }
@@ -236,7 +241,9 @@ public class PoiService {
                         .build())
                 .toList();
         poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs);
-
+        if (dto.tagNames() != null) {
+            tagClientService.addTags(dto.tagNames());
+        }
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);

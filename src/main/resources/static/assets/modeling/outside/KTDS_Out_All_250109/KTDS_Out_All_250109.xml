@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project>
+    <ProjectInfo gkxmlVersion="1.2">
+        <Title>KTDS_Out_All_250109</Title>
+    </ProjectInfo>
+    <Building sourceType="GPL" northAxis="0.000000">
+        <EarthReferenceSystem type="WGS84">
+            <altitudeMode>relativeToGround</altitudeMode>
+            <Location>
+                <longitude>126.977829</longitude>
+                <latitude>37.56826019</latitude>
+                <altitude>0</altitude>
+            </Location>
+            <Orientation>
+                <heading>0</heading>
+                <tilt>0.0</tilt>
+                <roll>0.0</roll>
+            </Orientation>
+        </EarthReferenceSystem>
+        <ExportOptions>
+            <Item name="floorMerge" value="false" />
+            <Item name="wallMerge" value="true" />
+        </ExportOptions>
+        <Unit>centimeter</Unit>
+        <DefaultBuilding>false</DefaultBuilding>
+        <DefaultFloor>0</DefaultFloor>
+        <Floors>
+            <Floor id="0" name="1F" baseFloor="1" groupID="0" isMain="True">
+                <FileSource name=".\KTDS_Out_All_250109_1F_0.sbm" type="SBM" />
+                <BoundingBox minimum="-153937.484375, -9532.937500, -180897.187500" maximum="153937.515625, 164836.078125, 180897.156250" />
+            </Floor>
+        </Floors>
+        <SpaceInfo>
+            <Floor id="0" name="1F" longname="980760209" baseFloor="1" level="0.000000" />
+        </SpaceInfo>
+        <ObjectHierarchy>
+            <Entity id="0" name="1F" type="Floor" longname="980760209">
+                <Entity id="5" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T01_0" longname="" type="MERGED" />
+                <Entity id="6" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T02_0" longname="" type="MERGED" />
+                <Entity id="4" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T03_0" longname="" type="MERGED" />
+                <Entity id="3" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T04_0" longname="" type="MERGED" />
+                <Entity id="9" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T05_0" longname="" type="MERGED" />
+                <Entity id="1" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T06_0" longname="" type="MERGED" />
+                <Entity id="8" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T07_0" longname="" type="MERGED" />
+                <Entity id="2" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T08_0" longname="" type="MERGED" />
+                <Entity id="7" name="MERGED_0_KTDS_Out_All/KTDS_Out_All_T09_0" longname="" type="MERGED" />
+            </Entity>
+        </ObjectHierarchy>
+    </Building>
+</Project>

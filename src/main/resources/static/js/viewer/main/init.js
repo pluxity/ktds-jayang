@@ -61,20 +61,20 @@
             });
         })
     });
-
+    await Init.initializeOutdoorBuilding();
     // viewer에만
-    await BuildingManager.getOutdoorBuilding().then((outdoorBuilding) => {
-        loadBuildingInfo(outdoorBuilding.id, async () => {
-            // camPos.setData(mapInfo.camPosJson);
-            await Init.initializeOutdoorBuilding();
-            // 도면 휠 이벤트
-            document
-                .querySelector('canvas')
-                .addEventListener('mousedown wheel resize ', () => {
-                    hidePoiMenu();
-                });
-        });
-    })
+    // await BuildingManager.getOutdoorBuilding().then((outdoorBuilding) => {
+    //     loadBuildingInfo(outdoorBuilding.id, async () => {
+    //         // camPos.setData(mapInfo.camPosJson);
+    //         await Init.initializeOutdoorBuilding();
+    //         // 도면 휠 이벤트
+    //         document
+    //             .querySelector('canvas')
+    //             .addEventListener('mousedown wheel resize ', () => {
+    //                 hidePoiMenu();
+    //             });
+    //     });
+    // })
     function loadBuildingInfo(buildingId, callback) {
         BuildingManager.getBuildingById(buildingId).then((building) => {
             const buildingList = BuildingManager.findAll();
@@ -242,15 +242,24 @@ const Init = (function () {
 
     // init floor
     const initFloors = (buildingId) => {
-        const { floors } = BuildingManager.findById(buildingId);
-        // floor setting
-        const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
-        floors.forEach(floor => {
+        if (buildingId) {
+            const { floors } = BuildingManager.findById(buildingId);
+            // floor setting
+            const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
+            floors.forEach(floor => {
+                const floorLi = document.createElement('li');
+                floorLi.setAttribute('floor-id', floor.id);
+                floorLi.textContent = floor.name
+                floorUl.appendChild(floorLi);
+            })
+        } else {
+            const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
             const floorLi = document.createElement('li');
-            floorLi.setAttribute('floor-id', floor.id);
-            floorLi.textContent = floor.name
+            floorLi.setAttribute('floor-id', 0);
+            floorLi.textContent = '1F'
             floorUl.appendChild(floorLi);
-        })
+        }
+
         clickFloor();
     }
     const clickFloor = () => {
@@ -285,12 +294,12 @@ const Init = (function () {
     const setActiveEquipment = (buildingId) => {
         const equipmentGroup = document.querySelectorAll('#equipmentListPop a');
         const allPois = PoiManager.findAll();
-        const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
+        // const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
         equipmentGroup.forEach(element => {
             if (element) {
                 const categoryId = element.getAttribute("data-category-id");
-                filteredPois.forEach(poi => {
-                    if (categoryId == poi.poiCategory) {
+                allPois.forEach(poi => {
+                    if (poi.position && categoryId == poi.poiCategory) {
                         element.classList.add('active');
                     }
                 });
@@ -305,10 +314,13 @@ const Init = (function () {
             const contents = document.querySelector('.contents');
             const outdoorBuilding = await BuildingManager.getOutdoorBuilding();
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
-            let buildingId = outdoorBuilding.id;
+            let buildingId = outdoorBuilding ? outdoorBuilding.id : null;
             initFloors(buildingId);
-            document.getElementById("buildingName").setAttribute("building-id", buildingId);
-            document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
+            if (buildingId) {
+                document.getElementById("buildingName").setAttribute("building-id", buildingId);
+                document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
+            }
+
             setActiveEquipment(buildingId);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
@@ -355,9 +367,11 @@ const Init = (function () {
                         Px.Effect.Outline.AddHoverEventCallback(
                             throttle(async (event) => {
 
-                                if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
+                                if (outdoorBuilding && outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
                                     const firstFloorId = outdoorBuilding.floors[0].id;
                                     Px.Effect.Outline.Add(firstFloorId);
+                                } else {
+                                    Px.Effect.Outline.Add(0);
                                 }
                             }, 10)
                         );

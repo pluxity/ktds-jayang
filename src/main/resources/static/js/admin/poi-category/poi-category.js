@@ -20,6 +20,7 @@ async function initializeIconSetInSelect() {
 
 document.getElementById('poiMiddleCategoryRegisterModal')
     .addEventListener('shown.bs.modal', function () {
+        document.getElementById('poiMiddleCategoryRegisterForm').reset();
         const categorySelect = document.getElementById('category1');
         const selectedOption = categorySelect.options[categorySelect.selectedIndex];
         if (selectedOption) {

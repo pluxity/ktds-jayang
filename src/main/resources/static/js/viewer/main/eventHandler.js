@@ -607,9 +607,9 @@
             if (searchText && searchText.value.trim() !== '') {
                 searchText.value = '';
             }
-            // poiMenuList.forEach(li => {
-            //     li.classList.remove('active');
-            // });
+            poiMenuList.forEach(li => {
+                li.classList.remove('active');
+            });
             selectBtn.forEach(btn => {
                 if (btn.classList.contains('select-box__btn--active')) {
                     btn.classList.remove('select-box__btn--active');

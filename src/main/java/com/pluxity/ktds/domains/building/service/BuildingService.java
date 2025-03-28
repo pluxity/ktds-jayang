@@ -86,8 +86,10 @@ public class BuildingService {
     public BuildingDetailResponseDTO findOutdoorDetail() {
 
         Building building = buildingRepository.findTop1ByIsIndoorOrderByIdDesc("N")
-                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
-
+                .orElse(null);
+        if (building == null) {
+            return null;
+        }
         return building.toDetailResponseDTO();
     }
 

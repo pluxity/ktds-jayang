@@ -25,14 +25,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-        registry.addResourceHandler("/**")
-                .addResourceLocations("file:" + resourcePath)
-                .setCachePeriod(9600)
-                .resourceChain(true)
-                .addResolver(new PathResourceResolver());
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(20)
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver());
+        registry.addResourceHandler("/**")
+                .addResourceLocations("file:" + resourcePath)
+                .setCachePeriod(9600)
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
         registry.addResourceHandler("/favicon.ico")

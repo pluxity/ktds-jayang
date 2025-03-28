@@ -3,7 +3,7 @@
     await SystemSettingManager.getSystemSetting();
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
-    await PoiMiddleCategoryManager.getPoiCategoryList();
+    await PoiMiddleCategoryManager.getPoiMiddleCategoryList();
     await BuildingManager.getBuildingList().then(() => {
         loadBuildingInfo(BUILDING_ID, async () => {
             // camPos.setData(mapInfo.camPosJson);

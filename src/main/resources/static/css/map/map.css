@@ -2093,8 +2093,8 @@ input[type=text]:disabled, input[type=password]:disabled {
   margin: -3px 0 0 5px;
   width: 14px;
   height: 14px;
-  -webkit-mask-image: url("/static/images/viewer/icon14/Icon14.svg");
-  mask-image: url("/static/images/viewer/icon14/Icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -350px -10px;

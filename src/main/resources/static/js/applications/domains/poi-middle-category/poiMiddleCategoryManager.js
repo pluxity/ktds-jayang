@@ -1,7 +1,7 @@
 const PoiMiddleCategoryManager = (function () {
     let poiMiddleCategoryList = [];
 
-    const getPoiCategoryList = () => {
+    const getPoiMiddleCategoryList = () => {
         const uri = `/poi-middle-categories`;
 
         return new Promise((resolve) => {
@@ -23,7 +23,7 @@ const PoiMiddleCategoryManager = (function () {
     };
 
     return {
-        getPoiCategoryList,
+        getPoiMiddleCategoryList,
         findAll,
         findById,
     };

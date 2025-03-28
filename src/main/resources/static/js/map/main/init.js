@@ -246,7 +246,7 @@
     await NoticeManager.getNotices();
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
-    await PoiMiddleCategoryManager.getPoiCategoryList();
+    await PoiMiddleCategoryManager.getPoiMiddleCategoryList();
 
     await BuildingManager.getBuildingList().then((buildingList) => {
         buildingList.forEach(async (building) => {

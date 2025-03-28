@@ -73,7 +73,9 @@
                 const categoryId = element.getAttribute('data-category-id');
                 filteredPois.forEach(poi => {
                     if (poi.poiCategory == categoryId) {
-                        element.classList.add('active');
+                        if (poi.position !== null) {
+                            element.classList.add('active');
+                        }
                     }
                 });
             });
@@ -417,7 +419,8 @@ const Init = (function () {
             }
 
             Px.Poi.HideAll();
-            filteredList.forEach((poiInfo) => {
+            filteredList
+                .filter(poiInfo => poiInfo.poiCategoryDetail?.name?.toLowerCase() === 'cctv').forEach((poiInfo) => {
                 Px.Poi.Show(poiInfo.id);
             });
         });
@@ -460,6 +463,21 @@ const Init = (function () {
                         moveToPoi(poiInfo.id);
                     });
                     Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
+                        const clickedPoiId = String(poiInfo.id);
+                        const allPopups = document.querySelectorAll('.popup-info');
+                        let samePopupOpen = false;
+                        allPopups.forEach(popup => {
+                            const poiIdInput = popup.querySelector('.poi-id');
+                            const popupPoiId = poiIdInput?.value;
+
+                            if (popupPoiId === clickedPoiId) {
+                                popup.remove();
+                                samePopupOpen = true;
+                            } else {
+                                popup.remove();
+                            }
+                        });
+                        if (samePopupOpen) return;
                         renderPoiInfo(poiInfo);
                     });
                     Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
@@ -543,13 +561,16 @@ const Init = (function () {
         }
     };
 
-    document.addEventListener('mousedown', handleOutsideClick);
+    // document.addEventListener('mousedown', handleOutsideClick);
 
     /**
      * POI 클릭 시 상태 표시
      * - 태그 데이터를 실시간으로 조회하여 표시
      * - 새로고침 버튼으로 갱신
      */
+
+    const activePopups = new Map();
+
     const renderPoiInfo = async (poiInfo) => {
         const poiProperty = poiInfo.property;
         const popupInfo = document.createElement('div');
@@ -557,6 +578,7 @@ const Init = (function () {
         popupInfo.className = 'popup-info';
         popupInfo.innerHTML =
             `<div class="popup-info__head">
+            <input type="hidden" class="poi-id" value="${poiInfo.id}">
             <h2>${poiProperty.poiCategoryName} ${poiProperty.name}</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
@@ -581,7 +603,6 @@ const Init = (function () {
                 </tbody>
             </table>
         </div>`;
-
 
         // poi 상태 가져오기
         const updateTagData = async () => {
@@ -613,7 +634,7 @@ const Init = (function () {
                 }
 
                 // 업데이트 시간 갱신
-                popupInfo.querySelector('.date .timestamp').textContent = 
+                popupInfo.querySelector('.date .timestamp').textContent =
                 `업데이트 일시 : ${new Date().toLocaleString()}`;
             } catch (error) {
                 console.error('태그 데이터 조회 실패:', error);
@@ -650,6 +671,19 @@ const Init = (function () {
         popupInfo.style.top = `${y}px`;
 
         document.body.appendChild(popupInfo);
+
+        const updatePosition = () => {
+            const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
+            popupInfo.style.left = `${x}px`;
+            popupInfo.style.top = `${y}px`;
+
+            if (!activePopups.has(poiInfo.id)) return;
+            requestAnimationFrame(updatePosition);
+
+        };
+
+        activePopups.set(poiInfo.id, { dom: popupInfo });
+        updatePosition();
        
     }
 

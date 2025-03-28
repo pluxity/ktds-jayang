@@ -168,6 +168,16 @@
             layerPopup.closePlayers()
         };
 
+        const currentPopup = document.getElementById('systemPopup');
+        document.querySelectorAll(".popup-basic").forEach(element => {
+            if (element !== currentPopup) {
+                element.style.display = 'none';
+                document.querySelectorAll("#poiMenuList ul li, #poiMenuListMap ul li").forEach(li => {
+                    li.classList.remove("active");
+                })
+            }
+        });
+
         if (isActive) {
             closeAllPopups();
             return;
@@ -250,15 +260,23 @@
         // 기존 팝업 닫기
         const mapLayerPopup = document.getElementById("mapLayerPopup");
         const layerPopup = document.getElementById("layerPopup");
-        if(mapLayerPopup || layerPopup){
+        const systemPopup = document.getElementById("systemPopup");
+        const eventLayerPopup = document.getElementById("eventLayerPopup");
+
+        if(mapLayerPopup || layerPopup || systemPopup || eventLayerPopup){
             mapLayerPopup.style.display = 'none';
             layerPopup.style.display = 'none';
+            systemPopup.style.display = 'none';
+            eventLayerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
             Px.Poi.ShowAll();
             const sopPopup = document.querySelector("#sopLayerPopup");
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
             }
+            document.querySelectorAll(".system-tap ul li").forEach(li => {
+                li.classList.remove("active");
+            })
             resetSelectBoxes();
             resetAccordions();
         }

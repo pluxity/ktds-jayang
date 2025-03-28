@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.building.repostiory;
 
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
+import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,6 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     Poi findPoiByTagName(@Param("tagName") String tagName);
 
     boolean existsByName(String name);
+
+    boolean existsByPoiMiddleCategoryId(Long id);
 }

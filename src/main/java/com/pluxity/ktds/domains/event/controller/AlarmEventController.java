@@ -24,7 +24,7 @@ public class AlarmEventController {
     private final EventService eventService;
 
     @GetMapping("/unconfirmed")
-    public DataResponseBody<List<AlarmResponseDTO>> getUnDisableAlarms(){
+    public DataResponseBody<AlarmResponseDTO> getUnDisableAlarms(){
         return DataResponseBody.of(eventService.findUnDisableAlarms());
     }
 

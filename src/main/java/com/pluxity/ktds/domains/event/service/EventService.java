@@ -44,25 +44,8 @@ public class EventService {
     private final PoiRepository poiRepository;
 
     @Transactional(readOnly = true)
-    public List<AlarmResponseDTO> findUnDisableAlarms() {
-        return eventRepository.findUnDisableAlarms()
-        .stream()
-                .map(this::toDto)
-                .toList();
-    }
-
-    private AlarmResponseDTO toDto(Alarm alarm) {
-        return AlarmResponseDTO.builder()
-                .id(alarm.getId())
-                .deviceCd(alarm.getDeviceCd())
-                .deviceNm(alarm.getDeviceNm())
-                .buildingNm(alarm.getBuildingNm())
-                .floorNm(alarm.getFloorNm())
-                .alarmType(alarm.getAlarmType().getStatus())
-                .process(alarm.getProcess())
-                .tagName(alarm.getTagName())
-                .occurrenceDate(alarm.getOccurrenceDate())
-                .build();
+    public AlarmResponseDTO findUnDisableAlarms() {
+        return eventRepository.findUnDisableAlarms().toResponseDTO();
     }
 
     @Transactional(readOnly = true)

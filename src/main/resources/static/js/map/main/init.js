@@ -72,7 +72,7 @@
             elements.forEach(element => {
                 const categoryId = element.getAttribute('data-category-id');
                 filteredPois.forEach(poi => {
-                    if (poi.poiCategory == categoryId) {
+                    if (poi.poiCategory == categoryId && poi.property.poiCategoryName.toLowerCase() == 'cctv') {
                         if (poi.position !== null) {
                             element.classList.add('active');
                         }

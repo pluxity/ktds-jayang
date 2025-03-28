@@ -1700,7 +1700,6 @@ const layerPopup = (function () {
             const poiCategories = Array.from(
                 new Map(poiList.map(poi => [poi.poiMiddleCategoryDetail.id, poi.poiMiddleCategoryDetail])).values()
             );
-            console.log("poi : ", poiList);
 
             const liAll = document.createElement('li');
             liAll.textContent = "전체";
@@ -1763,7 +1762,6 @@ const layerPopup = (function () {
     let globalAlarmList = [];
     let poiList = [];
 
-
     const taggedPoiMap = new Map();
     const createEventPopup = async (reinitializeSelectBoxes = false) => {
         // const buildingList = await BuildingManager.getBuildingList();
@@ -1796,40 +1794,78 @@ const layerPopup = (function () {
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
 
-        if (selectedBuilding !== '전체' && selectedBuilding !== '' && selectedBuilding !== '없음') {
-            params.append('buildingNm', selectedBuilding);
-        }
-        if (selectedFloor !== '전체' && selectedFloor !== '' && selectedFloor !== '없음') {
-            params.append('floorNm', selectedFloor);
-        }
-        if (selectedDeviceType !== '전체' && selectedDeviceType !== '' && selectedDeviceType !== '없음') {
-            params.append('deviceType', selectedDeviceType);
-        }
-        if (alarmTypeInput !== '') {
-            params.append('searchValue', alarmTypeInput);
-        }
-
         api.get(`/events/alarms?${params.toString()}`).then((res) => {
             const { result: data } = res.data;
             globalAlarmList = data;
+
+            const filteredAlarms = data.filter(alarm =>
+                poiList.some(poi =>
+                    poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                )
+            );
+
+            let searchedAlarms = filteredAlarms.slice();
+
+            if (selectedBuilding !== '전체' && selectedBuilding !== '') {
+                searchedAlarms = searchedAlarms.filter((alarm) => {
+                    const taggedPoi = poiList.find(poi =>
+                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                    );
+                    return taggedPoi && taggedPoi.property.buildingName === selectedBuilding;
+                });
+            }
+
+            if (selectedFloor !== '전체' && selectedFloor !== '') {
+                searchedAlarms = searchedAlarms.filter((alarm) => {
+                    const taggedPoi = poiList.find(poi =>
+                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                    );
+                    return taggedPoi && String(taggedPoi.property.floorNo) === selectedFloor;
+                });
+            }
+
+            if (selectedDeviceType !== '전체' && selectedDeviceType !== '') {
+                searchedAlarms = searchedAlarms.filter((alarm) => {
+                    const taggedPoi = poiList.find(poi =>
+                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                    );
+                    return taggedPoi && taggedPoi.property.deviceType === selectedDeviceType;
+                });
+            }
+
+            if (alarmTypeInput !== '') {
+                const searchTerm = alarmTypeInput.toLowerCase();
+                searchedAlarms = searchedAlarms.filter((alarm) => {
+                    const taggedPoi = poiList.find(poi =>
+                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                    );
+                    return taggedPoi && (
+                        (alarm.alarmType && alarm.alarmType.toLowerCase().includes(searchTerm)) ||
+                        (taggedPoi.property.poiMiddleCategoryName && taggedPoi.property.poiMiddleCategoryName.toLowerCase().includes(searchTerm)) ||
+                        (taggedPoi.name && taggedPoi.name.toLowerCase().includes(searchTerm))
+                    );
+                });
+            }
+
             const eventPopup = document.querySelector('#eventLayerPopup');
             eventPopup.style.position = 'absolute';
             eventPopup.style.top = '50%';
             eventPopup.style.left = '50%';
             eventPopup.style.transform = 'translate(-50%, -50%)';
             eventPopup.style.display = 'inline-block';
-            alarmCountEl.textContent = data.length.toLocaleString();
+            alarmCountEl.textContent = searchedAlarms.length.toLocaleString();
             // 페이지당 10개씩
             const itemsPerPage = 10;
             let currentPage = 1;
-            const totalPages = Math.ceil(data.length / itemsPerPage);
+            const totalPages = Math.ceil(searchedAlarms.length / itemsPerPage);
             const paginationContainer = document.querySelector(".search-result__paging .number");
 
             const renderTable = (page) => {
                 tableBody.innerHTML = "";
                 const startIndex = (page - 1) * itemsPerPage;
-                const pageAlarms = data.slice(startIndex, startIndex + itemsPerPage);
+                const pageAlarms = searchedAlarms.slice(startIndex, startIndex + itemsPerPage);
                 pageAlarms.forEach((data) => {
+
                     const eventRow = document.createElement('tr');
                     const [formattedOccurrenceDate, formattedConfirmTime] =
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
@@ -1841,24 +1877,23 @@ const layerPopup = (function () {
                     );
 
                     if (taggedPoi) {
+                        eventRow.innerHTML = `
+                            <td>${taggedPoi.property.buildingName || '-'}</td>
+                            <td>${taggedPoi.property.floorNo || '-'}</td>
+                            <td>${data.alarmType || '-'}</td>
+                            <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
+                            <td>${taggedPoi.name || '-'}</td>
+                            <td>${formattedOccurrenceDate || '-'}</td>
+                            <td>${formattedConfirmTime || '-'}</td>
+                            <td>
+                                <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
+                                    <span class="hide">도면 이동</span>
+                                </a>
+                            </td>
+                        `;
+                        tableBody.appendChild(eventRow);
                         taggedPoiMap.set(taggedPoi.id, taggedPoi);
                     }
-
-                    eventRow.innerHTML = `
-                        <td>${data.buildingNm || '-'}</td>
-                        <td>${data.floorNm || '-'}</td>
-                        <td>${data.alarmType || '-'}</td>
-                        <td>${deviceType || '-'}</td>
-                        <td>${data.deviceNm || '-'}</td>
-                        <td>${formattedOccurrenceDate || '-'}</td>
-                        <td>${formattedConfirmTime || '-'}</td>
-                        <td>
-                            <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
-                                <span class="hide">도면 이동</span>
-                            </a>
-                        </td>
-                    `;
-                    tableBody.appendChild(eventRow);
                 });
             };
 

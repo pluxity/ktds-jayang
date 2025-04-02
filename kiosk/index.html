@@ -11,16 +11,16 @@
     <div class="kiosk-main">
         <button type="button" class="kiosk-main__close"><span class="hide">close</span></button>
 
+        <span class="kiosk-info">B3</span>
         <!-- [Case] 3d 화면 -->
-        <div class="kiosk-3d" style="background-image:url(/dashboard/img/bg_kiosk.png)">
-            <span class="kiosk-3d__floor">B3</span>
+        <div class="kiosk-3d">
+            <div class="kiosk-3d__image" style="background-image:url(/dashboard/img/bg_kiosk.png)"></div>
+            <div class="kiosk-3d__control">
+                <button type="button" class="home"><span class="hide">처음으로</span></button>
+                <button type="button" class="plus"><span class="hide">확대</span></button>
+                <button type="button" class="minus"><span class="hide">축소</span></button>
+            </div>
         </div>
-        <div class="kiosk-control">
-            <button type="button" class="home"><span class="hide">처음으로</span></button>
-            <button type="button" class="plus"><span class="hide">확대</span></button>
-            <button type="button" class="minus"><span class="hide">축소</span></button>
-        </div>
-        
 
         <!-- [Case] 매장 정보 화면 -->
          <div class="kiosk-list" style="display:none;">
@@ -44,7 +44,6 @@
             <div class="kiosk-list__info">
                 <button class="kiosk-list__button kiosk-list__button--left"><span class="hide">right</span></button>
                 <div class="list">
-                    <!-- [D] 6개씩 ul로 묶어서 적용 -->
                     <ul>
                         <li>
                             <div class="list__header">
@@ -216,8 +215,6 @@
                                 </li>
                             </ul>
                         </li>
-                    </ul>
-                    <ul style="display:none;">
                         <li>
                             <div class="list__header">
                                 <div class="list__title">
@@ -378,7 +375,7 @@
                                 </li>
                             </ul>
                         </li>
-                    </ul>                    
+                    </ul>              
                     <div class="kiosk-list__paging">
                         <button type="button" class="button"><span class="hide">page1</span></button>
                         <!-- [D] 선택된 버튼 button--active 클래스 추가 -->
@@ -389,8 +386,6 @@
                     </div>
                 </div>
                 <button class="kiosk-list__button kiosk-list__button--right"><span class="hide">left</span></button>
-                
-               
              </div>
          </div>
     </div>
@@ -404,7 +399,7 @@
             <button class="active" type="button" role="tab" id="floor_info">층별 안내</button>
             <button type="button" role="tab" id="store_info">매장 검색</button>
         </div>
-        <div class="kiosk-footer__contents" role="tabpanel" aria-labelledby="floor_info">
+        <div class="kiosk-footer__contents kiosk-footer__contents--floor" role="tabpanel" aria-labelledby="floor_info">
             <ul class="floor">
                 <!-- [D] 클릭 시 active 클래스 추가 -->
                 <li><button class="active" type="button">B1</button></li>
@@ -413,60 +408,62 @@
                 <li><button type="button">B4</button></li>
             </ul> 
         </div>
-        <div class="kiosk-footer__contents" role="tabpanel" aria-labelledby="store_info" style="display:none;">
+        <div class="kiosk-footer__contents kiosk-footer__contents--store" role="tabpanel" aria-labelledby="store_info" style="display:none;">
             <div class="store">
                 <div class="store__search">
                     <input type="text" placeholder="초성 버튼을 선택하여 매장을 검색하세요."/>
                     <!-- [D] 문구 입력 시 remove--active 클래스 추가 -->
                     <button type="button" class="remove remove--active"><span class="hide">delete</span></button>
                 </div>
-                <div class="store__letters">
-                    <div class="consonants">
-                        <!-- [D] 클릭 시 active 클래스 추가 -->
-                        <button type="button" class="active">A</button>
-                        <button type="button">B</button>
-                        <button type="button">C</button>
-                        <button type="button">D</button>
-                        <button type="button">E</button>
-                        <button type="button">F</button>
-                        <button type="button">G</button>
-                        <button type="button">H</button>
-                        <button type="button">I</button>
-                        <button type="button">J</button>
-                        <button type="button">K</button>
-                        <button type="button">L</button>
-                        <button type="button">M</button>
-                        <button type="button">N</button>
-                        <button type="button">O</button>
-                        <button type="button">P</button>
-                        <button type="button">Q</button>
-                        <button type="button">R</button>
-                        <button type="button">S</button>
-                        <button type="button">T</button>
-                        <button type="button">U</button>
-                        <button type="button">V</button>
-                        <button type="button">E</button>
-                        <button type="button">X</button>
-                        <button type="button">Y</button>
-                        <button type="button">Z</button>
-                        <div class="number">
-                            <button type="button">1</button>
-                            <button type="button">2</button>
-                            <button type="button">3</button>
-                            <button type="button">4</button>
-                            <button type="button">5</button>
-                            <button type="button">6</button>
-                            <button type="button">7</button>
-                            <button type="button">8</button>
-                            <button type="button">9</button>
-                            <button type="button">0</button>
+                <div class="store__inner">
+                    <div class="store__letters">
+                        <div class="consonants">
+                            <!-- [D] 클릭 시 active 클래스 추가 -->
+                            <button type="button" class="active">A</button>
+                            <button type="button">B</button>
+                            <button type="button">C</button>
+                            <button type="button">D</button>
+                            <button type="button">E</button>
+                            <button type="button">F</button>
+                            <button type="button">G</button>
+                            <button type="button">H</button>
+                            <button type="button">I</button>
+                            <button type="button">J</button>
+                            <button type="button">K</button>
+                            <button type="button">L</button>
+                            <button type="button">M</button>
+                            <button type="button">N</button>
+                            <button type="button">O</button>
+                            <button type="button">P</button>
+                            <button type="button">Q</button>
+                            <button type="button">R</button>
+                            <button type="button">S</button>
+                            <button type="button">T</button>
+                            <button type="button">U</button>
+                            <button type="button">V</button>
+                            <button type="button">E</button>
+                            <button type="button">X</button>
+                            <button type="button">Y</button>
+                            <button type="button">Z</button>
+                            <div class="number">
+                                <button type="button">1</button>
+                                <button type="button">2</button>
+                                <button type="button">3</button>
+                                <button type="button">4</button>
+                                <button type="button">5</button>
+                                <button type="button">6</button>
+                                <button type="button">7</button>
+                                <button type="button">8</button>
+                                <button type="button">9</button>
+                                <button type="button">0</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="store__buttons">
-                    <!-- [D] 클릭 시 active 클래스 추가 -->
-                    <button type="button" class="active">한</button>
-                    <button type="button">A</button>
+                    <div class="store__buttons">
+                        <!-- [D] 클릭 시 active 클래스 추가 -->
+                        <button type="button" class="active">한</button>
+                        <button type="button">A</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -500,10 +497,12 @@
                     </dl>
                 </div>
             </div>
-            <div class="kiosk-layer__image" style="background-image:url(/dashboard/img/img_kiosk_layer01.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
-            <div class="kiosk-layer__image" style="background-image:url(/dashboard/img/img_kiosk_layer02.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
-            <div class="kiosk-layer__image" style="background-image:url(/dashboard/img/img_kiosk_layer03.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
-            <div class="kiosk-layer__image" style="background-image:url(/dashboard/img/img_kiosk_layer01.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
+            <div class="kiosk-layer__image">
+                <div class="image" style="background-image:url(/dashboard/img/img_kiosk_layer01.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
+                <div class="image" style="background-image:url(/dashboard/img/img_kiosk_layer02.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
+                <div class="image" style="background-image:url(/dashboard/img/img_kiosk_layer03.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
+                <div class="image" style="background-image:url(/dashboard/img/img_kiosk_layer01.png)" role="img" aria-label="나이키 매장 이미지 1"></div>
+            </div>
         </div>
     </div>
 </body>

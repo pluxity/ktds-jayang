@@ -81,25 +81,25 @@ public class Initializer implements CommandLineRunner {
             systemSettingService.updateSystemSetting(systemSettingRequestDto);
         }
 
-        // resources/icon default 추가
-        if (iconSetRepository.findAll().isEmpty()) {
-            ClassPathResource listResource = new ClassPathResource("static/images/viewer/categoryIcon/filelist.txt");
-
-            try (InputStream is = listResource.getInputStream();
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-
-                String fileName;
-                while ((fileName = reader.readLine()) != null) {
-                    if (!fileName.trim().isEmpty()) {
-                        ClassPathResource fileResource = new ClassPathResource("static/images/viewer/categoryIcon/" + fileName);
-                        uploadFile(fileResource);
-                    }
-                }
-
-            } catch (IOException e) {
-                throw new CustomException(ErrorCode.INVALID_FILE);
-            }
-        }
+//        // resources/icon default 추가
+//        if (iconSetRepository.findAll().isEmpty()) {
+//            ClassPathResource listResource = new ClassPathResource("static/images/viewer/categoryIcon/filelist.txt");
+//
+//            try (InputStream is = listResource.getInputStream();
+//                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+//
+//                String fileName;
+//                while ((fileName = reader.readLine()) != null) {
+//                    if (!fileName.trim().isEmpty()) {
+//                        ClassPathResource fileResource = new ClassPathResource("static/images/viewer/categoryIcon/" + fileName);
+//                        uploadFile(fileResource);
+//                    }
+//                }
+//
+//            } catch (IOException e) {
+//                throw new CustomException(ErrorCode.INVALID_FILE);
+//            }
+//        }
 
         if (!buildingRepository.existsByIsIndoor("N")) {
             try {

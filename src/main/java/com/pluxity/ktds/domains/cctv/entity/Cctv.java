@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Cctv {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", nullable = false)

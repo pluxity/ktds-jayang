@@ -36,8 +36,7 @@ const EventManager = (() => {
 
     // SSE 연결
     const connectToSSE = () => {
-        const url = 'http://localhost:8085/events/subscribe';
-        const eventSource = new EventSource(url);
+        const eventSource = new EventSource(`${api.defaults.baseURL}/events/subscribe`);
 
         // 이벤트 발생 시
         eventSource.addEventListener('newAlarm', async (event) => {
@@ -128,8 +127,8 @@ const EventManager = (() => {
     // 경고 팝업
     async function warningPopup(alarm) {
         try {
-            const response = await fetch(`http://localhost:8085/cctv/tag/${alarm.tagName}`);
-            const cctvData = await response.json();
+            const response = await api.get(`/cctv/tag/${alarm.tagName}`);
+            const cctvData = response.data;
             const cctvList = cctvData.result;
 
 
@@ -175,20 +174,10 @@ const EventManager = (() => {
     // 이벤트 해제
     async function handleAlarmConfirm(alarmId) {
         try {
-            const confirmResponse = await fetch(`http://localhost:8085/events/disable/${alarmId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!confirmResponse.ok) throw new Error("confirm-time 업데이트 실패!");
-
-            const responseData = await confirmResponse.json();
-            if (responseData.result) {
+            const confirmResponse = await api.patch(`/events/disable/${alarmId}`);
+            if (confirmResponse.data.result) {
                 removeAllAlarmElements(alarmId);
             }
-
         } catch (error) {
             console.error("에러 발생:", error);
         }
@@ -197,17 +186,15 @@ const EventManager = (() => {
     // 3d 맵 이동
     async function handle3DMapMove(alarm) {
         try {
-            // await handleAlarmConfirm(alarm.id); 이벤트 해제
-
             removeWarningElements()
 
-            const response = await fetch(`http://localhost:8085/poi/tagNames/${alarm.tagName}`);
-            const data = await response.json();
+            const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
+            const data = response.data;
             const poi = data.result;
 
             // CCTV 정보 조회
-            const cctvResponse = await fetch(`http://localhost:8085/cctv/tag/${alarm.tagName}`);
-            const cctvData = await cctvResponse.json();
+            const cctvResponse = await api.get(`/cctv/tag/${alarm.tagName}`);
+            const cctvData = cctvResponse.data;
             const cctvList = cctvData.result;
             const mainCctv = cctvList?.find(cctv => cctv.isMain === 'Y');
 
@@ -523,8 +510,8 @@ const EventManager = (() => {
     // 24시간 이벤트 목록 초기화
     const initializeLatest24HoursList = async (itemsPerPage) => {
         try {
-            const response = await fetch('http://localhost:8085/events/latest-24-hours');
-            allEvents = await response.json();
+            const response = await api.get('/events/latest-24-hours');
+            allEvents = response.data;
 
             // 페이징 UI 추가
             const paginationHTML = `
@@ -616,8 +603,8 @@ const EventManager = (() => {
     const initializeProcessChart = async () => {
         try {
             // 프로세스 차트
-            const processResponse = await fetch('http://localhost:8085/events/process-counts')
-            const processData = await processResponse.json();
+            const processResponse = await api.get('/events/process-counts');
+            const processData = processResponse.data;
 
             // 프로세스 차트
             const chartDoughunt = document.getElementById('chart_doughnut');
@@ -666,9 +653,8 @@ const EventManager = (() => {
     // 날짜별 이벤트 통계 차트 초기화
     const initializeDateChart = async () => {
         try {
-            // 1. 데이터 가져오기
-            const response = await fetch('http://localhost:8085/events/date-counts');
-            const dateData = await response.json();
+            const response = await api.get('/events/date-counts');
+            const dateData = response.data;
 
             // 2. 최근 7일 날짜 배열 생성
             const last7Days = Array.from({length: 7}, (_, i) => {

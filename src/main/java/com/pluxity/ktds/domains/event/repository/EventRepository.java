@@ -31,7 +31,7 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             )
             FROM Alarm a
             WHERE a.occurrenceDate >= :sevenDays
-            GROUP BY FORMATDATETIME(a.occurrenceDate, 'MM/dd')
+            GROUP BY DATE_FORMAT(a.occurrenceDate, '%m/%d')
             ORDER BY MIN(a.occurrenceDate)
             """)
     List<Last7DaysDateCountDTO> findDateCountsForLast7Days(@Param("sevenDays") LocalDateTime sevenDays);
@@ -54,8 +54,8 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
     List<Alarm> getAlarmsByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT a FROM Alarm a WHERE "
-            + "(STR_TO_DATE(a.occurrenceDate, '%Y/%m/%d %H:%i:%s') >= :startDate OR :startDate IS NULL) "
-            + "AND (STR_TO_DATE(a.occurrenceDate, '%Y/%m/%d %H:%i:%s') <= :endDate OR :endDate IS NULL)")
+            + "(DATE_FORMAT(a.occurrenceDate, '%Y/%m/%d %H:%i:%s') >= :startDate OR :startDate IS NULL) "
+            + "AND (DATE_FORMAT(a.occurrenceDate, '%Y/%m/%d %H:%i:%s') <= :endDate OR :endDate IS NULL)")
     List<Alarm> findAlarmsByDateRange(@Param("startDate") LocalDateTime startDate,
                                       @Param("endDate") LocalDateTime endDate);
 

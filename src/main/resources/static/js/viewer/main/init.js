@@ -366,10 +366,10 @@ const Init = (function () {
                         Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                             // Px.Effect.Outline 참고
                             // Px.Effect.Outline.HoverEventOn('area_no');
+                            if (firstIndoorBuilding) {
+                                window.location.href = `/map?buildingId=${firstIndoorBuilding.id}`;
+                            }
                         });
-                        if (firstIndoorBuilding) {
-                            window.location.href = `/map?buildingId=${firstIndoorBuilding.id}`;
-                        }
 
                         contents.style.position = 'static';
                         if (onComplete) onComplete();

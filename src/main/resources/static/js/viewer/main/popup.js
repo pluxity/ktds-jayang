@@ -4,6 +4,10 @@ const layerPopup = (function () {
     const systemTabs = document.querySelectorAll('.system-tap li');
     const systemPop = document.getElementById("systemPopup");
     // 센서
+    let cctvConfig = {};
+    api.get('/cctv/config').then((result) => {
+        cctvConfig = result.data.result;
+    });
     const createSensorPopup = (title, state, eventData) => {
 
         const sensorPopup = document.querySelector('.popup.sensor');
@@ -1221,9 +1225,10 @@ const layerPopup = (function () {
             handleTabClick(event);
             const poiList = PoiManager.findAll();
             PoiManager.getPoiList().then(poiList => {
+                // cctv중에 중분류가 엘리베이터인거(?)
                 const filteredPoiList = poiList.filter(poi =>
-                    poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
-                    poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv');
+                    poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
+                    poi.property.poiMiddleCategoryName.toLowerCase() === '엘리베이터');
                 addElevators(filteredPoiList);
             })
         });
@@ -1248,9 +1253,10 @@ const layerPopup = (function () {
                     const allPois = PoiManager.findAll();
                     const filteredPoiList = allPois.filter(poi =>
                         poi.buildingId === Number(building.id) &&
-                        poi.property.poiCategoryName.toLowerCase() === 'elevator' &&
-                        poi.property.poiMiddleCategoryName.toLowerCase() === 'cctv'
+                        poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
+                        poi.property.poiMiddleCategoryName.toLowerCase() === '엘리베이터'
                     );
+                    console.log("filteredPoiList : ", filteredPoiList);
                     addElevators(filteredPoiList);
                 });
             })
@@ -1262,6 +1268,7 @@ const layerPopup = (function () {
     const addElevators = (filteredPoiList) => {
         const facilityList = document.querySelector('.facility-area__list');
         facilityList.innerHTML = '';
+
 
         filteredPoiList.forEach((poi) => {
             const li = document.createElement('li');
@@ -1315,17 +1322,24 @@ const layerPopup = (function () {
                     alertSwal('POI를 배치해주세요');
                 }
             });
-
+            
             const canvasElement = document.getElementById(canvasId);
             let livePlayer = new PluxPlayer({
-                relayServerUrl: "ws://127.0.0.1:4001",
-                destinationIp: "192.168.4.45", //릴레이 서버 기준 LG ipsolute ip
-                destinationPort: "555", //릴레이 서버 기준 LG ipsolute 녹화서버 포트
+                wsRelayUrl: cctvConfig.wsRelayUrl,
+                wsRelayPort: cctvConfig.wsRelayPort,
+                httpRelayUrl: cctvConfig.httpRelayUrl,
+                httpRelayPort: cctvConfig.httpRelayPort,
+                lgServerIp: cctvConfig.lgServerIp,
+                lgServerPort: cctvConfig.lgServerPort,
+                LG_live_port: cctvConfig.lgLivePort,
+                lgPlaybackPort: cctvConfig.lgPlaybackPort,
                 canvasDom: canvasElement, //캔버스 dom
             })
 
+            let cctvCode = poi.property.code;
+
             // cctv id를 어떻게....
-            livePlayer.livePlay("c06dedd40ac202") // live play
+            livePlayer.livePlay(cctvCode) // live play
 
             livePlayers.push({ id: poi.id, player: livePlayer });
         });

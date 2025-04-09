@@ -233,14 +233,24 @@ public class PoiService {
         validateUpdateCode(dto, poi);
         validateAssociation(dto);
 
-        List<PoiCctv> newCctvs = dto.cctvList().stream()
-                .map(c -> PoiCctv.builder()
-                        .poi(poi)
-                        .code(c.code())
-                        .isMain(c.isMain())
-                        .build())
-                .toList();
-        poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs);
+        if (dto.cctvList() != null && !dto.cctvList().isEmpty()) {
+            List<PoiCctv> newCctvs = dto.cctvList().stream()
+                    .map(c -> PoiCctv.builder()
+                            .poi(poi)
+                            .code(c.code())
+                            .isMain(c.isMain())
+                            .build())
+                    .toList();
+            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs);
+        }
+//        List<PoiCctv> newCctvs = dto.cctvList().stream()
+//                .map(c -> PoiCctv.builder()
+//                        .poi(poi)
+//                        .code(c.code())
+//                        .isMain(c.isMain())
+//                        .build())
+//                .toList();
+        poi.update(dto.name(), dto.code(), dto.tagNames(), null);
         if (dto.tagNames() != null) {
             tagClientService.addTags(dto.tagNames());
         }

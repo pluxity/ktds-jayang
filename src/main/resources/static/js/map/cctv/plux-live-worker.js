@@ -157,6 +157,9 @@
 
     function socketOnMessage(e) {
         let buffer = e.data
+        //console.log(buffer)
+        let b = Array.from(new Uint8Array(buffer)).map(byte => byte.toString(16).padStart(2, "0")+"-").join('')
+        //console.log(b)
         bufferQueue = concatBuffers(bufferQueue, buffer);
         processBuffer()
     }
@@ -183,13 +186,15 @@
         }
 
         bufferQueue = bufferQueue.slice(HEADER_SIZE + dwBodySize);
-        console.log(wReqType)
+        //console.log(bufferQueue)
+
+        //console.log(wReqType)
         if (wReqType == 400) {
             console.log(wReqType)
             // parseLiveBuffer(bufferByteReader)
         } else if (wReqType == 402) {
-            // console.log(wReqType)
-            // relaySocket.send(startPacket)
+             //console.log(wReqType)
+             //relaySocket.send(startPacket)
 
             if (retryCount > 5000) {
                 return
@@ -399,6 +404,8 @@
         offset = appendBuffer(subHeadView, dtsTimeBuffer, offset);
         offset = appendBuffer(subHeadView, dtsStartBuffer, offset);
         offset = appendBuffer(subHeadView, reserved, offset);
+        //console.log(IdBuffer)
+        //printab(IdBuffer)
 
         if (subPaddingLength > 0) {
             subHeadView.set(new Uint8Array(subPaddingLength), offset);
@@ -421,9 +428,11 @@
         Hoffset = appendBuffer(HeadView, ctTypeBuffer, Hoffset);
         Hoffset = appendBuffer(HeadView, wBodySizeBuffer, Hoffset);
 
+
         let totalLength = HeadBuffer.byteLength + subHeadBuffer.byteLength;
         let packetBuffer = new ArrayBuffer(totalLength);
         let packetView = new Uint8Array(packetBuffer);
+        
 
         // HeadBuffer 복사
         packetView.set(new Uint8Array(HeadBuffer), 0);
@@ -464,6 +473,7 @@
         offset = appendBuffer(subHeadView, cTypeBuffer, offset);
         offset = appendBuffer(subHeadView, dateBuffer, offset);
         offset = appendBuffer(subHeadView, speedBuffer, offset);
+
 
 
         // if (subPaddingLength > 0) {
@@ -507,6 +517,12 @@
 
     }
 
+    function printab(buffer) {
+        let sp = Array.from(new Uint8Array(buffer)).map(byte => byte.toString(16).padStart(2, "0") + " ").join('')
+        console.log(sp)
+    }
+
+
     onmessage = function (event) {
         var eventData = event.data
         relayServerUrl = eventData.relayServerUrl
@@ -514,12 +530,21 @@
         destinationPort = eventData.destinationPort
         deviceId = eventData.deviceId
         startDate = eventData.startDate
+        console.log(`connect to ${relayServerUrl}/${destinationIp}/${destinationPort} , ${deviceId}`)
 
         startPacket = createPlayLivePacket()
         bePacket = createPlayLivePacket(true)
+        console.log("eventData : ", eventData);
 
 
+        //bf00bf00010010009001000044000000440065343330323239383765303431300000000000000000000000000000000000009001e907040002000800060022001a002e0001000000000000000000000000000000
+        //bf00bf00010010009001000044000000440065343330323239383765303431300000000000000000000000000000000000009001e90704000200080006001f000d00b20201000000000000000000000000000000
+        //bf00bf00010010009001000044000000440065343330323239383765303430320000000000000000000000000000000000009001e90704000200080006000a002a00380201000000000000000000000000000000
+        //bf00bf00010010009c01000044000000440065343330323239383765303430320000000000000000000000000000000000009c01e90704000200080006000a002a00190001000000000000000000000000000000
+    
         connectionRelay()
     };
+
+
 
 })(); 

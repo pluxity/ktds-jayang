@@ -1,4 +1,3 @@
-
 class PluxPlayer {
     constructor(options) {
         this.options = options;
@@ -22,8 +21,8 @@ class PluxPlayer {
         if (this.decodeWorker) {
             this.decodeWorker.terminate()
         }
-        this.decodeWorker = new Worker("./plux-playback-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.LG_server_ip, destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
+        this.decodeWorker = new Worker("/js/map/cctv/plux-playback-worker.js");
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: "10.20.11.211", destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -40,13 +39,12 @@ class PluxPlayer {
         if (this.decodeWorker) {
             this.decodeWorker.terminate()
         }
-        this.decodeWorker = new Worker("./plux-live-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.LG_server_ip, destinationPort: this.LG_live_port, deviceId });
+        this.decodeWorker = new Worker("/static/js/map/cctv/plux-live-worker.js");
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: "10.20.11.211", destinationPort: this.LG_live_port, deviceId });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
                 let frame = eventData.frame
-
                 this.ctx.drawImage(frame, 0, 0, this.canvasDom.width, this.canvasDom.height);
                 frame.close();
             }
@@ -92,6 +90,7 @@ class PluxPlayer {
         })
 
     }
+
     zoom(deviceUrl, devicePort, id, password, zoom) {
         this.generatePasswordDigest(password).then(digest => {
             if (zoom > 2) {
@@ -157,7 +156,6 @@ class PluxPlayer {
         })
     }
 
-
     getDeviceInfo(callback) {
 
         const soapBody = `<?xml version="1.0" encoding="UTF-8"?>
@@ -210,8 +208,6 @@ class PluxPlayer {
                 });
         });
     };
-
-
 
     generatePasswordDigest(password) {
 
@@ -301,6 +297,7 @@ class PluxPlayer {
         var now = new Date();
         return now.toISOString().split('.')[0] + ".000Z";
     }
+
     getRandomBytes(length = 20) {
         // 무작위 바이트 16개 생성
         const nonceBytes = new Uint8Array(length);

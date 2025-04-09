@@ -292,6 +292,34 @@ btnPoiCategoryModify.onclick = () => {
     });
 };
 
+const btnPoiMiddleCategoryModify = document.getElementById('btnPoiMiddleCategoryModify');
+btnPoiMiddleCategoryModify.onclick = () => {
+    const form = document.getElementById('poiMiddleCategoryModifyForm');
+    const formData = new FormData(form);
+
+    if (!validationForm(form)) return;
+
+    formData.set('poiMiddleCategoryIds[]', [document.getElementById('middleModifyMajorId').value]);
+    formData.delete('poiMiddleCategoryId');
+
+    const id = Number(
+        document
+            .getElementById('poiMiddleCategoryModifyForm')
+            .querySelector('#middleModifyId').value,
+    );
+
+    api.put(`/poi-middle-categories/${id}`, formData, {
+        headers: {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        },
+    }).then(() => {
+        alertSwal('수정이 완료 되었습니다.').then(() => {
+            window.location.reload();
+        });
+    });
+};
+
 const modifyModal = document.getElementById('poiCategoryModifyModal');
 modifyModal.addEventListener('shown.bs.modal', () => {});
 

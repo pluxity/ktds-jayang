@@ -70,10 +70,8 @@ public class PoiMiddleCategoryService {
         PoiCategory poiCategory = poiCategoryRepository.findById(dto.majorCategory())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_POI_CATEGORY));
 
-        poiMiddleCategory = PoiMiddleCategory.builder()
-                .name(dto.name())
-                .poiCategory(poiCategory)
-                .build();
+        poiMiddleCategory.updateName(dto.name());
+        poiMiddleCategory.updatePoiCategory(poiCategory);
 
         poiMiddleCategoryRepository.save(poiMiddleCategory);
     }

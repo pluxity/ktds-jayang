@@ -403,7 +403,6 @@
             sendPlayReq()
         })
         relaySocket.addEventListener('message', (e) => {
-            // console.log(e)
             socketOnMessage(e)
         })
         relaySocket.addEventListener("close", (event) => {
@@ -421,6 +420,7 @@
 
     function socketOnMessage(e) {
         let buffer = e.data
+        console.log(buffer)
         bufferQueue = concatBuffers(bufferQueue, buffer);
         processBuffer()
     }
@@ -439,6 +439,15 @@
 
         let wReqType = bufferByteReader.readTypes("DWORD")
         let dwBodySize = bufferByteReader.readTypes("DWORD")
+
+        // console.log('sep',dwSeparator)
+        // console.log('version',wVersion)
+        // console.log('headersize',wHeaderSize)
+
+        // console.log('wreqtype',wReqType)
+        // console.log('dwbodysize', dwBodySize)
+        // console.log("====")
+        // return
 
         // 데이터 부족 확인
         if (bufferQueue.byteLength < HEADER_SIZE + dwBodySize) {
@@ -459,7 +468,7 @@
 
             relaySocket.send(startPacket)
 
-            console.log("stop pppppppppppppppppppppp")
+            console.log("stop")
         } else {
             console.log("unknown request type: ", wReqType)
         }
@@ -816,6 +825,10 @@
         bePacket = createPlayPacket(true)
         stopPacket = createStopPacket()
 
+
+        console.log(startPacket)
+        let sp = Array.from(new Uint8Array(startPacket)).map(byte => byte.toString(16).padStart(2, "0")).join('')
+        console.log(sp)
         connectionRelay()
     };
 

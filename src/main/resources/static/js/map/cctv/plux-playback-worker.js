@@ -420,7 +420,7 @@
 
     function socketOnMessage(e) {
         let buffer = e.data
-        console.log(buffer)
+        //console.log(buffer)
         bufferQueue = concatBuffers(bufferQueue, buffer);
         processBuffer()
     }

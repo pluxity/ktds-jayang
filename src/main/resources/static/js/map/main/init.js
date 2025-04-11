@@ -589,16 +589,82 @@ const Init = (function () {
      * - 새로고침 버튼으로 갱신
      */
 
+    function closeEventPopup(event) {
+        const target = event.target;
+        const mainPopup = target.closest('.main-cctv-container');
+        const subPopup = target.closest('.cctv-item');
+        const sopPopup = target.closest('.sop-container');
+
+        if (sopPopup) {
+            sopPopup.remove();
+        }
+        if (mainPopup) {
+            mainPopup.remove();
+        }
+        if (subPopup) {
+            subPopup.remove();
+        }
+    }
+
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
-        console.log("poiInfo" ,poiInfo);
-        const poiProperty = poiInfo.property;
-        const popupInfo = document.createElement('div');
+        if (poiInfo.group === "cctv") {
+            const poiProperty = poiInfo.property;
+            const popupInfo = document.createElement('div');
 
-        popupInfo.className = 'popup-info';
-        popupInfo.innerHTML =
-            `<div class="popup-info__head">
+            popupInfo.className = 'main-cctv-container';
+            popupInfo.classList.add('popup-info');
+            const canvasId = `cctv-${poiInfo.id}`;
+            popupInfo.innerHTML =
+                `<div class="main-cctv-item" data-cctv-id="${poiInfo.id}">
+                    <div class="cctv-header">
+                        <button type="button" class="cctv-close">×</button>
+                    </div>
+                    <div class="cctv-content">
+                        <input type="hidden" class="poi-id" value="${poiInfo.id}">
+                        <canvas id="cctv-${poiInfo.id}" width="800" height="450"></canvas>
+<!--                        <div class="cctv-controls">-->
+<!--                            <button type="button" class="btn-play">▶</button>-->
+<!--                            <button type="button" class="btn-rotate">↻</button>-->
+<!--                        </div>-->
+                    </div>
+                </div>`;
+            const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
+            popupInfo.style.position = 'fixed';
+            popupInfo.style.zIndex = '9999';
+            popupInfo.style.left = `${x}px`;
+            popupInfo.style.top = `${y}px`;
+
+            document.body.appendChild(popupInfo);
+
+            const updatePosition = () => {
+                const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
+                popupInfo.style.left = `${x}px`;
+                popupInfo.style.top = `${y}px`;
+
+                if (!activePopups.has(poiInfo.id)) return;
+                requestAnimationFrame(updatePosition);
+            };
+
+            activePopups.set(poiInfo.id, { dom: popupInfo });
+            updatePosition();
+
+            EventManager.initializeCCTVStream(canvasId, poiInfo.property.code);
+
+            const closeBtn = popupInfo.querySelector('.cctv-close');
+            closeBtn.addEventListener('click', () => {
+                // 팝업 제거
+                popupInfo.remove();
+            });
+            return popupInfo;
+        } else {
+            const poiProperty = poiInfo.property;
+            const popupInfo = document.createElement('div');
+
+            popupInfo.className = 'popup-info';
+            popupInfo.innerHTML =
+                `<div class="popup-info__head">
             <input type="hidden" class="poi-id" value="${poiInfo.id}">
             <h2>${poiProperty.poiCategoryName} ${poiProperty.name}</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
@@ -625,87 +691,86 @@ const Init = (function () {
             </table>
         </div>`;
 
-        // poi 상태 가져오기
-        const updateTagData = async () => {
-            try {
-                const response = await fetch(`/poi/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(poiProperty.tagNames)
-                });
-                const data = await response.json();
+            // poi 상태 가져오기
+            const updateTagData = async () => {
+                try {
+                    const response = await fetch(`/poi/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(poiProperty.tagNames)
+                    });
+                    const data = await response.json();
 
-                const tbody = popupInfo.querySelector('tbody');
-                if (data.TAGCNT > 0) {
-                    tbody.innerHTML = data.TAGs.map(tag => `
+                    const tbody = popupInfo.querySelector('tbody');
+                    if (data.TAGCNT > 0) {
+                        tbody.innerHTML = data.TAGs.map(tag => `
                     <tr>
                         <td>${tag.T}</td>
                         <td>${tag.V}</td>
                         <td>${getStatusText(tag.S)}</td>
                     </tr>
                 `).join('');
-                } else {
-                    tbody.innerHTML = `
+                    } else {
+                        tbody.innerHTML = `
                     <tr>
                         <td colspan="3">태그 데이터가 없습니다.</td>
                     </tr>
                 `;
-                }
+                    }
 
-                // 업데이트 시간 갱신
-                popupInfo.querySelector('.date .timestamp').textContent =
-                `업데이트 일시 : ${new Date().toLocaleString()}`;
-            } catch (error) {
-                console.error('태그 데이터 조회 실패:', error);
-                const tbody = popupInfo.querySelector('tbody');
-                tbody.innerHTML = `
+                    // 업데이트 시간 갱신
+                    popupInfo.querySelector('.date .timestamp').textContent =
+                        `업데이트 일시 : ${new Date().toLocaleString()}`;
+                } catch (error) {
+                    console.error('태그 데이터 조회 실패:', error);
+                    const tbody = popupInfo.querySelector('tbody');
+                    tbody.innerHTML = `
                 <tr>
                     <td colspan="3">데이터 조회에 실패했습니다.</td>
                 </tr>
             `;
-            }
-        };
+                }
+            };
 
-        // 초기 데이터 로드
-        await updateTagData();
+            // 초기 데이터 로드
+            await updateTagData();
 
-        // 새로고침 이벤트
-        const refreshBtn = popupInfo.querySelector('.date__refresh');
-        refreshBtn.addEventListener('click', updateTagData);
+            // 새로고침 이벤트
+            const refreshBtn = popupInfo.querySelector('.date__refresh');
+            refreshBtn.addEventListener('click', updateTagData);
 
-        // 닫기 이벤트
-        const closeBtn = popupInfo.querySelector('.close');
-        closeBtn.addEventListener('click', () => {
-            // 이벤트 리스너 제거
-            refreshBtn.removeEventListener('click', updateTagData);
-            // 팝업 제거
-            popupInfo.remove();
-        });
-        
-        // 위치 설정
-        const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
-        popupInfo.style.position = 'fixed';
-        popupInfo.style.zIndex = '9999';
-        popupInfo.style.left = `${x}px`;
-        popupInfo.style.top = `${y}px`;
+            // 닫기 이벤트
+            const closeBtn = popupInfo.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
+                // 이벤트 리스너 제거
+                refreshBtn.removeEventListener('click', updateTagData);
+                // 팝업 제거
+                popupInfo.remove();
+            });
 
-        document.body.appendChild(popupInfo);
-
-        const updatePosition = () => {
-            const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
+            // 위치 설정
+            const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
+            popupInfo.style.position = 'fixed';
+            popupInfo.style.zIndex = '9999';
             popupInfo.style.left = `${x}px`;
             popupInfo.style.top = `${y}px`;
 
-            if (!activePopups.has(poiInfo.id)) return;
-            requestAnimationFrame(updatePosition);
+            document.body.appendChild(popupInfo);
 
-        };
+            const updatePosition = () => {
+                const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
+                popupInfo.style.left = `${x}px`;
+                popupInfo.style.top = `${y}px`;
 
-        activePopups.set(poiInfo.id, { dom: popupInfo });
-        updatePosition();
-       
+                if (!activePopups.has(poiInfo.id)) return;
+                requestAnimationFrame(updatePosition);
+            };
+
+            activePopups.set(poiInfo.id, { dom: popupInfo });
+            updatePosition();
+        }
     }
 
     // poi 상태

@@ -281,21 +281,26 @@ const EventManager = (() => {
         const canvasElement = document.getElementById(canvasId);
         if (!canvasElement) return;
 
-        const livePlayer = new PluxPlayer({
-            wsRelayUrl: "http://127.0.0.1",
-            wsRelayPort: 4001,
-            httpRelayUrl: "http://127.0.0.1",
-            httpRelayPort: 4002,
+        api.get("/cctv/config").then(res => {
+            const cctvConfig = res.data.result;
+            console.log("cctvCode : ", cctvCode);
+            console.log("cctvConfig : ", cctvConfig);
+            const livePlayer = new PluxPlayer({
+                wsRelayUrl: cctvConfig.wsRelayUrl,
+                wsRelayPort: cctvConfig.wsRelayPort,
+                httpRelayUrl: cctvConfig.httpRelayUrl,
+                httpRelayPort: cctvConfig.httpRelayPort,
 
-            LG_server_ip: "192.168.4.45",
-            LG_server_port: "9100",
+                LG_server_ip: cctvConfig.lgServerIp,
+                LG_server_port: cctvConfig.lgServerPort,
 
-            LG_live_port: "555",
-            LG_playback_port: "554",
-            canvasDom: canvasElement
-        });
-        livePlayer.livePlay(cctvCode);
-        return livePlayer;
+                LG_live_port: cctvConfig.lgLivePort,
+                LG_playback_port: cctvConfig.lgPlaybackPort,
+                canvasDom: canvasElement
+            });
+            livePlayer.livePlay(cctvCode);
+            return livePlayer;
+        })
     }
 
     // MainCCTV 팝업 생성
@@ -743,7 +748,8 @@ const EventManager = (() => {
         initializeAlarms,
         initializeLatest24HoursList,
         initializeProcessChart,
-        initializeDateChart
+        initializeDateChart,
+        initializeCCTVStream
     }
 })();
 

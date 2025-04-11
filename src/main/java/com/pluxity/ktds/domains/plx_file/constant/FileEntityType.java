@@ -4,7 +4,9 @@ public enum FileEntityType {
     BUILDING("Building"),
     ICON2D("2D"),
     ICON3D("3D"),
-    CATEGORY_IMAGE("CATEGORY");
+    CATEGORY_IMAGE("CATEGORY"),
+    LOGO("Logo"),
+    BANNER("Banner");
 
     private final String type;
 

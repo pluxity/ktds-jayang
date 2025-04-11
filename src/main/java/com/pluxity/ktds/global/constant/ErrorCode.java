@@ -110,7 +110,10 @@ public enum ErrorCode implements Code {
   INVALID_POI_CATEGORY_WITH_POI_SET(BAD_REQUEST, "해당 POI 카테고리에 POI 정보가 존재하지 않습니다."),
   INVALID_ICON_SET_ASSOCIATION(BAD_REQUEST, "해당 ICON_SET 에 POI 카테고리 정보가 존재하지 않습니다."),
 
-  INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다");
+  INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다"),
+
+  MAX_BANNER_LIMIT(BAD_REQUEST, "배너는 최대 4개까지 등록 가능합니다.");
+
 
   private final HttpStatus httpStatus;
   private final String message;

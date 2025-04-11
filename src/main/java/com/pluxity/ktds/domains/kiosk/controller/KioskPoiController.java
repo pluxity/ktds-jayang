@@ -31,7 +31,7 @@ public class KioskPoiController {
     }
 
     @GetMapping
-    public DataResponseBody<List<KioskAllPoiResponseRTO>> getPoiAll() {
+    public DataResponseBody<List<KioskAllPoiResponseDTO>> getPoiAll() {
         return DataResponseBody.of(kioskPoiService.findAll());
     }
 

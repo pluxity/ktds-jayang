@@ -59,7 +59,7 @@ public class KioskPoiService {
     }
 
     @Transactional(readOnly = true)
-    public List<KioskAllPoiResponseRTO> findAll() {
+    public List<KioskAllPoiResponseDTO> findAll() {
         return kioskPoiRepository.findAll().stream()
                 .map(KioskPoi::toAllResponseDto)
                 .toList();

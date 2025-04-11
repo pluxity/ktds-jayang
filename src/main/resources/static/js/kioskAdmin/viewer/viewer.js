@@ -13,9 +13,7 @@
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
             // const contents = document.querySelector('.contents');
-            console.log(BuildingManager.getBuildingList());
             const storeBuilding = await BuildingManager.findByCode('store');
-            console.log('storeBuilding : ',storeBuilding);
             let buildingId = storeBuilding ? storeBuilding.id : null;
             // initFloors(buildingId);
             // document.getElementById("buildingName").setAttribute("building-id", buildingId);

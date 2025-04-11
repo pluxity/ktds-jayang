@@ -4,21 +4,21 @@
 </head>
 
 <body>
-<div class="wrapper" style="display: block">
+<div class="main" id="wrapper" style="display: flex; flex-direction: column; height: 100%;">
     <nav th:replace="~{kioskAdmin/fragments/navbar :: nav}"></nav>
-    <div class="main" id="wrapper" style="display: -webkit-box; width: 100vw;">
-        <!-- navbar -->
+    <div style="display: flex; flex: 1; overflow: hidden;">
         <!-- Sidebar -->
-        <div class="viewer-sidebar">
+        <div class="viewer-sidebar" style="height: 100%; width: 30rem">
             <ul class="nav nav-tabs d-flex" style="margin-bottom:5px;" role="tablist">
                 <li class="nav-item" role="presentation" style="flex: 1">
                     <a class="nav-link active txt-center">POI관리</a>
                 </li>
             </ul>
-            <div class="tab-content" style="padding:5px; display: flex; width: 100%;height: 100%;padding-bottom: 50px;position: relative;">
+            <div class="tab-content"
+                 style="padding:5px; display: flex; width: 100%;height: 100%;padding-bottom: 50px;position: relative;">
                 <input type="hidden" name="mapNo" id="buildingId" th:value="${param.buildingId}">
                 <input type="hidden" name="poiListTabType" id="poiListTabType" value="0">
-                <div class="tab-pane fade show active" name="poi-tab"style="width: 100%">
+                <div class="tab-pane fade show active" name="poi-tab" style="width: 100%">
                     <ul class="nav nav-pills nav-fill">
                         <li class="nav-item" style="width: 33.33%">
                             <div class="nav-link active poi-position" data-tab-type="0" data-poi-position="Y"
@@ -51,7 +51,8 @@
                             </div>
                         </div>
                         <div class="input-group hr-margin">
-                            <input type="text" name="searchKeyword" class="form-control text-primary border-primary small" placeholder="POI 이름을 입력하세요.">
+                            <input type="text" name="searchKeyword"
+                                   class="form-control text-primary border-primary small" placeholder="POI 이름을 입력하세요.">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" type="button">
                                     <i class="fas fa-search fa-sm"></i>
@@ -86,223 +87,255 @@
                     </div>
                     <hr class="hr-margin">
                     <div class="txt-center">
-                        <button type="button" style="width: 100%" class="btn btn-secondary btn-md" id="poi-Register-btn" >POI 등록
+                        <button type="button" style="width: 100%" class="btn btn-secondary btn-md"
+                                id="poi-Register-btn">POI 등록
                         </button>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Sidebar -->
-        <div id="content-wrapper" >
-            <div class="container-fluid">
+        <div id="content-wrapper">
+            <div class="container-fluid" style="overflow-x:hidden; overflow-y: hidden">
                 <div id="webGLContainer">
                 </div>
             </div>
 
             <!-- 화면설정 툴바 -->
-            <div id="buildingCtrlToolBar" class="active">
+            <div id="buildingCtrlToolBar" class="active" style="right: 1rem; top: 5rem">
                 <div id="buildingCtrlTool" class="rounded">
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 확대" data-btn-type="in">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 확대"
+                            data-btn-type="in">
                         <i class="fas fa-search-plus"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 축소" data-btn-type="out">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 축소"
+                            data-btn-type="out">
                         <i class="fas fa-search-minus"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(상)" data-btn-type="up">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(상)"
+                            data-btn-type="up">
                         <i class="fas fa-arrow-up"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 (하)" data-btn-type="down">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 (하)"
+                            data-btn-type="down">
                         <i class="fas fa-arrow-down"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(좌)" data-btn-type="left">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(좌)"
+                            data-btn-type="left">
                         <i class="fas fa-arrow-left"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(우)" data-btn-type="right">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(우)"
+                            data-btn-type="right">
                         <i class="fas fa-arrow-right"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(중앙)" data-btn-type="center">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(중앙)"
+                            data-btn-type="center">
                         <i class="fas fa-expand"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="1인칭시점" data-btn-type="viewLook">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="1인칭시점"
+                            data-btn-type="viewLook">
                         <i class="fas fa-street-view"></i></button>
-                    <button type="button" class="btn btn-dark btn-sm btnBuildingTool" title="POI이동" data-btn-type="move">POI 이동
+                    <button type="button" class="btn btn-dark btn-sm btnBuildingTool" title="POI이동"
+                            data-btn-type="move">POI 이동
                     </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="poiRegisterModal" tabindex="-1" role="dialog" aria-labelledby="poiRegisterModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="poiRegisterModalLabel">POI 속성</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="poiRegisterForm" autocomplete="off">
-                            <div class="form-row type-row">
-                                <div class="form-label">유형</div>
-                                <label><input type="radio" name="type" value="store" checked> 상가</label>
-                                <label><input type="radio" name="type" value="kiosk"> 키오스크</label>
-                            </div>
-
-                            <!-- 상가 폼 -->
-                            <div id="store-form">
-                                <table class="table">
-                                    <tbody>
-                                    <tr>
-                                        <th>POI명<span class="required">*</span></th>
-                                        <td><input type="text" id="store-name" name="storeName" required></td>
-                                        <th>업종<span class="required">*</span></th>
-                                        <td>
-                                            <select id="business" name="business" required>
-                                                <option>F&B</option>
-                                                <option>라이프스타일</option>
-                                                <option>패션</option>
-                                                <option>편의/서비스</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>층선택<span class="required">*</span></th>
-                                        <td>
-                                            <select id="store-floor" name="storeFloor" required>
-                                                <option></option>
-                                            </select>
-                                        </td>
-                                        <th>전화번호</th>
-                                        <td><input type="text" id="phone" name="phone"></td>
-                                    </tr>
-                                    <tr>
-                                        <th>로고</th>
-                                        <td colspan="3">
-                                            <div class="file-upload">
-                                                <input type="file" id="logo-file" name="logoFile" style="display: none;">
-                                                <button class="file-select-btn" onclick="document.getElementById('logo-file').click()">파일 선택</button>
-                                                <span class="file-name"></span>
-                                                <span class="file-remove" style="cursor: pointer; margin-left: 5px; display: none;">×</span>
-                                            </div>
-                                            <p class="notice">※ 로고는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 000*000</p>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-
-                                <div class="banner-section">
-                                    <h3>배너</h3>
-                                    <table class="banner-table">
-                                        <thead>
-                                        <tr>
-                                            <th>기간</th>
-                                            <th>파일</th>
-                                            <th>순서</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="banner-tbody">
-                                        <tr>
-                                            <td>
-                                                <input type="date" class="banner-date start-date" name="startDate"> ~ <input type="date" class="banner-date end-date" name="endDate">
-                                                <input type="checkbox" class="banner-checkbox" name="always"> 상시
-                                            </td>
-                                            <td>
-                                                <input type="file" class="banner-file" name="bannerFile" style="display: none;">
-                                                <button class="file-select-btn" onclick="this.previousElementSibling.click()">파일 선택</button>
-                                                <span class="selected-file"></span>
-                                                <span class="file-remove" style="cursor: pointer; margin-left: 5px; display: none;">×</span>
-                                            </td>
-                                            <td>
-                                                <button class="order-btn up-btn">▲</button>
-                                                <button class="order-btn down-btn">▼</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <input type="date" class="banner-date start-date" name="startDate"> ~ <input type="date" class="banner-date end-date" name="endDate">
-                                                <input type="checkbox" class="banner-checkbox" name="always"> 상시
-                                            </td>
-                                            <td>
-                                                <input type="file" class="banner-file" name="bannerFile" style="display: none;">
-                                                <button class="file-select-btn" onclick="this.previousElementSibling.click()">파일 선택</button>
-                                                <span class="selected-file"></span>
-                                                <span class="file-remove" style="cursor: pointer; margin-left: 5px; display: none;">×</span>
-                                            </td>
-                                            <td>
-                                                <button class="order-btn up-btn">▲</button>
-                                                <button class="order-btn down-btn">▼</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <input type="date" class="banner-date start-date" name="startDate"> ~ <input type="date" class="banner-date end-date" name="endDate">
-                                                <input type="checkbox" class="banner-checkbox" name="always"> 상시
-                                            </td>
-                                            <td>
-                                                <input type="file" class="banner-file" name="bannerFile" style="display: none;">
-                                                <button class="file-select-btn" onclick="this.previousElementSibling.click()">파일 선택</button>
-                                                <span class="selected-file"></span>
-                                                <span class="file-remove" style="cursor: pointer; margin-left: 5px; display: none;">×</span>
-                                            </td>
-                                            <td>
-                                                <button class="order-btn up-btn">▲</button>
-                                                <button class="order-btn down-btn">▼</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <input type="date" class="banner-date start-date" name="startDate"> ~ <input type="date" class="banner-date end-date" name="endDate">
-                                                <input type="checkbox" class="banner-checkbox" name="always"> 상시
-                                            </td>
-                                            <td>
-                                                <input type="file" class="banner-file" name="bannerFile" style="display: none;">
-                                                <button class="file-select-btn" onclick="this.previousElementSibling.click()">파일 선택</button>
-                                                <span class="selected-file"></span>
-                                                <span class="file-remove" style="cursor: pointer; margin-left: 5px; display: none;">×</span>
-                                            </td>
-                                            <td>
-                                                <button class="order-btn up-btn">▲</button>
-                                                <button class="order-btn down-btn">▼</button>
-                                            </td>
-                                        </tr>
-                                        <!-- 추가 배너 행들 -->
-                                        </tbody>
-                                    </table>
-                                    <p class="notice">※ 배너는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 000*000</p>
-                                </div>
-                            </div>
-
-                            <!-- 키오스크 폼 -->
-                            <div id="kiosk-form" style="display: none;">
-                                <div class="form-group">
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-label">POI명<span class="required">*</span></div>
-                                            <input type="text" id="kiosk-name" name="kioskName" required>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-label">장비코드<span class="required">*</span></div>
-                                            <input type="text" id="equipment-code" name="equipmentCode" required>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-label">층선택<span class="required">*</span></div>
-                                            <select id="kiosk-floor" name="kioskFloor" required>
-                                                <option>B3F</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-label">비고</div>
-                                            <input type="text" id="remarks" name="remarks">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button type="button" class="btn btn-primary" id="btnPoiRegister">등록</button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-</div>
+    <div class="modal fade" id="poiRegisterModal" tabindex="-1" role="dialog" aria-labelledby="poiRegisterModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poiRegisterModalLabel">POI 속성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="poiRegisterForm" autocomplete="off">
+                        <div class="form-row type-row">
+                            <div class="form-label">유형</div>
+                            <label><input type="radio" name="type" value="store" checked> 상가</label>
+                            <label><input type="radio" name="type" value="kiosk"> 키오스크</label>
+                        </div>
 
-    <th:block th:replace="~{kioskAdmin/fragments/script :: script }"></th:block>
+                        <!-- 상가 폼 -->
+                        <div id="store-form">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>POI명<span class="required">*</span></th>
+                                    <td><input type="text" id="store-name" name="storeName" required></td>
+                                    <th>업종<span class="required">*</span></th>
+                                    <td>
+                                        <select id="business" name="business" required>
+                                            <option>F&B</option>
+                                            <option>라이프스타일</option>
+                                            <option>패션</option>
+                                            <option>편의/서비스</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>층선택<span class="required">*</span></th>
+                                    <td>
+                                        <select id="store-floor" name="storeFloor" required>
+                                            <option></option>
+                                        </select>
+                                    </td>
+                                    <th>전화번호</th>
+                                    <td><input type="text" id="phone" name="phone"></td>
+                                </tr>
+                                <tr>
+                                    <th>로고</th>
+                                    <td colspan="3">
+                                        <div class="file-upload">
+                                            <input type="file" id="logo-file" name="logoFile" style="display: none;">
+                                            <button class="file-select-btn"
+                                                    onclick="document.getElementById('logo-file').click()">파일 선택
+                                            </button>
+                                            <span class="file-name"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </div>
+                                        <p class="notice">※ 로고는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 000*000</p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="banner-section">
+                                <h3>배너</h3>
+                                <table class="banner-table">
+                                    <thead>
+                                    <tr>
+                                        <th>기간</th>
+                                        <th>파일</th>
+                                        <th>순서</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="banner-tbody">
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn"
+                                                    onclick="this.previousElementSibling.click()">파일 선택
+                                            </button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn"
+                                                    onclick="this.previousElementSibling.click()">파일 선택
+                                            </button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn"
+                                                    onclick="this.previousElementSibling.click()">파일 선택
+                                            </button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn"
+                                                    onclick="this.previousElementSibling.click()">파일 선택
+                                            </button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <!-- 추가 배너 행들 -->
+                                    </tbody>
+                                </table>
+                                <p class="notice">※ 배너는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 000*000</p>
+                            </div>
+                        </div>
+
+                        <!-- 키오스크 폼 -->
+                        <div id="kiosk-form" style="display: none;">
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-label">POI명<span class="required">*</span></div>
+                                        <input type="text" id="kiosk-name" name="kioskName" required>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-label">장비코드<span class="required">*</span></div>
+                                        <input type="text" id="equipment-code" name="equipmentCode" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-label">층선택<span class="required">*</span></div>
+                                        <select id="kiosk-floor" name="kioskFloor" required>
+                                            <option>B3F</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-label">비고</div>
+                                        <input type="text" id="remarks" name="remarks">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnPoiRegister">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{kioskAdmin/fragments/script :: script }"></th:block>
 </body>
 </html>

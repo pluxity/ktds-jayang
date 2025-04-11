@@ -15,14 +15,16 @@ class PluxPlayer {
         this.canvasDom = options.canvasDom;
         this.ctx = this.canvasDom.getContext('2d');
         this.decodeWorker = null
+        this.streamServerIP = null
     }
 
     playBack(deviceId, startDate, endTime) {
         if (this.decodeWorker) {
             this.decodeWorker.terminate()
         }
-        this.decodeWorker = new Worker("/js/map/cctv/plux-playback-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: "10.20.11.211", destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
+        deviceId = deviceId.slice(0, -2) + "00";
+        this.decodeWorker = new Worker("/static/js/map/cctv/plux-playback-worker.js");
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.streamServerIP[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -32,7 +34,6 @@ class PluxPlayer {
                 frame.close();
             }
         };
-
     }
 
     livePlay(deviceId) {
@@ -40,7 +41,9 @@ class PluxPlayer {
             this.decodeWorker.terminate()
         }
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-live-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: "10.20.11.211", destinationPort: this.LG_live_port, deviceId });
+        deviceId = deviceId.slice(0, -2) + "00";
+        console.log(this.streamServerIP[deviceId])
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.streamServerIP[deviceId], destinationPort: this.LG_live_port, deviceId });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -52,138 +55,166 @@ class PluxPlayer {
 
     }
 
-    ptzControl(deviceUrl, devicePort, x, y, id, password) {
-        console.log(deviceUrl, devicePort, x, y, id, password)
+    async ptzControl(deviceUrl, devicePort, x, y, id, password) {
+        console.log(deviceUrl, devicePort, x, y, id, password);
 
-        this.generatePasswordDigest(password).then(digest => {
-            let bodyContent;
+        try {
+            const digest = await this.generatePasswordDigest(password);
             if (x == 0 && y == 0) {
-                this.ptzStop(deviceUrl, devicePort, id, password)
+                await this.ptzStop(deviceUrl, devicePort, id, password);
             } else {
-
-                let soap_message = `<?xml version="1.0" encoding="utf-8"?>
-            <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
-                <s:Header>  
-                    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-                    <wsse:UsernameToken><wsse:Username>${id}</wsse:Username>
-                    <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">${digest.passwordDigest}</wsse:Password>
-                    <wsse:Nonce>${digest.nonce}</wsse:Nonce><wsu:Created>${digest.created}</wsu:Created></wsse:UsernameToken>
-                </wsse:Security>
-                </s:Header>
-                <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-                <ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
+                let soap_message = this.createDirectCamSoapBody(
+                    `<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
                     <ProfileToken>DefaultProfile-01-0</ProfileToken>
                     <Velocity>
                         <PanTilt x="${x}" y="${y}"
                             space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace"
                             xmlns="http://www.onvif.org/ver10/schema" />
                     </Velocity>
-                </ContinuousMove>
-            </s:Body>
-            </s:Envelope>`
-
-                this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service", soap_message).then(response => {
-                    console.log(response)
-                });
+                </ContinuousMove>`,
+                    id, digest.passwordDigest, digest.nonce, digest.created
+                );
+                const response = await this.sendSoapRequest(
+                    this.httpRelayUrl + ":" + this.httpRelayPort,
+                    "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service",
+                    soap_message
+                );
+                console.log(response);
             }
-        })
-
+        } catch (error) {
+            console.error("Error in ptzControl:", error);
+        }
     }
 
-    zoom(deviceUrl, devicePort, id, password, zoom) {
-        this.generatePasswordDigest(password).then(digest => {
-            if (zoom > 2) {
-                zoom = 2
-            } else if (zoom < -2) {
-                zoom = -2
-            }
-            let soap_message = `<?xml version="1.0" encoding="utf-8"?>
-            <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
-                <s:Header>  
-                    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-                    <wsse:UsernameToken><wsse:Username>${id}</wsse:Username>
-                    <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">${digest.passwordDigest}</wsse:Password>
-                    <wsse:Nonce>${digest.nonce}</wsse:Nonce><wsu:Created>${digest.created}</wsu:Created></wsse:UsernameToken>
-                </wsse:Security>
-                </s:Header>
-                <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-                <ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
+
+    async zoom(deviceUrl, devicePort, id, password, zoom) {
+        try {
+            const digest = await this.generatePasswordDigest(password);
+            if (zoom > 2) { zoom = 2 }
+            else if (zoom < -2) { zoom = -2 }
+            let soap_message = this.createDirectCamSoapBody(
+                `<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
                     <ProfileToken>DefaultProfile-01-0</ProfileToken>
                     <Velocity>
                         <Zoom x="${zoom}"
                     space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace"
                     xmlns="http://www.onvif.org/ver10/schema" />
                     </Velocity>
-                </ContinuousMove>
-            </s:Body>
-            </s:Envelope>`
+                </ContinuousMove>`,
+                id, digest.passwordDigest, digest.nonce, digest.created
+            );
+            const response = await this.sendSoapRequest(
+                this.httpRelayUrl + ":" + this.httpRelayPort,
+                "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service",
+                soap_message
+            );
+            console.log(response);
+        } catch (error) {
+            console.error("Error in zoom:", error);
+        }
+    }
 
-            this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service", soap_message).then(response => {
-                console.log(response)
-            });
+    async ptzStop(deviceUrl, devicePort, id, password) {
+        try {
+            const digest = await this.generatePasswordDigest(password);
+            let soap_message = this.createDirectCamSoapBody(
+                `<Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl">
+                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
+                    <PanTilt>true</PanTilt>
+                    <Zoom>true</Zoom>
+                </Stop>`,
+                id, digest.passwordDigest, digest.nonce, digest.created
+            );
+            const response = await this.sendSoapRequest(
+                this.httpRelayUrl + ":" + this.httpRelayPort,
+                "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service",
+                soap_message
+            );
+            console.log(response);
+        } catch (error) {
+            console.error("Error in ptzStop:", error);
+        }
+    }
 
+
+    async getDeviceInfo(callback) {
+        const soapBody = this.createSoapBody("<ns1:GetDeviceInfoExt />")
+        const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody);
+        let cameraList = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetDeviceInfoExtResponse"]["ns1:GetDeviceInfoExtResult"]["ns1:CAMERA_DATA_EXT"];
+        callback(cameraList);
+    }
+
+    async streamRecServerSetting() {
+        let getstreamcambody = this.createSoapBody("<ns1:GetStreamCam/>");
+        let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, getstreamcambody);
+        let parsedResponse = this.parseResponse(response);
+        let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"];
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const soapBody1 = this.createSoapBody("<ns1:GetStreamServerList/>");
+        response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody1);
+        parsedResponse = this.parseResponse(response);
+        let streamServerList = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamServerListResponse"]["ns1:GetStreamServerListResult"]["ns1:STREAM_SERVER"];
+
+        let streamServerIP = {}
+
+
+        if (typeof streamServerList == "object" && streamServerList && streamServerList.hasOwnProperty("ns1:strStrServerName")) {
+            streamServerIP[streamServerList["ns1:strStrServerName"]] = streamServerList["ns1:strStrServerIP"]
+        }
+        else{
+            streamServerList.map(item => {
+                if(item.hasOwnProperty("ns1:strStrServerName")){    
+                    streamServerIP[item["ns1:strStrServerName"]] = item["ns1:strStrServerIP"]
+                }
+            })
+        }
+
+
+        let streamServerIPFromCamId = {}
+        camAssign.map(item => {
+            streamServerIPFromCamId[item["ns1:strCameraID"]] = streamServerIP[item["ns1:strStrServerName"]]
         })
+      
+        this.streamServerIP = streamServerIPFromCamId
+        return streamServerIPFromCamId
 
     }
 
-    ptzStop(deviceUrl, devicePort, id, password) {
-        this.generatePasswordDigest(password).then(digest => {
+    async getStrNameFromCamId(callback) {
+        const serverId = "192.168.4.106";
+        const soapBody  = this.createSoapBody(
+            `<tns:GetRecordCam>
+                <tns:ServerID>${serverId}</tns:ServerID>
+            </tns:GetRecordCam> `
+        )
+        const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody)
+        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"]
 
-            let soap_message = `<?xml version="1.0" encoding="utf-8"?>
-            <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
-                <s:Header>  
-                    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-                    <wsse:UsernameToken><wsse:Username>${id}</wsse:Username>
-                    <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">${digest.passwordDigest}</wsse:Password>
-                    <wsse:Nonce>${digest.nonce}</wsse:Nonce><wsu:Created>${digest.created}</wsu:Created></wsse:UsernameToken>
-                </wsse:Security>
-                </s:Header>
-                <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-                    <Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                        <ProfileToken>DefaultProfile-01-0</ProfileToken>
-                        <PanTilt>true</PanTilt>
-                        <Zoom>true</Zoom>
-                        </Stop>
-                </s:Body>
-            </s:Envelope>`
-
-            this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service", soap_message).then(response => {
-                console.log(response)
-            });
-
+        let strnamefromcamid = {}
+        camassign.map(item => {
+            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strStrServerName"]
         })
-    }
+        callback(strnamefromcamid)
+    } 
 
-    getDeviceInfo(callback) {
-
-        const soapBody = `<?xml version="1.0" encoding="UTF-8"?>
-            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope"
-                            xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding"
-                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                            xmlns:ns2="http://tempuri.org/VMSConfigWebServiceSoap"
-                            xmlns:ns1="http://tempuri.org/"
-                            xmlns:ns3="http://tempuri.org/VMSConfigWebServiceSoap12">
-                <SOAP-ENV:Body>
-                    <ns1:GetDeviceInfoExt />
-                </SOAP-ENV:Body>
-            </SOAP-ENV:Envelope>`;
-
-        this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody).then(response => {
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(response, "text/xml");
-            let json = this.xmlToJson(xml);
-            let cameraList = json["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetDeviceInfoExtResponse"]["ns1:GetDeviceInfoExtResult"]["ns1:CAMERA_DATA_EXT"]
-            callback(cameraList)
+    getIpFromStrName(callback) {
+        const soapBody = this.createSoapBody("<ns1:GetStreamServerList/>")
+        this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody)
+        .then(response => {
+            let ssl= this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamServerListResponse"]["ns1:GetStreamServerListResult"]["ns1:STREAM_SERVER"]
+            let ipfromstrname = {}
+            ssl.map(item => {
+                ipfromstrname[item["ns1:strStrServerName"]] = item["ns1:strStrServerIP"]
+            })
+            callback(ipfromstrname)
         });
-
     }
 
-    sendSoapRequest = (relayUrl, targetServerUrl, soapBody) => {
-        return new Promise((resolve, reject) => {
-            fetch(relayUrl, {
+    sendSoapRequest = async (relayUrl, targetServerUrl, soapBody) => {
+        try {
+            const response = await fetch(relayUrl, {
                 method: "POST",  // POST 메서드 사용
                 headers: {
                     "Content-Type": "application/json",  // JSON 형식으로 요청 전송
@@ -192,27 +223,23 @@ class PluxPlayer {
                     url: targetServerUrl,
                     data: soapBody    // SOAP 요청 본문
                 })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return reject(`HTTP error! Status: ${response.status}`);
-                    }
+            });
 
-                    return response.text();  // SOAP 응답 본문을 텍스트로 반환
-                })
-                .then(responseText => {
-                    resolve(responseText);  // 성공적인 응답 처리
-                })
-                .catch(error => {
-                    reject(error);  // 에러 처리
-                });
-        });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const responseText = await response.text();  // SOAP 응답 본문을 텍스트로 반환
+            return responseText;  // 성공적인 응답 처리
+        } catch (error) {
+            throw error;  // 에러 처리
+        }
     };
 
-    generatePasswordDigest(password) {
+    async generatePasswordDigest(password) {
 
-        const created = this.getUTCTimestamp()
-        const nonceBytes = this.getRandomBytes()
+        const created = this.getUTCTimestamp();
+        const nonceBytes = this.getRandomBytes();
 
         // base64로 인코딩
         let base64String = '';
@@ -226,16 +253,50 @@ class PluxPlayer {
         const passwordBytes = encoder.encode(password);
         const digestSource = new Uint8Array([...nonceBytes, ...createdBytes, ...passwordBytes]);
 
-        return crypto.subtle.digest("SHA-1", digestSource).then(hashBuffer => {
-            // Step 3: 결과를 Base64로 인코딩
-            const sha1Digest = new Uint8Array(hashBuffer);
-            const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
+        const hashBuffer = await crypto.subtle.digest("SHA-1", digestSource);
+        // Step 3: 결과를 Base64로 인코딩
+        const sha1Digest = new Uint8Array(hashBuffer);
+        const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
 
-            return { nonce, created, passwordDigest };
-        });
-
+        return { nonce, created, passwordDigest };
     }
 
+    createSoapBody(body) {
+        return `<?xml version="1.0" encoding="UTF-8"?>
+            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope"
+                            xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                            xmlns:ns2="http://tempuri.org/VMSConfigWebServiceSoap"
+                            xmlns:ns1="http://tempuri.org/"
+                            xmlns:ns3="http://tempuri.org/VMSConfigWebServiceSoap12">
+                <SOAP-ENV:Body>
+                    ${body}
+                </SOAP-ENV:Body>
+            </SOAP-ENV:Envelope>`
+    }
+
+    createDirectCamSoapBody(body, id, passwordDigest, nonce, created) {
+        return `<?xml version="1.0" encoding="utf-8"?>
+        <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+            <s:Header>  
+                <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+                <wsse:UsernameToken><wsse:Username>${id}</wsse:Username>
+                <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">${passwordDigest}</wsse:Password>
+                <wsse:Nonce>${nonce}</wsse:Nonce><wsu:Created>${created}</wsu:Created></wsse:UsernameToken>
+            </wsse:Security>
+            </s:Header>
+            <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                ${body}
+            </s:Body>
+        </s:Envelope>`
+    }
+
+    parseResponse(response) {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(response, "text/xml");
+        return this.xmlToJson(xml);
+    }
     xmlToJson(xml) {
 
         // console.log(xml.hasChildNodes())

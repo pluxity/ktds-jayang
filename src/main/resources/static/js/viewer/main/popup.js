@@ -1322,17 +1322,17 @@ const layerPopup = (function () {
                     alertSwal('POI를 배치해주세요');
                 }
             });
-            
+
             const canvasElement = document.getElementById(canvasId);
             let livePlayer = new PluxPlayer({
                 wsRelayUrl: cctvConfig.wsRelayUrl,
                 wsRelayPort: cctvConfig.wsRelayPort,
                 httpRelayUrl: cctvConfig.httpRelayUrl,
                 httpRelayPort: cctvConfig.httpRelayPort,
-                lgServerIp: cctvConfig.lgServerIp,
-                lgServerPort: cctvConfig.lgServerPort,
+                LG_server_ip: cctvConfig.lgServerIp,
+                LG_server_port: cctvConfig.lgServerPort,
                 LG_live_port: cctvConfig.lgLivePort,
-                lgPlaybackPort: cctvConfig.lgPlaybackPort,
+                LG_playback_port: cctvConfig.lgPlaybackPort,
                 canvasDom: canvasElement, //캔버스 dom
             })
 

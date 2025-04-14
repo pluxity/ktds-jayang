@@ -22,9 +22,9 @@ class PluxPlayer {
         if (this.decodeWorker) {
             this.decodeWorker.terminate()
         }
-        deviceId = deviceId.slice(0, -2) + "00";
+        deviceId = deviceId.slice(0, -2) + "02";
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-playback-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.streamServerIP[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.streamServerIP?.[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -41,9 +41,9 @@ class PluxPlayer {
             this.decodeWorker.terminate()
         }
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-live-worker.js");
-        deviceId = deviceId.slice(0, -2) + "00";
-        console.log(this.streamServerIP[deviceId])
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.streamServerIP[deviceId], destinationPort: this.LG_live_port, deviceId });
+        deviceId = deviceId.slice(0, -2) + "02";
+        console.log(this.streamServerIP?.[deviceId])
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.streamServerIP?.[deviceId], destinationPort: this.LG_live_port, deviceId });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {

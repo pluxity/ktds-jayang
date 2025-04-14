@@ -9,6 +9,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const poiRegisterModal = new bootstrap.Modal(document.getElementById('poiRegisterModal'));
 
     registerBtn.addEventListener('click', () => {
+        const buildingId = document.getElementById("buildingId").value;
+        BuildingManager.findById(buildingId).floors.forEach((item) => {
+            const storeFloorSelect = document.getElementById('store-floor');
+            const kioskFloorSelect = document.getElementById('kiosk-floor');
+            const storeOption = document.createElement('option');
+            storeOption.value = item.id;
+            storeOption.textContent = item.name;
+            storeFloorSelect.appendChild(storeOption);
+
+            const kioskOption = document.createElement('option');
+            kioskOption.value = item.id;
+            kioskOption.textContent = item.name;
+            kioskFloorSelect.appendChild(kioskOption);
+        });
         poiRegisterModal.show();
     });
 

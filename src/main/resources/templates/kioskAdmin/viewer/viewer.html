@@ -42,10 +42,10 @@
                         <input type="hidden" name="page" value="1">
                         <div class="row">
                             <div class="col-md-12 d-flex gap-2">
-                                <select class="form-select input-sm">
+                                <select class="form-select input-sm" id="leftFloorSelect">
                                     <option value="">층 전체</option>
                                 </select>
-                                <select class="form-select input-sm">
+                                <select class="form-select input-sm" id="leftPoiCategorySelect">
                                     <option value="">분류 전체</option>
                                 </select>
                             </div>
@@ -133,6 +133,12 @@
                     </button>
                 </div>
             </div>
+        </div>
+        <div id="floorSelect">
+            <select name="floorNo" id="floorNo" class="form-select input-sm">
+            </select>
+        </div>
+        <div id="poiSelect">
         </div>
     </div>
 

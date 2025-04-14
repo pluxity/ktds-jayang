@@ -65,6 +65,32 @@
                     }
                 });
             });
+            // 층 콤보 박스 생성
+            let floorListOpt = "<option value=''>전체</option>";
+            BuildingManager.findById(buildingId).floors.forEach((item) => {
+                floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
+            });
+
+            const floorNo = document.querySelector('#floorNo');
+            floorNo.innerHTML = floorListOpt;
+
+            floorNo.addEventListener('change', function () {
+                changeEventFloor(this.value, buildingId);
+            });
+
+            document
+                .querySelector('#poiSelect')
+                .addEventListener('change', (event) => {
+                    const poiCategoryIds = event.target.value;
+                    const floorId = document.querySelector('#floorNo').value;
+                    const poiList = PoiManager.findByBuilding(BUILDING_ID)
+                        .filter(selectedPoiCategory(poiCategoryIds))
+                        .filter(selectedFloor(floorId));
+                    renderingPoiList(poiList);
+                });
+            initLeftSelect(buildingId);
+            initDropUpMenu();
+
             // handleZoomIn();
             // handleZoomOut();
             // handleExtendView();
@@ -73,6 +99,73 @@
         } catch (error) {
             console.error('PX Engine Initial', error);
         }
+    };
+
+    function changeEventFloor(floorId, buildingId) {
+        if (floorId === '') {
+            Px.Model.Visible.ShowAll();
+        } else {
+
+            Px.Model.Visible.HideAll();
+
+            const floor = BuildingManager.findById(buildingId).floors.find(
+                (floor) => floor.id === Number(floorId),
+            );
+            Px.Model.Visible.Show(floor.id);
+        }
+    }
+
+    const categoryList = [
+        { label: "상가", value: "store" },
+        { label: "키오스크", value: "kiosk" }
+    ];
+    const initLeftSelect = (buildingId) => {
+        const initLeftFloorSelect = () => {
+            let floors = BuildingManager.findById(buildingId).floors;
+            floors.forEach(floor => {
+                document.getElementById("leftFloorSelect")
+                    .appendChild(
+                        new Option(floor.name, floor.id),
+                    );
+            })
+        }
+        const initLeftPoiCategorySelect = () => {
+            categoryList.forEach(category => {
+                document.getElementById("leftPoiCategorySelect")
+                    .appendChild(
+                        new Option(category.label, category.value),
+                    );
+            })
+        }
+        initLeftFloorSelect();
+        initLeftPoiCategorySelect();
+    }
+
+    const initDropUpMenu = () => {
+
+        VirtualSelect.init({
+            ele: '#poiSelect',
+            options: categoryList,
+            selectedValue: categoryList.map((category) => category.value),
+            multiple: true,
+            silentInitialValueSet: true,
+            search: false,
+            name: 'poiSelect',
+            placeholder: 'POI 카테고리',
+            selectAllText: '전체 선택',
+            allOptionsSelectedText: '모두 선택됨',
+        });
+
+        document
+            .querySelector('#poiSelect')
+            .addEventListener('change', (event) => {
+                const poiCategoryIds = event.target.value;
+                const floorId = document.querySelector('#floorNo').value;
+                const poiList = PoiManager.findByBuilding(BUILDING_ID)
+                    .filter(selectedPoiCategory(poiCategoryIds))
+                    .filter(selectedFloor(floorId));
+                renderingPoiList(poiList);
+            });
     };
 
     await initializeStoreBuilding();

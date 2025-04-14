@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -89,7 +90,7 @@ public class KioskPoi {
 
     @OneToMany(mappedBy = "kioskPoi", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("priority ASC")// 우선순위 기준 정렬
-    private List<Banner> banners;
+    private List<Banner> banners = new ArrayList<>();
 
     // 배너 추가 (4개만)
     public void addBanner(Banner banner) {

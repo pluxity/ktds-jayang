@@ -42,10 +42,10 @@ public class Banner {
     @Column(name = "is_permanent", nullable = false)
     private boolean isPermanent;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date", nullable = true)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
     public void addKioskPoi(KioskPoi kioskPoi) {

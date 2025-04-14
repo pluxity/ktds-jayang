@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,14 +81,20 @@ public class KioskPoiService {
     }
 
     @Transactional
-    public Long saveStorePoi(CreateStorePoiDTO dto) {
+    public Long saveStorePoi(CreateStorePoiDTO dto, MultipartFile logo, List<MultipartFile> bannerFiles) {
         Building building = buildingRepository.findById(dto.buildingId()).orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
 
         Floor floor = floorRepository.findById(dto.floorId()).orElseThrow(() -> new CustomException(NOT_FOUND_FLOOR));
 
-        FileInfo logo = null;
-        if (dto.fileInfoId() != null) {
-            logo = fileInfoRepository.findById(dto.fileInfoId()).orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+        FileInfo logoInfo = null;
+        if (logo != null) {
+            try {
+                FileInfoDTO savedLogo = fileIoService.saveFile(logo, FileEntityType.LOGO, imageStrategy);
+                logoInfo = fileInfoRepository.findById(savedLogo.id())
+                        .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+            } catch (IOException e) {
+                throw new CustomException(FAILED_SAVE_FILE);
+            }
         }
 
         KioskPoi kioskPoi = KioskPoi.builder().name(dto.name()).phoneNumber(dto.phoneNumber()).category(dto.category()).isKiosk(dto.isKiosk()).build();
@@ -95,16 +102,29 @@ public class KioskPoiService {
         // 연관관계 설정
         kioskPoi.changeBuilding(building);
         kioskPoi.changeFloor(floor);
-        kioskPoi.changeLogo(logo);
+        kioskPoi.changeLogo(logoInfo);
 
         // 배너 추가
         if (dto.banners() != null) {
-            for (CreateBannerDTO bannerDTO : dto.banners()) {
-                FileInfo bannerFile = fileInfoRepository.findById(bannerDTO.fileId()).orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+            for (int i = 0; i < dto.banners().size(); i++) {
+                CreateBannerDTO bannerDTO = dto.banners().get(i);
+                MultipartFile bannerFileUpload = bannerFiles.get(i);
 
-                Banner banner = Banner.builder().image(bannerFile).priority(bannerDTO.priority()).startDate(bannerDTO.startDate()).endDate(bannerDTO.endDate()).build();
+                try {
+                    FileInfoDTO savedBanner = fileIoService.saveFile(
+                            bannerFileUpload,
+                            FileEntityType.BANNER,
+                            imageStrategy
+                    );
+                    FileInfo bannerFile = fileInfoRepository.findById(savedBanner.id())
+                            .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
 
-                kioskPoi.addBanner(banner);
+                    Banner banner = Banner.builder().image(bannerFile).priority(bannerDTO.priority()).startDate(bannerDTO.startDate()).endDate(bannerDTO.endDate()).build();
+
+                    kioskPoi.addBanner(banner);
+                } catch (IOException e) {
+                    throw new CustomException(FAILED_SAVE_FILE);
+                }
             }
         }
 

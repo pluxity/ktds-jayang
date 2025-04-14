@@ -2,26 +2,44 @@ document.addEventListener('DOMContentLoaded', function() {
     const registerBtn = document.querySelector('#poi-Register-btn');
     const popup = document.querySelector('#poi-register-popup');
     const radioButtons = document.querySelectorAll('input[name="type"]');
-    const storeForm = document.getElementById('store-form');
-    const kioskForm = document.getElementById('kiosk-form');
+    const registerStoreForm = document.getElementById('register-store-form');
+    const registerKioskForm = document.getElementById('register-kiosk-form');
     const closeBtn = document.querySelector('.close-btn');
     const cancelBtn = document.querySelector('.cancel-btn');
     const poiRegisterModal = new bootstrap.Modal(document.getElementById('poiRegisterModal'));
-
+    const poiRegisterForm = document.getElementById("poiRegisterForm");
     registerBtn.addEventListener('click', () => {
         const buildingId = document.getElementById("buildingId").value;
+        poiRegisterForm.reset();
+        poiRegisterForm.querySelector(".file-name").textContent = "";
+        poiRegisterForm.querySelector(".file-remove").textContent = "";
+
+        const bannerRows = poiRegisterForm.querySelectorAll("#banner-tbody tr");
+        bannerRows.forEach(row => {
+            const fileName = row.querySelector(".selected-file");
+            const removeBtn = row.querySelector(".file-remove");
+            const fileInput = row.querySelector(".banner-file");
+            const startDate = row.querySelector(".start-date");
+            const endDate = row.querySelector(".end-date");
+
+            fileName && (fileName.textContent = "");
+            removeBtn && (removeBtn.style.display = "none");
+            fileInput && (fileInput.value = "");
+            startDate && (startDate.disabled = false);
+            endDate && (endDate.disabled = false);
+        });
         BuildingManager.findById(buildingId).floors.forEach((item) => {
-            const storeFloorSelect = document.getElementById('store-floor');
-            const kioskFloorSelect = document.getElementById('kiosk-floor');
+            const registerStoreFloorSelect = document.getElementById('register-store-floor');
+            const registerKioskFloorSelect = document.getElementById('register-kiosk-floor');
             const storeOption = document.createElement('option');
             storeOption.value = item.id;
             storeOption.textContent = item.name;
-            storeFloorSelect.appendChild(storeOption);
+            registerStoreFloorSelect.appendChild(storeOption);
 
             const kioskOption = document.createElement('option');
             kioskOption.value = item.id;
             kioskOption.textContent = item.name;
-            kioskFloorSelect.appendChild(kioskOption);
+            registerKioskFloorSelect.appendChild(kioskOption);
         });
         poiRegisterModal.show();
     });
@@ -45,17 +63,17 @@ document.addEventListener('DOMContentLoaded', function() {
     radioButtons.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'store') {
-                storeForm.style.display = 'block';
-                kioskForm.style.display = 'none';
+                registerStoreForm.style.display = 'block';
+                registerKioskForm.style.display = 'none';
             } else {
-                storeForm.style.display = 'none';
-                kioskForm.style.display = 'block';
+                registerStoreForm.style.display = 'none';
+                registerKioskForm.style.display = 'block';
             }
         });
     });
 
     // 로고 파일 선택 시 파일명 표시
-    document.getElementById('logo-file').addEventListener('change', function() {
+    document.getElementById('register-logo-file').addEventListener('change', function() {
         const fileName = this.files[0] ? this.files[0].name : '';
         const fileNameElement = this.closest('.file-upload').querySelector('.file-name');
         const removeButton = this.closest('.file-upload').querySelector('.file-remove');
@@ -167,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let banners = [];
                 const formData = new FormData();
                 // 1. 로고 파일 업로드
-                const logoFile = document.getElementById('logo-file').files[0];
+                const logoFile = document.getElementById('register-logo-file').files[0];
                 if (logoFile) {
                     formData.append('logo', logoFile);
                 }

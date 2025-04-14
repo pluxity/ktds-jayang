@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         poiRegisterForm.querySelector(".file-name").textContent = "";
         poiRegisterForm.querySelector(".file-remove").textContent = "";
 
-        const bannerRows = poiRegisterForm.querySelectorAll("#banner-tbody tr");
+        const bannerRows = poiRegisterForm.querySelectorAll("#registerbanner-tbody tr");
         bannerRows.forEach(row => {
             const fileName = row.querySelector(".selected-file");
             const removeBtn = row.querySelector(".file-remove");
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const row = this.closest('tr');
-            const tbody = document.getElementById('banner-tbody');
+            const tbody = document.getElementById('register-banner-tbody');
             
             if (this.classList.contains('up-btn') && row.previousElementSibling) {
                 // 위로 이동
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 배너 priority 값 업데이트 함수
     function updateBannerPriorities() {
-        const rows = document.querySelectorAll('#banner-tbody tr');
+        const rows = document.querySelectorAll('#register-banner-tbody tr');
         rows.forEach((row, index) => {
             const priorityInput = row.querySelector('input[name="priority"]');
             if (priorityInput) {
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let storeData = {};
 
                 // 2. 배너 파일들 업로드
-                const bannerRows = document.querySelectorAll('#banner-tbody tr');
+                const bannerRows = document.querySelectorAll('#register-banner-tbody tr');
 
                 for (let i = 0; i < bannerRows.length; i++) {
                     const row = bannerRows[i];
@@ -217,11 +217,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 3. 상가 POI 엔티티 저장
                 storeData = {
                     isKiosk: false,
-                    name: document.getElementById('store-name').value,
-                    category: document.getElementById('business').value,
+                    name: document.getElementById('register-store-name').value,
+                    category: document.getElementById('register-business').value,
                     buildingId: Number(buildingId),
-                    floorId: Number(document.getElementById('store-floor').value),
-                    phoneNumber: document.getElementById('phone').value,
+                    floorId: Number(document.getElementById('register-store-floor').value),
+                    phoneNumber: document.getElementById('register-phone').value,
                     banners: banners
                 };
                 formData.append("store", new Blob([JSON.stringify(storeData)], { type: "application/json" }));
@@ -233,11 +233,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 키오스크 POI 등록
                 const kioskData = {
                     isKiosk: true,
-                    name: document.getElementById('kiosk-name').value,
-                    kioskCode: document.getElementById('equipment-code').value,
+                    name: document.getElementById('register-kiosk-name').value,
+                    kioskCode: document.getElementById('register-equipment-code').value,
                     buildingId: Number(buildingId),
-                    floorId: Number(document.getElementById('kiosk-floor').value),
-                    description: document.getElementById('remarks').value
+                    floorId: Number(document.getElementById('register-kiosk-floor').value),
+                    description: document.getElementById('register-remarks').value
                 };
 
                 await api.post('/kiosk/kiosk', kioskData);

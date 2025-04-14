@@ -74,20 +74,17 @@
                         <ul class="paging-list pagination">
                         </ul>
                         <div class="pagination__wrapper">
-                            <section class="pagination__items">
-                                <!--                    <button class="pagination__navigate-btn" onclick="firstPage()">First</button>-->
+                            <section class="pagination__items" style="display: flex; align-items: center; gap: 10px;">
                                 <button class="pagination__navigate-btn" onclick="prevPage()">이전</button>
-                                <ul class="pagination__pages pagination">
-
+                                <ul class="pagination__pages pagination" style="margin: 0;">
                                 </ul>
                                 <button class="pagination__navigate-btn" onclick="nextPage()">다음</button>
-                                <!--                    <button class="pagination__navigate-btn" onclick="lastPage()">Last</button>-->
                             </section>
                         </div>
                     </div>
                     <hr class="hr-margin">
                     <div class="txt-center">
-                        <button type="button" style="width: 100%" class="btn btn-secondary btn-md"
+                        <button type="button" style="width: 100%; height: 3rem" class="btn btn-secondary btn-md"
                                 id="poi-Register-btn">POI 등록
                         </button>
                     </div>
@@ -317,7 +314,7 @@
                                     <div class="form-col">
                                         <div class="form-label">층선택<span class="required">*</span></div>
                                         <select id="kiosk-floor" name="kioskFloor">
-                                            <option>B3F</option>
+                                            <option></option>
                                         </select>
                                     </div>
                                     <div class="form-col">
@@ -330,7 +327,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-secondary btn-cancle" data-bs-dismiss="modal">취소</button>
                     <button type="button" class="btn btn-primary" id="btnPoiRegister">등록</button>
                 </div>
             </div>

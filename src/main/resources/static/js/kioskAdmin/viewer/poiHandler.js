@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const removeButton = this.closest('.file-upload').querySelector('.file-remove');
         
         fileNameElement.textContent = fileName;
+        
         if (this.files[0]) {
             removeButton.style.display = 'inline';
         } else {
@@ -99,7 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 배너 순서 변경 기능
     document.querySelectorAll('.order-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
             const row = this.closest('tr');
             const tbody = document.getElementById('banner-tbody');
             
@@ -200,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: document.getElementById('store-name').value,
                     category: document.getElementById('business').value,
                     buildingId: Number(buildingId),
-                    floorId: 1,
+                    floorId: Number(document.getElementById('store-floor').value),
                     phoneNumber: document.getElementById('phone').value,
                     banners: banners
                 };

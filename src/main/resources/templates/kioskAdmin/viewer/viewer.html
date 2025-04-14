@@ -16,7 +16,7 @@
             </ul>
             <div class="tab-content"
                  style="padding:5px; display: flex; width: 100%;height: 100%;padding-bottom: 50px;position: relative;">
-                <input type="hidden" name="mapNo" id="buildingId" th:value="${param.buildingId}">
+                <input type="hidden" name="mapNo" id="buildingId">
                 <input type="hidden" name="poiListTabType" id="poiListTabType" value="0">
                 <div class="tab-pane fade show active" name="poi-tab" style="width: 100%">
                     <ul class="nav nav-pills nav-fill">
@@ -162,7 +162,7 @@
                                     <th>업종<span class="required">*</span></th>
                                     <td>
                                         <select id="business" name="business" required>
-                                            <option>F&B</option>
+                                            <option>FOOD</option>
                                             <option>라이프스타일</option>
                                             <option>패션</option>
                                             <option>편의/서비스</option>
@@ -172,7 +172,7 @@
                                 <tr>
                                     <th>층선택<span class="required">*</span></th>
                                     <td>
-                                        <select id="store-floor" name="storeFloor" required>
+                                        <select id="store-floor" name="storeFloor">
                                             <option></option>
                                         </select>
                                     </td>
@@ -184,8 +184,7 @@
                                     <td colspan="3">
                                         <div class="file-upload">
                                             <input type="file" id="logo-file" name="logoFile" style="display: none;">
-                                            <button class="file-select-btn"
-                                                    onclick="document.getElementById('logo-file').click()">파일 선택
+                                            <button class="file-select-btn">파일 선택
                                             </button>
                                             <span class="file-name"></span>
                                             <span class="file-remove"
@@ -213,13 +212,12 @@
                                             <input type="date" class="banner-date start-date" name="startDate"> ~ <input
                                                 type="date" class="banner-date end-date" name="endDate">
                                             <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="1">
                                         </td>
                                         <td>
                                             <input type="file" class="banner-file" name="bannerFile"
                                                    style="display: none;">
-                                            <button class="file-select-btn"
-                                                    onclick="this.previousElementSibling.click()">파일 선택
-                                            </button>
+                                            <button class="file-select-btn">파일 선택</button>
                                             <span class="selected-file"></span>
                                             <span class="file-remove"
                                                   style="cursor: pointer; margin-left: 5px; display: none;">×</span>
@@ -234,13 +232,12 @@
                                             <input type="date" class="banner-date start-date" name="startDate"> ~ <input
                                                 type="date" class="banner-date end-date" name="endDate">
                                             <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="2">
                                         </td>
                                         <td>
                                             <input type="file" class="banner-file" name="bannerFile"
                                                    style="display: none;">
-                                            <button class="file-select-btn"
-                                                    onclick="this.previousElementSibling.click()">파일 선택
-                                            </button>
+                                            <button class="file-select-btn">파일 선택</button>
                                             <span class="selected-file"></span>
                                             <span class="file-remove"
                                                   style="cursor: pointer; margin-left: 5px; display: none;">×</span>
@@ -255,13 +252,12 @@
                                             <input type="date" class="banner-date start-date" name="startDate"> ~ <input
                                                 type="date" class="banner-date end-date" name="endDate">
                                             <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="3">
                                         </td>
                                         <td>
                                             <input type="file" class="banner-file" name="bannerFile"
                                                    style="display: none;">
-                                            <button class="file-select-btn"
-                                                    onclick="this.previousElementSibling.click()">파일 선택
-                                            </button>
+                                            <button class="file-select-btn">파일 선택</button>
                                             <span class="selected-file"></span>
                                             <span class="file-remove"
                                                   style="cursor: pointer; margin-left: 5px; display: none;">×</span>
@@ -276,13 +272,12 @@
                                             <input type="date" class="banner-date start-date" name="startDate"> ~ <input
                                                 type="date" class="banner-date end-date" name="endDate">
                                             <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="4">
                                         </td>
                                         <td>
                                             <input type="file" class="banner-file" name="bannerFile"
                                                    style="display: none;">
-                                            <button class="file-select-btn"
-                                                    onclick="this.previousElementSibling.click()">파일 선택
-                                            </button>
+                                            <button class="file-select-btn">파일 선택</button>
                                             <span class="selected-file"></span>
                                             <span class="file-remove"
                                                   style="cursor: pointer; margin-left: 5px; display: none;">×</span>
@@ -305,17 +300,17 @@
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-label">POI명<span class="required">*</span></div>
-                                        <input type="text" id="kiosk-name" name="kioskName" required>
+                                        <input type="text" id="kiosk-name" name="kioskName" >
                                     </div>
                                     <div class="form-col">
                                         <div class="form-label">장비코드<span class="required">*</span></div>
-                                        <input type="text" id="equipment-code" name="equipmentCode" required>
+                                        <input type="text" id="equipment-code" name="equipmentCode">
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-label">층선택<span class="required">*</span></div>
-                                        <select id="kiosk-floor" name="kioskFloor" required>
+                                        <select id="kiosk-floor" name="kioskFloor">
                                             <option>B3F</option>
                                         </select>
                                     </div>

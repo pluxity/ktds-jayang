@@ -9,6 +9,7 @@ public record CreateBannerDTO(
         Long fileId,
         int priority,
         LocalDate startDate,
-        LocalDate endDate
+        LocalDate endDate,
+        boolean always
 ) {
 }

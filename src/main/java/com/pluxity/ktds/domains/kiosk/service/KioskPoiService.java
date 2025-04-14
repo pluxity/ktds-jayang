@@ -7,6 +7,7 @@ import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.kiosk.dto.*;
+import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
@@ -19,11 +20,14 @@ import com.pluxity.ktds.domains.kiosk.repository.KioskPoiRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -33,6 +37,7 @@ import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KioskPoiService {
 
     private final SaveImage imageStrategy;

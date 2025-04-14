@@ -3,23 +3,23 @@ package com.pluxity.ktds.domains.kiosk.controller;
 import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.kiosk.dto.*;
+import com.pluxity.ktds.domains.kiosk.service.KioskPoiService;
+import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import com.pluxity.ktds.global.response.ResponseBody;
-import com.pluxity.ktds.domains.kiosk.service.KioskPoiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_DELETE;
 import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
 
-
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/kiosk")
+@RequiredArgsConstructor
 public class KioskPoiController {
 
     private final KioskPoiService kioskPoiService;
@@ -37,7 +37,13 @@ public class KioskPoiController {
 
     @PostMapping("/upload/file")
     @ResponseStatus(HttpStatus.CREATED)
-    public DataResponseBody<FileInfoDTO> postKioskFile(@RequestBody KioskFileUploadDTO dto) {
+    public DataResponseBody<FileInfoDTO> postKioskFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("type") String type) {
+        KioskFileUploadDTO dto = KioskFileUploadDTO.builder()
+                .file(file)
+                .type(FileEntityType.valueOf(type.toUpperCase()))
+                .build();
         return DataResponseBody.of(kioskPoiService.saveFile(dto));
     }
 
@@ -92,7 +98,7 @@ public class KioskPoiController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseBody deletePoi(@PathVariable Long id) {
         kioskPoiService.delete(id);
-        return ResponseBody.of(SUCCESS_DELETE);
+        return ResponseBody.of(SUCCESS_PATCH);
     }
 
 }

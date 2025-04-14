@@ -14,11 +14,12 @@
             container.innerHTML = '';
             // const contents = document.querySelector('.contents');
             const storeBuilding = await BuildingManager.findByCode('store');
+            document.getElementById('buildingId').value = storeBuilding.id;
             let buildingId = storeBuilding ? storeBuilding.id : null;
-            // initFloors(buildingId);
+            //initFloors(buildingId);
             // document.getElementById("buildingName").setAttribute("building-id", buildingId);
             // document.getElementById("buildingName").setAttribute("building-name", storeBuilding.name);
-    
+
             // setActiveEquipment(buildingId);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];

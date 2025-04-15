@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
 
@@ -33,6 +34,11 @@ public class KioskPoiController {
     @GetMapping
     public DataResponseBody<List<KioskAllPoiResponseDTO>> getPoiAll() {
         return DataResponseBody.of(kioskPoiService.findAll());
+    }
+
+    @GetMapping("/detailList")
+    public DataResponseBody<List<Map<String, Object>>> getPoiAllDetail() {
+        return DataResponseBody.of(kioskPoiService.findAllDetail());
     }
 
     @PostMapping("/upload/file")

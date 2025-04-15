@@ -6,6 +6,7 @@ import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
+import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.kiosk.dto.*;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
@@ -28,9 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -70,6 +69,39 @@ public class KioskPoiService {
                 .map(KioskPoi::toAllResponseDto)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> findAllDetail() {
+        List<KioskPoi> kioskPoiList = kioskPoiRepository.findAll();
+        List<Map<String, Object>> poiDetailList = new ArrayList<>();
+
+        for (KioskPoi kioskPoi : kioskPoiList) {
+            Map<String, Object> map = new HashMap<>();
+            KioskAllPoiResponseDTO baseInfo = KioskAllPoiResponseDTO.builder()
+                    .id(kioskPoi.getId())
+                    .name(kioskPoi.getName())
+                    .isKiosk(kioskPoi.isKiosk())
+                    .position(kioskPoi.getPosition())
+                    .rotation(kioskPoi.getRotation())
+                    .scale(kioskPoi.getScale())
+                    .buildingId(kioskPoi.getBuilding() != null ? kioskPoi.getBuilding().getId() : null)
+                    .floorId(kioskPoi.getFloor() != null ? kioskPoi.getFloor().getId() : null)
+                    .build();
+
+            Object detailDto;
+            if (kioskPoi.isKiosk()) {
+                detailDto = kioskPoi.toKioskDetailResponseDTO();
+            } else {
+                detailDto = kioskPoi.toStoreDetailResponseDTO();
+            }
+
+            map.put("common", baseInfo);
+            map.put("detail", detailDto);
+            poiDetailList.add(map);
+        }
+        return poiDetailList;
+    }
+
 
     @Transactional
     public FileInfoDTO saveFile(@NotNull KioskFileUploadDTO dto) {

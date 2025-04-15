@@ -85,7 +85,7 @@ public class KioskPoi {
     private boolean isKiosk; // true: 키오스크, false: 상가
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "kiosk_category", nullable = false)
+    @Column(name = "kiosk_category", nullable = true)
     private KioskCategory category;
 
     @OneToMany(mappedBy = "kioskPoi", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -175,9 +175,10 @@ public class KioskPoi {
                 .isKiosk(this.isKiosk)
                 .name(this.name)
                 .category(this.category)
+                .buildingId(this.building.getId())
                 .floorId(this.floor.getId())
                 .phoneNumber(this.phoneNumber)
-                .logo(this.logo.getId())
+                .logo(this.logo != null ? this.logo.getId() : null)
                 .banners(this.banners.stream().map(Banner::toDetailResponseDTO).toList())
                 .position(this.position)
                 .rotation(this.rotation)
@@ -190,6 +191,11 @@ public class KioskPoi {
                 .id(this.id)
                 .name(this.name)
                 .isKiosk(this.isKiosk)
+                .buildingId(this.building.getId())
+                .floorId(this.floor.getId())
+                .scale(this.scale)
+                .rotation(this.rotation)
+                .position(this.position)
                 .build();
     }
 }

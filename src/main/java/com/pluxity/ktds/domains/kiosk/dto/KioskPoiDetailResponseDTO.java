@@ -9,6 +9,8 @@ public record KioskPoiDetailResponseDTO(
         boolean isKiosk,
         String kioskCode,
         String name,
+        Long buildingId,
+        Long floorId,
         String description,
         Spatial position,
         Spatial rotation,

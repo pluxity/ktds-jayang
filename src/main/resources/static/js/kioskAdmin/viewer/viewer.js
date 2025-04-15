@@ -43,6 +43,7 @@
                     urlDataList: sbmDataArray,
                     center: "",
                     onLoad: function() {
+                        getKioskPoiListRendering();
                         Px.Model.Visible.ShowAll();
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);

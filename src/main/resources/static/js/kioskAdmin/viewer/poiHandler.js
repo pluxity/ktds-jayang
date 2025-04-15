@@ -243,11 +243,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 await api.post('/kiosk/kiosk', kioskData);
             }
 
-            alert('POI가 성공적으로 등록되었습니다.');
+            await alertSwal('등록되었습니다.');
+            poiRegisterModal.hide();
+            await getKioskPoiListRendering();
 
         } catch (error) {
             console.error('Error:', error);
-            alert('POI 등록 중 오류가 발생했습니다: ' + error.message);
         }
     });
 });
+
+const getKioskPoiListRendering = async () => {
+    await KioskPoiManager.getKioskPoiList().then(() => {
+        let list = KioskPoiManager.getList();
+        poiPaging(list);
+    });
+}

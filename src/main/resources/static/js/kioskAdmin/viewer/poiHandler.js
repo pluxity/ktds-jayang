@@ -1,33 +1,42 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const closeBtn = document.querySelector('.close-btn');
-    const cancelBtn = document.querySelector('.cancel-btn');
-
     const registerBtn = document.querySelector('#poiRegisterBtn');
-    const popup = document.querySelector('#poiRegisterPopup');
     const radioButtons = document.querySelectorAll('input[name="type"]');
     const registerStoreForm = document.getElementById('registerStoreForm');
     const registerKioskForm = document.getElementById('registerKioskForm');
     const poiRegisterModal = new bootstrap.Modal(document.getElementById('poiRegisterModal'));
     const poiRegisterForm = document.getElementById("poiRegisterForm");
+    const modalEl = document.getElementById('poiRegisterModal');
+    const popup = document.getElementById('poiRegisterPopup');
+    const closeBtn = modalEl.querySelector('.btn-close');
+    const cancelBtn = modalEl.querySelector('.btn-cancel');
     registerBtn.addEventListener('click', () => {
+        handlePoiRegisterBtnClick();
+    });
+
+    function handlePoiRegisterBtnClick() {
         const buildingId = document.getElementById("buildingId").value;
         poiRegisterForm.reset();
 
-        BuildingManager.findById(buildingId).floors.forEach((item) => {
-            const registerStoreFloorSelect = document.getElementById('registerStoreFloor');
-            const registerKioskFloorSelect = document.getElementById('registerKioskFloor');
-            const storeOption = document.createElement('option');
-            storeOption.value = item.id;
-            storeOption.textContent = item.name;
-            registerStoreFloorSelect.appendChild(storeOption);
+        const floors = BuildingManager.findById(buildingId).floors;
+        const registerStoreFloorSelect = document.getElementById('registerStoreFloor');
+        const registerKioskFloorSelect = document.getElementById('registerKioskFloor');
 
-            const kioskOption = document.createElement('option');
-            kioskOption.value = item.id;
-            kioskOption.textContent = item.name;
-            registerKioskFloorSelect.appendChild(kioskOption);
-        });
+        appendFloorOptionsToSelect(floors, registerStoreFloorSelect);
+        appendFloorOptionsToSelect(floors, registerKioskFloorSelect);
+        registerStoreForm.style.display = 'block';
+        registerKioskForm.style.display = 'none';
         poiRegisterModal.show();
-    });
+    }
+
+    function appendFloorOptionsToSelect(floors, selectElement) {
+        floors.forEach((floor) => {
+            const option = document.createElement('option');
+            option.value = floor.id;
+            option.textContent = floor.name;
+            selectElement.appendChild(option);
+        });
+    }
+
 
     // 팝업 닫기 및 폼 초기화 함수
     function resetAndClosePopup() {
@@ -52,9 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             startDate && (startDate.disabled = false);
             endDate && (endDate.disabled = false);
         });
-        registerStoreForm.style.display = 'block';
-        registerKioskForm.style.display = 'none';
-        document.getElementById('poiRegisterPopup').style.display = 'none';
+        // document.getElementById('poiRegisterPopup').style.display = 'none';
     }
 
     // 팝업 닫기

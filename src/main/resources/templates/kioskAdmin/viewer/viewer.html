@@ -85,7 +85,7 @@
                     <hr class="hr-margin">
                     <div class="txt-center">
                         <button type="button" style="width: 100%; height: 3rem" class="btn btn-secondary btn-md"
-                                id="poi-Register-btn">POI 등록
+                                id="poiRegisterBtn">POI 등록
                         </button>
                     </div>
                 </div>
@@ -156,15 +156,15 @@
                         </div>
 
                         <!-- 상가 폼 -->
-                        <div id="register-store-form">
+                        <div id="registerStoreForm">
                             <table class="table">
                                 <tbody>
                                 <tr>
                                     <th>POI명<span class="required">*</span></th>
-                                    <td><input type="text" id="register-store-name" name="storeName" required></td>
+                                    <td><input type="text" id="registerStoreName" name="storeName" required></td>
                                     <th>업종<span class="required">*</span></th>
                                     <td>
-                                        <select id="register-business" name="business" required>
+                                        <select id="registerBusiness" name="business" required>
                                             <option value="FOOD">F&B</option>
                                             <option value="LIFE">라이프스타일</option>
                                             <option value="FASHION">패션</option>
@@ -175,18 +175,18 @@
                                 <tr>
                                     <th>층선택<span class="required">*</span></th>
                                     <td>
-                                        <select id="register-store-floor" name="storeFloor">
+                                        <select id="registerStoreFloor" name="storeFloor">
                                             <option></option>
                                         </select>
                                     </td>
                                     <th>전화번호</th>
-                                    <td><input type="text" id="register-phone" name="phone"></td>
+                                    <td><input type="text" id="registerPhone" name="phone"></td>
                                 </tr>
                                 <tr>
                                     <th>로고</th>
                                     <td colspan="3">
                                         <div class="file-upload">
-                                            <input type="file" id="register-logo-file" name="logoFile" style="display: none;">
+                                            <input type="file" id="registerLogoFile" name="logoFile" style="display: none;">
                                             <button class="file-select-btn">파일 선택
                                             </button>
                                             <span class="file-name"></span>
@@ -209,7 +209,7 @@
                                         <th>순서</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="register-banner-tbody">
+                                    <tbody id="registerBannerTbody">
                                     <tr>
                                         <td>
                                             <input type="date" class="banner-date start-date" name="startDate"> ~ <input
@@ -298,28 +298,28 @@
                         </div>
 
                         <!-- 키오스크 폼 -->
-                        <div id="register-kiosk-form" style="display: none;">
+                        <div id="registerKioskForm" style="display: none;">
                             <div class="form-group">
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-label">POI명<span class="required">*</span></div>
-                                        <input type="text" id="register-kiosk-name" name="kioskName" >
+                                        <input type="text" id="registerKioskName" name="kioskName" >
                                     </div>
                                     <div class="form-col">
                                         <div class="form-label">장비코드<span class="required">*</span></div>
-                                        <input type="text" id="register-equipment-code" name="equipmentCode">
+                                        <input type="text" id="registerEquipmentCode" name="equipmentCode">
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-label">층선택<span class="required">*</span></div>
-                                        <select id="register-kiosk-floor" name="kioskFloor">
+                                        <select id="registerKioskFloor" name="kioskFloor">
                                             <option></option>
                                         </select>
                                     </div>
                                     <div class="form-col">
                                         <div class="form-label">비고</div>
-                                        <input type="text" id="register-remarks" name="remarks">
+                                        <input type="text" id="registerRemarks" name="remarks">
                                     </div>
                                 </div>
                             </div>
@@ -351,15 +351,15 @@
                         </div>
 
                         <!-- 상가 폼 -->
-                        <div id="modify-store-form">
+                        <div id="modifyStoreForm">
                             <table class="table">
                                 <tbody>
                                 <tr>
                                     <th>POI명<span class="required">*</span></th>
-                                    <td><input type="text" id="modify-store-name" name="ModifyStoreName" required></td>
+                                    <td><input type="text" id="modifyStoreName" name="ModifyStoreName" required></td>
                                     <th>업종<span class="required">*</span></th>
                                     <td>
-                                        <select id="modify-business" name="business" required>
+                                        <select id="modifyBusiness" name="business" required>
                                             <option value="FOOD">F&B</option>
                                             <option value="LIFE">라이프스타일</option>
                                             <option value="FASHION">패션</option>
@@ -370,18 +370,18 @@
                                 <tr>
                                     <th>층선택<span class="required">*</span></th>
                                     <td>
-                                        <select id="modify-store-floor" name="storeFloor">
+                                        <select id="modifyStoreFloor" name="storeFloor">
                                             <option></option>
                                         </select>
                                     </td>
                                     <th>전화번호</th>
-                                    <td><input type="text" id="modify-phone" name="phone"></td>
+                                    <td><input type="text" id="modifyPhone" name="phone"></td>
                                 </tr>
                                 <tr>
                                     <th>로고</th>
                                     <td colspan="3">
                                         <div class="file-upload">
-                                            <input type="file" id="modify-logo-file" name="logoFile" style="display: none;">
+                                            <input type="file" id="modifyLogoFile" name="logoFile" style="display: none;">
                                             <button class="file-select-btn">파일 선택
                                             </button>
                                             <span class="file-name"></span>
@@ -404,7 +404,7 @@
                                         <th>순서</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="modify-banner-tbody">
+                                    <tbody id="modifyBannerTbody">
                                     <tr>
                                         <td>
                                             <input type="date" class="banner-date start-date" name="startDate"> ~ <input
@@ -493,28 +493,28 @@
                         </div>
 
                         <!-- 키오스크 폼 -->
-                        <div id="modify-kiosk-form" style="display: none;">
+                        <div id="modifyKioskForm" style="display: none;">
                             <div class="form-group">
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-label">POI명<span class="required">*</span></div>
-                                        <input type="text" id="modify-kiosk-name" name="kioskName" >
+                                        <input type="text" id="modifyKioskName" name="kioskName" >
                                     </div>
                                     <div class="form-col">
                                         <div class="form-label">장비코드<span class="required">*</span></div>
-                                        <input type="text" id="modify-equipment-code" name="equipmentCode">
+                                        <input type="text" id="modifyEquipmentCode" name="equipmentCode">
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-label">층선택<span class="required">*</span></div>
-                                        <select id="modify-kiosk-floor" name="kioskFloor">
+                                        <select id="modifyKioskFloor" name="kioskFloor">
                                             <option>B3F</option>
                                         </select>
                                     </div>
                                     <div class="form-col">
                                         <div class="form-label">비고</div>
-                                        <input type="text" id="moidify-remarks" name="remarks">
+                                        <input type="text" id="moidifyRemarks" name="remarks">
                                     </div>
                                 </div>
                             </div>

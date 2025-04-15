@@ -1,36 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const registerBtn = document.querySelector('#poi-Register-btn');
-    const popup = document.querySelector('#poi-register-popup');
-    const radioButtons = document.querySelectorAll('input[name="type"]');
-    const registerStoreForm = document.getElementById('register-store-form');
-    const registerKioskForm = document.getElementById('register-kiosk-form');
     const closeBtn = document.querySelector('.close-btn');
     const cancelBtn = document.querySelector('.cancel-btn');
+
+    const registerBtn = document.querySelector('#poiRegisterBtn');
+    const popup = document.querySelector('#poiRegisterPopup');
+    const radioButtons = document.querySelectorAll('input[name="type"]');
+    const registerStoreForm = document.getElementById('registerStoreForm');
+    const registerKioskForm = document.getElementById('registerKioskForm');
     const poiRegisterModal = new bootstrap.Modal(document.getElementById('poiRegisterModal'));
     const poiRegisterForm = document.getElementById("poiRegisterForm");
     registerBtn.addEventListener('click', () => {
         const buildingId = document.getElementById("buildingId").value;
         poiRegisterForm.reset();
-        poiRegisterForm.querySelector(".file-name").textContent = "";
-        poiRegisterForm.querySelector(".file-remove").textContent = "";
 
-        const bannerRows = poiRegisterForm.querySelectorAll("#registerbanner-tbody tr");
-        bannerRows.forEach(row => {
-            const fileName = row.querySelector(".selected-file");
-            const removeBtn = row.querySelector(".file-remove");
-            const fileInput = row.querySelector(".banner-file");
-            const startDate = row.querySelector(".start-date");
-            const endDate = row.querySelector(".end-date");
-
-            fileName && (fileName.textContent = "");
-            removeBtn && (removeBtn.style.display = "none");
-            fileInput && (fileInput.value = "");
-            startDate && (startDate.disabled = false);
-            endDate && (endDate.disabled = false);
-        });
         BuildingManager.findById(buildingId).floors.forEach((item) => {
-            const registerStoreFloorSelect = document.getElementById('register-store-floor');
-            const registerKioskFloorSelect = document.getElementById('register-kiosk-floor');
+            const registerStoreFloorSelect = document.getElementById('registerStoreFloor');
+            const registerKioskFloorSelect = document.getElementById('registerKioskFloor');
             const storeOption = document.createElement('option');
             storeOption.value = item.id;
             storeOption.textContent = item.name;
@@ -50,7 +35,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (form) {
             form.reset();
         }
-        document.getElementById('poi-register-popup').style.display = 'none';
+        poiRegisterForm.querySelector(".file-name").textContent = "";
+        poiRegisterForm.querySelector(".file-remove").textContent = "";
+
+        const bannerRows = poiRegisterForm.querySelectorAll("#register-banner-tbody tr");
+        bannerRows.forEach(row => {
+            const fileName = row.querySelector(".selected-file");
+            const removeBtn = row.querySelector(".file-remove");
+            const fileInput = row.querySelector(".banner-file");
+            const startDate = row.querySelector(".start-date");
+            const endDate = row.querySelector(".end-date");
+
+            fileName && (fileName.textContent = "");
+            removeBtn && (removeBtn.style.display = "none");
+            fileInput && (fileInput.value = "");
+            startDate && (startDate.disabled = false);
+            endDate && (endDate.disabled = false);
+        });
+        registerStoreForm.style.display = 'block';
+        registerKioskForm.style.display = 'none';
+        document.getElementById('poiRegisterPopup').style.display = 'none';
     }
 
     // 팝업 닫기
@@ -73,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 로고 파일 선택 시 파일명 표시
-    document.getElementById('register-logo-file').addEventListener('change', function() {
+    document.getElementById('registerLogoFile').addEventListener('change', function() {
         const fileName = this.files[0] ? this.files[0].name : '';
         const fileNameElement = this.closest('.file-upload').querySelector('.file-name');
         const removeButton = this.closest('.file-upload').querySelector('.file-remove');
@@ -121,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const row = this.closest('tr');
-            const tbody = document.getElementById('register-banner-tbody');
+            const tbody = document.getElementById('registerBannerTbody');
             
             if (this.classList.contains('up-btn') && row.previousElementSibling) {
                 // 위로 이동
@@ -138,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 배너 priority 값 업데이트 함수
     function updateBannerPriorities() {
-        const rows = document.querySelectorAll('#register-banner-tbody tr');
+        const rows = document.querySelectorAll('#registerBannerTbody tr');
         rows.forEach((row, index) => {
             const priorityInput = row.querySelector('input[name="priority"]');
             if (priorityInput) {
@@ -185,14 +189,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 let banners = [];
                 const formData = new FormData();
                 // 1. 로고 파일 업로드
-                const logoFile = document.getElementById('register-logo-file').files[0];
+                const logoFile = document.getElementById('registerLogoFile').files[0];
                 if (logoFile) {
                     formData.append('logo', logoFile);
                 }
                 let storeData = {};
 
                 // 2. 배너 파일들 업로드
-                const bannerRows = document.querySelectorAll('#register-banner-tbody tr');
+                const bannerRows = document.querySelectorAll('#registerBannerTbody tr');
 
                 for (let i = 0; i < bannerRows.length; i++) {
                     const row = bannerRows[i];
@@ -217,11 +221,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 3. 상가 POI 엔티티 저장
                 storeData = {
                     isKiosk: false,
-                    name: document.getElementById('register-store-name').value,
-                    category: document.getElementById('register-business').value,
+                    name: document.getElementById('registerStoreName').value,
+                    category: document.getElementById('registerBusiness').value,
                     buildingId: Number(buildingId),
-                    floorId: Number(document.getElementById('register-store-floor').value),
-                    phoneNumber: document.getElementById('register-phone').value,
+                    floorId: Number(document.getElementById('registerStoreFloor').value),
+                    phoneNumber: document.getElementById('registerPhone').value,
                     banners: banners
                 };
                 formData.append("store", new Blob([JSON.stringify(storeData)], { type: "application/json" }));
@@ -233,11 +237,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 키오스크 POI 등록
                 const kioskData = {
                     isKiosk: true,
-                    name: document.getElementById('register-kiosk-name').value,
-                    kioskCode: document.getElementById('register-equipment-code').value,
+                    name: document.getElementById('registerKioskName').value,
+                    kioskCode: document.getElementById('registerEquipmentCode').value,
                     buildingId: Number(buildingId),
-                    floorId: Number(document.getElementById('register-kiosk-floor').value),
-                    description: document.getElementById('register-remarks').value
+                    floorId: Number(document.getElementById('registerKioskFloor').value),
+                    description: document.getElementById('registerRemarks').value
                 };
 
                 await api.post('/kiosk/kiosk', kioskData);

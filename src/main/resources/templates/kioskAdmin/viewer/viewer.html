@@ -21,17 +21,17 @@
                 <div class="tab-pane fade show active" name="poi-tab" style="width: 100%">
                     <ul class="nav nav-pills nav-fill">
                         <li class="nav-item" style="width: 33.33%">
-                            <div class="nav-link active poi-position" data-tab-type="0" data-poi-position="Y"
+                            <div class="nav-link active poi-position" data-tab-type="0" data-poi-position="Y" id="poiAllocate"
                             >배치
                             </div>
                         </li>
                         <li class="nav-item" style="width: 33.33%">
-                            <div class="nav-link poi-position" data-tab-type="1" data-poi-position="N"
+                            <div class="nav-link poi-position" data-tab-type="1" data-poi-position="N" id="poiUnAllocateByFloor"
                             >미배치(층)
                             </div>
                         </li>
                         <li class="nav-item" style="width: 33.33%">
-                            <div class="nav-link poi-position" data-tab-type="1" data-poi-position="N"
+                            <div class="nav-link poi-position" data-tab-type="2" data-poi-position="N" id="poiUnAllocate"
                             >미배치(전체)
                             </div>
                         </li>
@@ -51,10 +51,10 @@
                             </div>
                         </div>
                         <div class="input-group hr-margin">
-                            <input type="text" name="searchKeyword"
+                            <input type="text" name="searchKeyword" id="searchKeyword"
                                    class="form-control text-primary border-primary small" placeholder="POI 이름을 입력하세요.">
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="button">
+                                <button class="btn btn-primary" type="button" id="searchBtn">
                                     <i class="fas fa-search fa-sm"></i>
                                 </button>
                             </div>

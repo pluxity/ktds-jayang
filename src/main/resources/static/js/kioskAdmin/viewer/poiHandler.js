@@ -61,7 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
             startDate && (startDate.disabled = false);
             endDate && (endDate.disabled = false);
         });
-        // document.getElementById('poiRegisterPopup').style.display = 'none';
+        registerStoreForm.style.display = 'block';
+        registerKioskForm.style.display = 'none';
+        document.getElementById('poiRegisterPopup').style.display = 'none';
     }
 
     // 팝업 닫기
@@ -256,7 +258,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             await alertSwal('등록되었습니다.');
             poiRegisterModal.hide();
-            await getKioskPoiListRendering();
+
+            KioskPoiManager.getKioskPoiList().then(() => {
+                getKioskPoiListRendering();
+            });
 
         } catch (error) {
             console.error('Error:', error);
@@ -264,9 +269,82 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-const getKioskPoiListRendering = async () => {
-    await KioskPoiManager.getKioskPoiList().then(() => {
-        let list = KioskPoiManager.getList();
-        poiPaging(list);
-    });
+// POI 리스트 렌더링
+const getKioskPoiListRendering = async (kioskPoiList) => {
+
+        let filteredList = KioskPoiManager.findAll();
+
+        const selectedFloorId = Number(
+            document.querySelector('#leftFloorSelect').value
+        );
+        if (selectedFloorId) {
+            filteredList = filteredList.filter(
+                (poi) => poi.floorId === selectedFloorId);
+        }
+
+        const selectedPoiType = document.querySelector('#leftPoiCategorySelect').value;
+        if (selectedPoiType === 'store') {
+            filteredList = filteredList.filter(
+                (poi) => poi.isKiosk === false);
+        }
+
+        const searchKeyword = document.querySelector('#searchKeyword');
+        if (searchKeyword.value) {
+            filteredList = filteredList.filter((poi) =>
+                poi.name.toLowerCase().includes(searchKeyword.value.toLowerCase()),
+            );
+        }
+
+        if (document.querySelector('#poiAllocate').classList.contains('active')) { //배치
+            filteredList = filteredList.filter((poi) => poi.position !== null);
+        } else if (document.querySelector('#poiUnAllocate').classList.contains('active')) { // 미배치(전체)
+            filteredList = filteredList.filter((poi) => poi.position === null);
+        } else if (document.querySelector('#poiUnAllocateByFloor').classList.contains('active')) { // 미배치(층별)
+            filteredList = filteredList.filter((poi) => poi.position === null && poi.floorId === selectedFloorId);
+        }
+
+        poiPaging(filteredList);
 }
+
+// 층 선택 시 POI 리스트 렌더링
+document.querySelector('#leftFloorSelect').addEventListener('change', () => {
+    getKioskPoiListRendering();
+});
+
+document.querySelector('#leftPoiCategorySelect').addEventListener('change', () => {
+    getKioskPoiListRendering();
+});
+
+document.querySelector('#poiAllocate').addEventListener('pointerup', (event) => {
+    const {currentTarget} = event;
+    currentTarget.classList.add('active');
+    document.querySelector('#poiUnAllocate').classList.remove('active');
+    document.querySelector('#poiUnAllocateByFloor').classList.remove('active');
+    getKioskPoiListRendering();
+});
+
+document.querySelector('#poiUnAllocate').addEventListener('pointerup', (event) => {
+    const {currentTarget} = event;
+    currentTarget.classList.add('active');
+    document.querySelector('#poiAllocate').classList.remove('active');
+    document.querySelector('#poiUnAllocateByFloor').classList.remove('active');
+    getKioskPoiListRendering();
+});
+
+document.querySelector('#poiUnAllocateByFloor').addEventListener('pointerup', (event) => {
+    const {currentTarget} = event;
+    currentTarget.classList.add('active');
+    document.querySelector('#poiAllocate').classList.remove('active');
+    document.querySelector('#poiUnAllocate').classList.remove('active');
+    getKioskPoiListRendering();
+});
+
+document.querySelector('#searchKeyword').addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        getKioskPoiListRendering();
+    }
+});
+
+document.querySelector('#searchBtn').addEventListener('click', () => {
+    getKioskPoiListRendering();
+});

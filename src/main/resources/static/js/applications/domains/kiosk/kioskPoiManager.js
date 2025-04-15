@@ -27,13 +27,13 @@ const KioskPoiManager = (() => {
         });
     };
 
-    const getList = () => {
+    const findAll = () => {
         return kioskPoiList;
     }
 
     return {
         getKioskPoiList,
-        getList
+        findAll
     }
 
 })();

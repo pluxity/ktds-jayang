@@ -161,6 +161,8 @@ public class KioskPoi {
                 .id(this.id)
                 .isKiosk(this.isKiosk)
                 .name(this.name)
+                .buildingId(this.building.getId())
+                .floorId(this.floor.getId())
                 .kioskCode(this.kioskCode)
                 .description(this.description)
                 .position(this.position)

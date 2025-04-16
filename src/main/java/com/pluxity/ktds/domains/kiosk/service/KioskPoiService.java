@@ -65,7 +65,7 @@ public class KioskPoiService {
 
     @Transactional(readOnly = true)
     public List<KioskAllPoiResponseDTO> findAll() {
-        return kioskPoiRepository.findAll().stream()
+        return kioskPoiRepository.findAllByOrderByIdDesc().stream()
                 .map(KioskPoi::toAllResponseDto)
                 .toList();
     }

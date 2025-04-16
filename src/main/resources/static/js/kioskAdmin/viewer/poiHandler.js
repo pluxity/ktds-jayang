@@ -270,13 +270,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // POI 리스트 렌더링
-const getKioskPoiListRendering = async (kioskPoiList) => {
+const getKioskPoiListRendering = async () => {
 
         let filteredList = KioskPoiManager.findAll();
 
-        const selectedFloorId = Number(
-            document.querySelector('#leftFloorSelect').value
-        );
+        const selectedFloorId = Number(document.querySelector('#leftFloorSelect').value);
         if (selectedFloorId) {
             filteredList = filteredList.filter(
                 (poi) => poi.floorId === selectedFloorId);
@@ -284,8 +282,9 @@ const getKioskPoiListRendering = async (kioskPoiList) => {
 
         const selectedPoiType = document.querySelector('#leftPoiCategorySelect').value;
         if (selectedPoiType === 'store') {
-            filteredList = filteredList.filter(
-                (poi) => poi.isKiosk === false);
+            filteredList = filteredList.filter((poi) => poi.isKiosk === false);
+        } else if (selectedPoiType === 'kiosk') {
+            filteredList = filteredList.filter((poi) => poi.isKiosk === true);
         }
 
         const searchKeyword = document.querySelector('#searchKeyword');
@@ -311,10 +310,12 @@ document.querySelector('#leftFloorSelect').addEventListener('change', () => {
     getKioskPoiListRendering();
 });
 
+// POI 카테고리 선택 시 POI 리스트 렌더링
 document.querySelector('#leftPoiCategorySelect').addEventListener('change', () => {
     getKioskPoiListRendering();
 });
 
+// POI 배치 선택 시 POI 리스트 렌더링
 document.querySelector('#poiAllocate').addEventListener('pointerup', (event) => {
     const {currentTarget} = event;
     currentTarget.classList.add('active');
@@ -323,6 +324,7 @@ document.querySelector('#poiAllocate').addEventListener('pointerup', (event) => 
     getKioskPoiListRendering();
 });
 
+// POI 미배치(전체) 선택 시 POI 리스트 렌더링
 document.querySelector('#poiUnAllocate').addEventListener('pointerup', (event) => {
     const {currentTarget} = event;
     currentTarget.classList.add('active');
@@ -331,6 +333,7 @@ document.querySelector('#poiUnAllocate').addEventListener('pointerup', (event) =
     getKioskPoiListRendering();
 });
 
+// POI 미배치(층별) 선택 시 POI 리스트 렌더링
 document.querySelector('#poiUnAllocateByFloor').addEventListener('pointerup', (event) => {
     const {currentTarget} = event;
     currentTarget.classList.add('active');
@@ -339,12 +342,14 @@ document.querySelector('#poiUnAllocateByFloor').addEventListener('pointerup', (e
     getKioskPoiListRendering();
 });
 
+// 검색어 입력 시 POI 리스트 렌더링
 document.querySelector('#searchKeyword').addEventListener('keyup', (event) => {
     if (event.key === 'Enter') {
         getKioskPoiListRendering();
     }
 });
 
+// 검색 버튼 클릭 시 POI 리스트 렌더링
 document.querySelector('#searchBtn').addEventListener('click', () => {
     getKioskPoiListRendering();
 });

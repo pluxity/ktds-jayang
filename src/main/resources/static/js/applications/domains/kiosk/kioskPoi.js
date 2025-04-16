@@ -47,6 +47,9 @@ class KioskPoi {
     get description() {
         return this.#description;
     }
+    get isKiosk() {
+        return this.#isKiosk;
+    }
 
 
 

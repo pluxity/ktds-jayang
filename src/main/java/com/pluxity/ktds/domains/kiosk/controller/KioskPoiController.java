@@ -112,6 +112,13 @@ public class KioskPoiController {
         return ResponseBody.of(SUCCESS_PATCH);
     }
 
+    @PatchMapping("/un-allocation/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchPoiUnAllocation(@PathVariable Long id) {
+        kioskPoiService.unAllocationPoi(id);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseBody deletePoi(@PathVariable Long id) {

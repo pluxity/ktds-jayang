@@ -8,9 +8,7 @@
         })
     });
 
-    KioskPoiManager.getKioskPoiList().then(() => {
-        getKioskPoiListRendering();
-    });
+
     await KioskPoiManager.getKioskPoiDetailList();
 
     const initializeStoreBuilding = async (onComplete) => {
@@ -48,6 +46,7 @@
                     urlDataList: sbmDataArray,
                     center: "",
                     onLoad: function() {
+                        initPoi();
                         Px.Model.Visible.ShowAll();
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
@@ -88,16 +87,14 @@
                 changeEventFloor(this.value, buildingId);
             });
 
-            document
-                .querySelector('#poiSelect')
-                .addEventListener('change', (event) => {
-                    const poiCategoryIds = event.target.value;
-                    const floorId = document.querySelector('#floorNo').value;
-                    const poiList = PoiManager.findByBuilding(BUILDING_ID)
-                        .filter(selectedPoiCategory(poiCategoryIds))
-                        .filter(selectedFloor(floorId));
-                    renderingPoiList(poiList);
-                });
+            // document.querySelector('#poiSelect')
+            //     .addEventListener('change', (event) => {
+            //         const floorId = document.querySelector('#floorNo').value;
+            //         const poiList = PoiManager.findByBuilding(BUILDING_ID)
+            //             .filter(selectedPoiCategory(poiCategoryIds))
+            //             .filter(selectedFloor(floorId));
+            //         renderingPoiList(poiList);
+            //     });
             initLeftSelect(buildingId);
             initDropUpMenu();
 
@@ -166,19 +163,19 @@
             allOptionsSelectedText: '모두 선택됨',
         });
 
-        document
-            .querySelector('#poiSelect')
-            .addEventListener('change', (event) => {
-                const poiCategoryIds = event.target.value;
-                const floorId = document.querySelector('#floorNo').value;
-                const poiList = PoiManager.findByBuilding(BUILDING_ID)
-                    .filter(selectedPoiCategory(poiCategoryIds))
-                    .filter(selectedFloor(floorId));
-                renderingPoiList(poiList);
-            });
+        // document
+        //     .querySelector('#poiSelect')
+        //     .addEventListener('change', (event) => {
+        //         const poiCategoryIds = event.target.value;
+        //         const floorId = document.querySelector('#floorNo').value;
+        //         const poiList = PoiManager.findByBuilding(BUILDING_ID)
+        //             .filter(selectedPoiCategory(poiCategoryIds))
+        //             .filter(selectedFloor(floorId));
+        //         renderingPoiList(poiList);
+        //     });
     };
 
-    await initializeStoreBuilding();
+        await initializeStoreBuilding();
 })();
 
 

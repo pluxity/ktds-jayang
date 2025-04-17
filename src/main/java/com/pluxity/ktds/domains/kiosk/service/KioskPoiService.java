@@ -278,6 +278,16 @@ public class KioskPoiService {
     }
 
     @Transactional
+    public void unAllocationPoi(Long id) {
+        Spatial position = Spatial.builder()
+                .x(null)
+                .y(null)
+                .z(null)
+                .build();
+        updateSpatial(id, poi -> poi.changePosition(position));
+    }
+
+    @Transactional
     public void delete(@NotNull final Long id) {
         KioskPoi kioskPoi = getKioskPoi(id);
         kioskPoiRepository.delete(kioskPoi);

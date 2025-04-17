@@ -357,6 +357,48 @@ document.querySelector('#btnPoiModify').addEventListener("click", function (even
     });
 })
 
+const allocatePoi = (id) => {
+    if (document.querySelector('#floorNo').value === '') {
+        alertSwal('전체 층일경우 POI 수정이 불가능 합니다.');
+        return;
+    }
+
+    const selectedFloorNo = document.querySelector('#floorNo').value;
+    const poi = KioskPoiManager.findById(id);
+    if (poi.floorId !== Number(selectedFloorNo)) {
+        alertSwal('POI의 층과 선택한 층이 다릅니다.');
+        return;
+    }
+
+    KioskPoiManager.renderKioskPoiByIdAddByMouse(id);
+
+};
+
+const deletePoi = (id) => {
+    confirmSwal('POI를 삭제하시겠습니까?').then(() =>{
+        const poi = KioskPoiManager.findById(id);
+        KioskPoiManager.deleteKioskPoi(id).then(() => {
+            poi.removeOn3D();
+            KioskPoiManager.getKioskPoiList().then(() => {
+                getKioskPoiListRendering();
+            });
+
+        });
+    });
+};
+
+const unAllocatePoi = (id) => {
+    confirmSwal('POI를 미배치로 변경하시겠습니까?').then(() => {
+        return api.patch(`/kiosk/un-allocation/${id}`)
+            .then(async () => {
+                KioskPoiManager.findById(id).removeOn3D();
+                await KioskPoiManager.getKioskPoiList().then(() => {
+                    getKioskPoiListRendering();
+                });
+            });
+    });
+};
+
 // POI 리스트 렌더링
 const getKioskPoiListRendering = async () => {
 
@@ -387,13 +429,73 @@ const getKioskPoiListRendering = async () => {
         } else if (document.querySelector('#poiUnAllocate').classList.contains('active')) { // 미배치(전체)
             filteredList = filteredList.filter((poi) => poi.position === null);
         } else if (document.querySelector('#poiUnAllocateByFloor').classList.contains('active')) { // 미배치(층별)
-            filteredList = filteredList.filter((poi) => poi.position === null && poi.floorId === selectedFloorId);
+            filteredList = filteredList.filter((poi) => {
+                    if(selectedFloorId){
+                        return poi.position === null && poi.floorId === selectedFloorId
+                    }else{
+                        return poi.position === null;
+                    }
+            });
         }
 
         poiPaging(filteredList);
 }
 
-// 층 선택 시 POI 리스트 렌더링
+// poi viewer 렌더링
+const getKioskPoiDisplayRendering = async () => {
+    let displayList = KioskPoiManager.findAll();
+    let filteredList = displayList;
+
+    const selectedFloorNo = document.querySelector('#floorNo').value;
+    const selectedType = document.querySelector('#poiSelect').value;
+    const leftFloorSelect = document.querySelector('#leftFloorSelect');
+    const leftPoiCategorySelect = document.querySelector('#leftPoiCategorySelect')
+
+    if(selectedFloorNo) {
+        leftFloorSelect.value = selectedFloorNo;
+        displayList = displayList.filter(
+            (poi) => poi.floorId === Number(selectedFloorNo));
+    }else{
+        leftFloorSelect.selectedIndex = 0;
+    }
+
+    if(selectedType.includes('store') && selectedType.includes('kiosk')) {
+        leftPoiCategorySelect.selectedIndex = 0;
+    } else {
+        displayList = displayList.filter((poi) => {
+            if (selectedType.includes('store')) {
+                leftPoiCategorySelect.selectedIndex = 1;
+                return poi.isKiosk === false;
+            }
+            if (selectedType.includes('kiosk')) {
+                leftPoiCategorySelect.selectedIndex = 2;
+                return poi.isKiosk === true;
+            }
+            return false;
+        });
+    }
+
+    filteredList = displayList;
+
+    if (document.querySelector('#poiAllocate').classList.contains('active')) { //배치
+        filteredList = filteredList.filter((poi) => poi.position !== null);
+    } else if (document.querySelector('#poiUnAllocate').classList.contains('active')) { // 미배치(전체)
+        filteredList = filteredList.filter((poi) => poi.position === null);
+    } else if (document.querySelector('#poiUnAllocateByFloor').classList.contains('active')) { // 미배치(층별)
+        filteredList = filteredList.filter((poi) => {
+            if(selectedFloorNo){
+                return poi.position === null && poi.floorId === Number(selectedFloorNo)
+            }else{
+                return poi.position === null;
+            }
+        });
+    }
+
+    renderingPoiList(displayList);
+    poiPaging(filteredList);
+}
+
+// side 층 선택 시 POI 리스트 렌더링
 document.querySelector('#leftFloorSelect').addEventListener('change', () => {
     getKioskPoiListRendering();
 });
@@ -409,6 +511,7 @@ document.querySelector('#poiAllocate').addEventListener('pointerup', (event) => 
     currentTarget.classList.add('active');
     document.querySelector('#poiUnAllocate').classList.remove('active');
     document.querySelector('#poiUnAllocateByFloor').classList.remove('active');
+    document.querySelector('#leftFloorSelect').selectedIndex = 0;
     getKioskPoiListRendering();
 });
 
@@ -418,6 +521,7 @@ document.querySelector('#poiUnAllocate').addEventListener('pointerup', (event) =
     currentTarget.classList.add('active');
     document.querySelector('#poiAllocate').classList.remove('active');
     document.querySelector('#poiUnAllocateByFloor').classList.remove('active');
+    document.querySelector('#leftFloorSelect').selectedIndex = 0;
     getKioskPoiListRendering();
 });
 
@@ -427,6 +531,7 @@ document.querySelector('#poiUnAllocateByFloor').addEventListener('pointerup', (e
     currentTarget.classList.add('active');
     document.querySelector('#poiAllocate').classList.remove('active');
     document.querySelector('#poiUnAllocate').classList.remove('active');
+    document.querySelector('#leftFloorSelect').selectedIndex = 0;
     getKioskPoiListRendering();
 });
 
@@ -441,6 +546,32 @@ document.querySelector('#searchKeyword').addEventListener('keyup', (event) => {
 document.querySelector('#searchBtn').addEventListener('click', () => {
     getKioskPoiListRendering();
 });
+
+
+// 층 선택 시 POI 리스트 렌더링
+document.querySelector('#floorNo').addEventListener('change', () => {
+    getKioskPoiDisplayRendering();
+});
+
+document.querySelector('#poiSelect').addEventListener('change', () => {
+    getKioskPoiDisplayRendering();
+});
+
+
+
+const renderingPoiList = (filteredList) => {
+    Px.Poi.HideAll();
+    filteredList.forEach((poiInfo) => {
+        Px.Poi.Show(poiInfo.id);
+    });
+};
+
+const initPoi = async () => {
+    KioskPoiManager.getKioskPoiList().then(() => {
+        getKioskPoiListRendering();
+        KioskPoiManager.renderAllPoiToEngine();
+    });
+}
 
 function handlePoiModifyBtnClick(kioskPoi) {
     const buildingId = document.getElementById("buildingId").value;

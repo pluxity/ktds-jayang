@@ -4,17 +4,17 @@ const KioskPoiManager = (() => {
     let kioskPoiDetailList = [];
 
     const dtoToModel = (kioskPoiDto) => {
-        const { id, name, buildingId, floorId, isKiosk, property, position, rotation, scale } = kioskPoiDto;
+        const { id, name, buildingId, floorId, isKiosk, position, rotation, scale } = kioskPoiDto;
         return new KioskPoi(
             id,
             name,
             buildingId,
             floorId,
             isKiosk,
-            property,
+            kioskPoiDto,
             position,
             rotation,
-            scale
+            scale,
         );
     }
 
@@ -52,6 +52,64 @@ const KioskPoiManager = (() => {
         return kioskPoiList;
     }
 
+
+    const findById = (id) => {
+        return kioskPoiList.find((kioskPoi) => Number(kioskPoi.id) === Number(id));
+    };
+
+    const patchKioskPoiPosition = (id, params) => {
+        return new Promise((resolve, reject) => {
+            api.patch(`/kiosk/${id}/position`, params)
+                .then(() => {
+                    getKioskPoiList().then(() => {
+                        getKioskPoiListRendering();
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                    getKioskPoiList().then(() => {
+                        getKioskPoiListRendering();
+                    });
+                });
+        });
+    };
+
+    const deleteKioskPoi = (id) => {
+        return new Promise((resolve, reject) => {
+            api.delete(`/kiosk/${id}`)
+                .then(() => {
+                    kioskPoiList = kioskPoiList.filter((kioskPoi) => kioskPoi.id !== id);
+                    resolve(id);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    reject(id);
+                });
+        });
+    };
+
+    const renderAllPoiToEngine = () => {
+        const poiData = [];
+        kioskPoiList.forEach((kioskPoi) => {
+        if (kioskPoi.position === null) {
+            return;
+        }
+        poiData.push(kioskPoi.poiOptions);
+        });
+
+        Px.Poi.AddFromDataArraySync(poiData);
+    };
+
+    const renderKioskPoiByIdAddByMouse = (id, floorId) => {
+        const kioskPoiDataEngine = KioskPoiManager.findById(id).poiOptions;
+        kioskPoiDataEngine.onComplete = (kioskPoiId) => {
+            const kioskPoiData = Px.Poi.GetData(kioskPoiId);
+            KioskPoiManager.patchKioskPoiPosition(kioskPoiId, kioskPoiData.position);
+        };
+
+        Px.Poi.AddByMouseSync(kioskPoiDataEngine);
+    };
+
     const findDetailAll = () => {
         return kioskPoiDetailList;
     }
@@ -67,6 +125,11 @@ const KioskPoiManager = (() => {
     return {
         getKioskPoiList,
         findAll,
+        findById,
+        patchKioskPoiPosition,
+        renderKioskPoiByIdAddByMouse,
+        deleteKioskPoi,
+        renderAllPoiToEngine,
         getKioskPoiDetailList,
         findDetailAll,
         getKioskPoi,

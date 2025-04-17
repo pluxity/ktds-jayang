@@ -10,6 +10,6 @@ public record CreateBannerDTO(
         int priority,
         LocalDate startDate,
         LocalDate endDate,
-        boolean always
+        boolean isPermanent
 ) {
 }

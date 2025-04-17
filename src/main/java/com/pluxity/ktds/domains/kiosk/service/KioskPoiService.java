@@ -151,7 +151,13 @@ public class KioskPoiService {
                     FileInfo bannerFile = fileInfoRepository.findById(savedBanner.id())
                             .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
 
-                    Banner banner = Banner.builder().image(bannerFile).priority(bannerDTO.priority()).startDate(bannerDTO.startDate()).endDate(bannerDTO.endDate()).build();
+                    Banner banner = Banner.builder()
+                            .image(bannerFile)
+                            .priority(bannerDTO.priority())
+                            .startDate(bannerDTO.startDate())
+                            .endDate(bannerDTO.endDate())
+                            .isPermanent(bannerDTO.isPermanent())
+                            .build();
 
                     kioskPoi.addBanner(banner);
                 } catch (IOException e) {
@@ -179,20 +185,59 @@ public class KioskPoiService {
     }
 
     @Transactional
-    public void updateStore(@Valid @NotNull final Long id, @NotNull final UpdateStorePoiDTO dto) {
+    public void updateStore(@Valid @NotNull final Long id,
+                            @NotNull final UpdateStorePoiDTO dto,
+                            final MultipartFile logoFile,
+                            final List<MultipartFile> bannerFiles) {
         KioskPoi kioskPoi = getKioskPoi(id);
-        kioskPoi.clearBanners();
 
         kioskPoi.storePoiUpdate(dto.name(), dto.category(), dto.phoneNumber());
 
         updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        updateIfNotNull(dto.fileInfoId(), kioskPoi::changeLogo, fileInfoRepository, ErrorCode.NOT_FOUND_FILE);
-        dto.banners().forEach(bannerDTO -> {
-            FileInfo bannerFile = fileInfoRepository.findById(bannerDTO.fileId()).orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
-            Banner banner = Banner.builder().image(bannerFile).priority(bannerDTO.priority()).startDate(bannerDTO.startDate()).endDate(bannerDTO.endDate()).build();
-            kioskPoi.addBanner(banner);
-        });
+        if (logoFile != null && !logoFile.isEmpty()) {
+            try {
+                FileInfoDTO savedLogoDTO = fileIoService.saveFile(logoFile, FileEntityType.LOGO, imageStrategy);
+                FileInfo newLogo = fileInfoRepository.findById(savedLogoDTO.id())
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FILE));
+                kioskPoi.changeLogo(newLogo);
+            } catch (IOException e) {
+                throw new CustomException(FAILED_SAVE_FILE);
+            }
+
+        } else {
+            updateIfNotNull(dto.fileInfoId(), kioskPoi::changeLogo, fileInfoRepository, ErrorCode.NOT_FOUND_FILE);
+        }
+        kioskPoi.clearBanners();
+
+        List<UpdateBannerDTO> bannerDTOs = dto.banners();
+
+        System.out.println("updateStoreDto : " + dto);
+        System.out.println("bannerDTOs : " + bannerDTOs);
+        for (int i = 0; i < bannerDTOs.size(); i++) {
+            UpdateBannerDTO bannerDTO = bannerDTOs.get(i);
+
+            MultipartFile bannerFileUpload = (bannerFiles != null && bannerFiles.size() > i) ? bannerFiles.get(i) : null;
+
+            if (bannerFileUpload != null && !bannerFileUpload.isEmpty()) {
+                FileInfo bannerFile;
+                try {
+                    FileInfoDTO savedBannerDTO = fileIoService.saveFile(bannerFileUpload, FileEntityType.BANNER, imageStrategy);
+                    bannerFile = fileInfoRepository.findById(savedBannerDTO.id())
+                            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FILE));
+                    Banner banner = Banner.builder()
+                            .image(bannerFile)
+                            .priority(bannerDTO.priority())
+                            .startDate(bannerDTO.startDate())
+                            .endDate(bannerDTO.endDate())
+                            .isPermanent(bannerDTO.isPermanent())
+                            .build();
+                    kioskPoi.addBanner(banner);
+                } catch (IOException e) {
+                    throw new CustomException(FAILED_SAVE_FILE);
+                }
+            }
+        }
     }
 
     @Transactional

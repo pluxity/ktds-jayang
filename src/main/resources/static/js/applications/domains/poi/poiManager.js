@@ -145,7 +145,6 @@ const PoiManager = (() => {
         });
     };
 
-
     const deletePoi = (id) => {
         return new Promise((resolve, reject) => {
             api.delete(`/poi/${id}`)
@@ -229,6 +228,7 @@ const PoiManager = (() => {
             PoiManager.patchPoiPosition(poiId, poiData.position);
         };
 
+        console.log("poiDataEngine : ", poiDataEngine);
         Px.Poi.AddByMouseSync(poiDataEngine);
     };
 

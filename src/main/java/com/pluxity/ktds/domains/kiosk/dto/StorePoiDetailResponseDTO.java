@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.kiosk.dto;
 
+import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.kiosk.entity.KioskCategory;
 import lombok.Builder;
@@ -16,6 +17,7 @@ public record StorePoiDetailResponseDTO (
     Long floorId,
     String phoneNumber,
     Long logo,
+    FileInfoDTO logoFile,
     List<BannerDetailResponseDTO> banners,
     Spatial position,
     Spatial rotation,

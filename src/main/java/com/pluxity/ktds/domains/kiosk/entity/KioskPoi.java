@@ -181,6 +181,7 @@ public class KioskPoi {
                 .floorId(this.floor.getId())
                 .phoneNumber(this.phoneNumber)
                 .logo(this.logo != null ? this.logo.getId() : null)
+                .logoFile(this.logo == null ? null : this.logo.toDto())
                 .banners(this.banners.stream().map(Banner::toDetailResponseDTO).toList())
                 .position(this.position)
                 .rotation(this.rotation)

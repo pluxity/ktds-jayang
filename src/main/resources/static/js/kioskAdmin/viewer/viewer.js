@@ -11,6 +11,7 @@
     KioskPoiManager.getKioskPoiList().then(() => {
         getKioskPoiListRendering();
     });
+    await KioskPoiManager.getKioskPoiDetailList();
 
     const initializeStoreBuilding = async (onComplete) => {
         try {
@@ -69,6 +70,11 @@
                     }
                 });
             });
+
+            api.get("/kiosk/detailList").then(res => {
+                console.log("res : ", res);
+            })
+
             // 층 콤보 박스 생성
             let floorListOpt = "<option value=''>전체</option>";
             BuildingManager.findById(buildingId).floors.forEach((item) => {

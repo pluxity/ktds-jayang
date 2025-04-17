@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.kiosk.dto;
 
+import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -8,8 +9,10 @@ import java.time.LocalDate;
 public record BannerDetailResponseDTO(
         Long id,
         Long image,
+        FileInfoDTO bannerFile,
         LocalDate startDate,
         LocalDate endDate,
-        int priority
+        int priority,
+        boolean isPermanent
 ) {
 }

@@ -10,6 +10,7 @@ import com.pluxity.ktds.global.response.ResponseBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,19 +70,26 @@ public class KioskPoiController {
         return DataResponseBody.of(kioskPoiService.saveKioskPoi(dto));
     }
 
-    @PutMapping("/kiosk/{id}")
+    @PutMapping(value = "/store/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseBody patchStorePoi(@PathVariable Long id, @Valid @RequestBody UpdateStorePoiDTO dto) {
-        kioskPoiService.updateStore(id, dto);
+    public ResponseBody patchStorePoi(
+            @PathVariable Long id,
+            @RequestPart("store") @Valid UpdateStorePoiDTO dto,
+            @RequestPart(value = "logo", required = false) MultipartFile logoFile,
+            @RequestPart(value = "bannerFiles", required = false) List<MultipartFile> bannerFiles
+    ) {
+        kioskPoiService.updateStore(id, dto, logoFile, bannerFiles);
         return ResponseBody.of(SUCCESS_PATCH);
     }
 
-    @PutMapping("/store/{id}")
+    @PutMapping("/kiosk/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseBody patchKioskPoi(@PathVariable Long id, @Valid @RequestBody UpdateKioskPoiDTO dto) {
         kioskPoiService.updateKiosk(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }
+
+
 
     @PatchMapping("/{id}/position")
     @ResponseStatus(HttpStatus.ACCEPTED)

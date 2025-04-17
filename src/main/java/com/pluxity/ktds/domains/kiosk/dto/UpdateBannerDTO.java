@@ -10,5 +10,6 @@ public record UpdateBannerDTO(
    Long fileId,
    int priority,
    LocalDate startDate,
-   LocalDate endDate
+   LocalDate endDate,
+   boolean isPermanent
 ) {}

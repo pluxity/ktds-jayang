@@ -225,9 +225,25 @@ function poiPaging(records) {
                 unAllocatePoi([records[index].id]);
             });
 
-            dropdownContentDiv.appendChild(dropdownItemAllocateA);
+            const dropdownItemInfo = document.createElement('a');
+            dropdownItemInfo.classList.add('dropdown-item');
+            // dropdownItemInfo.id = 'poiModifyBtn';
+            dropdownItemInfo.textContent = 'POI 속성';
+            dropdownItemInfo.addEventListener('click', () => {
+                console.log("records[index] : ", records[index]);
+                handlePoiModifyBtnClick(records[index]);
+            });
+
+            const poiPosition = document.querySelector('.poi-position.active');
+            const position = poiPosition.getAttribute('data-poi-position')
+
+            dropdownContentDiv.appendChild(dropdownItemInfo);
+            if (position === 'Y') {
+                dropdownContentDiv.appendChild(dropdownItemUnAllocateA);
+            } else {
+                dropdownContentDiv.appendChild(dropdownItemAllocateA);
+            }
             dropdownContentDiv.appendChild(dropdownItemDeleteA);
-            dropdownContentDiv.appendChild(dropdownItemUnAllocateA);
 
             dropdownDiv.append(buttonDropdown);
             dropdownDiv.append(dropdownContentDiv);

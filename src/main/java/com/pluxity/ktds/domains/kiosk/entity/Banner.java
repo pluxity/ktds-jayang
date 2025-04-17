@@ -56,10 +56,11 @@ public class Banner {
         return BannerDetailResponseDTO.builder()
                 .id(id)
                 .image(image.getId())
+                .bannerFile(image == null ? null : image.toDto())
+                .isPermanent(isPermanent)
                 .startDate(startDate)
                 .endDate(endDate)
                 .priority(priority)
                 .build();
     }
-
 }

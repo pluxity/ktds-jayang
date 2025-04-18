@@ -70,15 +70,12 @@ public class KioskPoiController {
         return DataResponseBody.of(kioskPoiService.saveKioskPoi(dto));
     }
 
-    @PutMapping(value = "/store/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/store/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseBody patchStorePoi(
             @PathVariable Long id,
-            @RequestPart("store") @Valid UpdateStorePoiDTO dto,
-            @RequestPart(value = "logo", required = false) MultipartFile logoFile,
-            @RequestPart(value = "bannerFiles", required = false) List<MultipartFile> bannerFiles
-    ) {
-        kioskPoiService.updateStore(id, dto, logoFile, bannerFiles);
+            @RequestBody UpdateStorePoiDTO dto) {
+        kioskPoiService.updateStore(id, dto);
         return ResponseBody.of(SUCCESS_PATCH);
     }
 

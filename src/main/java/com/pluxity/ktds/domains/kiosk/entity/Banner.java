@@ -5,11 +5,13 @@ import com.pluxity.ktds.domains.kiosk.dto.BannerDetailResponseDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
+@Getter
 @Table(name = "kiosk_banner")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Banner {
@@ -47,9 +49,26 @@ public class Banner {
 
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
-
+    public void changeImage(FileInfo newImage) {
+        this.image = newImage;
+    }
     public void addKioskPoi(KioskPoi kioskPoi) {
         this.kioskPoi = kioskPoi;
+    }
+
+    public void updateDetails(int priority, LocalDate startDate, LocalDate endDate, boolean isPermanent) {
+        this.priority = priority;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.isPermanent = isPermanent;
+    }
+
+    public void update(FileInfo image, int priority, LocalDate startDate, LocalDate endDate, boolean isPermanent) {
+        this.image = image;
+        this.priority = priority;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.isPermanent = isPermanent;
     }
 
     public BannerDetailResponseDTO toDetailResponseDTO() {

@@ -6,6 +6,8 @@ class KioskPoi {
     #floorId;
     #description;
     #property;
+    #store;
+    #kiosk;
 
     constructor(
         id,
@@ -17,6 +19,8 @@ class KioskPoi {
         position,
         rotation,
         scale,
+        store,
+        kiosk,
     ) {
         this.#id = id;
         this.#name = name;
@@ -27,6 +31,8 @@ class KioskPoi {
         this.rotation = rotation;
         this.scale = scale;
         this.#property = property;
+        this.#store = store;
+        this.#kiosk = kiosk;
     }
 
     get id() {
@@ -51,6 +57,11 @@ class KioskPoi {
         return this.#isKiosk;
     }
 
+    get store() {
+        return this.#store;
+    }
 
-
+    get kiosk() {
+        return this.#kiosk;
+    }
 }

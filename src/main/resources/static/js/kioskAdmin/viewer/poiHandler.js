@@ -3,7 +3,7 @@ const radioButtons = document.querySelectorAll('input[name="type"]');
 const registerStoreForm = document.getElementById('registerStoreForm');
 const registerKioskForm = document.getElementById('registerKioskForm');
 const poiRegisterModal = new bootstrap.Modal(document.getElementById('poiRegisterModal'));
-const poiModifyModal = document.querySelector('#poiModifyModal');
+const poiModifyModal = new bootstrap.Modal(document.getElementById('poiModifyModal'));
 const poiRegisterForm = document.getElementById("poiRegisterForm");
 const modalEl = document.getElementById('poiRegisterModal');
 const popup = document.getElementById('poiRegisterPopup');
@@ -268,94 +268,83 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
     }
 });
 
-document.querySelector('#btnPoiModify').addEventListener("click", function (event) {
-    event.preventDefault();
-    const type = document.querySelector('input[name="type"]:checked').value;
-    const buildingId = document.getElementById("buildingId").value;
-    const formId = document.getElementById("poiModifyForm").dataset.id;
-    if (type === 'store') {
-        const formData = new FormData();
-        let banners = [];
+const uploadFileAndSetId = async (inputElement, dataAttr, type) => {
+    const file = inputElement.files[0];
+    if (!file) return;
 
-        const logoFile = document.getElementById("modifyLogoFile").files[0];
-        if (logoFile) {
-            formData.append("logo", logoFile);
-        } else {
-            const logoId = document.getElementById("modifyLogoFile").dataset.fileId;
-            if (logoId) {
-                formData.append("logoId", logoId);
-            }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+
+    try {
+        const response = await api.post("/kiosk/upload/file", formData);
+        const fileInfo = response.data.result;
+        inputElement.setAttribute(dataAttr, fileInfo.id);
+        return fileInfo.id;
+    } catch (err) {
+        alertSwal(err.message);
+        throw new Error(err.message)
+    }
+};
+
+const updateStorePoi = async () => {
+    try {
+        const logoInput = document.getElementById("modifyLogoFile");
+        if (logoInput.files[0]) {
+            const logoFileId = await uploadFileAndSetId(logoInput, "data-file-id", "logo");
+            logoInput.setAttribute("data-file-id", logoFileId);
         }
 
-        // 여기서부터가..
         const bannerRows = document.querySelectorAll("#modifyBannerTbody tr");
-        for (let i = 0; i < bannerRows.length; i++) {
-            const row = bannerRows[i];
-            const bannerFileInput = row.querySelector(".banner-file");
-            const bannerFile = bannerFileInput.files[0];
-            const bannerId = bannerFileInput.dataset.bannerId;  // 기존 배너 id
-            const priority = Number(row.querySelector('input[name="priority"]').value);
-            const startDate = row.querySelector(".start-date").value;
-            const endDate = row.querySelector(".end-date").value;
-            const isPermanent = row.querySelector(".banner-checkbox").checked;
-
-            if (bannerFile) {
-                let banner = {
-                    priority: priority,
-                    startDate: startDate || null,
-                    endDate: endDate || null,
-                    isPermanent: isPermanent
-                };
-                if (bannerId) {
-                    banner.id = Number(bannerId);
-                }
-                formData.append("bannerFiles", bannerFile);
-                banners.push(banner);
-            } else {
-                if (bannerId) {
-                    banners.push({
-                        id: Number(bannerId),
-                        delete: true
-                    });
-                }
+        for (const row of bannerRows) {
+            const bannerInput = row.querySelector(".banner-file");
+            if (bannerInput.files[0]) {
+                const newFileId = await uploadFileAndSetId(bannerInput, "data-file-id", "banner");
+                bannerInput.setAttribute("data-file-id", newFileId);
+                console.log("newFileId : ", newFileId);
             }
         }
 
-        const storeData = {
+        const dto = {
+            id: Number(document.getElementById("poiModifyForm").dataset.id),
             name: document.getElementById("modifyStoreName").value,
             category: document.getElementById("modifyBusiness").value,
-            buildingId: Number(buildingId),
+            buildingId: Number(document.getElementById("buildingId").value),
             floorId: Number(document.getElementById("modifyStoreFloor").value),
             phoneNumber: document.getElementById("modifyPhone").value,
-            banners: banners
+            fileInfoId: Number(logoInput.getAttribute("data-file-id")) || null,
+            banners: Array.from(bannerRows).map(row => {
+                const fileId = row.querySelector(".banner-file").getAttribute("data-file-id");
+                const bannerId = row.dataset.bannerId || null;
+                const isPermanent = row.querySelector("input[name='always']").checked;
+
+                return {
+                    id: bannerId ? Number(bannerId) : null,
+                    fileId: fileId ? Number(fileId) : null,
+                    priority: parseInt(row.querySelector("input[name='priority']").value, 10) || 0,
+                    startDate: isPermanent ? null : row.querySelector("input[name='startDate']").value || null,
+                    endDate: isPermanent ? null : row.querySelector("input[name='endDate']").value || null,
+                    isPermanent
+                };
+            })
         };
 
-        formData.append("store", new Blob([JSON.stringify(storeData)], { type: "application/json" }));
+        api.put(`/kiosk/store/${dto.id}`, dto).then(res => {
+            alertSwal("수정이 완료되었습니다.");
+            poiModifyModal.hide();
 
-        api.put(`/kiosk/store/${formId}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
-
-    } else {
-        const kioskData = {
-            name: document.getElementById("modifyKioskName").value,
-            kioskCode: document.getElementById("modifyEquipmentCode").value,
-            buildingId: Number(buildingId),
-            floorId: Number(document.getElementById("modifyKioskFloor").value),
-            description: document.getElementById("modifyRemarks").value
-        };
-
-        api.put(`/kiosk/kiosk/${formId}`, kioskData);
+            KioskPoiManager.getKioskPoiList().then(() => {
+                getKioskPoiListRendering();
+            });
+        })
+    } catch(err) {
+        alertSwal(err.message);
+        throw err.message;
     }
+};
 
-    alertSwal("수정되었습니다.");
-    const modal = bootstrap.Modal.getInstance(poiModifyModal);
-    modal.hide();
+document.getElementById("btnPoiModify").addEventListener("click", updateStorePoi);
 
-    KioskPoiManager.getKioskPoiList().then(() => {
-        getKioskPoiListRendering();
-    });
-})
 
 const allocatePoi = (id) => {
     if (document.querySelector('#floorNo').value === '') {
@@ -573,7 +562,7 @@ const initPoi = async () => {
     });
 }
 
-function handlePoiModifyBtnClick(kioskPoi) {
+const handlePoiModifyBtnClick = async (kioskPoi) => {
     const buildingId = document.getElementById("buildingId").value;
 
     const floors = BuildingManager.findById(buildingId).floors;
@@ -582,47 +571,48 @@ function handlePoiModifyBtnClick(kioskPoi) {
 
     appendFloorOptionsToSelect(floors, modifyStoreFloorSelect);
     appendFloorOptionsToSelect(floors, modifyKioskFloorSelect);
-    const detail = KioskPoiManager.findPoiDetailById(kioskPoi.id)
+    const poiDetail = await KioskPoiManager.getKioskPoi(kioskPoi.id);
 
+    console.log("poiDetail : ", poiDetail);
     document.querySelectorAll('input[name="type"]').forEach(radio => {
         radio.disabled = true;
+        radio.checked = radio.value === (kioskPoi.isKiosk ? "kiosk" : "store");
     });
     document.getElementById('poiModifyForm').dataset.id = kioskPoi.id;
     if (kioskPoi.isKiosk) {
-        document.querySelector('input[name="type"][value="kiosk"]').checked = true;
         document.getElementById('modifyKioskForm').style.display = 'block';
         document.getElementById('modifyStoreForm').style.display = 'none';
 
-        document.getElementById("modifyKioskName").value = detail.detail.name || '';
-        document.getElementById("modifyEquipmentCode").value = detail.detail.equipmentCode || '';
-        document.getElementById("modifyKioskFloor").value = detail.detail.floorId || '';
-        document.getElementById("modifyRemarks").value = detail.detail.remarks || '';
+        document.getElementById("modifyKioskName").value = poiDetail.name || '';
+        document.getElementById("modifyEquipmentCode").value = poiDetail.kiosk.kioskCode || '';
+        document.getElementById("modifyKioskFloor").value = poiDetail.kiosk.floorId || '';
+        document.getElementById("modifyRemarks").value = poiDetail.kiosk.description || '';
+        poiModifyModal.show();
     } else {
-        document.querySelector('input[name="type"][value="store"]').checked = true;
         document.getElementById('modifyStoreForm').style.display = 'block';
         document.getElementById('modifyKioskForm').style.display = 'none';
 
-        document.getElementById("modifyStoreName").value = detail.detail.name || '';
-        document.getElementById("modifyBusiness").value = detail.detail.category || '';
-        document.getElementById("modifyStoreFloor").value = detail.detail.floorId || '';
-        document.getElementById("modifyPhone").value = detail.detail.phoneNumber || '';
+        document.getElementById("modifyStoreName").value = poiDetail.name || '';
+        document.getElementById("modifyBusiness").value = poiDetail.store.category || '';
+        document.getElementById("modifyStoreFloor").value = poiDetail.store.floorId || '';
+        document.getElementById("modifyPhone").value = poiDetail.store.phoneNumber || '';
 
         // 로고 표시
-        const logoId = detail.detail.logo;
+        const logoId = poiDetail.store.logo;
 
         if (logoId) {
             document.getElementById("modifyLogoFile").setAttribute("data-file-id", logoId);
             const logoNameLink = document.querySelector("#modifyStoreForm .file-name")
             logoNameLink.innerHTML = `
-            <a href="/Logo/${detail.detail?.logoFile.directory}/${detail.detail?.logoFile.storedName}.${detail.detail?.logoFile.extension}" download>
-                ${detail.detail?.logoFile.originName}
+            <a href="/Logo/${poiDetail?.store.logoFile.directory}/${poiDetail?.store.logoFile.storedName}.${poiDetail?.store.logoFile.extension}" download>
+                ${poiDetail?.store.logoFile.originName}
             </a>`;
 
             document.querySelector("#modifyStoreForm .file-remove").style.display = "inline";
         }
 
         // 배너 표시
-        detail.detail.banners?.forEach((banner, i) => {
+        poiDetail.store.banners?.forEach((banner, i) => {
             const row = document.querySelectorAll("#modifyBannerTbody tr")[i];
             if (!row) return;
             row.dataset.bannerId = banner.id;
@@ -630,7 +620,6 @@ function handlePoiModifyBtnClick(kioskPoi) {
             row.querySelector("input[name='endDate']").value = banner.endDate ?? '';
             row.querySelector("input[name='priority']").value = banner.priority ?? '';
 
-            // row.querySelector(".selected-file").textContent = `배너 파일 ID: ${banner.image}`;
             row.querySelector(".file-remove").style.display = "inline";
             row.querySelector(".banner-file").setAttribute("data-file-id", banner.image);
 
@@ -653,7 +642,6 @@ function handlePoiModifyBtnClick(kioskPoi) {
             }
         });
 
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(poiModifyModal);
-        modalInstance.show();
+        poiModifyModal.show();
     }
 }

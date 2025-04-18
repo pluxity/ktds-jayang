@@ -4,7 +4,7 @@ const KioskPoiManager = (() => {
     let kioskPoiDetailList = [];
 
     const dtoToModel = (kioskPoiDto) => {
-        const { id, name, buildingId, floorId, isKiosk, position, rotation, scale } = kioskPoiDto;
+        const { id, name, buildingId, floorId, isKiosk, position, rotation, scale, store, kiosk } = kioskPoiDto;
         return new KioskPoi(
             id,
             name,
@@ -15,6 +15,8 @@ const KioskPoiManager = (() => {
             position,
             rotation,
             scale,
+            isKiosk ? null : store,
+            isKiosk ? kiosk : null
         );
     }
 
@@ -41,7 +43,7 @@ const KioskPoiManager = (() => {
     const getKioskPoi = (id) => {
         return new Promise((resolve) => {
             api.get(`/kiosk/${id}`).then((result) => {
-                const { data } = result;
+                const { result : data } = result.data;
                 const kioskPoi = dtoToModel(data);
                 resolve(kioskPoi);
             });

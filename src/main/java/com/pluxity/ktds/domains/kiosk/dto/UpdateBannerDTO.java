@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 @Builder
 public record UpdateBannerDTO(
-   long id,
+   Long id,
    Long fileId,
    int priority,
    LocalDate startDate,

@@ -1,5 +1,8 @@
 package com.pluxity.ktds.domains.kiosk.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Floor;
@@ -8,6 +11,7 @@ import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.kiosk.dto.*;
+import com.pluxity.ktds.domains.kiosk.repository.BannerRepository;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
@@ -31,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
@@ -46,21 +51,28 @@ public class KioskPoiService {
     private final BuildingRepository buildingRepository;
     private final FloorRepository floorRepository;
     private final FileInfoRepository fileInfoRepository;
+    private final BannerRepository bannerRepository;
+    private final ObjectMapper objectMapper;
 
     private KioskPoi getKioskPoi(Long id) {
         return kioskPoiRepository.findById(id).orElseThrow(() -> new CustomException(NOT_FOUND_POI));
     }
 
     @Transactional(readOnly = true)
-    public Object findKioskPoiById(Long id) {
+    public JsonNode findKioskPoiById(Long id) {
 
         KioskPoi kioskPoi = getKioskPoi(id);
 
+        KioskAllPoiResponseDTO allPoiResponseDTO = kioskPoi.toAllResponseDto();
+        ObjectNode node = objectMapper.valueToTree(allPoiResponseDTO);
+
         if (kioskPoi.isKiosk()) {
-            return kioskPoi.toKioskDetailResponseDTO();
+            node.set("kiosk", objectMapper.valueToTree(kioskPoi.toKioskDetailResponseDTO()));
         } else {
-            return kioskPoi.toStoreDetailResponseDTO();
+            node.set("store", objectMapper.valueToTree(kioskPoi.toStoreDetailResponseDTO()));
         }
+
+        return node;
     }
 
     @Transactional(readOnly = true)
@@ -186,56 +198,52 @@ public class KioskPoiService {
 
     @Transactional
     public void updateStore(@Valid @NotNull final Long id,
-                            @NotNull final UpdateStorePoiDTO dto,
-                            final MultipartFile logoFile,
-                            final List<MultipartFile> bannerFiles) {
+                            UpdateStorePoiDTO dto) {
         KioskPoi kioskPoi = getKioskPoi(id);
-
         kioskPoi.storePoiUpdate(dto.name(), dto.category(), dto.phoneNumber());
 
-        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        if (logoFile != null && !logoFile.isEmpty()) {
-            try {
-                FileInfoDTO savedLogoDTO = fileIoService.saveFile(logoFile, FileEntityType.LOGO, imageStrategy);
-                FileInfo newLogo = fileInfoRepository.findById(savedLogoDTO.id())
-                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FILE));
-                kioskPoi.changeLogo(newLogo);
-            } catch (IOException e) {
-                throw new CustomException(FAILED_SAVE_FILE);
-            }
+        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
 
-        } else {
-            updateIfNotNull(dto.fileInfoId(), kioskPoi::changeLogo, fileInfoRepository, ErrorCode.NOT_FOUND_FILE);
+        if (dto.fileInfoId() != null) {
+            FileInfo logoFile = fileIoService.findById(dto.fileInfoId());
+            kioskPoi.changeLogo(logoFile);
         }
-        kioskPoi.clearBanners();
+        List<Banner> existingBanners = bannerRepository.findByKioskPoiId(kioskPoi.getId());
+        Map<Long, Banner> existingBannerMap = existingBanners.stream()
+                .collect(Collectors.toMap(Banner::getId, b -> b));
 
-        List<UpdateBannerDTO> bannerDTOs = dto.banners();
+        for (Banner oldBanner : existingBanners) {
+            boolean shouldDelete = dto.banners().stream()
+                    .noneMatch(req -> Objects.equals(req.id(), oldBanner.getId()) && req.fileId() != null);
+            if (shouldDelete) {
+                bannerRepository.delete(oldBanner);
+            }
+        }
 
-        System.out.println("updateStoreDto : " + dto);
-        System.out.println("bannerDTOs : " + bannerDTOs);
-        for (int i = 0; i < bannerDTOs.size(); i++) {
-            UpdateBannerDTO bannerDTO = bannerDTOs.get(i);
+        for (UpdateBannerDTO bannerDTO : dto.banners()) {
+            if (bannerDTO.fileId() == null) continue;
+            FileInfo bannerFile = fileIoService.findById(bannerDTO.fileId());
 
-            MultipartFile bannerFileUpload = (bannerFiles != null && bannerFiles.size() > i) ? bannerFiles.get(i) : null;
-
-            if (bannerFileUpload != null && !bannerFileUpload.isEmpty()) {
-                FileInfo bannerFile;
-                try {
-                    FileInfoDTO savedBannerDTO = fileIoService.saveFile(bannerFileUpload, FileEntityType.BANNER, imageStrategy);
-                    bannerFile = fileInfoRepository.findById(savedBannerDTO.id())
-                            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FILE));
-                    Banner banner = Banner.builder()
-                            .image(bannerFile)
-                            .priority(bannerDTO.priority())
-                            .startDate(bannerDTO.startDate())
-                            .endDate(bannerDTO.endDate())
-                            .isPermanent(bannerDTO.isPermanent())
-                            .build();
-                    kioskPoi.addBanner(banner);
-                } catch (IOException e) {
-                    throw new CustomException(FAILED_SAVE_FILE);
+            if (bannerDTO.id() != null) {
+                Banner target = existingBannerMap.get(bannerDTO.id());
+                if (target == null) {
+                    throw new CustomException(NOT_FOUND_FILE);
                 }
+
+                target.update(bannerFile, bannerDTO.priority(), bannerDTO.startDate(),
+                        bannerDTO.endDate(), bannerDTO.isPermanent());
+            } else {
+                Banner newBanner = Banner.builder()
+                        .kioskPoi(kioskPoi)
+                        .image(bannerFile)
+                        .priority(bannerDTO.priority())
+                        .startDate(bannerDTO.startDate())
+                        .endDate(bannerDTO.endDate())
+                        .isPermanent(bannerDTO.isPermanent())
+                        .build();
+
+                bannerRepository.save(newBanner);
             }
         }
     }

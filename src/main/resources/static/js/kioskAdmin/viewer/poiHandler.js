@@ -198,13 +198,25 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
 
             try{
                 // 로고 업로드
-                const logoFile = document.getElementById('registerLogoFile').files[0];
-                const logoFormData = new FormData();
-                logoFormData.set('file', logoFile);
-                logoFormData.set('type', 'logo');
+                const logoInput = document.getElementById('registerLogoFile');
+                const logoFile = logoInput.files[0];
+                const hasFileId = logoInput.hasAttribute('data-file-id');
 
-                const logoUploadRes = await api.post('/kiosk/upload/file', logoFormData);
-                logoFileId = logoUploadRes.data.result.id;
+                let logoFileId = null;
+
+                if (logoFile) {
+                    const formData = new FormData();
+                    formData.append("file", logoFile);
+                    formData.append("type", "logo");
+
+                    const res = await api.post("/kiosk/upload/file", formData);
+                    logoFileId = res.data.result.id;
+                    logoInput.setAttribute("data-file-id", logoFileId);
+                } else if (hasFileId) {
+                    logoFileId = Number(logoInput.getAttribute("data-file-id"));
+                } else {
+                    logoFileId = null;
+                }
 
                 // 배너들 파일 업로드 후 bannerDTO 생성
                 const bannerRows = document.querySelectorAll('#registerBannerTbody tr');

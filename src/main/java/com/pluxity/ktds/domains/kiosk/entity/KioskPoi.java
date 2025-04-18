@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,6 +106,10 @@ public class KioskPoi {
         this.logo = logo;
     }
 
+    public void removeLogo() {
+        this.logo = null;
+    }
+
     public void changeBuilding(Building building) {
         this.building = building;
     }
@@ -151,7 +156,6 @@ public class KioskPoi {
             this.description = description;
         }
     }
-
     public void clearBanners() {
         banners.clear();
     }

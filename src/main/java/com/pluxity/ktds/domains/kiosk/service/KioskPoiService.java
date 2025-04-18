@@ -217,6 +217,8 @@ public class KioskPoiService {
         if (dto.fileInfoId() != null) {
             FileInfo logoFile = fileIoService.findById(dto.fileInfoId());
             kioskPoi.changeLogo(logoFile);
+        } else {
+            kioskPoi.removeLogo();
         }
         List<Banner> existingBanners = bannerRepository.findByKioskPoiId(kioskPoi.getId());
         Map<Long, Banner> existingBannerMap = existingBanners.stream()

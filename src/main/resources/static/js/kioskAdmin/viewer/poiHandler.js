@@ -618,8 +618,8 @@ const handlePoiModifyBtnClick = async (kioskPoi) => {
     appendFloorOptionsToSelect(floors, modifyKioskFloorSelect);
     const poiDetail = await KioskPoiManager.getKioskPoi(kioskPoi.id);
 
-    console.log("poiDetail : ", poiDetail);
-    document.querySelectorAll('input[name="type"]').forEach(radio => {
+    const poiModifyForm = document.getElementById("poiModifyForm");
+    poiModifyForm.querySelectorAll('input[name="type"]').forEach(radio => {
         radio.disabled = true;
         radio.checked = radio.value === (kioskPoi.isKiosk ? "kiosk" : "store");
     });

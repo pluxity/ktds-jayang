@@ -134,7 +134,7 @@ document.querySelectorAll('.order-btn').forEach(button => {
     button.addEventListener('click', function(e) {
         e.preventDefault();
         const row = this.closest('tr');
-        const tbody = document.getElementById('registerBannerTbody');
+        const tbody = row.closest('tbody');
 
         if (this.classList.contains('up-btn') && row.previousElementSibling) {
             // 위로 이동
@@ -145,13 +145,13 @@ document.querySelectorAll('.order-btn').forEach(button => {
         }
 
         // priority 값 업데이트
-        updateBannerPriorities();
+        updateBannerPriorities(tbody);
     });
 });
 
 // 배너 priority 값 업데이트 함수
-function updateBannerPriorities() {
-    const rows = document.querySelectorAll('#registerBannerTbody tr');
+function updateBannerPriorities(tbody) {
+    const rows = tbody.querySelectorAll('tr');
     rows.forEach((row, index) => {
         const priorityInput = row.querySelector('input[name="priority"]');
         if (priorityInput) {
@@ -161,7 +161,8 @@ function updateBannerPriorities() {
 }
 
 // 초기 priority 값 설정
-updateBannerPriorities();
+updateBannerPriorities(document.getElementById('registerBannerTbody'));
+updateBannerPriorities(document.getElementById('modifyBannerTbody'));
 
 // 상시 체크박스 이벤트 처리
 document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -340,16 +341,41 @@ const updateKioskPoi = async () => {
 
 const updateStorePoi = async () => {
     try {
+        const name = document.getElementById("modifyStoreName").value.trim();
+        const category = document.getElementById("modifyBusiness").value;
+        const floorId = document.getElementById("modifyStoreFloor").value;
+        const bannerRows = document.querySelectorAll("#modifyBannerTbody tr");
+        
+        if (!name) {
+            alertSwal("POI명을 입력하세요.");
+            return;
+        }
+        if (!category) {
+            alertSwal("업종을 선택하세요.");
+            return;
+        }
+        if (!floorId) {
+            alertSwal("층을 선택하세요.");
+            return;
+        }
+
         const logoInput = document.getElementById("modifyLogoFile");
         if (logoInput.files[0]) {
             const logoFileId = await uploadFileAndSetId(logoInput, "data-file-id", "logo");
             logoInput.setAttribute("data-file-id", logoFileId);
         }
 
-        const bannerRows = document.querySelectorAll("#modifyBannerTbody tr");
         for (const row of bannerRows) {
             const bannerInput = row.querySelector(".banner-file");
             if (bannerInput.files[0]) {
+                const isPermanent = row.querySelector("input[name='always']").checked;
+                const startDate = row.querySelector("input[name='startDate']").value;
+                const endDate = row.querySelector("input[name='endDate']").value;
+
+                if (!isPermanent && (!startDate || !endDate)) {
+                    alertSwal("기간을 확인하세요.");
+                    return;
+                }
                 const newFileId = await uploadFileAndSetId(bannerInput, "data-file-id", "banner");
                 bannerInput.setAttribute("data-file-id", newFileId);
             }
@@ -619,7 +645,44 @@ const initPoi = async () => {
     });
 }
 
+const logoInput = document.getElementById('modifyLogoFile');
+const fileNameElement = logoInput.closest('.file-upload').querySelector('.file-name');
+const removeButton = logoInput.closest('.file-upload').querySelector('.file-remove');
+logoInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+        fileNameElement.textContent = file.name;
+        removeButton.style.display = 'inline';
+    } else {
+        fileNameElement.textContent = '';
+        removeButton.style.display = 'none';
+    }
+});
+
+function resetModifyStoreForm() {
+    const form = document.getElementById("poiModifyForm");
+
+    form.reset();
+
+    form.querySelectorAll("input[type='file']").forEach(fileInput => {
+        fileInput.value = '';
+        fileInput.removeAttribute('data-file-id');
+    });
+
+    form.querySelectorAll(".file-name, .selected-file").forEach(el => {
+        el.innerHTML = '';
+    });
+    form.querySelectorAll(".file-remove").forEach(btn => {
+        btn.style.display = 'none';
+    });
+
+    form.querySelectorAll("#modifyBannerTbody tr").forEach(row => {
+        delete row.dataset.bannerId;
+    });
+}
+
 const handlePoiModifyBtnClick = async (kioskPoi) => {
+    resetModifyStoreForm();
     const buildingId = document.getElementById("buildingId").value;
 
     const floors = BuildingManager.findById(buildingId).floors;

@@ -56,12 +56,8 @@ public class KioskPoiController {
 
     @PostMapping("/store")
     @ResponseStatus(HttpStatus.CREATED)
-    public DataResponseBody<Long> postStorePoi(
-            @RequestPart("store") CreateStorePoiDTO store,
-            @RequestPart(value = "logo", required = false) MultipartFile logo,
-            @RequestPart(value = "bannerFiles", required = false) List<MultipartFile> bannerFiles
-    ) {
-        return DataResponseBody.of(kioskPoiService.saveStorePoi(store, logo, bannerFiles));
+    public DataResponseBody<Long> postStorePoi(@RequestBody CreateStorePoiDTO dto) {
+        return DataResponseBody.of(kioskPoiService.saveStorePoi(dto));
     }
 
     @PostMapping("/kiosk")
@@ -117,9 +113,16 @@ public class KioskPoiController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody deletePoi(@PathVariable Long id) {
-        kioskPoiService.delete(id);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteKioskPoi(@PathVariable Long id) {
+        kioskPoiService.deleteKioskPoi(id);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
+    @DeleteMapping("/file/{fileId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteKioskFile(@PathVariable Long fileId) {
+        kioskPoiService.deleteFile(fileId);
         return ResponseBody.of(SUCCESS_PATCH);
     }
 

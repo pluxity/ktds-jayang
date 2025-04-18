@@ -21,6 +21,10 @@ function handlePoiRegisterBtnClick() {
     const registerStoreFloorSelect = document.getElementById('registerStoreFloor');
     const registerKioskFloorSelect = document.getElementById('registerKioskFloor');
 
+    poiRegisterForm.querySelectorAll('input[name="type"]').forEach(radio => {
+        radio.checked = radio.value === ("store");
+    });
+
     appendFloorOptionsToSelect(floors, registerStoreFloorSelect);
     appendFloorOptionsToSelect(floors, registerKioskFloorSelect);
     registerStoreForm.style.display = 'block';
@@ -37,6 +41,12 @@ function appendFloorOptionsToSelect(floors, selectElement) {
     });
 }
 
+// 모달 닫힐때 초기화
+document.querySelector('#poiRegisterModal').addEventListener('hide.bs.modal', function () {
+    resetAndClosePopup();
+});
+
+
 // 팝업 닫기 및 폼 초기화 함수
 function resetAndClosePopup() {
     const form = document.getElementById('poiRegisterForm');
@@ -46,7 +56,7 @@ function resetAndClosePopup() {
     poiRegisterForm.querySelector(".file-name").textContent = "";
     poiRegisterForm.querySelector(".file-remove").textContent = "";
 
-    const bannerRows = poiRegisterForm.querySelectorAll("#register-banner-tbody tr");
+    const bannerRows = poiRegisterForm.querySelectorAll("#registerBannerTbody tr");
     bannerRows.forEach(row => {
         const fileName = row.querySelector(".selected-file");
         const removeBtn = row.querySelector(".file-remove");
@@ -62,14 +72,9 @@ function resetAndClosePopup() {
     });
     registerStoreForm.style.display = 'block';
     registerKioskForm.style.display = 'none';
-    document.getElementById('poiRegisterPopup').style.display = 'none';
+
 }
 
-// 팝업 닫기
-if (closeBtn && popup) {
-    closeBtn.addEventListener('click', resetAndClosePopup);
-    cancelBtn.addEventListener('click', resetAndClosePopup);
-}
 
 // 팝업 변경
 radioButtons.forEach(radio => {
@@ -189,14 +194,57 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
     e.preventDefault();
 
     const type = document.querySelector('input[name="type"]:checked').value;
-    const buildingId = document.getElementById('buildingId').value;
     let logoFileId = null; // 로고 파일 ID 추적
     const bannerFileIds = []; // 배너 파일 ID들 추적
 
     try {
         if (type === 'store') {
             const buildingId = document.getElementById('buildingId').value;
+            const storeName = document.getElementById('registerStoreName').value;
+            const category = document.getElementById('registerBusiness').value;
+            const floorId=  Number(document.getElementById('registerStoreFloor').value);
+            const phoneNumber =  document.getElementById('registerPhone').value;
 
+            // 입력값 검증
+            if(!storeName){
+                alertSwal('상가명을 입력해주세요.');
+                return;
+            }
+            if(!category){
+                alertSwal('업종을 입력해주세요.');
+                return;
+            }
+            if(!floorId){
+                alertSwal('층을 선택해주세요.');
+                return;
+            }
+
+            // 배너 파일 검증
+            const bannerRows = document.querySelectorAll('#registerBannerTbody tr');
+            for (let row of bannerRows) {
+                const bannerFile = row.querySelector('.banner-file').files[0];
+                const startDate = row.querySelector('.start-date').value;
+                const endDate = row.querySelector('.end-date').value;
+                const isPermanent = row.querySelector('.banner-checkbox').checked;
+
+                if (bannerFile) {
+                    // isPermanent 체크박스가 체크되어 있지 않으면
+                    if(!isPermanent){
+                        // 배너 파일이 있으면 날짜 필수
+                        if (!startDate || !endDate) {
+                            await alertSwal('배너의 기간을 지정해주세요.');
+                            return;
+                        }
+                        // 날짜 검증
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        if (start > end) {
+                            await alertSwal('시작일이 종료일보다 늦을 수 없습니다.');
+                            return;
+                        }
+                    }
+                }
+            }
             try{
                 // 로고 업로드
                 const logoInput = document.getElementById('registerLogoFile');
@@ -247,17 +295,17 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
 
                 const poiDto = {
                     isKiosk: false,
-                    name: document.getElementById('registerStoreName').value,
-                    category: document.getElementById('registerBusiness').value,
+                    name: storeName,
+                    category: category,
                     buildingId: buildingId,
-                    floorId: Number(document.getElementById('registerStoreFloor').value),
-                    phoneNumber: document.getElementById('registerPhone').value,
+                    floorId: floorId,
+                    phoneNumber: phoneNumber,
                     fileInfoId: logoFileId,
                     banners: banners
                 };
 
                 await api.post('/kiosk/store', poiDto);
-
+                await alertSwal('등록되었습니다.');
             } catch (error) {
                 console.error('등록 중 오류 발생:', error);
                 try{
@@ -274,20 +322,41 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
             }
 
         } else {
+
+            const name =  document.getElementById('registerKioskName').value;
+            const kioskCode = document.getElementById('registerEquipmentCode').value;
+            const buildingId = Number(document.getElementById('buildingId').value);
+            const floorId = Number(document.getElementById('registerKioskFloor').value);
+            const description = document.getElementById('registerRemarks').value;
+
+            // 입력값 검증
+            if(!name){
+                alertSwal('키오스크 명을 입력해주세요.');
+                return;
+            }
+            if(!kioskCode){
+                alertSwal('키오스크 코드를 입력해주세요.');
+                return;
+            }
+            if(!floorId){
+                alertSwal('층을 선택해주세요.');
+                return;
+            }
+
             // 키오스크 POI 등록
             const kioskData = {
                 isKiosk: true,
-                name: document.getElementById('registerKioskName').value,
-                kioskCode: document.getElementById('registerEquipmentCode').value,
-                buildingId: Number(buildingId),
-                floorId: Number(document.getElementById('registerKioskFloor').value),
-                description: document.getElementById('registerRemarks').value
+                name: name,
+                kioskCode: kioskCode,
+                buildingId: buildingId,
+                floorId: floorId,
+                description: description
             };
 
             await api.post('/kiosk/kiosk', kioskData);
+            await alertSwal('등록되었습니다.');
         }
 
-        await alertSwal('등록되었습니다.');
         poiRegisterModal.hide();
 
         KioskPoiManager.getKioskPoiList().then(() => {

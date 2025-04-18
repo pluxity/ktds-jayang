@@ -149,6 +149,13 @@ function poiPaging(records) {
         paginationPages.innerHTML = html;
     }
 
+    function closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-content').forEach(el => {
+            el.classList.add('d-none');
+            el.previousElementSibling?.classList.remove('popup');
+        });
+    }
+
     function renderList() {
         const { beginningRecordIndex, endingRecordIndex } =
             paginator.getActiveRecordsIndices();
@@ -182,27 +189,20 @@ function poiPaging(records) {
             buttonDropdown.classList.add('dropdown-btn');
             buttonDropdown.textContent = '관리';
 
-            buttonDropdown.addEventListener(
-                'pointerup',
-                (event) => {
-                    const { currentTarget } = event;
-                    currentTarget.classList.toggle('popup');
-                    if (currentTarget.classList.contains('popup')) {
-                        currentTarget.nextElementSibling.classList.remove(
-                            'd-none',
-                        );
-                    } else {
-                        currentTarget.nextElementSibling.classList.add(
-                            'd-none',
-                        );
-                    }
-                },
-                false,
-            );
+            buttonDropdown.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const isOpen = !dropdownContentDiv.classList.contains('d-none');
+                closeAllDropdowns();
+                if (!isOpen) {
+                    dropdownContentDiv.classList.remove('d-none');
+                    buttonDropdown.classList.add('popup');
+                }
+            });
 
             const dropdownContentDiv = document.createElement('div');
             dropdownContentDiv.classList.add('dropdown-content');
             dropdownContentDiv.classList.add('d-none');
+            dropdownContentDiv.dataset.poiId = records[index].id;
 
             const dropdownItemAllocateA = document.createElement('a');
             dropdownItemAllocateA.classList.add('dropdown-item');
@@ -292,6 +292,9 @@ function poiPaging(records) {
             render();
         }
     }
+    document.addEventListener('click', () => {
+        closeAllDropdowns();
+    });
 
     this.firstPage = firstPage;
     this.lastPage = lastPage;

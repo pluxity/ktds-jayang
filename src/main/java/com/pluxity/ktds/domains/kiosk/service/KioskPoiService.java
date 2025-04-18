@@ -9,10 +9,8 @@ import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
-import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.kiosk.dto.*;
 import com.pluxity.ktds.domains.kiosk.repository.BannerRepository;
-import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
@@ -29,9 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -125,61 +121,74 @@ public class KioskPoiService {
     }
 
     @Transactional
-    public Long saveStorePoi(CreateStorePoiDTO dto, MultipartFile logo, List<MultipartFile> bannerFiles) {
-        Building building = buildingRepository.findById(dto.buildingId()).orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
+    public Long saveStorePoi(CreateStorePoiDTO dto){
+        List<FileInfo> savedFiles = new ArrayList<>();
 
-        Floor floor = floorRepository.findById(dto.floorId()).orElseThrow(() -> new CustomException(NOT_FOUND_FLOOR));
-
-        FileInfo logoInfo = null;
-        if (logo != null) {
-            try {
-                FileInfoDTO savedLogo = fileIoService.saveFile(logo, FileEntityType.LOGO, imageStrategy);
-                logoInfo = fileInfoRepository.findById(savedLogo.id())
+        try{
+            // 로고 파일 저장
+            if (dto.fileInfoId() != null) {
+                FileInfo savedLogoFile = fileInfoRepository.findById(dto.fileInfoId())
                         .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
-            } catch (IOException e) {
-                throw new CustomException(FAILED_SAVE_FILE);
+                savedFiles.add(savedLogoFile);
             }
-        }
 
-        KioskPoi kioskPoi = KioskPoi.builder().name(dto.name()).phoneNumber(dto.phoneNumber()).category(dto.category()).isKiosk(dto.isKiosk()).build();
+            KioskPoi poi = KioskPoi.builder()
+                    .name(dto.name())
+                    .phoneNumber(dto.phoneNumber())
+                    .category(dto.category())
+                    .isKiosk(dto.isKiosk())
+                    .build();
 
-        // 연관관계 설정
-        kioskPoi.changeBuilding(building);
-        kioskPoi.changeFloor(floor);
-        kioskPoi.changeLogo(logoInfo);
+            updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
+            updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+            updateIfNotNull(dto.fileInfoId(), poi::changeLogo, fileInfoRepository, NOT_FOUND_FILE);
 
-        // 배너 추가
-        if (dto.banners() != null) {
-            for (int i = 0; i < dto.banners().size(); i++) {
-                CreateBannerDTO bannerDTO = dto.banners().get(i);
-                MultipartFile bannerFileUpload = bannerFiles.get(i);
+            try{
+                for(CreateBannerDTO bannerDTO : dto.banners()) {
 
-                try {
-                    FileInfoDTO savedBanner = fileIoService.saveFile(
-                            bannerFileUpload,
-                            FileEntityType.BANNER,
-                            imageStrategy
-                    );
-                    FileInfo bannerFile = fileInfoRepository.findById(savedBanner.id())
+                    FileInfo bannerImage = fileInfoRepository.findById(bannerDTO.fileId())
                             .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+                    savedFiles.add(bannerImage);
 
                     Banner banner = Banner.builder()
-                            .image(bannerFile)
+                            .image(bannerImage)
                             .priority(bannerDTO.priority())
                             .startDate(bannerDTO.startDate())
                             .endDate(bannerDTO.endDate())
                             .isPermanent(bannerDTO.isPermanent())
                             .build();
 
-                    kioskPoi.addBanner(banner);
-                } catch (IOException e) {
-                    throw new CustomException(FAILED_SAVE_FILE);
+                    poi.addBanner(banner);
                 }
+            }catch (Exception e){
+                cleanupFiles(savedFiles);
+                throw new CustomException(FAILED_SAVE_FILE);
+            }
+
+            kioskPoiRepository.save(poi);
+            return poi.getId();
+        }catch (Exception e){
+            cleanupFiles(savedFiles);
+            throw new CustomException(FAILED_SAVE_FILE);
+        }
+    }
+
+    private void cleanupFiles(List<FileInfo> files) {
+        for (FileInfo file : files) {
+            try {
+                fileInfoRepository.deleteById(file.getId());
+            } catch (Exception e) {
+                log.error("Failed to delete file with ID: {}", file.getId(), e);
+                throw new CustomException(FAILED_DELETE_FILE);
             }
         }
-
-        return kioskPoiRepository.save(kioskPoi).getId();
     }
+
+    @Transactional
+    public void deleteFile(Long fileId){
+        fileInfoRepository.deleteById(fileId);
+    }
+
 
     @Transactional
     public Long saveKioskPoi(CreateKioskPoiDTO dto) {
@@ -296,7 +305,7 @@ public class KioskPoiService {
     }
 
     @Transactional
-    public void delete(@NotNull final Long id) {
+    public void deleteKioskPoi(@NotNull final Long id) {
         KioskPoi kioskPoi = getKioskPoi(id);
         kioskPoiRepository.delete(kioskPoi);
     }

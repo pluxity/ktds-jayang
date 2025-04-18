@@ -188,60 +188,78 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
     e.preventDefault();
 
     const type = document.querySelector('input[name="type"]:checked').value;
-
     const buildingId = document.getElementById('buildingId').value;
+    let logoFileId = null; // 로고 파일 ID 추적
+    const bannerFileIds = []; // 배너 파일 ID들 추적
 
     try {
         if (type === 'store') {
-            // 상가 POI 등록
-            let logoFileInfoId = null;
-            let banners = [];
-            const formData = new FormData();
-            // 1. 로고 파일 업로드
-            const logoFile = document.getElementById('registerLogoFile').files[0];
-            if (logoFile) {
-                formData.append('logo', logoFile);
-            }
-            let storeData = {};
+            const buildingId = document.getElementById('buildingId').value;
 
-            // 2. 배너 파일들 업로드
-            const bannerRows = document.querySelectorAll('#registerBannerTbody tr');
+            try{
+                // 로고 업로드
+                const logoFile = document.getElementById('registerLogoFile').files[0];
+                const logoFormData = new FormData();
+                logoFormData.set('file', logoFile);
+                logoFormData.set('type', 'logo');
 
-            for (let i = 0; i < bannerRows.length; i++) {
-                const row = bannerRows[i];
-                const bannerFile = row.querySelector('.banner-file').files[0];
+                const logoUploadRes = await api.post('/kiosk/upload/file', logoFormData);
+                logoFileId = logoUploadRes.data.result.id;
 
-                if (bannerFile) {
-                    formData.append('bannerFiles', bannerFile);
+                // 배너들 파일 업로드 후 bannerDTO 생성
+                const bannerRows = document.querySelectorAll('#registerBannerTbody tr');
+                const banners = [];
 
-                    const startDate = row.querySelector('.start-date').value;
-                    const endDate = row.querySelector('.end-date').value;
-                    const isPermanent = row.querySelector('.banner-checkbox')?.checked ?? false;
-                    const priority = Number(row.querySelector('input[name="priority"]').value);
+                for (let row of bannerRows) {
+                    const bannerFile = row.querySelector('.banner-file').files[0];
 
-                    banners.push({
-                        priority: priority,
-                        startDate: startDate ? startDate : null,
-                        endDate: endDate ? endDate : null,
-                        isPermanent: isPermanent
-                    });
+                    if(bannerFile) {
+                        const bannerFormData = new FormData();
+                        bannerFormData.set('file', bannerFile);
+                        bannerFormData.set('type', 'banner');
+
+                        const bannerUploadRes = await api.post('/kiosk/upload/file', bannerFormData);
+                        const bannerFileId = bannerUploadRes.data.result.id;
+                        bannerFileIds.push(bannerFileId); // 업로드된 배너 파일 ID 저장
+
+                        banners.push({
+                            fileId: bannerFileId,
+                            isPermanent: row.querySelector('.banner-checkbox')?.checked ?? false,
+                            startDate: row.querySelector('.start-date').value,
+                            endDate: row.querySelector('.end-date').value,
+                            priority: Number(row.querySelector('input[name="priority"]').value),
+                        });
+                    }
                 }
-            }
-            // 3. 상가 POI 엔티티 저장
-            storeData = {
-                isKiosk: false,
-                name: document.getElementById('registerStoreName').value,
-                category: document.getElementById('registerBusiness').value,
-                buildingId: Number(buildingId),
-                floorId: Number(document.getElementById('registerStoreFloor').value),
-                phoneNumber: document.getElementById('registerPhone').value,
-                banners: banners
-            };
-            formData.append("store", new Blob([JSON.stringify(storeData)], { type: "application/json" }));
 
-            await api.post('/kiosk/store', formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+                const poiDto = {
+                    isKiosk: false,
+                    name: document.getElementById('registerStoreName').value,
+                    category: document.getElementById('registerBusiness').value,
+                    buildingId: buildingId,
+                    floorId: Number(document.getElementById('registerStoreFloor').value),
+                    phoneNumber: document.getElementById('registerPhone').value,
+                    fileInfoId: logoFileId,
+                    banners: banners
+                };
+
+                await api.post('/kiosk/store', poiDto);
+
+            } catch (error) {
+                console.error('등록 중 오류 발생:', error);
+                try{
+                    if(logoFileId){
+                        await api.delete(`/kiosk/file/${logoFileId}`);
+                    }
+                    for(const bannerFileId of bannerFileIds){
+                        await api.delete(`/kiosk/file/${bannerFileId}`);
+                    }
+                } catch (error) {
+                    console.error('파일 삭제 중 오류 발생:', error);
+                }
+                alertSwal('등록에 실패했습니다.');
+            }
+
         } else {
             // 키오스크 POI 등록
             const kioskData = {

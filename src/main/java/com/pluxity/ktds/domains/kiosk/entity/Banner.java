@@ -49,6 +49,7 @@ public class Banner {
 
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
+
     public void changeImage(FileInfo newImage) {
         this.image = newImage;
     }

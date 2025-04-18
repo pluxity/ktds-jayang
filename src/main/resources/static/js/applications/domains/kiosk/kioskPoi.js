@@ -56,6 +56,31 @@ class KioskPoi {
     get isKiosk() {
         return this.#isKiosk;
     }
+    get pinUrl() {
+        return `${CONTEXT_PATH}2D/pin/pin.svg`;
+    }
+    // Px.Poi.Add 용
+    get poiOptions() {
+        return {
+            id: this.id,
+            displayText: this.name,
+            group: this.isKiosk ? 'Kiosk' : 'Store',
+            lineHeight: SystemSettingManager.find().poiLineLength ?? 10,
+            position: this.position ? this.position : {x:0,y:0,z:0},
+            iconUrl: this.pinUrl,
+            property: this.property,
+            rotation: {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+        };
+    }
+
+    removeOn3D(onComplete) {
+        Px.Poi.Remove(this.id, onComplete);
+    }
+
 
     get store() {
         return this.#store;

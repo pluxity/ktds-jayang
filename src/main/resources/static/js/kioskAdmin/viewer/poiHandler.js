@@ -287,6 +287,27 @@ const uploadFileAndSetId = async (inputElement, dataAttr, type) => {
     }
 };
 
+const updateKioskPoi = async () => {
+
+    const formId = document.getElementById("poiModifyForm").dataset.id;
+    const kioskData = {
+        name: document.getElementById("modifyKioskName").value,
+        kioskCode: document.getElementById("modifyEquipmentCode").value,
+        buildingId: Number(buildingId),
+        floorId: Number(document.getElementById("modifyKioskFloor").value),
+        description: document.getElementById("modifyRemarks").value
+    }
+
+    api.put(`/kiosk/kiosk/${formId}`, kioskData).then(() => {
+        alertSwal("수정이 완료되었습니다.");
+        poiModifyModal.hide();
+
+        KioskPoiManager.getKioskPoiList().then(() => {
+            getKioskPoiListRendering();
+        });
+    })
+}
+
 const updateStorePoi = async () => {
     try {
         const logoInput = document.getElementById("modifyLogoFile");
@@ -301,7 +322,6 @@ const updateStorePoi = async () => {
             if (bannerInput.files[0]) {
                 const newFileId = await uploadFileAndSetId(bannerInput, "data-file-id", "banner");
                 bannerInput.setAttribute("data-file-id", newFileId);
-                console.log("newFileId : ", newFileId);
             }
         }
 
@@ -343,8 +363,15 @@ const updateStorePoi = async () => {
     }
 };
 
-document.getElementById("btnPoiModify").addEventListener("click", updateStorePoi);
+document.getElementById("btnPoiModify").addEventListener("click", async () =>{
 
+    const isKiosk = document.querySelector('input[name="type"]:checked').value === "kiosk";
+    if (isKiosk) {
+        await updateKioskPoi();
+    } else {
+        await updateStorePoi();
+    }
+});
 
 const allocatePoi = (id) => {
     if (document.querySelector('#floorNo').value === '') {

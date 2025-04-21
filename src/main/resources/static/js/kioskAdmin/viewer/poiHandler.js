@@ -7,8 +7,6 @@ const poiModifyModal = new bootstrap.Modal(document.getElementById('poiModifyMod
 const poiRegisterForm = document.getElementById("poiRegisterForm");
 const modalEl = document.getElementById('poiRegisterModal');
 const popup = document.getElementById('poiRegisterPopup');
-const closeBtn = modalEl.querySelector('.btn-close');
-const cancelBtn = modalEl.querySelector('.btn-cancel');
 registerBtn.addEventListener('click', () => {
     handlePoiRegisterBtnClick();
 });
@@ -72,7 +70,6 @@ function resetAndClosePopup() {
     });
     registerStoreForm.style.display = 'block';
     registerKioskForm.style.display = 'none';
-
 }
 
 
@@ -713,6 +710,27 @@ const initPoi = async () => {
         KioskPoiManager.renderAllPoiToEngine();
     });
 }
+
+const moveToPoi = (id) => {
+    let poiId;
+    if (id.constructor.name === 'PointerEvent') {
+        poiId = id.currentTarget.getAttribute('poiid');
+    } else {
+        poiId = id;
+    }
+    const poiData = Px.Poi.GetData(poiId);
+
+    if (poiData) {
+        Px.Model.Visible.Show(String(poiData.property.floorId));
+        Px.Camera.MoveToPoi({
+            id: poiId,
+            isAnimation: true,
+            duration: 500,
+        });
+    } else {
+        alertSwal('POI를 배치해주세요');
+    }
+};
 
 const logoInput = document.getElementById('modifyLogoFile');
 const fileNameElement = logoInput.closest('.file-upload').querySelector('.file-name');

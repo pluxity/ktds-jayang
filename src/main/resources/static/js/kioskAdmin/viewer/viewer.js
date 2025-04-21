@@ -15,15 +15,10 @@
         try {
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
-            // const contents = document.querySelector('.contents');
             const storeBuilding = await BuildingManager.findByCode('store');
-            document.getElementById('buildingId').value = storeBuilding.id;
             let buildingId = storeBuilding ? storeBuilding.id : null;
-            //initFloors(buildingId);
-            // document.getElementById("buildingName").setAttribute("building-id", buildingId);
-            // document.getElementById("buildingName").setAttribute("building-name", storeBuilding.name);
+            document.getElementById('buildingId').value = buildingId;
 
-            // setActiveEquipment(buildingId);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {
@@ -52,19 +47,7 @@
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
                         Px.Event.On();
-                        Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                            moveToPoi(poiInfo.id)
-                        });
                         Px.Effect.Outline.HoverEventOn('area_no');
-                        // Px.Effect.Outline.AddHoverEventCallback(
-                        //     throttle(async (event) => {
-                        //         if (storeBuilding.floors && storeBuilding.floors.length > 0) {
-                        //             const firstFloorId = storeBuilding.floors[0].id;
-                        //             Px.Effect.Outline.Add(firstFloorId);
-                        //         }
-                        //     }, 10)
-                        // );
-                        // contents.style.position = 'static';
                         if (onComplete) onComplete();
                     }
                 });
@@ -87,27 +70,99 @@
                 changeEventFloor(this.value, buildingId);
             });
 
-            // document.querySelector('#poiSelect')
-            //     .addEventListener('change', (event) => {
-            //         const floorId = document.querySelector('#floorNo').value;
-            //         const poiList = PoiManager.findByBuilding(BUILDING_ID)
-            //             .filter(selectedPoiCategory(poiCategoryIds))
-            //             .filter(selectedFloor(floorId));
-            //         renderingPoiList(poiList);
-            //     });
             initLeftSelect(buildingId);
             initDropUpMenu();
 
-            // handleZoomIn();
-            // handleZoomOut();
-            // handleExtendView();
-            // handleFirstView(buildingId);
-            // handle2D(buildingId);
         } catch (error) {
             console.error('PX Engine Initial', error);
         }
     };
 
+    // 버튼 정의
+    const eventTypeList = [
+        'mousedown',
+        'mouseup',
+        'touchstart',
+        'touchend',
+        'pointerup',
+    ];
+    for (const eventType of eventTypeList) {
+        document
+            .querySelector('#buildingCtrlTool')
+            .addEventListener(eventType, (evt) => {
+                const target = evt.target.closest('.btnBuildingTool');
+                const { btnType } = target.dataset;
+
+                if (eventType === 'mousedown' || eventType === 'touchstart') {
+                    switch (btnType) {
+                        case 'in':
+                            Px.Camera.StartZoomIn();
+                            break;
+                        case 'out':
+                            Px.Camera.StartZoomOut();
+                            break;
+                        case 'up':
+                            Px.Camera.StartRotateUp();
+                            break;
+                        case 'down':
+                            Px.Camera.StartRotateDown();
+                            break;
+                        case 'left':
+                            Px.Camera.StartRotateLeft();
+                            break;
+                        case 'right':
+                            Px.Camera.StartRotateRight();
+                            break;
+                    }
+                } else if (eventType === 'pointerup') {
+                    switch (btnType) {
+                        case 'center':
+                            Px.Camera.ExtendView();
+                            break;
+                        case 'viewLook':
+                            if (target.classList.contains('on')) {
+                                target.classList.remove('on');
+                                Px.Camera.FPS.Off();
+                            } else {
+                                target.classList.add('on');
+                                Px.Camera.FPS.On();
+                            }
+                            break;
+                        case 'move' :
+                            if(target.classList.contains('on')) {
+                                target.classList.remove('on');
+                                Px.Event.Off();
+                            }else{
+                                target.classList.add('on');
+                                Px.Event.On();
+                                Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {moveToPoi(poiInfo.id)});
+                            }
+                            break;
+                    }
+                } else {
+                    switch (btnType) {
+                        case 'in':
+                            Px.Camera.StopZoomIn();
+                            break;
+                        case 'out':
+                            Px.Camera.StopZoomOut();
+                            break;
+                        case 'up':
+                            Px.Camera.StopRotateUp();
+                            break;
+                        case 'down':
+                            Px.Camera.StopRotateDown();
+                            break;
+                        case 'left':
+                            Px.Camera.StopRotateLeft();
+                            break;
+                        case 'right':
+                            Px.Camera.StopRotateRight();
+                            break;
+                    }
+                }
+            });
+    }
     function changeEventFloor(floorId, buildingId) {
         if (floorId === '') {
             Px.Model.Visible.ShowAll();

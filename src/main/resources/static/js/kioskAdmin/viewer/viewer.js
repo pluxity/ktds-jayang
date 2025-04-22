@@ -47,6 +47,9 @@
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
                         Px.Event.On();
+                        Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
+                            poiClickMenu(poiInfo);
+                        });
                         Px.Effect.Outline.HoverEventOn('area_no');
                         if (onComplete) onComplete();
                     }
@@ -163,6 +166,48 @@
                 }
             });
     }
+
+    const poiClickMenu = async (poiInfo) => {
+
+        const dropdownContentDiv = document.createElement('div');
+        dropdownContentDiv.classList.add('dropdown-content');
+        dropdownContentDiv.dataset.poiId = poiInfo.id;
+
+        const dropdownItemInfo = document.createElement('a');
+        dropdownItemInfo.classList.add('dropdown-item');
+        dropdownItemInfo.textContent = 'POI 속성';
+        dropdownItemInfo.addEventListener('click', () => {
+            handlePoiModifyBtnClick(poiInfo);
+        });
+
+        const dropdownItemDeleteA = document.createElement('a');
+        dropdownItemDeleteA.classList.add('dropdown-item');
+        dropdownItemDeleteA.textContent = 'POI 삭제하기';
+        dropdownItemDeleteA.addEventListener('click', () => {
+            deletePoi(poiInfo.id);
+        });
+
+        const dropdownItemUnAllocateA = document.createElement('a');
+        dropdownItemUnAllocateA.classList.add('dropdown-item');
+        dropdownItemUnAllocateA.textContent = 'POI 미배치로 변경';
+        dropdownItemUnAllocateA.addEventListener('click', () => {
+            unAllocatePoi(poiInfo.id);
+        });
+
+        dropdownContentDiv.appendChild(dropdownItemInfo);
+        dropdownContentDiv.appendChild(dropdownItemUnAllocateA);
+        dropdownContentDiv.appendChild(dropdownItemDeleteA);
+
+        const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
+        console.log("x, y : ", x, y);
+        dropdownContentDiv.style.position = 'fixed';
+        dropdownContentDiv.style.zIndex = '9999';
+        dropdownContentDiv.style.left = `${x}px`;
+        dropdownContentDiv.style.top = `${y}px`;
+
+        document.body.appendChild(dropdownContentDiv);
+    }
+
     function changeEventFloor(floorId, buildingId) {
         if (floorId === '') {
             Px.Model.Visible.ShowAll();

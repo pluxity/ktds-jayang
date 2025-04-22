@@ -783,10 +783,14 @@ const handlePoiModifyBtnClick = async (kioskPoi) => {
     const poiModifyForm = document.getElementById("poiModifyForm");
     poiModifyForm.querySelectorAll('input[name="type"]').forEach(radio => {
         radio.disabled = true;
-        radio.checked = radio.value === (kioskPoi.isKiosk ? "kiosk" : "store");
+        if (kioskPoi.isKiosk || kioskPoi.property.isKiosk) {
+            radio.checked = radio.value === "kiosk";
+        }else{
+            radio.checked = radio.value === "store";
+        }
     });
     document.getElementById('poiModifyForm').dataset.id = kioskPoi.id;
-    if (kioskPoi.isKiosk) {
+    if (kioskPoi.isKiosk || kioskPoi.property.isKiosk) {
         document.getElementById('modifyKioskForm').style.display = 'block';
         document.getElementById('modifyStoreForm').style.display = 'none';
 

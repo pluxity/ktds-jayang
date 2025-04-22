@@ -151,8 +151,13 @@ function poiPaging(records) {
 
     function closeAllDropdowns() {
         document.querySelectorAll('.dropdown-content').forEach(el => {
-            el.classList.add('d-none');
-            el.previousElementSibling?.classList.remove('popup');
+            if(el.classList.contains('poi-on-map')){
+                el.remove();
+            }else{
+                el.classList.add('d-none');
+                el.previousElementSibling?.classList.remove('popup');
+            }
+
         });
     }
 

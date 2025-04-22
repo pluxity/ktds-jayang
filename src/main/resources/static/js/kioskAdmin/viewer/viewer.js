@@ -172,6 +172,7 @@
 
         const dropdownContentDiv = document.createElement('div');
         dropdownContentDiv.classList.add('dropdown-content');
+        dropdownContentDiv.classList.add('poi-on-map');
         dropdownContentDiv.dataset.poiId = poiInfo.id;
 
         const dropdownItemInfo = document.createElement('a');
@@ -210,8 +211,7 @@
         dropdownContentDiv.style.left = `${x + sidebarWidth}px`;
         dropdownContentDiv.style.top = `${y + navbarHeight}px`;
 
-        document.querySelector('#content-wrapper').appendChild(dropdownContentDiv)
-        // document.body.appendChild(dropdownContentDiv);
+        document.querySelector('#content-wrapper').appendChild(dropdownContentDiv);
     }
 
     function changeEventFloor(floorId, buildingId) {

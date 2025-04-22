@@ -81,6 +81,8 @@
         }
     };
 
+    const movePoiHandler = (poiInfo) => { moveToPoi(poiInfo.id) };
+
     // 버튼 정의
     const eventTypeList = [
         'mousedown',
@@ -132,13 +134,12 @@
                             }
                             break;
                         case 'move' :
-                            if(target.classList.contains('on')) {
+                            if (target.classList.contains('on')) {
                                 target.classList.remove('on');
-                                Px.Event.Off();
-                            }else{
+                                Px.Event.RemoveEventListener('pointerup', 'poi', movePoiHandler);
+                            } else {
                                 target.classList.add('on');
-                                Px.Event.On();
-                                Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {moveToPoi(poiInfo.id)});
+                                Px.Event.AddEventListener('pointerup', 'poi', movePoiHandler);
                             }
                             break;
                     }
@@ -199,13 +200,18 @@
         dropdownContentDiv.appendChild(dropdownItemDeleteA);
 
         const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
-        console.log("x, y : ", x, y);
+
+        const sidebar = document.querySelector('.viewer-sidebar');
+        const navbar = document.querySelector('.navbar.navbar-bg');
+        const sidebarWidth = sidebar?.offsetWidth || 0;
+        const navbarHeight = navbar?.offsetHeight || 0;
         dropdownContentDiv.style.position = 'fixed';
         dropdownContentDiv.style.zIndex = '9999';
-        dropdownContentDiv.style.left = `${x}px`;
-        dropdownContentDiv.style.top = `${y}px`;
+        dropdownContentDiv.style.left = `${x + sidebarWidth}px`;
+        dropdownContentDiv.style.top = `${y + navbarHeight}px`;
 
-        document.body.appendChild(dropdownContentDiv);
+        document.querySelector('#content-wrapper').appendChild(dropdownContentDiv)
+        // document.body.appendChild(dropdownContentDiv);
     }
 
     function changeEventFloor(floorId, buildingId) {

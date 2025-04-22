@@ -732,11 +732,21 @@ const moveToPoi = (id) => {
     }
 };
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const logoInput = document.getElementById('modifyLogoFile');
 const fileNameElement = logoInput.closest('.file-upload').querySelector('.file-name');
 const removeButton = logoInput.closest('.file-upload').querySelector('.file-remove');
 logoInput.addEventListener('change', function () {
     const file = this.files[0];
+
+    if (file && file.size > MAX_FILE_SIZE) {
+        alertSwal("10MB 이하의 파일만 업로드할 수 있습니다.");
+        if (!fileNameElement?.textContent.trim()) {
+            this.value = '';
+        }
+
+        return;
+    }
     if (file) {
         fileNameElement.textContent = file.name;
         removeButton.style.display = 'inline';
@@ -754,6 +764,10 @@ function resetModifyStoreForm() {
     form.querySelectorAll("input[type='file']").forEach(fileInput => {
         fileInput.value = '';
         fileInput.removeAttribute('data-file-id');
+    });
+
+    form.querySelectorAll("input[type='date']").forEach(fileInput => {
+        fileInput.value = '';
     });
 
     form.querySelectorAll(".file-name, .selected-file").forEach(el => {
@@ -793,7 +807,7 @@ const handlePoiModifyBtnClick = async (kioskPoi) => {
     if (kioskPoi.isKiosk || kioskPoi.property.isKiosk) {
         document.getElementById('modifyKioskForm').style.display = 'block';
         document.getElementById('modifyStoreForm').style.display = 'none';
-
+        document.getElementById("modifyEquipmentCode").disabled = true;
         document.getElementById("modifyKioskName").value = poiDetail.name || '';
         document.getElementById("modifyEquipmentCode").value = poiDetail.kiosk.kioskCode || '';
         document.getElementById("modifyKioskFloor").value = poiDetail.kiosk.floorId || '';

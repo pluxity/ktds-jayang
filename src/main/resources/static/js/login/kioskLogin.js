@@ -42,10 +42,8 @@ function doLogin() {
 document.getElementById('btn_login').onclick = doLogin;
 
 const inputFields = document.querySelector('#pw');
-inputFields.forEach(input => {
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            doLogin();
-        }
-    });
+inputFields.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        doLogin();
+    }
 });

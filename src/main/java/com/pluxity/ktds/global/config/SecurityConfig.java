@@ -63,16 +63,25 @@ public class SecurityConfig {
                                 .failureUrl("/login?error=true")
                 )
 
-                .logout().permitAll()
-                .logoutUrl("/logout") // 로그아웃 URL (기본 값 : /logout)
-                .logoutSuccessUrl("/login?logout=true") // 로그아웃 성공 URL (기본 값 : "/login?logout")
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout")) // 주소창에 요청해도 포스트로 인식하여 로그아웃
-                .deleteCookies("JSESSIONID","USER_ID", "USER_ROLE") // 로그아웃 시 JSESSIONID 제거
-                .invalidateHttpSession(true) // 로그아웃 시 세션 종료
-                .clearAuthentication(true)// 로그아웃 시 권한 제거
-                .and()
-                .exceptionHandling()
-                .accessDeniedPage("/accessDenied");
+                .logout(logout -> logout
+                        .permitAll()
+                        .logoutUrl("/logout")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .deleteCookies("JSESSIONID", "USER_ID", "USER_ROLE")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            String referer = request.getHeader("Referer");
+                            if (referer != null && referer.contains("/kiosk")) {
+                                response.sendRedirect("/kiosk-login?logout=true");
+                            } else {
+                                response.sendRedirect("/login?logout=true");
+                            }
+                        })
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/accessDenied")
+                );
 
         http.headers().frameOptions().sameOrigin();
         http.addFilterBefore((request, response, chain) -> {

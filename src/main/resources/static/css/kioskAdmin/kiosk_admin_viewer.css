@@ -428,4 +428,9 @@ input[type="checkbox"] {
     margin-bottom: 10px;
 }
 
+#kioskCamPosToolbar {
+    position: absolute;
+    top: 5rem;
+    left: 25rem;
+}
 

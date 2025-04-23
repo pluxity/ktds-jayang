@@ -19,16 +19,6 @@
             let buildingId = storeBuilding ? storeBuilding.id : null;
             document.getElementById('buildingId').value = buildingId;
 
-            const sidebar = document.querySelector('.viewer-sidebar');
-            const camPosTool = document.getElementById('camPosToolbar');
-
-            if (sidebar && camPosTool) {
-                const navbarRect = sidebar.getBoundingClientRect();
-                const offset = 15;
-                camPosTool.style.left = `${navbarRect.right + offset}px`;
-                camPosTool.style.top = '5rem';
-            }
-
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {

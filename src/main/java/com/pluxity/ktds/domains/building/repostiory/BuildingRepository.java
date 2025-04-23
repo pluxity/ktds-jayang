@@ -54,4 +54,6 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
 
     Optional<Building> findTop1ByIsIndoorOrderByIdDesc(String isIndoor);
     boolean existsByIsIndoor(String isIndoor);
+
+    Optional<Building> findByCode(String code);
 }

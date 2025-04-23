@@ -41,6 +41,11 @@ public class BuildingController {
         return DataResponseBody.of(service.findOutdoorDetail());
     }
 
+    @GetMapping("/store")
+    public DataResponseBody<BuildingDetailResponseDTO> getStoreBuilding() {
+        return DataResponseBody.of(service.findStoreDetail());
+    }
+
     @GetMapping("/{id}")
     public DataResponseBody<BuildingDetailResponseDTO> getBuilding(@PathVariable Long id) {
         return DataResponseBody.of(service.findById(id));

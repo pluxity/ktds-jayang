@@ -28,6 +28,20 @@ const BuildingManager = (() => {
             });
         });
     };
+    // store get
+    const getStoreBuilding = () => {
+        const uri = `/buildings/store`;
+
+        return new Promise((resolve) => {
+            api.get(uri).then((result) => {
+                const { result: data } = result.data;
+                const storeBuilding = new Building(data);
+                resolve(storeBuilding);
+            }).catch(() => {
+                resolve(null);
+            });
+        });
+    };
 
     const getBuildingById = (id) => {
         const uri = `/buildings/${id}`;
@@ -112,5 +126,6 @@ const BuildingManager = (() => {
         findAll,
         findById,
         findByCode,
+        getStoreBuilding,
     };
 })();

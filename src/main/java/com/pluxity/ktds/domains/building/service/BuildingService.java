@@ -93,6 +93,17 @@ public class BuildingService {
         return building.toDetailResponseDTO();
     }
 
+    @Transactional(readOnly = true)
+    public BuildingDetailResponseDTO findStoreDetail() {
+
+        Building building = buildingRepository.findByCode("store")
+                .orElse(null);
+        if (building == null) {
+            return null;
+        }
+        return building.toDetailResponseDTO();
+    }
+
     @Transactional
     public FileInfoDTO saveFile(@NotNull final MultipartFile file) throws IOException {
         return saveZipFileAndGetFileInfo(file);

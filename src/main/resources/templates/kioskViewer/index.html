@@ -12,7 +12,7 @@
             <span class="kiosk-info">B3</span>
             <!-- [Case] 3d 화면 -->
             <div class="kiosk-3d">
-                <div id="webGLContainer" class="kiosk-3d__image" style="position:fixed; width: 100%; height:100%; "></div>
+                <div id="webGLContainer" class="kiosk-3d__image"></div>
                 <div class="kiosk-3d__control">
                     <button type="button" class="home"><span class="hide">처음으로</span></button>
                     <button type="button" class="plus"><span class="hide">확대</span></button>
@@ -398,12 +398,12 @@
                 <button type="button" role="tab" id="store_info">매장 검색</button>
             </div>
             <div class="kiosk-footer__contents kiosk-footer__contents--floor" role="tabpanel" aria-labelledby="floor_info">
-                <ul class="floor">
+                <ul class="floor" id="storeFloorList">
                     <!-- [D] 클릭 시 active 클래스 추가 -->
-                    <li><button class="active" type="button">B1</button></li>
-                    <li><button type="button">B2</button></li>
-                    <li><button type="button">B3</button></li>
-                    <li><button type="button">B4</button></li>
+<!--                    <li><button class="active" type="button">B1</button></li>-->
+<!--                    <li><button type="button">B2</button></li>-->
+<!--                    <li><button type="button">B3</button></li>-->
+<!--                    <li><button type="button">B4</button></li>-->
                 </ul>
             </div>
             <div class="kiosk-footer__contents kiosk-footer__contents--store" role="tabpanel" aria-labelledby="store_info" style="display:none;">

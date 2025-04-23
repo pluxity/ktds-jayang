@@ -84,10 +84,17 @@
             setFloorList(storeBuilding);
 
             const footerButtons = document.querySelectorAll('.kiosk-footer__buttons button[role="tab"]');
+            const footerPanels  = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
+
             footerButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     footerButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+
+                    footerPanels.forEach(panel => {
+                        const labelled = panel.getAttribute('aria-labelledby');
+                        panel.style.display = (labelled === btn.id) ? '' : 'none';
+                    });
                 });
             });
 
@@ -124,6 +131,7 @@
             btn.addEventListener('click', () => {
                 floorTabList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+
                 kioskInfo.textContent = btn.textContent;
             });
         });

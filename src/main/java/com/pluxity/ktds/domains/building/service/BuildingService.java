@@ -485,4 +485,11 @@ public class BuildingService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
                 .changeCamera2d(camera2d);
     }
+
+    @Transactional
+    public void updateCamera3d(Long id, String camera3d) {
+        buildingRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
+                .changeCamera3d(camera3d);
+    }
 }

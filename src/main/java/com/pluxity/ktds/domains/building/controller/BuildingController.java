@@ -129,4 +129,12 @@ public class BuildingController {
         service.updateCamera2d(id, camera2dMap.get("camera"));
         return ResponseBody.of(SUCCESS_PATCH);
     }
+
+    @PatchMapping("/{id}/camera3d")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchBuildingCamera3d(@PathVariable Long id,
+                                              @RequestBody Map<String, String> camera3dMap) {
+        service.updateCamera3d(id, camera3dMap.get("camera"));
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
 }

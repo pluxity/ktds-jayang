@@ -19,6 +19,16 @@
             let buildingId = storeBuilding ? storeBuilding.id : null;
             document.getElementById('buildingId').value = buildingId;
 
+            const sidebar = document.querySelector('.viewer-sidebar');
+            const camPosTool = document.getElementById('camPosToolbar');
+
+            if (sidebar && camPosTool) {
+                const navbarRect = sidebar.getBoundingClientRect();
+                const offset = 15;
+                camPosTool.style.left = `${navbarRect.right + offset}px`;
+                camPosTool.style.top = '5rem';
+            }
+
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {
@@ -52,6 +62,8 @@
                         });
                         Px.Effect.Outline.HoverEventOn('area_no');
                         if (onComplete) onComplete();
+                        if(storeBuilding.camera3d)
+                            Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
                     }
                 });
             });
@@ -80,6 +92,24 @@
             console.error('PX Engine Initial', error);
         }
     };
+
+    document.querySelector('#camPosTool').addEventListener('click', (evt) => {
+        const target = evt.target.closest('.camPosTool');
+        const storeBuilding = BuildingManager.findByCode('store');
+        if(target === null) return;
+
+        const { btnType } = target.dataset;
+        const camPos = JSON.stringify(Px.Camera.GetState());
+
+        const param = {
+            camera: camPos,
+        };
+
+        api.patch(`/buildings/${storeBuilding.id}/${btnType}`, param).then(() => {
+            alertSwal('정상 등록 되었습니다.');
+            BuildingManager.findById(storeBuilding.id)[btnType] = camPos;
+        });
+    });
 
     const movePoiHandler = (poiInfo) => { moveToPoi(poiInfo.id) };
 

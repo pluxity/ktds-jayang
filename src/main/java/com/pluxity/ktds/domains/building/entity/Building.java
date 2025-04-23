@@ -59,6 +59,9 @@ public class Building {
     @Column(name = "camera_2d", columnDefinition = "LONGTEXT")
     private String camera2d;
 
+    @Column(name = "camera_3d", columnDefinition = "LONGTEXT")
+    private String camera3d;
+
     @Builder
     public Building(String code, String name, String description, String isIndoor) {
         this.code = code;
@@ -78,6 +81,9 @@ public class Building {
     }
     public void changeCamera2d(String camera2d) {
         this.camera2d = camera2d;
+    }
+    public void changeCamera3d(String camera3d) {
+        this.camera3d = camera3d;
     }
 
     public void changeEvacuationRoute(String evacuationRoute) {
@@ -121,6 +127,7 @@ public class Building {
                 .isIndoor(this.isIndoor)
                 .description(this.description)
                 .camera2d(this.camera2d)
+                .camera3d(this.camera3d)
                 .build();
     }
 
@@ -138,6 +145,7 @@ public class Building {
                 .floorIds(this.floors.stream().map(Floor::getId).toList())
                 .isIndoor(this.isIndoor)
                 .camera2d(this.camera2d)
+                .camera3d(this.camera3d)
                 .build();
 
     }

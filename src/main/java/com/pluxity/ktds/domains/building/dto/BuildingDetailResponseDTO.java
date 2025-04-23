@@ -19,7 +19,8 @@ public record BuildingDetailResponseDTO(
         List<Long> floorIds,
         List<FloorResponseDTO> floors,
         String isIndoor,
-        String camera2d
+        String camera2d,
+        String camera3d
 //        Long poiSetId
 ) {
 }

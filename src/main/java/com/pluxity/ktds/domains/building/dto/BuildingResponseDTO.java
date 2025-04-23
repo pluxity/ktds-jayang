@@ -9,6 +9,7 @@ public record BuildingResponseDTO(
         String name,
         String description,
         String isIndoor,
-        String camera2d
+        String camera2d,
+        String camera3d
 ) {
 }

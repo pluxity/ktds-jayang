@@ -27,7 +27,8 @@ public enum ViewPath {
     VIEWER_MAIN("/viewer","viewer/index"),
     VIEWER_MAP("/map","map/index"),
 
-    KIOSK_ADMIN_VIEWER("/kiosk/admin/viewer", "kioskAdmin/viewer/viewer");
+    KIOSK_ADMIN_VIEWER("/kiosk/admin/viewer", "kioskAdmin/viewer/viewer"),
+    KIOSK_VIEWER("/kioskViewer", "kioskViewer/index");
 
     private final String path;
     private final String view;

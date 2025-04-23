@@ -1,0 +1,48 @@
+diff a/src/main/resources/static/js/viewer/main/popup.js b/src/main/resources/static/js/viewer/main/popup.js	(rejected hunks)
+@@ -1316,25 +1316,38 @@
+             setEquipmentData("");
+         });
+     }
+-
++    
+     const setEquipmentData = (buildingId) => {
+         const eqAccordion = document.getElementById("eqAccordion");
+         eqAccordion.replaceChildren();
+ 
+-        const poiCategories = PoiCategoryManager.findAll();
++        const allCategories = PoiCategoryManager.findAll();
++        const equipmentCategory = allCategories.find(category => category.name.toLowerCase() === "설비");
++        if (!equipmentCategory) return;
++
++        const pois = PoiManager.findByPoiCategory(buildingId, "", equipmentCategory.id);
++
++        const middleMap = new Map();
++        pois.forEach(poi => {
++            const middleName = (poi.poiMiddleCategoryDetail?.name || "기타").trim();
++            if (middleMap.has(middleName)) {
++                middleMap.get(middleName).push(poi);
++            } else {
++                middleMap.set(middleName, [poi]);
++            }
++        });
+ 
+         let firstAccordionBtn = null;
+         let firstPoi = null;
++        let groupIndex = 0;
+ 
+-        poiCategories.forEach((category, categoryIndex) => {
+-            const pois = PoiManager.findByPoiCategory(buildingId, "", category.id);
+-            const poiCount = pois.length;
+-
++        middleMap.forEach((poiList, middleName) => {
++            const poiCount = poiList.length;
+             const btn = document.createElement("button");
+             btn.classList.add("accordion__btn");
+-            btn.textContent = `${category.name} (${poiCount})`;
++            btn.textContent = `${middleName} (${poiCount})`;
+ 
+-            if (categoryIndex === 0) {
++            if (groupIndex === 0) {
+                 firstAccordionBtn = btn;
+             }
+ 

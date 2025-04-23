@@ -1,0 +1,14 @@
+diff a/src/main/resources/static/js/viewer/main/init.js b/src/main/resources/static/js/viewer/main/init.js	(rejected hunks)
+@@ -367,9 +367,11 @@
+                         Px.Effect.Outline.AddHoverEventCallback(
+                             throttle(async (event) => {
+ 
+-                                if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
++                                if (outdoorBuilding && outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
+                                     const firstFloorId = outdoorBuilding.floors[0].id;
+                                     Px.Effect.Outline.Add(firstFloorId);
++                                } else {
++                                    Px.Effect.Outline.Add(0);
+                                 }
+                             }, 10)
+                         );

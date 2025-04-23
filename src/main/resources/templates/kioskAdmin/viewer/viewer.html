@@ -529,6 +529,41 @@
             </div>
         </div>
     </div>
+
+    <!-- pw change modal -->
+    <div class="modal fade" id="pwChangeModal" tabindex="-1" aria-labelledby="pwChangeModalLabel" aria-hidden="true">
+        <div class="modal-dialog pw-modal-dialog">
+            <div class="modal-content border border-dark">
+                <div class="modal-header pw-modal-header">
+                    <h5 class="modal-title pw-modal-title" id="pwChangeModalLabel">비밀번호 변경</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <!-- 모달 안의 폼 부분만 수정된 버전 -->
+                <div class="modal-body pw-modal-body">
+                    <form id="pwChangeForm">
+                        <div class="pw-modal-group d-flex align-items-center mb-2">
+                            <label for="currentPw" class="pw-modal-label me-2" style="width: 110px;">현재 비밀번호</label>
+                            <input type="password" class="form-control pw-modal-input flex-grow-1" id="currentPw" />
+                        </div>
+                        <div class="pw-modal-group d-flex align-items-center mb-2">
+                            <label for="newPw" class="pw-modal-label me-2" style="width: 110px;">변경 비밀번호</label>
+                            <input type="password" class="form-control pw-modal-input flex-grow-1" id="newPw" />
+                        </div>
+                        <div class="pw-modal-group d-flex align-items-center mb-2">
+                            <label for="confirmPw" class="pw-modal-label me-2" style="width: 110px;">변경 비밀번호<br>재입력</label>
+                            <input type="password" class="form-control pw-modal-input flex-grow-1" id="confirmPw" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer pw-modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnChangePw">수정</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 <th:block th:replace="~{kioskAdmin/fragments/script :: script }"></th:block>
 </body>

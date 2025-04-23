@@ -38,6 +38,7 @@ public enum ErrorCode implements Code {
   INVALID_BUILDING_FILE_TITLE(BAD_REQUEST, "도면 파일명이 일치하지 않습니다."),
 
   INVALID_ID_OR_PASSWORD(BAD_REQUEST, "아이디 또는 비밀번호가 틀렸습니다."),
+  INVALID_PASSWORD(BAD_REQUEST, "비밀번호가 틀렸습니다."),
 
   INVALID_ACCESS_TOKEN(UNAUTHORIZED, "ACCESS 토큰이 유효하지 않습니다."),
   INVALID_REFRESH_TOKEN(UNAUTHORIZED, "REFRESH 토큰이 유효하지 않습니다."),

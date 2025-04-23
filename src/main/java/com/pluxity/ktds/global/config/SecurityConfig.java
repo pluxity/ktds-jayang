@@ -96,11 +96,6 @@ public class SecurityConfig {
                 return;
             }
 
-            if (isLoggedIn && req.getRequestURI().equals("/login")) {
-                res.sendRedirect("/viewer");
-                return;
-            }
-
             chain.doFilter(request, response);
         }, UsernamePasswordAuthenticationFilter.class);
 

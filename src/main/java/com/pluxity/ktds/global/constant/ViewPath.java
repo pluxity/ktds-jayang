@@ -20,14 +20,14 @@ public enum ViewPath {
     ADMIN_NOTICE("/admin/notice", "admin/notice/notice"),
 
     LOGIN("/login", "login/login"),
+    KIOSK_LOGIN("/kiosk-login", "login/kiosk-login"),
     LOGIN_FAILURE("/login/failure", "login/failure/accessDenied"),
     DEFAULT("/", "login/login"),
 
     VIEWER_MAIN("/viewer","viewer/index"),
     VIEWER_MAP("/map","map/index"),
 
-    KIOSK_ADMIN_VIEWER("/kiosk/admin/viewer", "kioskAdmin/viewer/viewer"),
-    ;
+    KIOSK_ADMIN_VIEWER("/kiosk/admin/viewer", "kioskAdmin/viewer/viewer");
 
     private final String path;
     private final String view;

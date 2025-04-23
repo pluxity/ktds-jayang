@@ -48,7 +48,7 @@
                         Px.Camera.FPS.SetMoveSpeed(500);
                         Px.Event.On();
                         Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                            poiClickMenu(poiInfo);
+                            showPoiMenu(poiInfo);
                         });
                         Px.Effect.Outline.HoverEventOn('area_no');
                         if (onComplete) onComplete();
@@ -168,7 +168,9 @@
             });
     }
 
-    const poiClickMenu = async (poiInfo) => {
+    const activePopups = new Map();
+
+    const showPoiMenu = async (poiInfo) => {
 
         const dropdownContentDiv = document.createElement('div');
         dropdownContentDiv.classList.add('dropdown-content');
@@ -212,6 +214,18 @@
         dropdownContentDiv.style.top = `${y + navbarHeight}px`;
 
         document.querySelector('#content-wrapper').appendChild(dropdownContentDiv);
+
+        const updatePosition = () => {
+            const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
+            dropdownContentDiv.style.left = `${x + sidebarWidth}px`;
+            dropdownContentDiv.style.top = `${y + navbarHeight}px`;
+
+            if (!activePopups.has(poiInfo.id)) return;
+            requestAnimationFrame(updatePosition);
+        };
+
+        activePopups.set(poiInfo.id, { dom: dropdownContentDiv });
+        updatePosition();
     }
 
     function changeEventFloor(floorId, buildingId) {
@@ -268,20 +282,48 @@
             selectAllText: '전체 선택',
             allOptionsSelectedText: '모두 선택됨',
         });
-
-        // document
-        //     .querySelector('#poiSelect')
-        //     .addEventListener('change', (event) => {
-        //         const poiCategoryIds = event.target.value;
-        //         const floorId = document.querySelector('#floorNo').value;
-        //         const poiList = PoiManager.findByBuilding(BUILDING_ID)
-        //             .filter(selectedPoiCategory(poiCategoryIds))
-        //             .filter(selectedFloor(floorId));
-        //         renderingPoiList(poiList);
-        //     });
     };
 
-        await initializeStoreBuilding();
+    const submitPwChange =() => {
+        const currentPw = document.getElementById("currentPw").value.trim();
+        const newPw = document.getElementById("newPw").value.trim();
+        const confirmPw = document.getElementById("confirmPw").value.trim();
+        const userId = document.getElementById("userId").value;
+
+        // 유효성 검사
+        if (!currentPw || !newPw || !confirmPw) {
+            alertSwal("모든 항목을 입력해주세요.");
+            return;
+        }
+
+        if (newPw !== confirmPw) {
+            alertSwal("변경 비밀번호와 재입력이 일치하지 않습니다.");
+            return;
+        }
+        api.patch(`/kiosk-user/${userId}/change-password`, {
+            password: currentPw,
+            newPassword: newPw
+        }).then(res => {
+            alertSwal("비밀번호가 성공적으로 변경되었습니다.");
+            document.getElementById("pwChangeForm").reset();
+            bootstrap.Modal.getInstance(document.getElementById('pwChangeModal')).hide();
+        }).catch(err => {
+            console.error("비밀번호 변경 실패", err);
+            alertSwal(err.message);
+        });
+    }
+
+
+    document.getElementById("btnChangePw").addEventListener("click", submitPwChange);
+
+    document.querySelector('#pwChangeModal').addEventListener('hide.bs.modal', function () {
+        const form = document.getElementById("pwChangeForm");
+        if(form){
+            form.reset();
+        }
+    });
+
+    await initializeStoreBuilding();
 })();
 
 

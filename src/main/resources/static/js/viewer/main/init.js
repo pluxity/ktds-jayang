@@ -5,6 +5,9 @@
     if (!USER_ID) {
         window.location.href = '/login';
     }
+    if(USER_ID === 'kiosk'){
+        window.location.href = '/login';
+    }
     api.get(`/users/userid/${USER_ID}`).then((result) => {
         const {result: data} = result.data;
 

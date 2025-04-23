@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>로그인</title>
+    <link rel="stylesheet" th:href="@{/static/css/common/common.css}"/>
+    <link rel="stylesheet" th:href="@{/static/css/login.css}"/>
+</head>
+<body>
+<script th:inline="javascript">
+    const CONTEXT_PATH = /*[[@{/}]]*/ '';
+</script>
+<div class="container" th:style="'background-image: url(' + @{/static/images/viewer/bg_login.png} + ')'" >
+    <div class="login">
+        <h1 class="login__logo"><span class="hide">kt Login</span></h1>
+        <div class="login__box" style="height:18rem">
+            <h2 class="title">KT 층별 상가 안내</h2>
+            <div class="login-forms">
+                <div  class="input-error input-error--active">
+                    <input id="pw" type="password" placeholder="비밀번호를 입력하세요">
+                    <p class="input-error__text">비밀번호를 입력하세요</p>
+                </div>
+            </div>
+            <div class="login-footer">
+                <p class="login-footer__warning" style="display: none">
+                </p>
+                <button id="btn_login" type="button" class="button button--solid-middle">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    const params = new URLSearchParams(location.search);
+    const isError = JSON.parse(params.get("error"));
+
+    if (isError) {
+        const alertTxt = document.querySelector("SPAN.alert_txt");
+        alertTxt.classList.add("on");
+    }
+</script>
+<script th:src="@{/static/js/login/kioskLogin.js}"></script></body>
+<script th:src="@{/static/js/lib/axios/axios.min.js}"></script>
+<script th:src="@{/static/js/lib/axios/axios.interceptor.js}" ></script>
+</html>
+

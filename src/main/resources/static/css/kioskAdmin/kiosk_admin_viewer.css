@@ -391,4 +391,41 @@ input[type="checkbox"] {
     display: inline-block;
 }
 
+.pw-modal-header {
+    padding-bottom: 0;
+}
+
+.pw-modal-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.pw-modal-label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pw-modal-input {
+    height: 30px;
+    font-size: 13px;
+}
+
+.pw-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pw-modal-dialog {
+    max-width: 350px;
+}
+
+.pw-modal-body {
+    padding-top: 0;
+}
+
+.pw-modal-group {
+    margin-bottom: 10px;
+}
+
 

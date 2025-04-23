@@ -9,13 +9,12 @@
                 <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
                     <span class="text-dark">관리자</span>
                 </a>
+                <input type="hidden" id="userId">
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a class="dropdown-item " href="/viewer"><i class="align-middle me-1 fa-solid fa-display"></i> 사용자 화면으로 이동</a>
-                    <a class="dropdown-item " href="/admin/system-setting"><i class="align-middle me-1 fa-solid fa-gears"></i> 시스템 설정</a>
-                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item change-password" data-bs-toggle="modal" data-bs-target="#pwChangeModal"> 비밀번호 변경</a>
                     <a class="dropdown-item">
                         <form action="/logout" method="post">
-                            <input id="logout-input" type="submit" value="로그아웃" />
+                            <input id="logout-input" type="submit" value="로그아웃" style="margin-left: 0" />
                         </form>
                     </a>
                 </div>

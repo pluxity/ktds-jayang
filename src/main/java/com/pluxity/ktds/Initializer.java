@@ -16,9 +16,11 @@ import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.system_setting.dto.SystemSettingRequestDTO;
 import com.pluxity.ktds.domains.system_setting.repository.SystemSettingRepository;
 import com.pluxity.ktds.domains.system_setting.service.SystemSettingService;
+import com.pluxity.ktds.domains.user.entity.KioskUser;
 import com.pluxity.ktds.domains.user.entity.User;
 import com.pluxity.ktds.domains.user.entity.UserAuthority;
 import com.pluxity.ktds.domains.user.entity.UserGroup;
+import com.pluxity.ktds.domains.user.repository.KioskUserRepository;
 import com.pluxity.ktds.domains.user.repository.UserAuthorityRepository;
 import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
@@ -54,6 +56,7 @@ public class Initializer implements CommandLineRunner {
     private final PoiCategoryRepository poiCategoryRepository;
     private final BuildingRepository buildingRepository;
     private final BuildingService buildingService;
+    private final KioskUserRepository kioskUserRepository;
     private static final String ICON_RESOURCE_PATH = "static/images/viewer/categoryIcon";
 
     @Override
@@ -79,6 +82,13 @@ public class Initializer implements CommandLineRunner {
                     .nodeDefaultColor("#FF0000")
                     .build();
             systemSettingService.updateSystemSetting(systemSettingRequestDto);
+        }
+        if(!kioskUserRepository.existsByName("kiosk")) {
+            KioskUser kiosk = KioskUser.builder()
+                    .password(passwordEncoder.encode("pluxity123!@#"))
+                    .name("kiosk")
+                    .build();
+            kioskUserRepository.save(kiosk);
         }
 
 //        // resources/icon default 추가

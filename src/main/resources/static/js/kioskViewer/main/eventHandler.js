@@ -3,12 +3,43 @@
 
 (function () {
     // 미니맵
-    const hangulLetters = document.querySelector('.korean');
-    const consonants   = document.querySelector('.consonants');
-    const toggleBtns   = document.querySelectorAll('.store__buttons button');
+    const koreanLetters = document.querySelector('.korean');
+    const consonants= document.querySelector('.consonants');
+    const toggleBtns = document.querySelectorAll('.store__buttons button');
     const letterButtons = document.querySelectorAll('.store__letters button');
-    const searchInput   = document.querySelector('.store__search input');
-    const removeBtn     = document.querySelector('.store__search .remove');
+    const searchInput = document.querySelector('.store__search input');
+    const removeBtn = document.querySelector('.store__search .remove');
+
+    const footerButtons = document.querySelectorAll('.kiosk-footer__buttons button[role="tab"]');
+    const footerPanels = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
+    const floorDiv = document.getElementById('floorInfo');
+    const storeDiv = document.getElementById('storeSearch');
+    const kioskList = storeDiv.querySelector('.kiosk-list')
+    const kioskInfo = document.querySelector('.kiosk-main .kiosk-info')
+    footerButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            footerButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            footerPanels.forEach(panel => {
+                const labelled = panel.getAttribute('aria-labelledby');
+                panel.style.display = (labelled === btn.id) ? '' : 'none';
+            });
+
+            if (btn.id === 'floor_info') {
+                floorDiv.style.display = '';
+                kioskInfo.style.display = '';
+                storeDiv.style.display = 'none';
+                kioskList.style.display = 'none';
+            } else {
+                floorDiv.style.display = 'none';
+                kioskInfo.style.display = 'none';
+                storeDiv.style.display = 'contents';
+                kioskList.style.display = 'contents';
+                popup.createStorePopup();
+            }
+        });
+    });
 
     toggleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -16,11 +47,11 @@
             btn.classList.add('active');
 
             if (btn.textContent === '한') {
-                hangulLetters.style.display = 'block';
+                koreanLetters.style.display = 'block';
                 consonants.style.display   = 'none';
             } else {
                 consonants.style.display   = 'block';
-                hangulLetters.style.display = 'none';
+                koreanLetters.style.display = 'none';
             }
         });
     });

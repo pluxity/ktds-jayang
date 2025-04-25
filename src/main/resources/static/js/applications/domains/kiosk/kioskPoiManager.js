@@ -30,6 +30,16 @@ const KioskPoiManager = (() => {
         });
     };
 
+    const getStoreDetailList = () => {
+        return new Promise((resolve) => {
+            api.get('/kiosk/storeDetailList').then((result) => {
+                const { result : data } = result.data;
+                kioskPoiList = data.map(dtoToModel);
+                resolve(kioskPoiList);
+            });
+        });
+    };
+
     const getKioskPoiDetailList = () => {
         return new Promise((resolve) => {
             api.get('/kiosk/detailList').then((result) => {
@@ -53,7 +63,6 @@ const KioskPoiManager = (() => {
     const findAll = () => {
         return kioskPoiList;
     }
-
 
     const findById = (id) => {
         return kioskPoiList.find((kioskPoi) => Number(kioskPoi.id) === Number(id));
@@ -135,7 +144,9 @@ const KioskPoiManager = (() => {
         getKioskPoiDetailList,
         findDetailAll,
         getKioskPoi,
-        findPoiDetailById
+        findPoiDetailById,
+        getKioskByCode,
+        getStoreDetailList,
     }
 
 })();

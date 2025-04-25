@@ -42,7 +42,6 @@
             container.innerHTML = '';
             const storeBuilding = await BuildingManager.getStoreBuilding();
             let buildingId = storeBuilding ? storeBuilding.id : null;
-
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {
@@ -82,21 +81,6 @@
             });
             // 층
             setFloorList(storeBuilding);
-
-            const footerButtons = document.querySelectorAll('.kiosk-footer__buttons button[role="tab"]');
-            const footerPanels  = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
-
-            footerButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    footerButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-
-                    footerPanels.forEach(panel => {
-                        const labelled = panel.getAttribute('aria-labelledby');
-                        panel.style.display = (labelled === btn.id) ? '' : 'none';
-                    });
-                });
-            });
 
             // initLeftSelect(buildingId);
             // initDropUpMenu();
@@ -253,20 +237,6 @@ const Init = (function () {
         } else {
             alertSwal('POI를 배치해주세요');
         }
-    };
-
-    const initPoi = async (buildingId) => {
-        PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
-
-        document.querySelector('#webGLContainer').addEventListener('pointerup', () => {
-            const popupList = document.querySelectorAll(
-                '#webGLContainer .dropdown-content',
-            );
-            popupList.forEach((popup) => {
-                popup.remove();
-            });
-        });
-
     };
 
     const initPatrol = () => {

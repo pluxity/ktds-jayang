@@ -183,6 +183,7 @@ public class KioskPoi {
                 .category(this.category)
                 .buildingId(this.building.getId())
                 .floorId(this.floor.getId())
+                .floorNm(this.floor.getName())
                 .phoneNumber(this.phoneNumber)
                 .logo(this.logo != null ? this.logo.getId() : null)
                 .logoFile(this.logo == null ? null : this.logo.toDto())

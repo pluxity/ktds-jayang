@@ -79,6 +79,13 @@ public class KioskPoiService {
     }
 
     @Transactional(readOnly = true)
+    public List<StorePoiDetailResponseDTO> findStoreDetailList() {
+        return kioskPoiRepository.findByIsKioskFalse().stream()
+                .map(KioskPoi::toStoreDetailResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> findAllDetail() {
         List<KioskPoi> kioskPoiList = kioskPoiRepository.findAll();
         List<Map<String, Object>> poiDetailList = new ArrayList<>();

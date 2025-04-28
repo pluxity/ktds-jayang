@@ -9,7 +9,7 @@
     <div class="kiosk-main">
         <button type="button" class="kiosk-main__close"><span class="hide">close</span></button>
 
-        <span class="kiosk-info">B3</span>
+        <span class="kiosk-info"></span>
         <template th:replace="kioskViewer/floorInfo :: kiosk-template"></template>
         <template th:replace="kioskViewer/storeSearch :: kiosk-template"></template>
     </div>
@@ -23,7 +23,7 @@
             <button class="active" type="button" role="tab" id="floor_info">층별 안내</button>
             <button type="button" role="tab" id="store_info">매장 검색</button>
         </div>
-        <div class="kiosk-footer__contents kiosk-footer__contents--floor" role="tabpanel" aria-labelledby="floor_info">
+        <div class="kiosk-footer__contents kiosk-footer__contents--floor" role="tabpanel" aria-labelledby="floor_info" style="overflow: hidden">
             <ul class="floor" id="storeFloorList">
                 <!-- [D] 클릭 시 active 클래스 추가 -->
                 <!--                    <li><button class="active" type="button">B1</button></li>-->

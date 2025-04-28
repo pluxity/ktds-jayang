@@ -11,4 +11,6 @@ public interface KioskPoiRepository extends JpaRepository<KioskPoi, Long> {
     List<KioskPoi> findAllByOrderByIdDesc();
 
     List<KioskPoi> findByIsKioskFalse();
+
+    Optional<KioskPoi> findByKioskCode(String code);
 }

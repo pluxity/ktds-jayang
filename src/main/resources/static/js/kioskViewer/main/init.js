@@ -1,7 +1,5 @@
 'use strict';
 (async function () {
-
-    await PoiManager.getPoiList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.kiosk-footer .kiosk-footer__date');
         const now = new Date();
@@ -42,6 +40,14 @@
             container.innerHTML = '';
             const storeBuilding = await BuildingManager.getStoreBuilding();
             let buildingId = storeBuilding ? storeBuilding.id : null;
+            const urlParams = new URLSearchParams(window.location.search);
+            const kioskCode = urlParams.get('kioskCode');
+            if (!kioskCode) {
+                console.error('키오스크 코드가 없습니다.');
+                return;
+            }
+            const kioskPoi = await KioskPoiManager.getKioskPoiByCode(kioskCode);
+
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {
@@ -60,17 +66,33 @@
                     });
                 }
 
+                let lastTab = 0;
+                const DOUBLE_TAB_DELAY = 300;
+
                 Px.Loader.LoadSbmUrlArray({
                     urlDataList: sbmDataArray,
                     center: "",
-                    onLoad: function() {
-                        Px.Model.Visible.ShowAll();
-                        Px.Util.SetBackgroundColor('#333333');
-                        Px.Camera.FPS.SetHeightOffset(15);
-                        Px.Camera.FPS.SetMoveSpeed(500);
+                    onLoad: async function() {
+                        await initPoi();
+                        moveToKiosk(kioskPoi);
                         Px.Event.On();
-                        Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                            showPoiMenu(poiInfo);
+                        Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
+
+                            const currentTime = new Date().getTime();
+                            const tabLength = currentTime - lastTab;
+
+                            if(tabLength < DOUBLE_TAB_DELAY && tabLength > 0) {
+                                popup.showPoiPopup(poiInfo);
+                                Px.Camera.MoveToPoi({
+                                    id: poiInfo.id,
+                                    isAnimation: true,
+                                    duration: 500,
+                                });
+                                lastTab = 0;
+                            }else{
+                                lastTab = currentTime;
+                            }
+
                         });
                         Px.Effect.Outline.HoverEventOn('area_no');
                         if (onComplete) onComplete();
@@ -80,8 +102,22 @@
                 });
             });
             // 층
-            setFloorList(storeBuilding);
+            setFloorList(storeBuilding, kioskPoi);
 
+            const footerButtons = document.querySelectorAll('.kiosk-footer__buttons button[role="tab"]');
+            const footerPanels  = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
+
+            footerButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    footerButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    footerPanels.forEach(panel => {
+                        const labelled = panel.getAttribute('aria-labelledby');
+                        panel.style.display = (labelled === btn.id) ? '' : 'none';
+                    });
+                });
+            });
             // initLeftSelect(buildingId);
             // initDropUpMenu();
 
@@ -90,19 +126,61 @@
         }
     };
 
-    const setFloorList = (storeBuilding) => {
+    const initPoi = async () => {
+        await KioskPoiManager.getKioskPoiList();
+        await KioskPoiManager.renderAllPoiToEngine();
+
+    };
+
+    const moveToKiosk =  (kioskPoi) => {
+        Px.Model.Visible.HideAll();
+        Px.Model.Visible.Show(kioskPoi.floorId);
+        Px.Poi.HideAll();
+        Px.Poi.ShowByProperty("floorId", kioskPoi.floorId);
+        Px.Camera.MoveToPoi({
+            id: kioskPoi.id,
+            isAnimation: true,
+            duration: 500,
+            distanceOffset: 1000
+        });
+    }
+
+    const homeButton = document.querySelector('.kiosk-3d__control .home');
+    homeButton.addEventListener('click', async () => {
+        const floorList = document.querySelector('#storeFloorList');
+        const kioskInfo = document.querySelector('.kiosk-info');
+        const urlParams = new URLSearchParams(window.location.search);
+        const kioskCode = urlParams.get('kioskCode');
+        if (kioskCode) {
+            const kioskPoi = await KioskPoiManager.getKioskPoiByCode(kioskCode);
+            moveToKiosk(kioskPoi);
+            floorList.querySelectorAll('li').forEach((floor) => {
+                const btn = floor.querySelector('button');
+                if(btn.classList.contains('active')){
+                    btn.classList.remove('active');
+                }
+                if (Number(floor.id) === Number(kioskPoi.floorId)) {
+                    btn.classList.add('active');
+                    kioskInfo.textContent = floor.innerText;
+                }
+            })
+        }
+    });
+
+    const setFloorList = (storeBuilding, kioskPoi) => {
         const floorTabList = document.getElementById('storeFloorList');
         const kioskInfo    = document.querySelector('.kiosk-info');
 
         storeBuilding.floors.forEach((floor, index) => {
             const li = document.createElement('li');
             li.setAttribute('role', 'tab');
-            li.id = `floor-${floor.id}`;
+            li.id = floor.id;
 
             const button = document.createElement('button');
             button.type = 'button';
             button.textContent = floor.name;
-            if (index === 0) {
+
+            if (floor.id === kioskPoi.floorId) {
                 button.classList.add('active');
                 kioskInfo.textContent = floor.name;
             }
@@ -117,14 +195,17 @@
                 btn.classList.add('active');
 
                 kioskInfo.textContent = btn.textContent;
+                //btn의 상위 노드 li의 id값
+                const li = btn.closest('li');
+                const floorId = li.id;
+                Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(Number(floorId));
+                Px.Poi.HideAll();
+                Px.Poi.ShowByProperty("floorId", Number(floorId));
             });
         });
     };
-    const setControlBtn = () => {
-        const zoomInButton = document.querySelector('.kiosk-3d__control.plus');
-        const zoomOutButton = document.querySelector('.kiosk-3d__control.minus');
-        const homeButton = document.querySelector('.kiosk-3d__control.home');
-    }
+
 
     setDateTime();
     setInterval(updateCurrentTime, 1000);
@@ -238,6 +319,7 @@ const Init = (function () {
             alertSwal('POI를 배치해주세요');
         }
     };
+
 
     const initPatrol = () => {
 

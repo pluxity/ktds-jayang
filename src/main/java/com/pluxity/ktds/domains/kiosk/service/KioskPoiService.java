@@ -117,6 +117,12 @@ public class KioskPoiService {
         return poiDetailList;
     }
 
+    @Transactional(readOnly = true)
+    public KioskPoiDetailResponseDTO findKioskPoiByCode(String code) {
+        KioskPoi kioskPoi = kioskPoiRepository.findByKioskCode(code).orElseThrow(() -> new CustomException(NOT_FOUND_POI));
+        return kioskPoi.toKioskDetailResponseDTO();
+    }
+
 
     @Transactional
     public FileInfoDTO saveFile(@NotNull KioskFileUploadDTO dto) {

@@ -14,8 +14,12 @@
     const footerPanels = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
     const floorDiv = document.getElementById('floorInfo');
     const storeDiv = document.getElementById('storeSearch');
-    const kioskList = storeDiv.querySelector('.kiosk-list')
-    const kioskInfo = document.querySelector('.kiosk-main .kiosk-info')
+    const kioskList = storeDiv.querySelector('.kiosk-list');
+    const kioskInfo = document.querySelector('.kiosk-main .kiosk-info');
+
+    const zoomInButton = document.querySelector('.kiosk-3d__control .plus');
+    const zoomOutButton = document.querySelector('.kiosk-3d__control .minus');
+
     footerButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             footerButtons.forEach(b => b.classList.remove('active'));
@@ -90,5 +94,23 @@
         }
         const floorId = document.querySelector('.kiosk-list__tab li.active').id;
         popup.setStores(floorId, term);
+
     });
+
+    const addZoomEventListener = (button, startAction, stopAction) => {
+        button.addEventListener('touchstart', startAction);
+        button.addEventListener('mousedown',startAction);
+        button.addEventListener('touchend', stopAction);
+        button.addEventListener('mouseup',stopAction);
+    };
+
+    addZoomEventListener(zoomInButton,
+        () => Px.Camera.StartZoomIn(),
+        () => Px.Camera.StopZoomIn()
+    );
+
+    addZoomEventListener(zoomOutButton,
+        () => Px.Camera.StartZoomOut(),
+        () => Px.Camera.StopZoomOut()
+    );
 })();

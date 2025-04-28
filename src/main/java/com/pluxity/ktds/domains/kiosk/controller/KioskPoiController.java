@@ -46,6 +46,11 @@ public class KioskPoiController {
         return DataResponseBody.of(kioskPoiService.findAllDetail());
     }
 
+    @GetMapping("code/{code}")
+    public DataResponseBody<KioskPoiDetailResponseDTO> getKioskPoiByCode(@PathVariable String code) {
+        return DataResponseBody.of(kioskPoiService.findKioskPoiByCode(code));
+    }
+
     @PostMapping("/upload/file")
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseBody<FileInfoDTO> postKioskFile(

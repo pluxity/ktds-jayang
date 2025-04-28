@@ -40,6 +40,15 @@ const KioskPoiManager = (() => {
         });
     };
 
+    const getKioskPoiByCode = (code) => {
+        return new Promise((resolve) => {
+            api.get(`/kiosk/code/${code}`).then((result) => {
+                const { result : data } = result.data;
+                resolve(data);
+            })
+        })
+    }
+
     const getKioskPoiDetailList = () => {
         return new Promise((resolve) => {
             api.get('/kiosk/detailList').then((result) => {
@@ -146,6 +155,7 @@ const KioskPoiManager = (() => {
         getKioskPoi,
         findPoiDetailById,
         getStoreDetailList,
+        getKioskPoiByCode
     }
 
 })();

@@ -217,9 +217,67 @@ const popup = (function () {
         })
     }
 
+    const showPoiPopup = (poiInfo) => {
+        console.log(poiInfo);
+        if(!poiInfo.property.isKiosk){
+            const id = poiInfo.id;
+            const floorNm = document.querySelector('.kiosk-info').innerText;
+            api.get(`/kiosk/${id}`).then((res) => {
+                const { result: resultData } = res.data;
+                console.log(resultData);
+                const layer = document.createElement('div');
+                layer.classList.add("kiosk-layer__inner");
+                layer.innerHTML = `
+                <div class="kiosk-layer__content">
+                    <button type="button" class="kiosk-layer__close"><span class="hide">숨김</span></button>
+                    <div class="kiosk-layer__title"><span class="name">${resultData.name}</span></div>
+                    <div class="kiosk-layer__info">
+                        <dl><dt>위치</dt><dd>${floorNm || ''}</dd></dl>
+                        <dl><dt>연락처</dt><dd>${resultData.store.phoneNumber || ''}</dd></dl>
+                        <dl style="visibility:hidden;"><dt>영업시간</dt><dd>&nbsp;</dd></dl>
+                        <dl style="visibility:hidden;"><dt>주차할인</dt><dd>&nbsp;</dd></dl>   
+                    </div>
+                </div>
+                <div class="kiosk-layer__image">
+                    ${resultData.store.banners
+                    .sort((a, b) => a.priority - b.priority)
+                    .filter(banner => !banner.endDate || new Date(banner.endDate) >= new Date())
+                    .map(banner => {
+                        const bf = banner.bannerFile;
+                        const imageUrl = `${bf.fileEntityType}/${bf.directory}/${bf.storedName}.${bf.extension}`;
+                        return `
+                                <div
+                                    class="image"
+                                    style="
+                                        background-image: url('${imageUrl}');
+                                        background-position: center;
+                                        background-size: contain;
+                                        background-repeat: no-repeat;
+                                    "
+                                    role="img"
+                                    aria-label="${resultData.name} 이미지 ${banner.id}"
+                                ></div>
+                            `;
+                    }).join('')}
+                </div>
+            `;
+
+                // 기존 내용 제거 후 새로운 layer 추가
+                document.body.appendChild(layer);
+
+                // close 버튼 이벤트 리스너 추가
+                layer.querySelector('.kiosk-layer__close').addEventListener('click', () => {
+                    layer.remove();
+                });
+            });
+        }
+
+    }
+
     return {
         createStorePopup,
-        setStores
+        setStores,
+        showPoiPopup
     }
 })();
 

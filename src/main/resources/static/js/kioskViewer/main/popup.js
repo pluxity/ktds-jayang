@@ -3,9 +3,17 @@
 const popup = (function () {
 
     const ITEMS_PER_PAGE = 10;
+    const CHOSEONG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    function getKeyInitial(ch) {
+        if (!/[가-힣]/.test(ch)) return '';
+        const code = ch.charCodeAt(0) - 0xAC00;
+        return CHOSEONG[Math.floor(code / (21 * 28))];
+    }
     let pages = [];
     let currentPage = 0;
     let leftBtn, rightBtn, pagingContainer;
+    let currentFloor = 'all';
+    let currentTerm = '';
 
     const initPagerControls = () => {
         leftBtn = document.querySelector('.kiosk-list__button--left');
@@ -93,11 +101,23 @@ const popup = (function () {
         await setStores('all');
     }
 
-    const setStores = async (floorId) => {
+    const setStores = async (floorId, term = '') => {
+
+        currentFloor = floorId;
+        currentTerm = term.trim();
         const kioskPoiList = await KioskPoiManager.getKioskPoiDetailList();
-        const storePoiList = kioskPoiList
+        let storePoiList = kioskPoiList
             .filter(poi => poi.common?.isKiosk === false)
             .filter(poi => floorId === 'all' || `${poi.common?.floorId}` === `${floorId}`);
+
+        if (currentTerm) {
+            storePoiList = storePoiList.filter(poi => {
+                const initials = Array.from(poi.detail.name)
+                    .map(c => getKeyInitial(c))
+                    .join('');
+                return initials.includes(currentTerm);
+            });
+        }
 
         pages = [];
         for (let i = 0; i < storePoiList.length; i += ITEMS_PER_PAGE) {
@@ -200,6 +220,7 @@ const popup = (function () {
 
     return {
         createStorePopup,
+        setStores
     }
 })();
 

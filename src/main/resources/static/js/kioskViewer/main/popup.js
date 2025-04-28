@@ -203,8 +203,7 @@ const popup = (function () {
 
         const storeBuilding = await BuildingManager.getStoreBuilding();
 
-        // slice(0. 4) 는 테스트
-        storeBuilding.floors.slice(0, 4).forEach((floor, idx) => {
+        storeBuilding.floors.forEach((floor, idx) => {
             const floorLi = document.createElement('li');
             floorLi.setAttribute('role', 'tab');
             floorLi.id = `${floor.id}`;

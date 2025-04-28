@@ -4,23 +4,23 @@
     await PoiManager.getPoiList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.kiosk-footer .kiosk-footer__date');
-
         const now = new Date();
 
-        const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+        const year  = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day   = String(now.getDate()).padStart(2, '0');
 
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
-        const date = String(now.getDate()).padStart(2, '0');
-        const day = days[now.getDay()];
-        const hours = String(now.getHours()).padStart(2, '0');
+        const hours24 = now.getHours();
+        const ampm    = hours24 < 12 ? '오전' : '오후';
+        const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+        const hours   = String(hours12).padStart(2, '0');
+
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        const formattedTime = `${year}년 ${month}월 ${date}일(${day} ${hours}:${minutes}:${seconds})`;
-
-        dateElement.textContent = formattedTime;
-    }
+        dateElement.innerHTML =
+            `${year}년 ${month}월 ${day}일<br>` +
+            `${ampm} ${hours}:${minutes}`;
+    };
 
     const setDateTime = () => {
         const renderDateTime = () => {

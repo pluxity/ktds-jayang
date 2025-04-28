@@ -145,7 +145,6 @@ const KioskPoiManager = (() => {
         findDetailAll,
         getKioskPoi,
         findPoiDetailById,
-        getKioskByCode,
         getStoreDetailList,
     }
 

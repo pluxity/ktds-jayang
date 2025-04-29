@@ -3,8 +3,8 @@
 
 (function () {
     // 미니맵
-    const koreanLetters = document.querySelector('.korean');
-    const consonants= document.querySelector('.consonants');
+    const koreanLetters = document.querySelector('.store__letters .korean');
+    const consonants= document.querySelector('.store__letters .consonants');
     const toggleBtns = document.querySelectorAll('.store__buttons button');
     const letterButtons = document.querySelectorAll('.store__letters button');
     const searchInput = document.querySelector('.store__search input');
@@ -52,10 +52,14 @@
 
             if (btn.textContent === '한') {
                 koreanLetters.style.display = 'block';
+                koreanLetters.classList.add("active");
                 consonants.style.display   = 'none';
+                consonants.classList.remove("active");
             } else {
                 consonants.style.display   = 'block';
+                consonants.classList.add("active");
                 koreanLetters.style.display = 'none';
+                koreanLetters.classList.remove("active");
             }
         });
     });

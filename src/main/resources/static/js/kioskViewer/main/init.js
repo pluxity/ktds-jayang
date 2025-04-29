@@ -139,10 +139,13 @@
                         canvas.style.touchAction = 'none';
 
                         function pan(dx, dy) {
-                            const s = Px.Camera.GetState();
-                            s.position.x -= dx;
-                            s.position.y += dy;
-                            Px.Camera.SetState(s);
+                            const state = Px.Camera.GetState();
+                            state.position.x -= dx;
+                            state.position.y += dy;
+
+                            state.target.x -= dx;
+                            state.target.y += dy;
+                            Px.Camera.SetState(state);
                         }
 
                         function handleTouchStartPan(e) {

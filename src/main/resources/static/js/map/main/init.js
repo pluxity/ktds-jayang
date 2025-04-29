@@ -433,7 +433,8 @@ const Init = (function () {
         const contents = document.querySelector('.contents');
         Px.Core.Initialize(container, async () => {
 
-            const { buildingFile, floors } = await BuildingManager.findById(buildingId);
+            const building = await BuildingManager.findById(buildingId);
+            const { buildingFile, floors } = building;
             const { directory } = buildingFile;
 
             const sbmDataArray = floors.map((floor) => {
@@ -489,6 +490,8 @@ const Init = (function () {
 
                         }, 1000)
                     );
+                    if(building?.camera3d)
+                        Px.Camera.SetState(JSON.parse(building.camera3d));
 
                     contents.style.position = 'static';
                     initializeTexture();
@@ -914,10 +917,14 @@ const Init = (function () {
             () => {
                 // TODO: top-view 위치
                 const building = BuildingManager.findById(buildingId);
-                const option = JSON.parse(building.camera2d);
+                let option = JSON.parse(building.camera2d);
                 if (option === null) {
-                    console.error('2D 카메라 정보가 없습니다.');
-                    return;
+                    option = {
+                        position: {x: -134.91073489593867, y: 4048.653041121009, z: -418.59942425930194},
+                        rotation: {x: 0, y: 0, z: 0},
+                        target: {x: -134.91382798752565, y: 6.060831375368665e-14, z: -418.59681190865894}
+                    };
+                    Px.Camera.SetOrthographic();
                 }
                 option.onComplete = () => {
                     Px.Camera.SetOrthographic();
@@ -933,7 +940,7 @@ const Init = (function () {
                 }
                 option.onComplete = () => {
                     Px.Camera.SetPerspective();
-                };
+                }
                 Px.Camera.SetState(option);
 
             },

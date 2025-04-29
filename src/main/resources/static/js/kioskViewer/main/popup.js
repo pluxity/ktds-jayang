@@ -31,6 +31,7 @@ const popup = (function () {
     };
 
     const renderPage = (pageIndex) => {
+        document.querySelectorAll('.kiosk-layer').forEach(el => el.remove());
         currentPage = pageIndex;
         const emptyInfo = document.querySelector('.kiosk-list__info--empty');
         const listInfo  = document.querySelector('.kiosk-list__info:not(.kiosk-list__info--empty)');

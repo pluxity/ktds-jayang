@@ -277,7 +277,7 @@ function initBuilding() {
     Px.Core.Initialize(container, async () => {
         Px.Util.SetBackgroundColor('#1b1c2f'); // 백그라운드 색깔지정
         // BuildingManager.findById(BUILDING_ID).getDetail();
-        const { buildingFile, code} = BuildingManager.findById(BUILDING_ID);
+        const { buildingFile, code, camera3d} = BuildingManager.findById(BUILDING_ID);
         const { directory, storedName, extension } = buildingFile;
 
         const {floors} = BuildingManager.findById(BUILDING_ID);
@@ -301,6 +301,8 @@ function initBuilding() {
                 initPoi();
                 initPatrol();
                 Px.Event.On();
+                if(camera3d)
+                    Px.Camera.SetState(JSON.parse(camera3d));
                 Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                     const activeTab = document.querySelector('.viewer-sidebar .nav li a.active').id;
                     if(activeTab === 'poi-tab') {

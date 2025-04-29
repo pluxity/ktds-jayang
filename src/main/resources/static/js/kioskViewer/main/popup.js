@@ -5,9 +5,17 @@ const popup = (function () {
     const ITEMS_PER_PAGE = 10;
     const CHOSEONG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
     function getKeyInitial(ch) {
-        if (!/[가-힣]/.test(ch)) return '';
-        const code = ch.charCodeAt(0) - 0xAC00;
-        return CHOSEONG[Math.floor(code / (21 * 28))];
+        // 숫자
+        if (/[0-9]/.test(ch)) return ch;
+        // 영문
+        if (/[a-zA-Z]/.test(ch)) return ch.toLowerCase();
+        // 한글
+        if (/[가-힣]/.test(ch)) {
+            const code = ch.charCodeAt(0) - 0xAC00;
+            return CHOSEONG[Math.floor(code / (21 * 28))];
+        }
+
+        return '';
     }
     let pages = [];
     let currentPage = 0;

@@ -111,7 +111,7 @@
                     center: "",
                     onLoad: async function() {
                         await initPoi();
-                        moveToKiosk(kioskPoi);
+                        Init.moveToKiosk(kioskPoi);
                         Px.Event.On();
                         Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
 
@@ -219,18 +219,18 @@
 
     };
 
-    const moveToKiosk =  (kioskPoi) => {
-        Px.Model.Visible.HideAll();
-        Px.Model.Visible.Show(kioskPoi.floorId);
-        Px.Poi.HideAll();
-        Px.Poi.ShowByProperty("floorId", kioskPoi.floorId);
-        Px.Camera.MoveToPoi({
-            id: kioskPoi.id,
-            isAnimation: true,
-            duration: 500,
-            distanceOffset: 300
-        });
-    }
+    // const moveToKiosk =  (kioskPoi, poiId = '') => {
+    //     Px.Model.Visible.HideAll();
+    //     Px.Model.Visible.Show(kioskPoi.floorId);
+    //     Px.Poi.HideAll();
+    //     Px.Poi.ShowByProperty("floorId", kioskPoi.floorId);
+    //     Px.Camera.MoveToPoi({
+    //         id: kioskPoi.id,
+    //         isAnimation: true,
+    //         duration: 500,
+    //         distanceOffset: 300
+    //     });
+    // }
 
     const homeButton = document.querySelector('.kiosk-3d__control .home');
     homeButton.addEventListener('click', async () => {
@@ -240,7 +240,7 @@
         const kioskCode = urlParams.get('kioskCode');
         if (kioskCode) {
             const kioskPoi = await KioskPoiManager.getKioskPoiByCode(kioskCode);
-            moveToKiosk(kioskPoi);
+            Init.moveToKiosk(kioskPoi);
             floorList.querySelectorAll('li').forEach((floor) => {
                 const btn = floor.querySelector('button');
                 if(btn.classList.contains('active')){
@@ -280,6 +280,10 @@
 
         floorTabList.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
+                const existPoiPopup = document.querySelector('.kiosk-layer__inner.floorInfo__inner')
+                if (existPoiPopup) {
+                    existPoiPopup.remove();
+                }
                 floorTabList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
@@ -311,6 +315,19 @@ const Init = (function () {
 
         Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
             console.log('가상순찰 캐릭터 로딩 완료');
+        });
+    }
+
+    const moveToKiosk =  (kioskPoi) => {
+        Px.Model.Visible.HideAll();
+        Px.Model.Visible.Show(kioskPoi.floorId);
+        Px.Poi.HideAll();
+        Px.Poi.ShowByProperty("floorId", kioskPoi.floorId);
+        Px.Camera.MoveToPoi({
+            id: kioskPoi.id,
+            isAnimation: true,
+            duration: 500,
+            distanceOffset: 300
         });
     }
 
@@ -444,6 +461,6 @@ const Init = (function () {
     }
 
     return {
-
+        moveToKiosk
     }
 })();

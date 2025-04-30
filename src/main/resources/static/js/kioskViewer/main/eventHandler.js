@@ -36,15 +36,22 @@
                 searchStoreSpan.style.display = 'none';
                 kioskList.style.display = 'none';
             } else {
+                const existPoiPopup = document.querySelector('.kiosk-layer__inner.floorInfo__inner')
+                if (existPoiPopup) {
+                    existPoiPopup.remove();
+                }
+                document.querySelectorAll('.store__letters button')
+                    .forEach(btn => btn.classList.remove("active"))
                 floorDiv.style.display = 'none';
                 kioskInfo.style.display = 'none';
                 searchStoreSpan.style.display = '';
                 kioskList.style.display = 'block';
+                document.querySelector('.store__search input').value = '';
                 popup.createStorePopup();
             }
         });
     });
-
+    const letters = document.querySelector('.store__letters');
     toggleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             toggleBtns.forEach(b => b.classList.remove('active'));
@@ -53,10 +60,10 @@
             if (btn.textContent === '한') {
                 koreanLetters.style.display = 'block';
                 koreanLetters.classList.add("active");
-                consonants.style.display   = 'none';
+                consonants.style.display = 'none';
                 consonants.classList.remove("active");
             } else {
-                consonants.style.display   = 'block';
+                consonants.style.display = 'block';
                 consonants.classList.add("active");
                 koreanLetters.style.display = 'none';
                 koreanLetters.classList.remove("active");

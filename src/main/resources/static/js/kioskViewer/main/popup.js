@@ -29,14 +29,27 @@ const popup = (function () {
         pagingContainer = document.querySelector('.kiosk-list__paging');
 
         leftBtn.addEventListener('click', () => {
-            if (currentPage > 0) renderPage(currentPage - 1);
+            if (currentPage > 0) {
+                renderPage(currentPage - 1);
+            } else {
+                renderPage(pages.length - 1);
+            }
         });
         rightBtn.addEventListener('click', () => {
-            if (currentPage < pages.length - 1) renderPage(currentPage + 1);
+            if (currentPage < pages.length - 1) {
+                renderPage(currentPage + 1);
+            } else {
+                renderPage(0)
+            }
         });
 
         return { leftBtn, rightBtn, pagingContainer };
     };
+
+    const floorDiv = document.getElementById('floorInfo');
+    const kioskList = document.querySelector('.kiosk-list');
+    const kioskInfo = document.querySelector('.kiosk-main .kiosk-info');
+    const searchStoreSpan = document.getElementById("kioskInfoSpan");
 
     const renderPage = (pageIndex) => {
         document.querySelectorAll('.kiosk-layer').forEach(el => el.remove());
@@ -44,6 +57,10 @@ const popup = (function () {
         const emptyInfo = document.querySelector('.kiosk-list__info--empty');
         const listInfo  = document.querySelector('.kiosk-list__info:not(.kiosk-list__info--empty)');
         const storeList = document.getElementById('storeList');
+        const floorInfoBtn = document.getElementById('floor_info');
+        const storeInfoBtn = document.getElementById('store_info');
+        const footerPanels = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
+        const floorTabList = document.getElementById('storeFloorList');
 
         if (pages.length === 0) {
             emptyInfo.style.display = 'block';
@@ -82,12 +99,33 @@ const popup = (function () {
                 </div>
                 <ul class="list__footer">
                   <li><button type="button" class="button">${poi.detail.floorNm}</button></li>
-                  <li><button type="button" class="button button--location">위치 확인</button></li>
+                  <li><button type="button" class="button button--location" data-poi-id="${poi.detail.id}" data-floor-id="${poi.detail.floorId}">위치 확인</button></li>
                 </ul>
               `;
-            const layer = createBanner(poi);
+            // const layer = createBanner(poi);
             li.querySelector('.button--location')
-                .addEventListener('click', () => layer.style.display = 'block');
+                .addEventListener('click', () => {
+                    footerPanels.forEach(panel => {
+                        const labelled = panel.getAttribute('aria-labelledby');
+                        panel.style.display = (labelled === 'floor_info') ? '' : 'none';
+                    });
+                    floorTabList.querySelectorAll('button').forEach(btn => btn.classList.remove('active'))
+
+                    const btn = floorTabList.querySelector(`li[id="${poi.detail.floorId}"] > button`);
+                    if (btn) {
+                        btn.classList.add('active');
+                        kioskInfo.textContent = poi.detail.floorNm;
+                    }
+
+                    floorInfoBtn.classList.add("active");
+                    storeInfoBtn.classList.remove("active");
+                    floorDiv.style.display = '';
+                    kioskInfo.style.display = '';
+                    searchStoreSpan.style.display = 'none';
+                    kioskList.style.display = 'none';
+                    Init.moveToKiosk(poi.detail);
+                    popup.showPoiPopup(poi.detail);
+                });
             storeList.appendChild(li);
         });
 
@@ -100,8 +138,8 @@ const popup = (function () {
             pagingContainer.appendChild(btn);
         });
 
-        leftBtn.style.display  = pageIndex > 0 ? 'inline-block' : 'none';
-        rightBtn.style.display = pageIndex < pages.length-1 ? 'inline-block' : 'none';
+        // leftBtn.style.display  = pageIndex > 0 ? 'inline-block' : 'none';
+        // rightBtn.style.display = pageIndex < pages.length-1 ? 'inline-block' : 'none';
     };
 
     const createStorePopup = async () => {
@@ -119,7 +157,7 @@ const popup = (function () {
         term = searchInput?.value.trim();
 
         currentFloor = floorId;
-        currentTerm = term.trim();
+        currentTerm = term.trim().toLowerCase();
         if (floorId === 'all') {
             const kioskPoiList = await KioskPoiManager.getKioskPoiDetailList();
             cachedStoreList = kioskPoiList
@@ -139,10 +177,17 @@ const popup = (function () {
             });
         }
         pages = [];
+        const extended = [];
+        storePoiList.forEach(poi => {
+            for (let i = 0; i < 3; i++) {
+                extended.push({ ...poi, id: poi.id + i + 1 });
+            }
+        });
+
         const ITEMS_PER_PAGE = window.matchMedia("(orientation: landscape)").matches ? 10 : 6;
 
-        for (let i = 0; i < storePoiList.length; i += ITEMS_PER_PAGE) {
-            pages.push(storePoiList.slice(i, i + ITEMS_PER_PAGE));
+        for (let i = 0; i < extended.length; i += ITEMS_PER_PAGE) {
+            pages.push(extended.slice(i, i + ITEMS_PER_PAGE));
         }
 
         renderPage(0);
@@ -245,7 +290,7 @@ const popup = (function () {
         if(document.querySelector('.floorInfo__inner')){
             document.querySelector('.floorInfo__inner').remove();
         }
-        if(!poiInfo.property.isKiosk){
+        if(!poiInfo.property?.isKiosk){
             const id = poiInfo.id;
             const floorNm = document.querySelector('.kiosk-info').innerText;
             api.get(`/kiosk/${id}`).then((res) => {

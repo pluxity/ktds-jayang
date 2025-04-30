@@ -107,18 +107,28 @@ const popup = (function () {
     const createStorePopup = async () => {
         await setFloors();
         if (!leftBtn) initPagerControls();
-        await setStores('all');
+        const searchInput = document.querySelector('.store__search input');
+        const term = searchInput.value.trim();
+        await setStores('all', term);
     }
 
+    let cachedStoreList = [];
     const setStores = async (floorId, term = '') => {
+
+        const searchInput = document.querySelector('.store__search input');
+        term = searchInput?.value.trim();
 
         currentFloor = floorId;
         currentTerm = term.trim();
-        const kioskPoiList = await KioskPoiManager.getKioskPoiDetailList();
-        let storePoiList = kioskPoiList
-            .filter(poi => poi.common?.position != null)
-            .filter(poi => poi.common?.isKiosk === false)
-            .filter(poi => floorId === 'all' || `${poi.common?.floorId}` === `${floorId}`);
+        if (floorId === 'all') {
+            const kioskPoiList = await KioskPoiManager.getKioskPoiDetailList();
+            cachedStoreList = kioskPoiList
+                .filter(poi => poi.common?.position != null)
+                .filter(poi => poi.common?.isKiosk === false);
+        }
+        let storePoiList = floorId === 'all'
+            ? cachedStoreList
+            : cachedStoreList.filter(poi => `${poi.common.floorId}` === `${floorId}`);
 
         if (currentTerm) {
             storePoiList = storePoiList.filter(poi => {
@@ -128,7 +138,6 @@ const popup = (function () {
                 return initials.includes(currentTerm);
             });
         }
-
         pages = [];
         const ITEMS_PER_PAGE = window.matchMedia("(orientation: landscape)").matches ? 10 : 6;
 

@@ -289,6 +289,7 @@
                 const floorId = li.id;
                 Px.Model.Visible.HideAll();
                 Px.Model.Visible.Show(Number(floorId));
+                Px.Camera.MoveToObject(Number(floorId), 50, 1);
                 Px.Poi.HideAll();
                 Px.Poi.ShowByProperty("floorId", Number(floorId));
             });

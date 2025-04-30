@@ -100,8 +100,8 @@ const popup = (function () {
             pagingContainer.appendChild(btn);
         });
 
-        leftBtn.style.display  = pageIndex > 0 ? 'block' : 'none';
-        rightBtn.style.display = pageIndex < pages.length-1 ? 'block' : 'none';
+        leftBtn.style.display  = pageIndex > 0 ? 'inline-block' : 'none';
+        rightBtn.style.display = pageIndex < pages.length-1 ? 'inline-block' : 'none';
     };
 
     const createStorePopup = async () => {
@@ -130,6 +130,8 @@ const popup = (function () {
         }
 
         pages = [];
+        const ITEMS_PER_PAGE = window.matchMedia("(orientation: landscape)").matches ? 10 : 6;
+
         for (let i = 0; i < storePoiList.length; i += ITEMS_PER_PAGE) {
             pages.push(storePoiList.slice(i, i + ITEMS_PER_PAGE));
         }

@@ -3,7 +3,7 @@
 
 (function () {
     // 미니맵
-    const koreanLetters = document.querySelector('.store__letters .korean');
+    const koreanLetters = document.querySelector('.store__letters .hangul-letters');
     const consonants= document.querySelector('.store__letters .consonants');
     const toggleBtns = document.querySelectorAll('.store__buttons button');
     const letterButtons = document.querySelectorAll('.store__letters button');
@@ -13,9 +13,9 @@
     const footerButtons = document.querySelectorAll('.kiosk-footer__buttons button[role="tab"]');
     const footerPanels = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
     const floorDiv = document.getElementById('floorInfo');
-    const storeDiv = document.getElementById('storeSearch');
-    const kioskList = storeDiv.querySelector('.kiosk-list');
+    const kioskList = document.querySelector('.kiosk-list');
     const kioskInfo = document.querySelector('.kiosk-main .kiosk-info');
+    const searchStoreSpan = document.getElementById("kioskInfoSpan");
 
     const zoomInButton = document.querySelector('.kiosk-3d__control .plus');
     const zoomOutButton = document.querySelector('.kiosk-3d__control .minus');
@@ -33,13 +33,13 @@
             if (btn.id === 'floor_info') {
                 floorDiv.style.display = '';
                 kioskInfo.style.display = '';
-                storeDiv.style.display = 'none';
+                searchStoreSpan.style.display = 'none';
                 kioskList.style.display = 'none';
             } else {
                 floorDiv.style.display = 'none';
                 kioskInfo.style.display = 'none';
-                storeDiv.style.display = 'contents';
-                kioskList.style.display = 'contents';
+                searchStoreSpan.style.display = '';
+                kioskList.style.display = 'block';
                 popup.createStorePopup();
             }
         });

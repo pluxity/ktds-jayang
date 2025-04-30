@@ -10,6 +10,7 @@
         <button type="button" class="kiosk-main__close"><span class="hide">close</span></button>
 
         <span class="kiosk-info"></span>
+        <span style="display: none" id="kioskInfoSpan" class="kiosk-info">매장 검색</span>
         <template th:replace="kioskViewer/floorInfo :: kiosk-template"></template>
         <template th:replace="kioskViewer/storeSearch :: kiosk-template"></template>
     </div>
@@ -41,7 +42,7 @@
                 </div>
                 <div class="store__inner">
                     <div class="store__letters">
-                        <div class="korean active">
+                        <div class="hangul-letters active">
                             <button type="button">ㄱ</button>
                             <button type="button">ㄲ</button>
                             <button type="button">ㄴ</button>
@@ -61,18 +62,6 @@
                             <button type="button">ㅌ</button>
                             <button type="button">ㅍ</button>
                             <button type="button">ㅎ</button>
-                            <div class="number">
-                                <button type="button">1</button>
-                                <button type="button">2</button>
-                                <button type="button">3</button>
-                                <button type="button">4</button>
-                                <button type="button">5</button>
-                                <button type="button">6</button>
-                                <button type="button">7</button>
-                                <button type="button">8</button>
-                                <button type="button">9</button>
-                                <button type="button">0</button>
-                            </div>
                         </div>
                         <div class="consonants" style="display: none">
                             <!-- [D] 클릭 시 active 클래스 추가 -->
@@ -102,26 +91,25 @@
                             <button type="button">X</button>
                             <button type="button">Y</button>
                             <button type="button">Z</button>
-                            <div class="number">
-                                <button type="button">1</button>
-                                <button type="button">2</button>
-                                <button type="button">3</button>
-                                <button type="button">4</button>
-                                <button type="button">5</button>
-                                <button type="button">6</button>
-                                <button type="button">7</button>
-                                <button type="button">8</button>
-                                <button type="button">9</button>
-                                <button type="button">0</button>
-                            </div>
+                        </div>
+                        <div class="number">
+                            <button type="button">1</button>
+                            <button type="button">2</button>
+                            <button type="button">3</button>
+                            <button type="button">4</button>
+                            <button type="button">5</button>
+                            <button type="button">6</button>
+                            <button type="button">7</button>
+                            <button type="button">8</button>
+                            <button type="button">9</button>
+                            <button type="button">0</button>
                         </div>
                     </div>
-
-                </div>
-                <div class="store__buttons">
-                    <!-- [D] 클릭 시 active 클래스 추가 -->
-                    <button type="button" class="active">한</button>
-                    <button type="button">A</button>
+                    <div class="store__buttons">
+                        <!-- [D] 클릭 시 active 클래스 추가 -->
+                        <button type="button" class="active">한</button>
+                        <button type="button">A</button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -7,42 +7,40 @@
 </head>
 <body>
 
-<div th:fragment="kiosk-template" id="storeSearch" style="display: none">
-    <div class="kiosk-list" style="display:none;">
-        <ul class="kiosk-list__tab" role="tablist">
-            <!-- tab과 content 의 id와 aria-labelledby의 값이 동일해야합니다.
-            li 의 id값과 아래 kiosk-contents__detail tabpanel의 aria-labelledby의 값을 동일하게 적용 부탁드립니다.
-            -->
-            <!-- [D] 클릭 시 active 클래스 추가 -->
-            <li class="all active" role="tab" id="all"><button type="button">전층</button></li>
-            <li role="tab" id="first"><button type="button">B1</button></li>
-            <li role="tab" id="second"><button type="button">B2</button></li>
-            <li role="tab" id="third"><button type="button">B3</button></li>
-            <li role="tab" id="fourth"><button type="button">B4</button></li>
-        </ul>
+<div class="kiosk-list" th:fragment="kiosk-template" id="storeSearch" style="display: none">
+    <ul class="kiosk-list__tab" role="tablist">
+        <!-- tab과 content 의 id와 aria-labelledby의 값이 동일해야합니다.
+        li 의 id값과 아래 kiosk-contents__detail tabpanel의 aria-labelledby의 값을 동일하게 적용 부탁드립니다.
+        -->
+        <!-- [D] 클릭 시 active 클래스 추가 -->
+        <li class="all active" role="tab" id="all"><button type="button">전층</button></li>
+        <li role="tab" id="first"><button type="button">B1</button></li>
+        <li role="tab" id="second"><button type="button">B2</button></li>
+        <li role="tab" id="third"><button type="button">B3</button></li>
+        <li role="tab" id="fourth"><button type="button">B4</button></li>
+    </ul>
 
-        <!-- [Case] 리스트가 없을 경우 -->
-        <div class="kiosk-list__info kiosk-list__info--empty" style="display:none;">
-            <p class="empty">매장 검색 결과가 없습니다.</p>
-        </div>
-        <!-- [Case] 리스트가 있을 경우  -->
-        <div class="kiosk-list__info">
-            <button class="kiosk-list__button kiosk-list__button--left"><span class="hide">right</span></button>
-            <div class="list">
-                <ul id="storeList">
+    <!-- [Case] 리스트가 없을 경우 -->
+    <div class="kiosk-list__info kiosk-list__info--empty" style="display:none;">
+        <p class="empty">매장 검색 결과가 없습니다.</p>
+    </div>
+    <!-- [Case] 리스트가 있을 경우  -->
+    <div class="kiosk-list__info">
+        <button class="kiosk-list__button kiosk-list__button--left"><span class="hide">right</span></button>
+        <div class="list">
+            <ul id="storeList">
 
-                </ul>
-                <div class="kiosk-list__paging">
-<!--                    <button type="button" class="button"><span class="hide">page1</span></button>-->
-<!--                    &lt;!&ndash; [D] 선택된 버튼 button&#45;&#45;active 클래스 추가 &ndash;&gt;-->
-<!--                    <button type="button" class="button button&#45;&#45;active"><span class="hide">page2</span></button>-->
-<!--                    <button type="button" class="button"><span class="hide">page3</span></button>-->
-<!--                    <button type="button" class="button"><span class="hide">page4</span></button>-->
-<!--                    <button type="button" class="button"><span class="hide">page5</span></button>-->
-                </div>
+            </ul>
+            <div class="kiosk-list__paging">
+                <!--                    <button type="button" class="button"><span class="hide">page1</span></button>-->
+                <!--                    &lt;!&ndash; [D] 선택된 버튼 button&#45;&#45;active 클래스 추가 &ndash;&gt;-->
+                <!--                    <button type="button" class="button button&#45;&#45;active"><span class="hide">page2</span></button>-->
+                <!--                    <button type="button" class="button"><span class="hide">page3</span></button>-->
+                <!--                    <button type="button" class="button"><span class="hide">page4</span></button>-->
+                <!--                    <button type="button" class="button"><span class="hide">page5</span></button>-->
             </div>
-            <button class="kiosk-list__button kiosk-list__button--right"><span class="hide">left</span></button>
         </div>
+        <button class="kiosk-list__button kiosk-list__button--right"><span class="hide">left</span></button>
     </div>
 </div>
 </body>

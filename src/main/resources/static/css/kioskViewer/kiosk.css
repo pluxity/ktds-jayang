@@ -595,6 +595,9 @@ html {
 
 /* 가로형 */
 @media (orientation: landscape) {
+  #kioskInfoSpan {
+    display: none;
+  }
   .kiosk-main {
     position: relative;
     height: calc(100vh - 15rem);

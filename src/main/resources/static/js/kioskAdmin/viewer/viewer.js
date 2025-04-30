@@ -17,6 +17,7 @@
             container.innerHTML = '';
             const storeBuilding = await BuildingManager.findByCode('store');
             let buildingId = storeBuilding ? storeBuilding.id : null;
+            const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
             document.getElementById('buildingId').value = buildingId;
 
             Px.Core.Initialize(container, async () => {
@@ -24,17 +25,19 @@
                 if (storeBuilding) {
                     const { buildingFile, floors } = storeBuilding;
                     const { directory } = buildingFile;
-                    sbmDataArray = floors.map((floor) => {
-                        const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
-                        const sbmData = {
-                            url,
-                            id: floor.sbmFloor[0].id,
-                            displayName: floor.sbmFloor[0].sbmFileName,
-                            baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                            groupId: floor.sbmFloor[0].sbmFloorGroup,
-                        };
-                        return sbmData;
-                    });
+
+                    sbmDataArray = floors
+                        .filter(floor => kioskSet.has(floor.name))
+                        .map(floor => {
+                            const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                            return {
+                                url,
+                                id: floor.sbmFloor[0].id,
+                                displayName: floor.sbmFloor[0].sbmFileName,
+                                baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                                groupId: floor.sbmFloor[0].sbmFloorGroup,
+                            };
+                        });
                 } 
     
                 Px.Loader.LoadSbmUrlArray({
@@ -64,9 +67,11 @@
 
             // 층 콤보 박스 생성
             let floorListOpt = "<option value=''>전체</option>";
-            BuildingManager.findById(buildingId).floors.forEach((item) => {
-                floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
-            });
+            BuildingManager.findById(buildingId).floors
+                .filter(floor => kioskSet.has(floor.name))
+                .forEach((item) => {
+                    floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
+                });
 
             const floorNo = document.querySelector('#floorNo');
             floorNo.innerHTML = floorListOpt;

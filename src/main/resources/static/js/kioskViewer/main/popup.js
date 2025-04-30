@@ -116,6 +116,7 @@ const popup = (function () {
         currentTerm = term.trim();
         const kioskPoiList = await KioskPoiManager.getKioskPoiDetailList();
         let storePoiList = kioskPoiList
+            .filter(poi => poi.common?.position != null)
             .filter(poi => poi.common?.isKiosk === false)
             .filter(poi => floorId === 'all' || `${poi.common?.floorId}` === `${floorId}`);
 
@@ -211,8 +212,11 @@ const popup = (function () {
         floorTabList.appendChild(allFloorLi);
 
         const storeBuilding = await BuildingManager.getStoreBuilding();
+        const kioskSet = new Set(['B2','B1','1F','2F']);
 
-        storeBuilding.floors.forEach((floor, idx) => {
+        storeBuilding.floors
+            .filter(floor => kioskSet.has(floor.name))
+            .forEach((floor, idx) => {
             const floorLi = document.createElement('li');
             floorLi.setAttribute('role', 'tab');
             floorLi.id = `${floor.id}`;
@@ -227,7 +231,9 @@ const popup = (function () {
     }
 
     const showPoiPopup = (poiInfo) => {
-        console.log(poiInfo);
+        if(document.querySelector('.floorInfo__inner')){
+            document.querySelector('.floorInfo__inner').remove();
+        }
         if(!poiInfo.property.isKiosk){
             const id = poiInfo.id;
             const floorNm = document.querySelector('.kiosk-info').innerText;
@@ -236,6 +242,7 @@ const popup = (function () {
                 console.log(resultData);
                 const layer = document.createElement('div');
                 layer.classList.add("kiosk-layer__inner");
+                layer.classList.add("floorInfo__inner")
                 layer.innerHTML = `
                 <div class="kiosk-layer__content">
                     <button type="button" class="kiosk-layer__close"><span class="hide">숨김</span></button>

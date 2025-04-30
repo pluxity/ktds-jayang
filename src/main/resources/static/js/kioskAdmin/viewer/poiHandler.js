@@ -240,6 +240,16 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
                             return;
                         }
                     }
+                }else{
+                    if(isPermanent){
+                        await alertSwal('배너 파일을 선택해주세요.');
+                        return;
+                    }else{
+                        if (startDate || endDate) {
+                            await alertSwal('배너 파일을 선택해주세요.');
+                            return;
+                        }
+                    }
                 }
             }
             try{

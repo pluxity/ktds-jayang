@@ -87,21 +87,24 @@
                 if (storeBuilding) {
                     const { buildingFile, floors } = storeBuilding;
                     const { directory } = buildingFile;
-                    sbmDataArray = floors.map((floor) => {
-                        const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
-                        const sbmData = {
-                            url,
-                            id: floor.sbmFloor[0].id,
-                            displayName: floor.sbmFloor[0].sbmFileName,
-                            baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                            groupId: floor.sbmFloor[0].sbmFloorGroup,
-                        };
-                        return sbmData;
-                    });
+                    const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
+
+                    sbmDataArray = floors
+                        .filter(floor => kioskSet.has(floor.name))
+                        .map(floor => {
+                            const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                            return {
+                                url,
+                                id: floor.sbmFloor[0].id,
+                                displayName: floor.sbmFloor[0].sbmFileName,
+                                baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                                groupId: floor.sbmFloor[0].sbmFloorGroup,
+                            };
+                        });
                 }
 
-                let lastTab = 0;
-                const DOUBLE_TAB_DELAY = 300;
+                let lastTap = 0;
+                const DOUBLE_TAP_DELAY = 300;
 
                 Px.Loader.LoadSbmUrlArray({
                     urlDataList: sbmDataArray,
@@ -113,18 +116,13 @@
                         Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
 
                             const currentTime = new Date().getTime();
-                            const tabLength = currentTime - lastTab;
+                            const tapLength = currentTime - lastTap;
 
-                            if(tabLength < DOUBLE_TAB_DELAY && tabLength > 0) {
+                            if(tapLength < DOUBLE_TAP_DELAY && tapLength > 0) {
                                 popup.showPoiPopup(poiInfo);
-                                Px.Camera.MoveToPoi({
-                                    id: poiInfo.id,
-                                    isAnimation: true,
-                                    duration: 500,
-                                });
-                                lastTab = 0;
+                                lastTap = 0;
                             }else{
-                                lastTab = currentTime;
+                                lastTap = currentTime;
                             }
 
                         });
@@ -230,7 +228,7 @@
             id: kioskPoi.id,
             isAnimation: true,
             duration: 500,
-            distanceOffset: 1000
+            distanceOffset: 300
         });
     }
 
@@ -259,24 +257,26 @@
     const setFloorList = (storeBuilding, kioskPoi) => {
         const floorTabList = document.getElementById('storeFloorList');
         const kioskInfo    = document.querySelector('.kiosk-info');
+        const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
 
-        storeBuilding.floors.forEach((floor, index) => {
-            const li = document.createElement('li');
-            li.setAttribute('role', 'tab');
-            li.id = floor.id;
+        storeBuilding.floors
+            .filter(floor => kioskSet.has(floor.name))
+            .forEach((floor, index) => {
+                const li = document.createElement('li');
+                li.setAttribute('role', 'tab');
+                li.id = floor.id;
 
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.textContent = floor.name;
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = floor.name;
 
-            if (floor.id === kioskPoi.floorId) {
-                button.classList.add('active');
-                kioskInfo.textContent = floor.name;
-            }
-
-            li.appendChild(button);
-            floorTabList.appendChild(li);
-        });
+                if (floor.id === kioskPoi.floorId) {
+                    button.classList.add('active');
+                    kioskInfo.textContent = floor.name;
+                }
+                li.appendChild(button);
+                floorTabList.appendChild(li);
+            });
 
         floorTabList.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {

@@ -2,6 +2,27 @@
 // TODO Mutation 이나 상태 관리가 필요하면 것들 넣으세요
 
 (() => {
+    let inactivityTimer;
+    const INACTIVITY_TIMEOUT = 60000;
+
+    // 사용자 활동 감지
+    const resetInactivityTimer = () => {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            // 1분간 사용자 활동이 없을 때 빌딩 안내 시스템 이동
+            console.log('사용자 비활동 감지');
+        }, INACTIVITY_TIMEOUT);
+    };
+
+
+    const setupInactivityDetection = () => {
+        const events = ['touchend', 'touchstart', 'touchmove'];
+        events.forEach(event => {
+            document.addEventListener(event, resetInactivityTimer);
+        });
+        resetInactivityTimer();
+    };
+
     const observerRecentWrap = () => {
         const mutationCallback = (mutationRecordList) => {
             mutationRecordList
@@ -123,4 +144,5 @@
     // observerRecentWrap();
     observerSidebar();
     observerDate();
+    setupInactivityDetection();
 })();

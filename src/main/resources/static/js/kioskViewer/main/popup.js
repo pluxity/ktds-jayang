@@ -105,26 +105,13 @@ const popup = (function () {
             // const layer = createBanner(poi);
             li.querySelector('.button--location')
                 .addEventListener('click', () => {
-                    footerPanels.forEach(panel => {
-                        const labelled = panel.getAttribute('aria-labelledby');
-                        panel.style.display = (labelled === 'floor_info') ? '' : 'none';
+
+                    eventHandler.updateKioskUIState({
+                        showFloor: true,
+                        floor: poi.detail.floorId
                     });
-                    floorTabList.querySelectorAll('button').forEach(btn => btn.classList.remove('active'))
-
-                    const btn = floorTabList.querySelector(`li[id="${poi.detail.floorId}"] > button`);
-                    if (btn) {
-                        btn.classList.add('active');
-                        kioskInfo.textContent = poi.detail.floorNm;
-                    }
-
-                    floorInfoBtn.classList.add("active");
-                    storeInfoBtn.classList.remove("active");
-                    floorDiv.style.display = '';
-                    kioskInfo.style.display = '';
-                    searchStoreSpan.style.display = 'none';
-                    kioskList.style.display = 'none';
-                    Init.moveToKiosk(poi.detail);
                     popup.showPoiPopup(poi.detail);
+                    Init.moveToKiosk(poi.detail);
                 });
             storeList.appendChild(li);
         });

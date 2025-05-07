@@ -121,6 +121,7 @@ const eventHandler = (function () {
         const floorInfo = document.querySelector('.kiosk-main .kiosk-info');
         const floorList = document.querySelectorAll('#storeFloorList li');
 
+        const storePopup = document.querySelector('.kiosk-layer__inner');
 
         if(showFloor) { // floor
             floorDiv.style.display = 'block';
@@ -140,6 +141,7 @@ const eventHandler = (function () {
                 panel.style.display = panel.getAttribute('aria-labelledby') === 'store_info' ? '' : 'none';
             })
             floorInfo.style.display = 'none';
+            storePopup?.remove();
         }
 
         if(floor) {

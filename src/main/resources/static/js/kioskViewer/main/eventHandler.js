@@ -18,7 +18,6 @@ const eventHandler = (function () {
         btn.addEventListener('click', () => {
 
             if (btn.id === 'floor_info') {
-                console.log('floor_info');
                 updateKioskUIState({
                    showFloor: true
                 });
@@ -132,6 +131,7 @@ const eventHandler = (function () {
                 panel.style.display = panel.getAttribute('aria-labelledby') === 'floor_info' ? '' : 'none';
             })
             floorInfo.style.display = '';
+            storePopup?.remove();
         }else{ // store
             floorDiv.style.display = 'none';
             storeDiv.style.display = 'block';

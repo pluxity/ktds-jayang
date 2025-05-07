@@ -46,21 +46,12 @@ const popup = (function () {
         return { leftBtn, rightBtn, pagingContainer };
     };
 
-    const floorDiv = document.getElementById('floorInfo');
-    const kioskList = document.querySelector('.kiosk-list');
-    const kioskInfo = document.querySelector('.kiosk-main .kiosk-info');
-    const searchStoreSpan = document.getElementById("kioskInfoSpan");
-
     const renderPage = (pageIndex) => {
         document.querySelectorAll('.kiosk-layer').forEach(el => el.remove());
         currentPage = pageIndex;
         const emptyInfo = document.querySelector('.kiosk-list__info--empty');
         const listInfo  = document.querySelector('.kiosk-list__info:not(.kiosk-list__info--empty)');
         const storeList = document.getElementById('storeList');
-        const floorInfoBtn = document.getElementById('floor_info');
-        const storeInfoBtn = document.getElementById('store_info');
-        const footerPanels = document.querySelectorAll('.kiosk-footer__contents[role="tabpanel"]');
-        const floorTabList = document.getElementById('storeFloorList');
 
         if (pages.length === 0) {
             emptyInfo.style.display = 'block';
@@ -164,79 +155,14 @@ const popup = (function () {
             });
         }
         pages = [];
-        const extended = [];
-        storePoiList.forEach(poi => {
-            for (let i = 0; i < 3; i++) {
-                extended.push({ ...poi, id: poi.id + i + 1 });
-            }
-        });
-
         const ITEMS_PER_PAGE = window.matchMedia("(orientation: landscape)").matches ? 10 : 6;
 
-        for (let i = 0; i < extended.length; i += ITEMS_PER_PAGE) {
-            pages.push(extended.slice(i, i + ITEMS_PER_PAGE));
+        for (let i = 0; i < storePoiList.length; i += ITEMS_PER_PAGE) {
+            pages.push(storePoiList.slice(i, i + ITEMS_PER_PAGE));
         }
 
         renderPage(0);
     };
-
-    const createBanner = (poi) => {
-        const footer = document.querySelector('.kiosk-footer');
-        const parent = footer.parentElement;
-
-        const layer = document.createElement('div');
-        layer.className = 'kiosk-layer';
-        layer.style.display = 'none';
-        const today = new Date();
-        const banners = poi.detail.banners
-            .filter(b => {
-                if (b.isPermanent) return true;
-                if (b.startDate && new Date(b.startDate) > today) return false;
-                if (b.endDate   && new Date(b.endDate)   < today) return false;
-                return true;
-            })
-            .sort((a, b) => a.priority - b.priority);
-        layer.innerHTML = `
-            <div class="kiosk-layer__inner">
-              <div class="kiosk-layer__content">
-                <button type="button" class="kiosk-layer__close"><span class="hide">숨김</span></button>
-                <div class="kiosk-layer__title"><span class="name">${poi.detail.name}</span></div>
-                <div class="kiosk-layer__info">
-                  <dl><dt>위치</dt><dd>${poi.detail.floorNm}</dd></dl>
-                  <dl><dt>연락처</dt><dd>${poi.detail.phoneNumber}</dd></dl>
-                  <dl style="visibility:hidden;"><dt>영업시간</dt><dd>&nbsp;</dd></dl>
-                  <dl style="visibility:hidden;"><dt>주차할인</dt><dd>&nbsp;</dd></dl>   
-                </div>
-              </div>
-              <div class="kiosk-layer__image">
-                ${banners.map((b, i) => {
-                    const bf = b.bannerFile;
-                    const url = `/Banner/${bf.directory}/${bf.storedName}.${bf.extension}`;
-                    return `
-                    <div
-                      class="image"
-                      style="
-                          background-image: url('${url}');
-                          background-position: center;
-                          background-size: contain;
-                          background-repeat: no-repeat;
-                        "
-                      role="img"
-                      aria-label="${poi.detail.name} 매장 이미지 ${i + 1}"
-                    ></div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          `;
-
-        // close 버튼 이벤트
-        layer.querySelector('.kiosk-layer__close')
-            .addEventListener('click', () => layer.style.display = 'none');
-        // document.body.appendChild(layer);
-        parent.insertBefore(layer, footer.nextSibling);
-        return layer;
-    }
 
     const setFloors = async () => {
         const storeSearch = document.getElementById("storeSearch");
@@ -282,7 +208,6 @@ const popup = (function () {
             const floorNm = document.querySelector('.kiosk-info').innerText;
             api.get(`/kiosk/${id}`).then((res) => {
                 const { result: resultData } = res.data;
-                console.log(resultData);
                 const layer = document.createElement('div');
                 layer.classList.add("kiosk-layer__inner");
                 layer.classList.add("floorInfo__inner")

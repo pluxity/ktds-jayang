@@ -219,23 +219,15 @@
 
     const homeButton = document.querySelector('.kiosk-3d__control .home');
     homeButton.addEventListener('click', async () => {
-        const floorList = document.querySelector('#storeFloorList');
-        const kioskInfo = document.querySelector('.kiosk-info');
         const urlParams = new URLSearchParams(window.location.search);
         const kioskCode = urlParams.get('kioskCode');
         if (kioskCode) {
             const kioskPoi = await KioskPoiManager.getKioskPoiByCode(kioskCode);
             Init.moveToKiosk(kioskPoi);
-            floorList.querySelectorAll('li').forEach((floor) => {
-                const btn = floor.querySelector('button');
-                if(btn.classList.contains('active')){
-                    btn.classList.remove('active');
-                }
-                if (Number(floor.id) === Number(kioskPoi.floorId)) {
-                    btn.classList.add('active');
-                    kioskInfo.textContent = floor.innerText;
-                }
-            })
+            eventHandler.updateKioskUIState({
+                    showFloor: true,
+                    floor: kioskPoi.floorId
+            });
         }
     });
 

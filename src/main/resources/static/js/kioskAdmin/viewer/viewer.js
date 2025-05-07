@@ -106,7 +106,6 @@
         });
     });
 
-    const movePoiHandler = (poiInfo) => { moveToPoi(poiInfo.id) };
 
     // 버튼 정의
     const eventTypeList = [
@@ -160,14 +159,23 @@
                             break;
                         case 'move' :
                             if (target.classList.contains('on')) {
+                                Px.Edit.Off();
                                 target.classList.remove('on');
-                                Px.Event.RemoveEventListener('pointerup', 'poi', movePoiHandler);
                             } else {
+                                if (document.querySelector('#floorNo').value === '') {
+                                    alertSwal('전체 층일경우 POI 수정이 불가능 합니다.');
+                                    return;
+                                }
+                                Px.Edit.On();
                                 target.classList.add('on');
-                                Px.Event.AddEventListener('pointerup', 'poi', movePoiHandler);
+                                const mode = 'translate';
+                                Px.Edit.SetMode(mode);
+                                Px.Edit.SetMouseUpCallback((poiInfo) => {
+                                    KioskPoiManager.patchKioskPoiPosition(poiInfo.id, poiInfo.position);
+                                });
                             }
                             break;
-                    }
+                        }
                 } else {
                     switch (btnType) {
                         case 'in':

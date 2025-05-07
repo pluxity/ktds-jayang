@@ -80,7 +80,7 @@
                 changeEventFloor(this.value, buildingId);
             });
 
-            initLeftSelect(buildingId);
+            initLeftSelect(buildingId, kioskSet);
             initDropUpMenu();
 
         } catch (error) {
@@ -271,10 +271,12 @@
         { label: "상가", value: "store" },
         { label: "키오스크", value: "kiosk" }
     ];
-    const initLeftSelect = (buildingId) => {
+    const initLeftSelect = (buildingId, kioskSet) => {
         const initLeftFloorSelect = () => {
             let floors = BuildingManager.findById(buildingId).floors;
-            floors.forEach(floor => {
+            floors
+                .filter(floor => kioskSet.has(floor.name))
+                .forEach(floor => {
                 document.getElementById("leftFloorSelect")
                     .appendChild(
                         new Option(floor.name, floor.id),

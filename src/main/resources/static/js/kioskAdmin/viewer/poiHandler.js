@@ -94,34 +94,23 @@ radioButtons.forEach(radio => {
     });
 });
 
-// 로고 파일 선택 시 파일명 표시
+// 등록폼 로고 파일 선택
 document.getElementById('registerLogoFile').addEventListener('change', function() {
-    const fileName = this.files[0] ? this.files[0].name : '';
+    const file = this.files[0];
     const fileNameElement = this.closest('.file-upload').querySelector('.file-name');
     const removeButton = this.closest('.file-upload').querySelector('.file-remove');
 
-    fileNameElement.textContent = fileName;
-
-    if (this.files[0]) {
-        removeButton.style.display = 'inline';
-    } else {
-        removeButton.style.display = 'none';
-    }
+    validateFileSize(file, this, fileNameElement, removeButton);
 });
 
-// 배너 파일들 선택 시 파일명 표시
+// 등록폼 배너 파일들 선택
 document.querySelectorAll('.banner-file').forEach(input => {
     input.addEventListener('change', function() {
-        const fileName = this.files[0] ? this.files[0].name : '';
+        const file = this.files[0];
         const fileNameElement = this.closest('td').querySelector('.selected-file');
         const removeButton = this.closest('td').querySelector('.file-remove');
 
-        fileNameElement.textContent = fileName;
-        if (this.files[0]) {
-            removeButton.style.display = 'inline';
-        } else {
-            removeButton.style.display = 'none';
-        }
+        validateFileSize(file, this, fileNameElement, removeButton);
     });
 });
 
@@ -195,6 +184,7 @@ document.querySelectorAll('.file-select-btn').forEach(button => {
     });
 });
 
+// 등록 버튼 클릭 이벤트
 document.querySelector('#btnPoiRegister').addEventListener('click', async function(e) {
     e.preventDefault();
 
@@ -756,23 +746,29 @@ const fileNameElement = logoInput.closest('.file-upload').querySelector('.file-n
 const removeButton = logoInput.closest('.file-upload').querySelector('.file-remove');
 logoInput.addEventListener('change', function () {
     const file = this.files[0];
+    validateFileSize(file, this, fileNameElement, removeButton);
+});
+
+// 파일 크기 검증 함수
+function validateFileSize(file, inputElement, fileNameElement, removeButton) {
+    if (!file) {
+        inputElement.value = '';
+        fileNameElement.textContent = '';
+        removeButton.style.display = 'none';
+        return;
+    }
 
     if (file && file.size > MAX_FILE_SIZE) {
         alertSwal("10MB 이하의 파일만 업로드할 수 있습니다.");
-        if (!fileNameElement?.textContent.trim()) {
-            this.value = '';
-        }
+        inputElement.value = '';
+        removeButton.style.display = 'none';
+        fileNameElement.textContent = '';
 
-        return;
-    }
-    if (file) {
+    } else {
         fileNameElement.textContent = file.name;
         removeButton.style.display = 'inline';
-    } else {
-        fileNameElement.textContent = '';
-        removeButton.style.display = 'none';
     }
-});
+}
 
 function resetModifyStoreForm() {
     const form = document.getElementById("poiModifyForm");

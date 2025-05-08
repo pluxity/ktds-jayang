@@ -148,14 +148,18 @@
     }
 
     const elevatorPop = document.getElementById('elevatorPop');
-    const equipmentPop = document.getElementById('equipmentPop');
+    const lightPop = document.getElementById('lightPop');
+    const energyPop = document.getElementById('energyPop');
+    const airPop = document.getElementById('airPop');
+    const parkingPop = document.getElementById('parkingPop');
+    const electricPop = document.getElementById('electricPop');
     // 하단 systemTab handle
     const handleSystemTabClick = (event) => {
         const clickedItem = event.target.closest('li');
         const isActive = clickedItem.classList.contains('active');
 
         const closeAllPopups = () => {
-            ['equipmentPop', 'elevatorPop'].forEach(id => {
+            ['lightPop', 'elevatorPop', 'parkingPop', 'airPop', 'energyPop', 'electricPop'].forEach(id => {
                 const popup = document.getElementById(id);
                 if (popup) {
                     popup.style.display = 'none';
@@ -185,7 +189,6 @@
 
         closeAllPopups();
         clickedItem.classList.add('active');
-        systemPopup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
 
         systemPopup.style.position = 'absolute';
         systemPopup.style.top = '50%';
@@ -193,21 +196,37 @@
         systemPopup.style.transform = 'translate(-50%, -50%)';
         systemPopup.style.display = 'inline-block';
         const actions = {
-            equipmentTab: () => {
-                console.log("equipmentTab");
-                layerPopup.setEquipmentTab();
-                equipmentPop.style.display = 'block';
-            },
-            parkTab: () => {
-                console.log("parkTab");
-            },
-            chargeTab: () => {
-                console.log("chargeTab");
+            lightTab: () => {
+                console.log("lightTab");
+                layerPopup.setLightTab();
+                lightPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                lightPop.style.display = 'block';
             },
             elevatorTab: () => {
                 console.log("elevatorTab");
                 layerPopup.setElevatorTab();
+                elevatorPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
                 elevatorPop.style.display = 'block';
+            },
+            parkingTab: () => {
+                console.log("parkingTab");
+                parkingPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                parkingPop.style.display = 'block';
+            },
+            airTab: () => {
+                console.log("airTab");
+                airPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                airPop.style.display = 'block';
+            },
+            energyTab: () => {
+                console.log("energyTab");
+                energyPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                energyPop.style.display = 'block';
+            },
+            electricTab: () => {
+                console.log("electricTab");
+                electricPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                electricPop.style.display = 'block';
             }
         };
         const matchedAction = Object.keys(actions).find(action => clickedItem.id === action);
@@ -478,6 +497,8 @@
     const closeBtn = document.querySelector('#noticePopup .close');
     closeBtn.addEventListener('click', function () {
         const popup = document.getElementById('noticePopup');
+        profileBadge.style.display = 'none';
+        badge.style.display = 'none';
         popup.style.display = 'none';
     });
 
@@ -1207,6 +1228,8 @@
         return eventSource;
     }
 
+    const badge = document.querySelector('#notice .badge');
+    const profileBadge = document.querySelector(".profile__btn .badge")
     // 여기서 popup 1회 호출(
     const sse = createSseConnection(
         '/sse/notice',
@@ -1223,6 +1246,9 @@
                     return;
                 }
             }
+
+            profileBadge.style.display = '';
+            badge.style.display = '';
             const popup = document.getElementById('noticePopup');
             popup.style.display = 'inline-block';
             popup.style.position = 'absolute';

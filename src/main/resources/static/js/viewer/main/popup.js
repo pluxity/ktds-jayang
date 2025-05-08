@@ -1187,8 +1187,90 @@ const layerPopup = (function () {
         }
     })
 
+    // 일단 building, floor select box 추가
+    const setLightTab = () => {
+        const buildingBox = document.getElementById('lightBuilding');
+        const floorBox = document.getElementById('lightFloor');
+        const buildingBtn = buildingBox.querySelector('.select-box__btn');
+        const floorBtn = floorBox.querySelector('.select-box__btn');
+        let buildingList = BuildingManager.findAll();
+        const lightPopup = document.getElementById('lightPop');
+
+        const toggleBtnActive = (btn, otherBtn) => {
+            if (!btn.classList.contains('select-box__disabled')) {
+                btn.classList.toggle('select-box__btn--active');
+                otherBtn.classList.remove('select-box__btn--active');
+            }
+        };
+        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn);
+        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn)
+
+        const buildingUl = document.getElementById('lightBuildingUl');
+        const floorUl = document.getElementById('lightFloorUl');
+        buildingUl.innerHTML = '';
+        floorUl.innerHTML = '';
+
+        const defaultBuilding = buildingList.find(building => building.name == 'A');
+        if (defaultBuilding) {
+            buildingBtn.textContent = defaultBuilding.name;
+            const firstFloor = defaultBuilding.floors[0];
+            if (firstFloor) {
+                floorBtn.textContent = firstFloor.name;
+                lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+            }
+            floorUl.innerText = '';
+            defaultBuilding.floors.forEach(floor => {
+                const floorLi = document.createElement('li');
+                floorLi.dataset.id = floor.id;
+                floorLi.textContent = floor.name;
+                floorUl.appendChild(floorLi);
+            })
+        }
+
+        buildingList.forEach(building => {
+            const buildingLi = document.createElement('li');
+            buildingLi.dataset.id = building.id;
+            buildingLi.textContent = building.name;
+
+            buildingLi.onclick = () => {
+                buildingBtn.textContent = building.name;
+                buildingBtn.classList.remove('select-box__btn--active');
+
+                floorUl.innerHTML = '';
+
+                building.floors.forEach(floor => {
+                    const floorLi = document.createElement('li');
+                    floorLi.dataset.id = floor.id
+                    floorLi.textContent = floor.name;
+
+                    floorLi.onclick = () => {
+                        floorBtn.textContent = floor.name;
+                        lightPopup.querySelector('.section__head h3').textContent = `${building.name} ${floor.name}`;
+                        floorBtn.classList.remove('select-box__btn--active');
+                    }
+
+                    floorUl.appendChild(floorLi);
+                });
+
+                if (building.floors.length > 0) {
+                    floorBtn.textContent = building.floors[0].name;
+                    lightPopup.querySelector('.section__head h3').textContent = `${building.name} ${building.floors[0].name}`;
+                }
+            }
+
+            buildingUl.appendChild(buildingLi);
+        })
+
+    }
+
     const elevatorPopup = document.getElementById('elevatorPop');
+
     const setElevatorTab = () => {
+        const popupUl = elevatorPopup.querySelector('.section--contents ul')
+        popupUl.replaceChildren()
+    }
+
+    const setElevatorTab_old = () => {
         const popupUl = elevatorPopup.querySelector('.section--contents ul')
         // popupUl.innerHTML = '';
         popupUl.replaceChildren()
@@ -1344,6 +1426,7 @@ const layerPopup = (function () {
             livePlayers.push({ id: poi.id, player: livePlayer });
         });
     }
+
 
     // 설비 popup
     const equipmentPopup = document.getElementById('equipmentPop');
@@ -2240,7 +2323,8 @@ const layerPopup = (function () {
         setPoiEvent,
         createEventPopup,
         pagingNotice,
-        addClosePopup
+        addClosePopup,
+        setLightTab
     }
 })();
 

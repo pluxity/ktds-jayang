@@ -107,7 +107,7 @@ public class KioskPoiService {
             if (kioskPoi.isKiosk()) {
                 detailDto = kioskPoi.toKioskDetailResponseDTO();
             } else {
-                detailDto = kioskPoi.toStoreDetailResponseDTO();
+                detailDto = kioskPoi.toStorePoiBasicResponseDTO();
             }
 
             map.put("common", baseInfo);
@@ -136,7 +136,6 @@ public class KioskPoiService {
     @Transactional
     public Long saveStorePoi(CreateStorePoiDTO dto){
         List<FileInfo> savedFiles = new ArrayList<>();
-        FileInfo logoFile = null;
 
         try{
             // 로고 파일 저장
@@ -144,8 +143,6 @@ public class KioskPoiService {
                 FileInfo savedLogoFile = fileInfoRepository.findById(dto.fileInfoId())
                         .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
                 savedFiles.add(savedLogoFile);
-
-                logoFile = fileInfoRepository.findById(dto.fileInfoId()).orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
             }
 
             KioskPoi poi = KioskPoi.builder()
@@ -155,12 +152,9 @@ public class KioskPoiService {
                     .isKiosk(dto.isKiosk())
                     .build();
 
-            if(logoFile != null){
-                poi.changeLogo(logoFile);
-            }
-
             updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
             updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+            updateIfNotNull(dto.fileInfoId(), poi::changeLogo, fileInfoRepository, ErrorCode.NOT_FOUND_FILE);
 
             try{
                 for(CreateBannerDTO bannerDTO : dto.banners()) {

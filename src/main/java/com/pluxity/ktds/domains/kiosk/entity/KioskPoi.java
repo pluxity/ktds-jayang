@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.kiosk.dto.KioskAllPoiResponseDTO;
+import com.pluxity.ktds.domains.kiosk.dto.StorePoiBasicResponseDTO;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
@@ -191,6 +192,16 @@ public class KioskPoi {
                 .position(this.position)
                 .rotation(this.rotation)
                 .scale(this.scale)
+                .build();
+    }
+
+    public StorePoiBasicResponseDTO toStorePoiBasicResponseDTO() {
+        return StorePoiBasicResponseDTO.builder()
+                .category(this.category)
+                .floorNm(this.floor.getName())
+                .phoneNumber(this.phoneNumber)
+                .logo(this.logo != null ? this.logo.getId() : null)
+                .logoFile(this.logo == null ? null : this.logo.toDto())
                 .build();
     }
 

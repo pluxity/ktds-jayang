@@ -142,6 +142,8 @@ const eventHandler = (function () {
             })
             floorInfo.style.display = 'none';
             storePopup?.remove();
+            searchInput.value = '';
+
         }
 
         if(floor) {

@@ -77,7 +77,7 @@ const popup = (function () {
                   <div
                     class="list__thumbnail"
                     role="img"
-                    aria-label="${poi.detail.name} 이미지"
+                    aria-label="${poi.common.name} 이미지"
                     style="
                       background-image: url('${thumbnailUrl}');
                       background-position: center;
@@ -85,12 +85,12 @@ const popup = (function () {
                       background-repeat: no-repeat;
                     "
                   ></div>
-                  <div class="list__title"><p class="name">${poi.detail.name}</p></div>
+                  <div class="list__title"><p class="name">${poi.common.name}</p></div>
                   <span class="list__desc">${poi.detail.phoneNumber || '&nbsp;'}</span>
                 </div>
                 <ul class="list__footer">
                   <li><button type="button" class="button">${poi.detail.floorNm}</button></li>
-                  <li><button type="button" class="button button--location" data-poi-id="${poi.detail.id}" data-floor-id="${poi.detail.floorId}">위치 확인</button></li>
+                  <li><button type="button" class="button button--location" data-poi-id="${poi.common.id}" data-floor-id="${poi.common.floorId}">위치 확인</button></li>
                 </ul>
               `;
             // const layer = createBanner(poi);
@@ -99,10 +99,10 @@ const popup = (function () {
 
                     eventHandler.updateKioskUIState({
                         showFloor: true,
-                        floor: poi.detail.floorId
+                        floor: poi.common.floorId
                     });
-                    popup.showPoiPopup(poi.detail);
-                    Init.moveToKiosk(poi.detail);
+                    popup.showPoiPopup(poi.common);
+                    Init.moveToKiosk(poi.common);
                 });
             storeList.appendChild(li);
         });
@@ -148,7 +148,7 @@ const popup = (function () {
 
         if (currentTerm) {
             storePoiList = storePoiList.filter(poi => {
-                const initials = Array.from(poi.detail.name)
+                const initials = Array.from(poi.common.name)
                     .map(c => getKeyInitial(c))
                     .join('');
                 return initials.includes(currentTerm);
@@ -180,7 +180,7 @@ const popup = (function () {
         });
         floorTabList.appendChild(allFloorLi);
 
-        const storeBuilding = await BuildingManager.getStoreBuilding();
+        const storeBuilding = await BuildingManager.findStore();
         const kioskSet = new Set(['B2','B1','1F','2F']);
 
         storeBuilding.floors

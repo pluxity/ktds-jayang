@@ -2,8 +2,6 @@
 
     await BuildingManager.getStoreBuilding();
 
-    await KioskPoiManager.getKioskPoiDetailList();
-
     const initializeStoreBuilding = async (onComplete) => {
         try {
             const container = document.getElementById('webGLContainer');

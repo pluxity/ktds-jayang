@@ -78,6 +78,7 @@ public class BuildingService {
     @Transactional(readOnly = true)
     public List<BuildingDetailResponseDTO> findDetailAll() {
         return buildingRepository.findAll().stream()
+                .filter(building -> !"store".equals(building.getCode()))
                 .map(Building::toDetailResponseDTO)
                 .toList();
     }

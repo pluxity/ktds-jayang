@@ -1,13 +1,6 @@
 (async function() {
-    await BuildingManager.getBuildingList().then((buildingList) => {
-        buildingList.forEach(async (building) => {
-            const {id} = building;
-            await BuildingManager.getBuildingById(id).then((building) => {
-                BuildingManager.findById(id).setDetails(building);
-            });
-        })
-    });
 
+    await BuildingManager.getStoreBuilding();
 
     await KioskPoiManager.getKioskPoiDetailList();
 
@@ -15,7 +8,7 @@
         try {
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
-            const storeBuilding = await BuildingManager.findByCode('store');
+            const storeBuilding = await BuildingManager.findStore();
             let buildingId = storeBuilding ? storeBuilding.id : null;
             const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
             document.getElementById('buildingId').value = buildingId;
@@ -61,13 +54,9 @@
                 });
             });
 
-            api.get("/kiosk/detailList").then(res => {
-                console.log("res : ", res);
-            })
-
             // 층 콤보 박스 생성
             let floorListOpt = "<option value=''>전체</option>";
-            BuildingManager.findById(buildingId).floors
+            BuildingManager.findStore().floors
                 .filter(floor => kioskSet.has(floor.name))
                 .forEach((item) => {
                     floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
@@ -90,7 +79,7 @@
 
     document.querySelector('#camPosTool').addEventListener('click', (evt) => {
         const target = evt.target.closest('.camPosTool');
-        const storeBuilding = BuildingManager.findByCode('store');
+        const storeBuilding = BuildingManager.findStore();
         if(target === null) return;
 
         const { btnType } = target.dataset;
@@ -102,7 +91,7 @@
 
         api.patch(`/buildings/${storeBuilding.id}/${btnType}`, param).then(() => {
             alertSwal('정상 등록 되었습니다.');
-            BuildingManager.findById(storeBuilding.id)[btnType] = camPos;
+            BuildingManager.findStore()[btnType] = camPos;
         });
     });
 
@@ -268,7 +257,7 @@
 
             Px.Model.Visible.HideAll();
 
-            const floor = BuildingManager.findById(buildingId).floors.find(
+            const floor = BuildingManager.findStore().floors.find(
                 (floor) => floor.id === Number(floorId),
             );
             Px.Model.Visible.Show(floor.id);
@@ -281,7 +270,7 @@
     ];
     const initLeftSelect = (buildingId, kioskSet) => {
         const initLeftFloorSelect = () => {
-            let floors = BuildingManager.findById(buildingId).floors;
+            let floors = BuildingManager.findStore().floors;
             floors
                 .filter(floor => kioskSet.has(floor.name))
                 .forEach(floor => {

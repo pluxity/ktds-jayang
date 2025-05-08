@@ -1,5 +1,6 @@
 const BuildingManager = (() => {
     let buildingList = [];
+    let storeBuilding = null;
 
     const getBuildingList = () => {
         const uri = `/buildings`;
@@ -35,7 +36,8 @@ const BuildingManager = (() => {
         return new Promise((resolve) => {
             api.get(uri).then((result) => {
                 const { result: data } = result.data;
-                const storeBuilding = new Building(data);
+                storeBuilding = new Building(data);
+                storeBuilding.setDetails(data);
                 resolve(storeBuilding);
             }).catch(() => {
                 resolve(null);
@@ -116,6 +118,10 @@ const BuildingManager = (() => {
         return buildingList.find((building) => building.code === code);
     };
 
+    const findStore = () => {
+        return storeBuilding;
+    }
+
     return {
         getBuildingList,
         getOutdoorBuilding,
@@ -127,5 +133,6 @@ const BuildingManager = (() => {
         findById,
         findByCode,
         getStoreBuilding,
+        findStore
     };
 })();

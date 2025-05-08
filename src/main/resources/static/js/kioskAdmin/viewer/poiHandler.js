@@ -12,10 +12,9 @@ registerBtn.addEventListener('click', () => {
 });
 
 function handlePoiRegisterBtnClick() {
-    const buildingId = document.getElementById("buildingId").value;
     poiRegisterForm.reset();
 
-    const floors = BuildingManager.findById(buildingId).floors;
+    const floors = BuildingManager.findStore().floors;
     const registerStoreFloorSelect = document.getElementById('registerStoreFloor');
     const registerKioskFloorSelect = document.getElementById('registerKioskFloor');
 
@@ -31,7 +30,16 @@ function handlePoiRegisterBtnClick() {
 }
 
 function appendFloorOptionsToSelect(floors, selectElement) {
-    floors.forEach((floor) => {
+    if (selectElement.id.startsWith("register")) {
+        selectElement.innerHTML = "<option>층 선택</option>";
+    } else {
+        selectElement.innerHTML = "";
+    }
+
+    const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
+    floors
+        .filter(floor => kioskSet.has(floor.name))
+        .forEach((floor) => {
         const option = document.createElement('option');
         option.value = floor.id;
         option.textContent = floor.name;
@@ -794,9 +802,7 @@ function resetModifyStoreForm() {
 
 const handlePoiModifyBtnClick = async (kioskPoi) => {
     resetModifyStoreForm();
-    const buildingId = document.getElementById("buildingId").value;
-
-    const floors = BuildingManager.findById(buildingId).floors;
+    const floors = BuildingManager.findStore().floors;
     const modifyStoreFloorSelect = document.getElementById('modifyStoreFloor');
     const modifyKioskFloorSelect = document.getElementById('modifyKioskFloor');
 

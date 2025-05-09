@@ -44,19 +44,24 @@
                     </div>
                     <div style="margin-top: 10px" id="lightAccordion" class="accordion">
                         <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                        <button class="accordion__btn accordion__btn--active" type="button">building - floor</button>
                         <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
+
+                        </div>
+
+                        <button class="accordion__btn accordion__btn--active" type="button">building - floor</button>
+                        <div class="accordion__detail">
+
+                        </div>
+
+                        <button class="accordion__btn accordion__btn--active" type="button">building - floor</button>
+                        <div class="accordion__detail">
+
+                        </div>
+
+                        <button class="accordion__btn accordion__btn--active" type="button">building - floor</button>
+                        <div class="accordion__detail">
+
                         </div>
                     </div>
                 </div>
@@ -71,9 +76,15 @@
             </div>
         </div>
     </div>
+    <!-- 승강 -->
     <div id="elevatorPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
+            <ul class="header__tab" role="tablist">
+                <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+                <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">엘리베이터</a></li>
+                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">에스컬레이터</a></li>
+            </ul>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
         <div class="search-result search-result--space">
@@ -83,25 +94,31 @@
                         <div class="filter-left" style="display: flex;align-items: center;grid-gap: 5px ">
                             <!-- select-box -->
                             <!-- [D] width값 지정 -->
-                            <div id="buildingSelect" class="select-box" style="width:100px;">
+                            <div id="elevatorBuilding" class="select-box" style="width:100px;">
                                 <!-- [D]
                                  select-box 클릭 시 select-box__btn--active 클래스 추가
                                  select-box 비활성화 시 select__btn--disabled 클래스 추가
                                  -->
                                 <span class="select-box__btn">건물 전체</span>
                                 <div class="select-box__content">
+                                    <ul id="elevatorBuildingUl">
+
+                                    </ul>
                                 </div>
                             </div>
-                            <div id="floorSelect" class="select-box" style="width:80px;">
+                            <div id="elevatorFloor" class="select-box" style="width:80px;">
                                 <!-- [D]
                                  select-box 클릭 시 select-box__btn--active 클래스 추가
                                  select-box 비활성화 시 select__btn--disabled 클래스 추가
                                  -->
                                 <span class="select-box__btn">층 전체</span>
                                 <div class="select-box__content">
+                                    <ul id="elevatorFloorUl">
+
+                                    </ul>
                                 </div>
                             </div>
-                            <div id="statusSelect" class="select-box" style="width:80px;">
+                            <div id="elevatorStatus" class="select-box" style="width:80px;">
                                 <!-- [D]
                                  select-box 클릭 시 select-box__btn--active 클래스 추가
                                  select-box 비활성화 시 select__btn--disabled 클래스 추가
@@ -127,6 +144,7 @@
             </div>
         </div>
     </div>
+    <!-- 주차 -->
     <div id="parkingPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
@@ -158,161 +176,6 @@
                                 </tbody>
                             </table>
                         </div>
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn" type="button">에스컬레이터 (125)</button>
-                        <div class="accordion__detail">
-                            <p class="empty">검색 결과가 없습니다.</p>
-                        </div>
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn" type="button">기계설비</button>
-                        <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn" type="button">기계설비</button>
-                        <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn" type="button">기계설비</button>
-                        <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn" type="button">기계설비</button>
-                        <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn" type="button">기계설비</button>
-                        <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
                 <div class="section section--contents">
@@ -327,12 +190,12 @@
             </div>
         </div>
     </div>
+    <!-- 시스템 에어컨 -->
     <div id="airPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <!-- 시스템 에어컨 -->
         <div class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">
@@ -351,6 +214,7 @@
             </div>
         </div>
     </div>
+    <!-- 에너지 -->
     <div id="energyPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
@@ -375,12 +239,12 @@
             </div>
         </div>
     </div>
+    <!-- 전력 -->
     <div id="electricPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <!-- 전력 -->
         <div class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">

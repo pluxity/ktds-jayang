@@ -78,12 +78,12 @@
     </div>
     <!-- 승강 -->
     <div id="elevatorPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
-        <div class="popup-basic__head">
+        <div class="popup-basic__head system-pop-header">
             <h2 class="name"></h2>
-            <ul class="header__tab" role="tablist">
+            <ul class="header__tab system-pop-header-tab">
                 <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">엘리베이터</a></li>
-                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">에스컬레이터</a></li>
+                <li class="active">엘레베이터</li>
+                <li>에스컬레이터</li>
             </ul>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
@@ -146,70 +146,391 @@
     </div>
     <!-- 주차 -->
     <div id="parkingPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
-        <div class="popup-basic__head">
+        <div class="popup-basic__head system-pop-header">
             <h2 class="name"></h2>
+            <ul class="header__tab system-pop-header-tab">
+                <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+                <li class="parking-guide-tab">주차 유도</li>
+                <li class="parking-monitor-tab">주차 관제</li>
+            </ul>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div class="search-result search-result--space">
+        <div id="parkingGuideContent" class="search-result search-result--space ">
             <div class="search-result__space">
                 <div class="section section--select">
-                    <ul class="tab-list tab-list--border" role="tablist">
-                        <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                        <!--                    <li class="active" role="tab" id="tab_1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">전체</a></li>-->
-                        <!--                    <li role="tab" id="tab_2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 A</a></li>-->
-                        <!--                    <li role="tab" id="tab_3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">건물 B</a></li>-->
-                        <!--                    <li role="tab" id="tab_4" aria-controls="tabpanel4" aria-selected="false" tabindex="0"><a href="#tab3">주차장</a></li>-->
-                    </ul>
+                    <div class="parking-status-row">
+                        <span id="parkingCurrentCount">현재</span>
+                        <span style="color: gray">/</span>
+                        <span id="parkingTotalCount">전체</span>
+                        <button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+                    </div>
+
                     <div id="eqAccordion" class="accordion">
                         <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn accordion__btn--active" type="button">기계설비</button>
+                        <button class="accordion__btn accordion__btn--active" type="button">floor</button>
                         <div class="accordion__detail">
-                            <table>
-                                <caption class="hide">출입구</caption>
-                                <tbody>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                <tr>
-                                    <td class="align-left">기계종류</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <div class="parkingStatus">혼잡</div>
+                            <div class="parking-">
+
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="section section--contents">
                     <div class=section__head>
-                        <h3 class="title">장비명 | 배치 건물 | 배치 층</h3>
-                        <div class="sub"><button type="button" class="button-move">도면 이동</button></div>
+                        <div class="parkingStatus">혼잡</div>
+                        <h3 class="title">동 | 층 </h3>
                     </div>
                     <div class="section__detail">
-
                     </div>
                 </div>
             </div>
         </div>
+        <div id="parkingMonitorContent" style="margin: 15px">
+            <div class="search-result__filter">
+                <div class="date-pickerwrap">
+                    <div class="date-picker">
+                        <input type="date" id="start-date">
+                    </div>
+                    <span>~</span>
+                    <div class="date-picker">
+                        <input type="date" id="end-date">
+                    </div>
+                </div>
+                <div class="select-box" style="width: 110px;">
+                    <span class="select-box__btn">주차 구분 전체</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>주차 구분 전체</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="select-box" style="width: 80px;">
+                    <span class="select-box__btn">입구 전체</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>입구 전체</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="select-box" style="width: 80px;">
+                    <span class="select-box__btn">출구 전체</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>출구 전체</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="select-box" style="width: 80px;">
+                    <span class="select-box__btn">차량 번호</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>차량 번호</li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="text" placeholder="입력">
+                <button type="button" class="button button--solid-middle" style="width: 100px;">검색</button>
+            </div>
+            <div class="search-result__contents">
+                <div class="title">
+                    총 <span id="alarmCount">0</span><button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+                </div>
+                <div class="event-info">
+                    <table>
+                        <colgroup>
+                            <!--<col style="width:">-->
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th scope="col">번호</th>
+                            <th scope="col">차량번호</th>
+                            <th scope="col">주차구분</th>
+                            <th scope="col">상태</th>
+                            <th scope="col">주차층</th>
+                            <th scope="col">주차면</th>
+                            <th scope="col">입차 시각</th>
+                            <th scope="col">입구코드</th>
+                            <th scope="col">출차 시각</th>
+                            <th scope="col">출구코드</th>
+                            <th scope="col">주차 시간</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>123가123</td>
+                                <td>정기</td>
+                                <td>출차</td>
+                                <td>B3</td>
+                                <td>B1_AO1-115</td>
+                                <td>2024-10-10 14:21:11</td>
+                                <td>IN00A</td>
+                                <td>2024-10-10 14:21:21</td>
+                                <td>OUT00A</td>
+                                <td>10:55:12</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="search-result__footer">
+                <div class="search-result__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
+                </div>
+                <button type="button" class="download">데이터 다운로드</button>
+            </div>
+        </div>
     </div>
-    <!-- 시스템 에어컨 -->
-    <div id="airPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
+    <!-- 에어컨 -->
+    <div id="airPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem; height: 780px; z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div class="search-result search-result--space">
+        <!-- 시스템 에어컨 -->
+        <div id="airContent" class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">
-                    <ul class="tab-list" role="tablist">
-                        <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                        <!--                    <li class="active" role="tab" id="allTab" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="javascript:void(0);">전체</a></li>-->
-                    </ul>
-                    <div class="section__detail">
-                        <div class="facility-area facility-area--elevator">
-                            <ul class="facility-area__list facility-area__list--grid3">
+                    <div class="search-result__filter"  style="margin-bottom: 10px">
+                        <div class="select-box" style="width: 100px;">
+                            <span class="select-box__btn">건물 전체</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <li>건물 전체</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="select-box" style="width: 100px;">
+                            <span class="select-box__btn">층 전체</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <li>층 전체</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="select-box" style="width: 100px;">
+                            <span class="select-box__btn">ON/OFF 전체</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <li>ON/OFF 전체</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="select-box" style="width: 100px;">
+                            <span class="select-box__btn">모드 전체</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <li>모드 전체</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="select-box" style="width: 100px;">
+                            <span class="select-box__btn">풍량 전체</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <li>풍량 전체</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="select-box" style="width: 100px;">
+                            <span class="select-box__btn">풍향 전체</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <li>풍향 전체</li>
+                                </ul>
+                            </div>
+                        </div>
 
+                        <button type="button" class="button button--solid-middle" style="width: 100px;">검색</button>
+                    </div>
+                    <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
+                        총 <span id="totalAirCnt">0</span>
+                    </div>
+                    <div class="section__detail" style="height: 580px; background-color: transparent">
+                        <div class="facility-area facility-area--elevator">
+                            <ul id="airList" class="facility-area__list facility-area__list--grid3">
+                                <li class="air-card on" style="padding: 0">
+                                    <div class="air-card__header">
+                                        <span class="air-card__status">ON</span>
+                                        <span class="air-card__title">A동 | 1F | 출입구001</span>
+                                        <button type="button" class="button-move" style="background-color: transparent; padding: 0; height: 12px; max-height: 12px; line-height: 12px;"></button>
+                                    </div>
+                                    <div class="air-card__body">
+                                        <div class="air-card__temp">
+                                            <div class="air-card__temp-info">
+                                                <div class="air-card__temp-label">현재</div>
+                                                <div class="air-card__temp-value">24.5°C</div>
+                                                <div class="air-card__temp-set">설정 온도 <span>23.0°C</span></div>
+                                            </div>
+                                        </div>
+                                        <ul class="air-card__functions">
+                                            <li>
+                                                <span>냉방</span>
+                                            </li>
+                                            <li>
+                                                <span>미풍</span>
+                                            </li>
+                                            <li>
+                                                <span>수직</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="search-result__footer" style="margin-top: 10px;">
+                <div class="search-result__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
                 </div>
             </div>
         </div>
@@ -220,7 +541,6 @@
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <!-- 에너지 -->
         <div class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">

@@ -209,9 +209,19 @@
                 elevatorPop.style.display = 'block';
             },
             parkingTab: () => {
-                console.log("parkingTab");
-                parkingPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
-                parkingPop.style.display = 'block';
+
+                const guideTab = document.querySelector('.parking-guide-tab');
+                const monitorTab = document.querySelector('.parking-monitor-tab');
+                const guideContent = document.getElementById('parkingGuideContent');
+                const monitorContent = document.getElementById('parkingMonitorContent');
+
+                initPopup(parkingPop, clickedItem);
+                registerTabHandlers({
+                    firstTab: guideTab,
+                    secondTab: monitorTab,
+                    firstContent: guideContent,
+                    secondContent: monitorContent
+                });
             },
             airTab: () => {
                 console.log("airTab");
@@ -235,6 +245,41 @@
             actions[matchedAction]();
         }
     }
+
+    const registerTabHandlers = (option) => {
+        const  {
+            firstTab,
+            secondTab,
+            firstContent,
+            secondContent
+        } = option;
+
+        firstTab.addEventListener('click', () => {
+            switchTab(firstTab, secondTab, firstContent, secondContent);
+        });
+
+        secondTab.addEventListener('click', () => {
+            switchTab(secondTab, firstTab, secondContent, firstContent);
+        });
+
+        // 초기 상태 설정
+        switchTab(firstTab, secondTab, firstContent, secondContent);
+    };
+
+
+    const initPopup = (popup, clickedItem) => {
+        popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+        popup.style.display = 'block';
+    };
+
+    const switchTab = (activeTab, inactiveTab, activeContent, inactiveContent) => {
+        activeTab.classList.add('active');
+        inactiveTab.classList.remove('active');
+        activeContent.style.display = 'block';
+        inactiveContent.style.display = 'none';
+    };
+
+
 
     function resetAccordions() {
         const viewerResult = document.getElementById("viewerResult");

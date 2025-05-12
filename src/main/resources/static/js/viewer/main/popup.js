@@ -1148,9 +1148,12 @@ const layerPopup = (function () {
     }
 
     const closeAllPopups = () => {
-        ['equipmentPop', 'elevatorPop'].forEach(id => {
+        ['equipmentPop', 'elevatorPop', 'lightPop', 'energyPop', 'airPop', 'parkingPop', 'electricPop'].forEach(id => {
             const popup = document.getElementById(id);
             if (popup) {
+                if (popup.id === 'lightPop') {
+                    popup.querySelector('.section__detail').innerHTML = '';
+                }
                 popup.style.display = 'none';
             }
         });
@@ -1187,14 +1190,19 @@ const layerPopup = (function () {
         }
     })
 
-    // 일단 building, floor select box 추가
-    const setLightTab = () => {
-        const buildingBox = document.getElementById('lightBuilding');
-        const floorBox = document.getElementById('lightFloor');
+    // set building, floor tab
+    const setTab = (type, { onBuildingChange = () => {}, onFloorChange = () => {} } = {}) => {
+        const buildingBox = document.getElementById(`${type}Building`);
+        const floorBox = document.getElementById(`${type}Floor`);
         const buildingBtn = buildingBox.querySelector('.select-box__btn');
         const floorBtn = floorBox.querySelector('.select-box__btn');
         let buildingList = BuildingManager.findAll();
-        const lightPopup = document.getElementById('lightPop');
+        const sysPopup = document.getElementById(`${type}Pop`);
+        const buildingUl = document.getElementById(`${type}BuildingUl`);
+        const floorUl = document.getElementById(`${type}FloorUl`);
+
+        let currentBuilding = null;
+        let currentFloor = null;
 
         const toggleBtnActive = (btn, otherBtn) => {
             if (!btn.classList.contains('select-box__disabled')) {
@@ -1204,25 +1212,45 @@ const layerPopup = (function () {
         };
         buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn);
         floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn)
-
-        const buildingUl = document.getElementById('lightBuildingUl');
-        const floorUl = document.getElementById('lightFloorUl');
         buildingUl.innerHTML = '';
         floorUl.innerHTML = '';
 
         const defaultBuilding = buildingList.find(building => building.name == 'A');
         if (defaultBuilding) {
+            currentBuilding = defaultBuilding;
             buildingBtn.textContent = defaultBuilding.name;
-            const firstFloor = defaultBuilding.floors[0];
+            // const firstFloor = defaultBuilding.floors[0];
+            const firstFloor = (type==='light' && ['A','B'].includes(defaultBuilding.name))
+                ? defaultBuilding.floors.find(f=>f.name==='1F') || defaultBuilding.floors[0]
+                : defaultBuilding.floors[0];
             if (firstFloor) {
+                currentFloor = firstFloor;
                 floorBtn.textContent = firstFloor.name;
-                lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+                if (type == 'light') {
+                    sysPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+                }
+                Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(Number(currentFloor.id));
+                onBuildingChange(currentBuilding, currentFloor);
             }
             floorUl.innerText = '';
             defaultBuilding.floors.forEach(floor => {
                 const floorLi = document.createElement('li');
                 floorLi.dataset.id = floor.id;
                 floorLi.textContent = floor.name;
+                floorLi.onclick = () => {
+                    currentFloor = floor;
+                    floorBtn.textContent = floor.name;
+                    floorBtn.classList.remove('select-box__btn--active');
+                    if (type == 'light') {
+                        sysPopup.querySelector('.section__head h3')
+                            .textContent = `${defaultBuilding.name} ${floor.name}`;
+                    }
+                    Px.Model.Visible.HideAll();
+                    Px.Model.Visible.Show(Number(currentFloor.id));
+                    onFloorChange(defaultBuilding, currentFloor);
+                };
+
                 floorUl.appendChild(floorLi);
             })
         }
@@ -1233,6 +1261,7 @@ const layerPopup = (function () {
             buildingLi.textContent = building.name;
 
             buildingLi.onclick = () => {
+                currentBuilding = building;
                 buildingBtn.textContent = building.name;
                 buildingBtn.classList.remove('select-box__btn--active');
 
@@ -1244,31 +1273,175 @@ const layerPopup = (function () {
                     floorLi.textContent = floor.name;
 
                     floorLi.onclick = () => {
+                        currentFloor = floor;
                         floorBtn.textContent = floor.name;
-                        lightPopup.querySelector('.section__head h3').textContent = `${building.name} ${floor.name}`;
+                        if (type == 'light') {
+                            sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${floor.name}`;
+                        }
                         floorBtn.classList.remove('select-box__btn--active');
+                        Px.Model.Visible.HideAll();
+                        Px.Model.Visible.Show(Number(currentFloor.id));
+                        onFloorChange(building, currentFloor);
                     }
 
                     floorUl.appendChild(floorLi);
                 });
 
                 if (building.floors.length > 0) {
-                    floorBtn.textContent = building.floors[0].name;
-                    lightPopup.querySelector('.section__head h3').textContent = `${building.name} ${building.floors[0].name}`;
+                    // currentFloor = building.floors[0];
+                    currentFloor = (type==='light' && ['A','B'].includes(building.name))
+                        ? building.floors.find(f=>f.name==='1F') || building.floors[0]
+                        : building.floors[0];
+                    floorBtn.textContent = currentFloor.name;
+                    if (type == 'light') {
+                        sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${building.floors[0].name}`;
+                    }
+                    // onChange(currentBuilding, currentFloor);
+                    // Px.Model.Visible.Show(currentFloor.id);
                 }
+                Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(Number(currentFloor.id));
+                onBuildingChange(building, currentFloor);
             }
 
             buildingUl.appendChild(buildingLi);
+        });
+    }
+
+    function getLightData(building, floor) {
+        return [
+            { zoneName: '1', data: ['A1','A2','A3'] },
+            { zoneName: '2', data: ['B1','B2'] },
+            { zoneName: '3', data: ['C1','C2','C3','C4'] },
+            { zoneName: '4', data: ['D1'] }
+        ];
+    }
+
+    // 일단 building, floor select box 추가
+    const setLight = () => {
+        const lightAccordionBtn    = document.querySelectorAll('#lightAccordion .accordion__btn');
+        const lightAccordionDetail = document.querySelectorAll('#lightAccordion .accordion__detail');
+
+        setTab('light', {
+            onBuildingChange: (building, floor) => {
+                getBuildingPop(building, floor);
+
+                const lightData = getLightData(building, floor);
+                lightAccordionBtn.forEach((btn, i) => {
+                    btn.textContent = `${floor.name} - ${i + 1}`;
+                });
+                lightAccordionDetail.forEach((detail, i) => {
+                    const rows = lightData[i].data
+                        .map(d => `<tr><td class="align-left">${d}</td></tr>`)
+                        .join('');
+                    detail.innerHTML = `
+                    <table>
+                      <caption class="hide"></caption>
+                      <tbody>
+                        ${rows}
+                      </tbody>
+                    </table>`;
+                });
+            },
+            onFloorChange: (building, floor) => {
+                const lightData = getLightData(building, floor);
+                lightAccordionBtn.forEach((btn, i) => {
+                    btn.textContent = `${floor.name} - ${i + 1}`;
+                });
+                lightAccordionDetail.forEach((detail, i) => {
+                    const rows = lightData[i].data
+                        .map(d => `<tr><td class="align-left">${d}</td></tr>`)
+                        .join('');
+                    detail.innerHTML = `
+                    <table>
+                      <caption class="hide"></caption>
+                      <tbody>
+                        ${rows}
+                      </tbody>
+                    </table>`;
+                });
+            }
+        });
+
+        lightAccordionBtn.forEach(btn => {
+            btn.onclick = () => {
+                const isActive = btn.classList.toggle('accordion__btn--active');
+                if (isActive) {
+                    btn.style.backgroundColor = 'var(--color-mint)';
+                    btn.style.color = 'var(--color-black)';
+                } else {
+                    btn.style.backgroundColor = '';
+                    btn.style.color = '';
+                }
+            };
+        });
+    };
+
+    const getBuildingPop = (building, floor) => {
+        const container = document.querySelector('#lightPop .section--contents .section__detail')
+        container.innerHTML = '';
+
+        Px.Core.Initialize(container, async () => {
+            console.log("building : ", building);
+            const { buildingFile, floors } = building;
+            const { directory } = buildingFile;
+
+            const sbmDataArray = floors.map((floor) => {
+
+                const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                const sbmData = {
+                    url,
+                    id: floor.sbmFloor[0].id,
+                    displayName: floor.sbmFloor[0].sbmFileName,
+                    baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                    groupId: floor.sbmFloor[0].sbmFloorGroup,
+                };
+                return sbmData;
+            });
+
+            Px.Loader.LoadSbmUrlArray({
+                urlDataList: sbmDataArray,
+                center: "",
+                onLoad: (loadedId) => {
+                    Px.Core.Resize();
+                    Px.Util.SetBackgroundColor('#333333');
+                    Px.Camera.FPS.SetHeightOffset(15);
+                    // Px.Camera.FPS.SetMoveSpeed(500);
+                    Px.Camera.SetOrthographic();
+                    Px.Camera.ExtendView();
+                    Px.Camera.EnableScreenPanning();
+                    Px.Model.Visible.HideAll();
+                    Px.Model.Visible.Show(Number(floor.id));
+                    PoiManager.renderAllPoiToEngineByBuildingId(building.id);
+                    // initializeTexture();
+                },
+            })
         })
+    }
+
+    const getFloor = (building, floor) => {
+        const container = document.querySelector('#lightPop .section--contents .section__detail')
+        container.innerHTML = '';
+
+        getBuildingPop(building);
+    }
+
+    const initializeTexture = () => {
+        Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
+            console.log('화살표 로딩완료');
+        });
+
+        Px.VirtualPatrol.LoadCharacterModel('/static/assets/modeling/virtualPatrol/guardman.glb', function () {
+            console.log('가상순찰 캐릭터 로딩 완료');
+        });
+    }
+
+    // elevator
+    const setElevator = () => {
 
     }
 
     const elevatorPopup = document.getElementById('elevatorPop');
-
-    const setElevatorTab = () => {
-        const popupUl = elevatorPopup.querySelector('.section--contents ul')
-        popupUl.replaceChildren()
-    }
 
     const setElevatorTab_old = () => {
         const popupUl = elevatorPopup.querySelector('.section--contents ul')
@@ -2201,6 +2374,11 @@ const layerPopup = (function () {
         document.querySelectorAll('.popup-basic .close, .popup-basic .arrow').forEach(btn => {
             btn.addEventListener('click', (event) => {
                 const target = event.target.closest('.popup-basic');
+                if (btn.closest('#systemPopup')) {
+                    systemTabs.forEach(tab => {
+                        tab.classList.remove('active')
+                    });
+                }
                 closePopup(target);
             });
         });
@@ -2309,7 +2487,7 @@ const layerPopup = (function () {
 
     return {
         closePlayers,
-        setElevatorTab,
+        setElevator,
         setEquipmentTab,
         createRecentPopup,
         createEarthquakePopup,
@@ -2324,7 +2502,7 @@ const layerPopup = (function () {
         createEventPopup,
         pagingNotice,
         addClosePopup,
-        setLightTab
+        setLight
     }
 })();
 

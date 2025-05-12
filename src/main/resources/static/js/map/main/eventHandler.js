@@ -162,6 +162,9 @@
             ['lightPop', 'elevatorPop', 'parkingPop', 'airPop', 'energyPop', 'electricPop'].forEach(id => {
                 const popup = document.getElementById(id);
                 if (popup) {
+                    if (popup.id.startsWith('light')) {
+                        popup.querySelector('.section__detail').innerHTML = '';
+                    }
                     popup.style.display = 'none';
                 }
             });
@@ -198,13 +201,13 @@
         const actions = {
             lightTab: () => {
                 console.log("lightTab");
-                layerPopup.setLightTab();
+                layerPopup.setLight();
                 lightPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
                 lightPop.style.display = 'block';
             },
             elevatorTab: () => {
                 console.log("elevatorTab");
-                layerPopup.setElevatorTab();
+                layerPopup.setElevator();
                 elevatorPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
                 elevatorPop.style.display = 'block';
             },

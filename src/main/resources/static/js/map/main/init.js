@@ -458,6 +458,7 @@ const Init = (function () {
                     Px.Util.SetBackgroundColor('#333333');
                     Px.Camera.FPS.SetHeightOffset(15);
                     Px.Camera.FPS.SetMoveSpeed(500);
+                    Px.Camera.EnableScreenPanning();
                     PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
                     Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {

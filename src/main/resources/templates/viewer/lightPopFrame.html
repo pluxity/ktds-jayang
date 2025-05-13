@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Light Pop Viewer</title>
+    <script th:src="@{/static/js/lib/pluxity/Px.Engine.js}"></script>
+    <style>
+        html, body { margin:0; width:100%; height:100%; overflow:hidden; }
+        #sbmViewer { width:100%; height:100%; }
+    </style>
+</head>
+<body>
+<div id="sbmViewer"></div>
+<script>
+    window.addEventListener('message', function(e) {
+        if (e.origin !== window.location.origin) return;
+        const buildingData = e.data.buildingData;
+        const floor = e.data.floor;
+
+        Px.Core.Initialize(document.getElementById('sbmViewer'), function() {
+            var bf = buildingData.buildingFile;
+            var arr = buildingData.floors.map(function(f) {
+                return {
+                    url: '/Building/' + bf.directory + '/' + f.sbmFloor[0].sbmFileName,
+                    id: f.sbmFloor[0].id,
+                    displayName: f.sbmFloor[0].sbmFileName,
+                    baseFloor: f.sbmFloor[0].sbmFloorBase,
+                    groupId: f.sbmFloor[0].sbmFloorGroup
+                };
+            });
+
+            Px.Loader.LoadSbmUrlArray({
+                urlDataList: arr,
+                center: "",
+                onLoad: function() {
+                    Px.Core.Resize();
+                    Px.Util.SetBackgroundColor('#333333');
+                    Px.Camera.FPS.SetHeightOffset(15);
+                    // Px.Camera.SetOrthographic();
+                    Px.Camera.TopView();
+                    Px.Camera.EnableScreenPanning();
+
+                    Px.Model.Visible.HideAll();
+                    Px.Model.Visible.Show(Number(floor.id));
+                    // 조명만 보이게
+                    Px.Poi.ShowByProperty("floorId", Number(floor.id));
+                    // Px.Poi.ShowByPropertyArray({ "floorId": floorId, "poiCategoryId": categoryId });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

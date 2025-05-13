@@ -127,57 +127,57 @@
 
                         });
                         Px.Camera.EnableScreenPanning();
-                        EventTarget.prototype.addEventListener = origAdd;
+                        // EventTarget.prototype.addEventListener = origAdd;
                         const canvas = container.querySelector('canvas');
-                        const panStart = new Vec2();
-                        const panEnd   = new Vec2();
-                        const panDelta = new Vec2();
-                        const panSpeed = 1;
-
-                        canvas.style.touchAction = 'none';
-
-                        function pan(dx, dy) {
-                            const state = Px.Camera.GetState();
-                            state.position.x -= dx;
-                            state.position.y += dy;
-
-                            state.target.x -= dx;
-                            state.target.y += dy;
-                            Px.Camera.SetState(state);
-                        }
-
-                        function handleTouchStartPan(e) {
-                            if (e.touches.length === 1) {
-                                panStart.set(e.touches[0].pageX, e.touches[0].pageY);
-                            } else {
-                                const x = 0.5 * (e.touches[0].pageX + e.touches[1].pageX);
-                                const y = 0.5 * (e.touches[0].pageY + e.touches[1].pageY);
-                                panStart.set(x, y);
-                            }
-                            canvas.addEventListener('touchmove', handleTouchMovePan, { passive: false });
-                            canvas.addEventListener('touchend',  handleTouchEndPan);
-                        }
-
-                        function handleTouchMovePan(e) {
-                            if (e.touches.length === 1) {
-                                panEnd.set(e.touches[0].pageX, e.touches[0].pageY);
-                            } else {
-                                const x = 0.5 * (e.touches[0].pageX + e.touches[1].pageX);
-                                const y = 0.5 * (e.touches[0].pageY + e.touches[1].pageY);
-                                panEnd.set(x, y);
-                            }
-
-                            panDelta.subVectors(panEnd, panStart).multiplyScalar(panSpeed);
-
-                            pan(panDelta.x, panDelta.y);
-
-                            panStart.copy(panEnd);
-                        }
-
-                        function handleTouchEndPan() {
-                            canvas.removeEventListener('touchmove', handleTouchMovePan);
-                            canvas.removeEventListener('touchend',  handleTouchEndPan);
-                        }
+                        // const panStart = new Vec2();
+                        // const panEnd   = new Vec2();
+                        // const panDelta = new Vec2();
+                        // const panSpeed = 1;
+                        //
+                        // canvas.style.touchAction = 'none';
+                        //
+                        // function pan(dx, dy) {
+                        //     const state = Px.Camera.GetState();
+                        //     state.position.x -= dx;
+                        //     state.position.y += dy;
+                        //
+                        //     state.target.x -= dx;
+                        //     state.target.y += dy;
+                        //     Px.Camera.SetState(state);
+                        // }
+                        //
+                        // function handleTouchStartPan(e) {
+                        //     if (e.touches.length === 1) {
+                        //         panStart.set(e.touches[0].pageX, e.touches[0].pageY);
+                        //     } else {
+                        //         const x = 0.5 * (e.touches[0].pageX + e.touches[1].pageX);
+                        //         const y = 0.5 * (e.touches[0].pageY + e.touches[1].pageY);
+                        //         panStart.set(x, y);
+                        //     }
+                        //     canvas.addEventListener('touchmove', handleTouchMovePan, { passive: false });
+                        //     canvas.addEventListener('touchend',  handleTouchEndPan);
+                        // }
+                        //
+                        // function handleTouchMovePan(e) {
+                        //     if (e.touches.length === 1) {
+                        //         panEnd.set(e.touches[0].pageX, e.touches[0].pageY);
+                        //     } else {
+                        //         const x = 0.5 * (e.touches[0].pageX + e.touches[1].pageX);
+                        //         const y = 0.5 * (e.touches[0].pageY + e.touches[1].pageY);
+                        //         panEnd.set(x, y);
+                        //     }
+                        //
+                        //     panDelta.subVectors(panEnd, panStart).multiplyScalar(panSpeed);
+                        //
+                        //     pan(panDelta.x, panDelta.y);
+                        //
+                        //     panStart.copy(panEnd);
+                        // }
+                        //
+                        // function handleTouchEndPan() {
+                        //     canvas.removeEventListener('touchmove', handleTouchMovePan);
+                        //     canvas.removeEventListener('touchend',  handleTouchEndPan);
+                        // }
 
                         canvas.addEventListener('touchstart', handleTouchStartPan, { passive: false });
 

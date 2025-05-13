@@ -45,6 +45,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         for(ViewPath v : ViewPath.values()) {
             registry.addViewController(v.getPath()).setViewName(v.getView());
         }
+        registry.addViewController("/viewer/lightPopFrame.html")
+                .setViewName("viewer/lightPopFrame");
     }
 
 }

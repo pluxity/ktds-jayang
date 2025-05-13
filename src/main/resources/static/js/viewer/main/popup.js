@@ -1229,8 +1229,8 @@ const layerPopup = (function () {
                 if (type == 'light') {
                     sysPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
                 }
-                Px.Model.Visible.HideAll();
-                Px.Model.Visible.Show(Number(currentFloor.id));
+                // Px.Model.Visible.HideAll();
+                // Px.Model.Visible.Show(Number(currentFloor.id));
                 onBuildingChange(currentBuilding, currentFloor);
             }
             floorUl.innerText = '';
@@ -1246,8 +1246,8 @@ const layerPopup = (function () {
                         sysPopup.querySelector('.section__head h3')
                             .textContent = `${defaultBuilding.name} ${floor.name}`;
                     }
-                    Px.Model.Visible.HideAll();
-                    Px.Model.Visible.Show(Number(currentFloor.id));
+                    // Px.Model.Visible.HideAll();
+                    // Px.Model.Visible.Show(Number(currentFloor.id));
                     onFloorChange(defaultBuilding, currentFloor);
                 };
 
@@ -1279,8 +1279,8 @@ const layerPopup = (function () {
                             sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${floor.name}`;
                         }
                         floorBtn.classList.remove('select-box__btn--active');
-                        Px.Model.Visible.HideAll();
-                        Px.Model.Visible.Show(Number(currentFloor.id));
+                        // Px.Model.Visible.HideAll();
+                        // Px.Model.Visible.Show(Number(currentFloor.id));
                         onFloorChange(building, currentFloor);
                     }
 
@@ -1299,8 +1299,8 @@ const layerPopup = (function () {
                     // onChange(currentBuilding, currentFloor);
                     // Px.Model.Visible.Show(currentFloor.id);
                 }
-                Px.Model.Visible.HideAll();
-                Px.Model.Visible.Show(Number(currentFloor.id));
+                // Px.Model.Visible.HideAll();
+                // Px.Model.Visible.Show(Number(currentFloor.id));
                 onBuildingChange(building, currentFloor);
             }
 
@@ -1344,6 +1344,10 @@ const layerPopup = (function () {
                 });
             },
             onFloorChange: (building, floor) => {
+
+                const win = lightIframe.contentWindow;
+                win.Px.Model.Visible.HideAll();
+                win.Px.Model.Visible.Show(Number(floor.id));
                 const lightData = getLightData(building, floor);
                 lightAccordionBtn.forEach((btn, i) => {
                     btn.textContent = `${floor.name} - ${i + 1}`;
@@ -1363,60 +1367,81 @@ const layerPopup = (function () {
             }
         });
 
-        lightAccordionBtn.forEach(btn => {
-            btn.onclick = () => {
-                const isActive = btn.classList.toggle('accordion__btn--active');
-                if (isActive) {
-                    btn.style.backgroundColor = 'var(--color-mint)';
-                    btn.style.color = 'var(--color-black)';
-                } else {
-                    btn.style.backgroundColor = '';
-                    btn.style.color = '';
-                }
-            };
-        });
+        // lightAccordionBtn.forEach(btn => {
+        //     btn.onclick = () => {
+        //         const isActive = btn.classList.toggle('accordion__btn--active');
+        //         if (isActive) {
+        //             btn.style.backgroundColor = 'var(--color-mint)';
+        //             btn.style.color = 'var(--color-black)';
+        //         } else {
+        //             btn.style.backgroundColor = '';
+        //             btn.style.color = '';
+        //         }
+        //     };
+        // });
     };
+
+    let lightIframe = null;
 
     const getBuildingPop = (building, floor) => {
         const container = document.querySelector('#lightPop .section--contents .section__detail')
         container.innerHTML = '';
 
-        Px.Core.Initialize(container, async () => {
-            console.log("building : ", building);
-            const { buildingFile, floors } = building;
-            const { directory } = buildingFile;
+        lightIframe = document.createElement('iframe');
+        lightIframe.style.cssText = 'width:100%;height:100%;border:none';
+        lightIframe.src = '/viewer/lightPopFrame.html';
+        container.appendChild(lightIframe);
 
-            const sbmDataArray = floors.map((floor) => {
+        const buildingData = {
+            id: building.id,
+            name: building.name,
+            buildingFile: building.buildingFile,
+            floors: building.floors
+        };
 
-                const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
-                const sbmData = {
-                    url,
-                    id: floor.sbmFloor[0].id,
-                    displayName: floor.sbmFloor[0].sbmFileName,
-                    baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                    groupId: floor.sbmFloor[0].sbmFloorGroup,
-                };
-                return sbmData;
-            });
+        lightIframe.addEventListener('load', () => {
+            lightIframe.contentWindow.postMessage(
+                { buildingData, floor },
+                window.location.origin
+            );
+        }, { once: true });
 
-            Px.Loader.LoadSbmUrlArray({
-                urlDataList: sbmDataArray,
-                center: "",
-                onLoad: (loadedId) => {
-                    Px.Core.Resize();
-                    Px.Util.SetBackgroundColor('#333333');
-                    Px.Camera.FPS.SetHeightOffset(15);
-                    // Px.Camera.FPS.SetMoveSpeed(500);
-                    Px.Camera.SetOrthographic();
-                    Px.Camera.ExtendView();
-                    Px.Camera.EnableScreenPanning();
-                    Px.Model.Visible.HideAll();
-                    Px.Model.Visible.Show(Number(floor.id));
-                    PoiManager.renderAllPoiToEngineByBuildingId(building.id);
-                    // initializeTexture();
-                },
-            })
-        })
+        // Px.Core.Initialize(container, async () => {
+        //     console.log("building : ", building);
+        //     const { buildingFile, floors } = building;
+        //     const { directory } = buildingFile;
+        //
+        //     const sbmDataArray = floors.map((floor) => {
+        //
+        //         const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+        //         const sbmData = {
+        //             url,
+        //             id: floor.sbmFloor[0].id,
+        //             displayName: floor.sbmFloor[0].sbmFileName,
+        //             baseFloor: floor.sbmFloor[0].sbmFloorBase,
+        //             groupId: floor.sbmFloor[0].sbmFloorGroup,
+        //         };
+        //         return sbmData;
+        //     });
+        //
+        //     Px.Loader.LoadSbmUrlArray({
+        //         urlDataList: sbmDataArray,
+        //         center: "",
+        //         onLoad: (loadedId) => {
+        //             Px.Core.Resize();
+        //             Px.Util.SetBackgroundColor('#333333');
+        //             Px.Camera.FPS.SetHeightOffset(15);
+        //             // Px.Camera.FPS.SetMoveSpeed(500);
+        //             Px.Camera.SetOrthographic();
+        //             Px.Camera.ExtendView();
+        //             Px.Camera.EnableScreenPanning();
+        //             Px.Model.Visible.HideAll();
+        //             Px.Model.Visible.Show(Number(floor.id));
+        //             PoiManager.renderAllPoiToEngineByBuildingId(building.id);
+        //             // initializeTexture();
+        //         },
+        //     })
+        // })
     }
 
     const getFloor = (building, floor) => {
@@ -2363,7 +2388,7 @@ const layerPopup = (function () {
         } else if (target.id === 'layerPopup') {
             document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
             document.body.style.overflow = '';
-        } else if (target.id === 'systemPopup') {
+        } else if (target.closest('#systemPopup')) {
             document.querySelectorAll('.system-tab ul li').forEach(li => console.log("li : ", li));
             closeAllPopups();
         }

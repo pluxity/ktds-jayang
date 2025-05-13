@@ -35,6 +35,7 @@
                     urlDataList: sbmDataArray,
                     center: "",
                     onLoad: function() {
+                        document.querySelector('canvas').style.position = 'static';
                         initPoi();
                         Px.Model.Visible.ShowAll();
                         Px.Util.SetBackgroundColor('#333333');

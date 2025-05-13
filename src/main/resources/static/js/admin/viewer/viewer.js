@@ -298,6 +298,7 @@ function initBuilding() {
             urlDataList: sbmDataArray,
             center: '',
             onLoad: () => {
+                document.querySelector('canvas').style.position = 'static';
                 initPoi();
                 initPatrol();
                 Px.Event.On();

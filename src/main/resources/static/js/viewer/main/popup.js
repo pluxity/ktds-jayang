@@ -1519,6 +1519,103 @@ const layerPopup = (function () {
         allTabLi.click();
     }
 
+    const setAirTab = () => {
+        const buildingBtn = document.querySelector('#airBuildingSelector .select-box__btn');
+        const floorBtn = document.querySelector('#airFloorSelector .select-box__btn');
+        const onOffBtn = document.querySelector('#airOnOffSelector .select-box__btn');
+        const modeBtn = document.querySelector('#airModeSelector .select-box__btn')
+        const volumeBtn = document.querySelector('#airVolumeSelector .select-box__btn');
+        const directionBtn = document.querySelector('#airDirectionSelector .select-box__btn');
+        let buildingList = BuildingManager.findAll();
+
+
+        const toggleBtnActive = (btn, otherBtn) => {
+            if (!btn.classList.contains('select-box__disabled')) {
+                btn.classList.toggle('select-box__btn--active');
+                otherBtn.classList.remove('select-box__btn--active');
+            }
+        };
+
+        const handleSelectItem = (event, buttonElement) => {
+            buttonElement.textContent = event.target.textContent;
+            buttonElement.classList.remove('select-box__btn--active');
+        };
+
+        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn);
+        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn);
+        onOffBtn.onclick = () => onOffBtn.classList.toggle('select-box__btn--active');
+        modeBtn.onclick = () => modeBtn.classList.toggle('select-box__btn--active');
+        volumeBtn.onclick = () => volumeBtn.classList.toggle('select-box__btn--active');
+        directionBtn.onclick = () => directionBtn.classList.toggle('select-box__btn--active');
+
+        const buildingUl = document.getElementById('airBuildingUl');
+        const floorUl = document.getElementById('airFloorUl');
+        buildingUl.innerHTML = '';
+        floorUl.innerHTML = '';
+
+
+
+        const onOffUl = document.querySelector('#airOnOffSelector ul');
+        onOffUl.onclick = (eve) => handleSelectItem(eve, onOffBtn);
+
+        const modeUl = document.querySelector('#airModeSelector ul');
+        modeUl.onclick = (eve) => handleSelectItem(eve, modeBtn);
+
+        const volumeUl = document.querySelector('#airVolumeSelector ul');
+        volumeUl.onclick = (eve) => handleSelectItem(eve, volumeBtn);
+
+        const directionUl = document.querySelector('#airDirectionSelector ul');
+        directionUl.onclick = (eve) => handleSelectItem(eve, directionBtn);
+
+
+        const defaultBuilding = buildingList.find(building => building.name == 'A');
+        if (defaultBuilding) {
+            buildingBtn.textContent = defaultBuilding.name;
+            const firstFloor = defaultBuilding.floors[0];
+            if (firstFloor) {
+                floorBtn.textContent = firstFloor.name;
+                lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+            }
+            floorUl.innerText = '';
+            defaultBuilding.floors.forEach(floor => {
+                const floorLi = document.createElement('li');
+                floorLi.dataset.id = floor.id;
+                floorLi.textContent = floor.name;
+                floorUl.appendChild(floorLi);
+            })
+        }
+
+        buildingList.forEach(building => {
+            const buildingLi = document.createElement('li');
+            buildingLi.dataset.id = building.id;
+            buildingLi.textContent = building.name;
+
+            buildingLi.onclick = () => {
+                buildingBtn.textContent = building.name;
+                buildingBtn.classList.remove('select-box__btn--active');
+
+                floorUl.innerHTML = '';
+
+                building.floors.forEach(floor => {
+                    const floorLi = document.createElement('li');
+                    floorLi.dataset.id = floor.id
+                    floorLi.textContent = floor.name;
+
+                    floorLi.onclick = () => {
+                        floorBtn.textContent = floor.name;
+                        floorBtn.classList.remove('select-box__btn--active');
+                    }
+
+                    floorUl.appendChild(floorLi);
+                });
+            }
+
+            buildingUl.appendChild(buildingLi);
+        })
+
+
+    }
+
     const livePlayers = [];
     const addElevators = (filteredPoiList) => {
         const facilityList = document.querySelector('.facility-area__list');
@@ -2502,7 +2599,8 @@ const layerPopup = (function () {
         createEventPopup,
         pagingNotice,
         addClosePopup,
-        setLight
+        setLight,
+        setAirTab
     }
 })();
 

@@ -77,17 +77,17 @@
         </div>
     </div>
     <!-- 승강 -->
-    <div id="elevatorPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
+    <div id="elevatorPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem ;height: 780px;;z-index: 50">
         <div class="popup-basic__head system-pop-header">
             <h2 class="name"></h2>
             <ul class="header__tab system-pop-header-tab">
                 <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                <li class="active">엘레베이터</li>
-                <li>에스컬레이터</li>
+                <li class="elevator-tab">엘레베이터</li>
+                <li class="escalator-tab">에스컬레이터</li>
             </ul>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div class="search-result search-result--space">
+        <div id="elevatorContent" class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">
                     <div class="search-result__filter" style="justify-content: space-between;margin-bottom: 10px">
@@ -133,13 +133,90 @@
                             총 <span id="totalElevatorCnt">0</span>대
                         </div>
                     </div>
-                    <div class="section__detail">
+                    <div class="section__detail" style="height: 580px; background-color: transparent">
                         <div class="facility-area facility-area--elevator">
-                            <ul class="facility-area__list facility-area__list--grid3">
-
+                            <ul id="elevatorList" class="facility-area__list facility-area__list--grid3 card-list">
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="search-result__footer" style="margin-top: 10px;">
+                <div class="search-result__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
+                </div>
+            </div>
+        </div>
+        <div id="escalatorContent" class="search-result search-result--space">
+            <div class="search-result__space">
+                <div class="section section--contents">
+                    <div class="search-result__filter" style="justify-content: space-between;margin-bottom: 10px">
+                        <div class="filter-left" style="display: flex;align-items: center;grid-gap: 5px ">
+                            <!-- select-box -->
+                            <!-- [D] width값 지정 -->
+                            <div id="escalatorBuilding" class="select-box" style="width:100px;">
+                                <!-- [D]
+                                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                 -->
+                                <span class="select-box__btn">건물 전체</span>
+                                <div class="select-box__content">
+                                    <ul id="escalatorBuildingUl">
+
+                                    </ul>
+                                </div>
+                            </div>
+                            <div id="escalatorFloor" class="select-box" style="width:80px;">
+                                <!-- [D]
+                                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                 -->
+                                <span class="select-box__btn">층 전체</span>
+                                <div class="select-box__content">
+                                    <ul id="escalatorFloorUl">
+
+                                    </ul>
+                                </div>
+                            </div>
+                            <div id="escalatorDrive" class="select-box" style="width:80px;">
+                                <!-- [D]
+                                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                 -->
+                                <span class="select-box__btn">운행 전체</span>
+                                <div class="select-box__content">
+                                </div>
+                            </div>
+                            <div id="escalatorStatus" class="select-box" style="width:80px;">
+                                <!-- [D]
+                                 select-box 클릭 시 select-box__btn--active 클래스 추가
+                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                 -->
+                                <span class="select-box__btn">상태 전체</span>
+                                <div class="select-box__content">
+                                </div>
+                            </div>
+                            <button id="escalatorSearchBtn" type="button" style="width: 80px" class="button button--solid-middle">검색</button>
+                        </div>
+                        <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
+                            총 <span id="totalEscalatorCnt">0</span>대
+                        </div>
+                    </div>
+                    <div class="section__detail" style="height: 580px; background-color: transparent">
+                        <div class="facility-area facility-area--elevator">
+                            <ul id="escalatorList" class="facility-area__list facility-area__list--grid3 card-list">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-result__footer" style="margin-top: 10px;">
+                <div class="search-result__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
                 </div>
             </div>
         </div>
@@ -436,64 +513,78 @@
         <div id="airContent" class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">
-                    <div class="search-result__filter"  style="margin-bottom: 10px">
-                        <div class="select-box" style="width: 100px;">
-                            <span class="select-box__btn">건물 전체</span>
-                            <div class="select-box__content">
-                                <ul>
-                                    <li>건물 전체</li>
-                                </ul>
+                    <div class="search-result__filter"  style="justify-content: space-between;margin-bottom: 10px">
+                        <div class="filter-left" style="display: flex;align-items: center;grid-gap: 5px ">
+                            <div id="airBuildingSelector"  class="select-box" style="width: 100px;">
+                                <span class="select-box__btn">건물 전체</span>
+                                <div class="select-box__content">
+                                    <ul id="airBuildingUl">
+                                        <li>건물 전체</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                        <div class="select-box" style="width: 100px;">
-                            <span class="select-box__btn">층 전체</span>
-                            <div class="select-box__content">
-                                <ul>
-                                    <li>층 전체</li>
-                                </ul>
+                            <div id="airFloorSelector" class="select-box" style="width: 100px;">
+                                <span class="select-box__btn">층 전체</span>
+                                <div class="select-box__content">
+                                    <ul id="airFloorUl">
+                                        <li>층 전체</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                        <div class="select-box" style="width: 100px;">
-                            <span class="select-box__btn">ON/OFF 전체</span>
-                            <div class="select-box__content">
-                                <ul>
-                                    <li>ON/OFF 전체</li>
-                                </ul>
+                            <div id="airOnOffSelector" class="select-box" style="width: 100px;">
+                                <span class="select-box__btn">ON/OFF 전체</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <li>ON/OFF 전체</li>
+                                        <li>ON</li>
+                                        <li>OFF</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                        <div class="select-box" style="width: 100px;">
-                            <span class="select-box__btn">모드 전체</span>
-                            <div class="select-box__content">
-                                <ul>
-                                    <li>모드 전체</li>
-                                </ul>
+                            <div id="airModeSelector" class="select-box" style="width: 100px;">
+                                <span class="select-box__btn">모드 전체</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <li>모드 전체</li>
+                                        <li>난방</li>
+                                        <li>냉방</li>
+                                        <li>제습</li>
+                                        <li>송풍</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                        <div class="select-box" style="width: 100px;">
-                            <span class="select-box__btn">풍량 전체</span>
-                            <div class="select-box__content">
-                                <ul>
-                                    <li>풍량 전체</li>
-                                </ul>
+                            <div id="airVolumeSelector" class="select-box" style="width: 100px;">
+                                <span class="select-box__btn">풍량 전체</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <li>풍량 전체</li>
+                                        <li>미풍</li>
+                                        <li>약풍</li>
+                                        <li>강풍</li>
+                                        <li>터보풍</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                        <div class="select-box" style="width: 100px;">
-                            <span class="select-box__btn">풍향 전체</span>
-                            <div class="select-box__content">
-                                <ul>
-                                    <li>풍향 전체</li>
-                                </ul>
+                            <div id="airDirectionSelector" class="select-box" style="width: 100px;">
+                                <span class="select-box__btn">풍향 전체</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <li>풍향 전체</li>
+                                        <li>좌우</li>
+                                        <li>상하</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
 
-                        <button type="button" class="button button--solid-middle" style="width: 100px;">검색</button>
-                    </div>
-                    <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
-                        총 <span id="totalAirCnt">0</span>
+                            <button type="button" class="button button--solid-middle" style="width: 100px;">검색</button>
+                        </div>
+                        <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
+                            총 <span id="totalAirCnt">0</span>
+                        </div>
                     </div>
                     <div class="section__detail" style="height: 580px; background-color: transparent">
                         <div class="facility-area facility-area--elevator">
-                            <ul id="airList" class="facility-area__list facility-area__list--grid3">
+                            <ul id="airList" class="facility-area__list facility-area__list--grid3 card-list">
                                 <li class="air-card on" style="padding: 0">
                                     <div class="air-card__header">
                                         <span class="air-card__status">ON</span>

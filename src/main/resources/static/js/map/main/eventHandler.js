@@ -208,8 +208,20 @@
             elevatorTab: () => {
                 console.log("elevatorTab");
                 layerPopup.setElevator();
-                elevatorPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
-                elevatorPop.style.display = 'block';
+
+                const elevatorTab = document.querySelector('.elevator-tab');
+                const escalatorTab = document.querySelector('.escalator-tab');
+                const elevatorContent = document.getElementById('elevatorContent');
+                const escalatorContent = document.getElementById('escalatorContent');
+
+                initPopup(elevatorPop, clickedItem);
+                registerTabHandlers({
+                    firstTab: elevatorTab,
+                    secondTab: escalatorTab,
+                    firstContent: elevatorContent,
+                    secondContent: escalatorContent
+                });
+
             },
             parkingTab: () => {
 
@@ -227,9 +239,9 @@
                 });
             },
             airTab: () => {
-                console.log("airTab");
-                airPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
-                airPop.style.display = 'block';
+                layerPopup.setAirTab();
+                initPopup(airPop, clickedItem);
+
             },
             energyTab: () => {
                 console.log("energyTab");

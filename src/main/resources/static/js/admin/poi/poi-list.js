@@ -6,8 +6,9 @@ function initCctv() {
     dummyCanvas.width = 640;
     dummyCanvas.height = 480;
     let pluxPlayer = null;
+    let cctvConfig = {};
     api.get("/cctv/config").then(res => {
-        const cctvConfig = res.data.result;
+        cctvConfig = res.data.result;
         pluxPlayer = new PluxPlayer({
             wsRelayUrl: cctvConfig.wsRelayUrl,
             wsRelayPort: cctvConfig.wsRelayPort,
@@ -19,24 +20,23 @@ function initCctv() {
 
             LG_live_port: cctvConfig.lgLivePort,
             LG_playback_port: cctvConfig.lgPlaybackPort,
-            canvasDom: canvasElement
+            canvasDom: dummyCanvas
+        });
+        pluxPlayer.getDeviceInfo(function(cameraList) {
+            const params = {
+                cameraList: cameraList.map(camera => ({
+                    url: camera["ns1:strIPAddress"],
+                    code: camera["ns1:strCameraID"],
+                    name: camera["ns1:strName"]
+                }))
+            }
+            console.log("params : ", params);
+
+            // api.post('/cctv', params).then((res) => {
+            //     console.log("parma : ", params)
+            // });
         });
     })
-
-    pluxPlayer.getDeviceInfo(function(cameraList) {
-        const params = {
-            cameraList: cameraList.map(camera => ({
-                url: camera["ns1:strIPAddress"],
-                code: camera["ns1:strCameraID"],
-                name: camera["ns1:strName"]
-            }))
-        }
-        console.log("params : ", params);
-
-        // api.post('/cctv', params).then((res) => {
-        //     console.log("parma : ", params)
-        // });
-    });
 }
 const dataManufacturer = (rowData) =>
     rowData.map((poi) => {
@@ -271,19 +271,21 @@ api.get("/cctv/config").then(res => {
 
         LG_live_port: cctvConfig.lgLivePort,
         LG_playback_port: cctvConfig.lgPlaybackPort,
-        canvasDom: canvasElement
+        canvasDom: dummyCanvas
     });
 })
 
 function getCctvList(callback) {
-    pluxPlayer.getDeviceInfo(function(cameraList) {
-        const cameraInfoList = cameraList.map(camera => ({
-            ipAddress: camera["ns1:strIPAddress"],
-            cameraID: camera["ns1:strCameraID"],
-            cameraName: camera["ns1:strName"]
-        }));
-        callback(cameraInfoList);
-    });
+    if (pluxPlayer) {
+        pluxPlayer.getDeviceInfo(function(cameraList) {
+            const cameraInfoList = cameraList.map(camera => ({
+                ipAddress: camera["ns1:strIPAddress"],
+                cameraID: camera["ns1:strCameraID"],
+                cameraName: camera["ns1:strName"]
+            }));
+            callback(cameraInfoList);
+        });
+    }
 }
 
 const registerModal = document.querySelector('#poiRegisterModal');

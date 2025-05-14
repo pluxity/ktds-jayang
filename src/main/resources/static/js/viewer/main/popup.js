@@ -1375,6 +1375,8 @@ const layerPopup = (function () {
                 const win = lightIframe.contentWindow;
                 win.Px.Model.Visible.HideAll();
                 win.Px.Model.Visible.Show(Number(floor.id));
+                win.Px.Poi.ShowAll()
+                // win.Px.Poi.ShowByProperty("floorId", Number(floor.id));
                 const lightData = getLightData(building, floor);
                 lightAccordionBtn.forEach((btn, i) => {
                     btn.textContent = `${floor.name} - ${i + 1}`;
@@ -1403,7 +1405,7 @@ const layerPopup = (function () {
 
         lightIframe = document.createElement('iframe');
         lightIframe.style.cssText = 'width:100%;height:100%;border:none';
-        lightIframe.src = '/viewer/lightPopFrame.html';
+        lightIframe.src = '/lightPopFrame';
         container.appendChild(lightIframe);
 
         const buildingData = {

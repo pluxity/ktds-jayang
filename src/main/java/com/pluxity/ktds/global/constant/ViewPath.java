@@ -25,6 +25,7 @@ public enum ViewPath {
     DEFAULT("/", "login/login"),
 
     VIEWER_MAIN("/viewer","viewer/index"),
+    IFRAME_POP("/lightPopFrame","viewer/lightPopFrame"),
     VIEWER_MAP("/map","map/index"),
 
     KIOSK_ADMIN_VIEWER("/kiosk/admin/viewer", "kioskAdmin/viewer/viewer"),

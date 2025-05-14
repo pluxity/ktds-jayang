@@ -1372,11 +1372,17 @@ const layerPopup = (function () {
             },
             onFloorChange: (building, floor) => {
 
+                const floorPois = PoiManager.findByFloor(floor.id);
+                console.log("floorPoi :", floorPois);
                 const win = lightIframe.contentWindow;
                 win.Px.Model.Visible.HideAll();
                 win.Px.Model.Visible.Show(Number(floor.id));
-                win.Px.Poi.ShowAll()
-                // win.Px.Poi.ShowByProperty("floorId", Number(floor.id));
+                win.Px.Poi.HideAll();
+                win.Px.Poi.ShowByProperty("floorId", Number(floor.id));
+                floorPois.forEach(poi => {
+                    win.Px.Poi.SetIconSize(poi.id, 50);
+                })
+
                 const lightData = getLightData(building, floor);
                 lightAccordionBtn.forEach((btn, i) => {
                     btn.textContent = `${floor.name} - ${i + 1}`;

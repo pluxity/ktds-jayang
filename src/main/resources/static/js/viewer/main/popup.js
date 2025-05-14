@@ -1195,6 +1195,7 @@ const layerPopup = (function () {
         const buildingBox = document.getElementById(`${type}Building`);
         const floorBox = document.getElementById(`${type}Floor`);
         const buildingBtn = buildingBox.querySelector('.select-box__btn');
+        const statusBox = document.getElementById('elevatorStatus');
         const floorBtn = floorBox.querySelector('.select-box__btn');
         let buildingList = BuildingManager.findAll();
         const sysPopup = document.getElementById(`${type}Pop`);
@@ -1204,14 +1205,39 @@ const layerPopup = (function () {
         let currentBuilding = null;
         let currentFloor = null;
 
-        const toggleBtnActive = (btn, otherBtn) => {
+        const toggleBtnActive = (btn, ...others) => {
             if (!btn.classList.contains('select-box__disabled')) {
                 btn.classList.toggle('select-box__btn--active');
-                otherBtn.classList.remove('select-box__btn--active');
+                others.forEach(o => o?.classList.remove('select-box__btn--active'));
+                // others.classList.remove('select-box__btn--active');
             }
         };
-        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn);
-        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn)
+
+        const statusBtn = statusBox?.querySelector('.select-box__btn');
+        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn, statusBtn);
+        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn, statusBtn)
+        console.log("sysPopup : ", sysPopup);
+        if (type == 'elevator') {
+            sysPopup.querySelector('#elevatorContent')
+            const statusBtn = statusBox.querySelector('.select-box__btn');
+            const statusContent = statusBox.querySelector('.select-box__content');
+            if (statusContent.querySelector('ul')) {
+                const statusUl = document.createElement('ul');
+                ['자동', '수동', '독립', '통신이상', '소방', '파킹', '만원', '고장'].forEach(text => {
+                    const li = document.createElement('li');
+                    li.dataset.id  = text;
+                    li.textContent = text;
+                    li.onclick = () => {
+                        statusBtn.textContent = text;
+                        statusBtn.classList.remove('select-box__btn--active');
+                    };
+                    statusUl.appendChild(li);
+                });
+                statusContent.appendChild(statusUl);
+            }
+
+            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn, floorBtn);
+        }
         buildingUl.innerHTML = '';
         floorUl.innerHTML = '';
 
@@ -1304,6 +1330,7 @@ const layerPopup = (function () {
                 onBuildingChange(building, currentFloor);
             }
 
+
             buildingUl.appendChild(buildingLi);
         });
     }
@@ -1366,19 +1393,6 @@ const layerPopup = (function () {
                 });
             }
         });
-
-        // lightAccordionBtn.forEach(btn => {
-        //     btn.onclick = () => {
-        //         const isActive = btn.classList.toggle('accordion__btn--active');
-        //         if (isActive) {
-        //             btn.style.backgroundColor = 'var(--color-mint)';
-        //             btn.style.color = 'var(--color-black)';
-        //         } else {
-        //             btn.style.backgroundColor = '';
-        //             btn.style.color = '';
-        //         }
-        //     };
-        // });
     };
 
     let lightIframe = null;
@@ -1405,50 +1419,6 @@ const layerPopup = (function () {
                 window.location.origin
             );
         }, { once: true });
-
-        // Px.Core.Initialize(container, async () => {
-        //     console.log("building : ", building);
-        //     const { buildingFile, floors } = building;
-        //     const { directory } = buildingFile;
-        //
-        //     const sbmDataArray = floors.map((floor) => {
-        //
-        //         const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
-        //         const sbmData = {
-        //             url,
-        //             id: floor.sbmFloor[0].id,
-        //             displayName: floor.sbmFloor[0].sbmFileName,
-        //             baseFloor: floor.sbmFloor[0].sbmFloorBase,
-        //             groupId: floor.sbmFloor[0].sbmFloorGroup,
-        //         };
-        //         return sbmData;
-        //     });
-        //
-        //     Px.Loader.LoadSbmUrlArray({
-        //         urlDataList: sbmDataArray,
-        //         center: "",
-        //         onLoad: (loadedId) => {
-        //             Px.Core.Resize();
-        //             Px.Util.SetBackgroundColor('#333333');
-        //             Px.Camera.FPS.SetHeightOffset(15);
-        //             // Px.Camera.FPS.SetMoveSpeed(500);
-        //             Px.Camera.SetOrthographic();
-        //             Px.Camera.ExtendView();
-        //             Px.Camera.EnableScreenPanning();
-        //             Px.Model.Visible.HideAll();
-        //             Px.Model.Visible.Show(Number(floor.id));
-        //             PoiManager.renderAllPoiToEngineByBuildingId(building.id);
-        //             // initializeTexture();
-        //         },
-        //     })
-        // })
-    }
-
-    const getFloor = (building, floor) => {
-        const container = document.querySelector('#lightPop .section--contents .section__detail')
-        container.innerHTML = '';
-
-        getBuildingPop(building);
     }
 
     const initializeTexture = () => {
@@ -1463,7 +1433,15 @@ const layerPopup = (function () {
 
     // elevator
     const setElevator = () => {
+        setTab('elevator', {
+            onBuildingChange: (building, floor) => {
+                console.log("building", building);
 
+            },
+            onFloorChange: (building, floor) => {
+                console.log("floor", floor);
+            }
+        });
     }
 
     const elevatorPopup = document.getElementById('elevatorPop');

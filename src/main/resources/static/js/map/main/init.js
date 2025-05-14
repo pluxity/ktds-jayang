@@ -165,7 +165,8 @@
         // 1층단위
         upButton.addEventListener('click', () => {
             if (startIndex > 0) {
-                startIndex--;
+                startIndex -= 10;
+                // startIndex = Math.max(0, startIndex - 10);
                 updateFloorPage(floorUl, startIndex, itemsPerPage);
                 updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
             }
@@ -173,7 +174,8 @@
 
         downButton.addEventListener('click', () => {
             if (startIndex + itemsPerPage < totalItems) {
-                startIndex++;
+                startIndex += 10;
+                // startIndex = Math.min(totalItems - itemsPerPage, startIndex + 10);
                 updateFloorPage(floorUl, startIndex, itemsPerPage);
                 updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
             }
@@ -380,6 +382,7 @@ const Init = (function () {
 
                         Px.Event.On();
                         Px.Event.RemoveEventListener('dblclick', 'sbm', buildingDblclick);
+
                         Px.Effect.Outline.HoverEventOff();
                         Px.Effect.Outline.RemoveHoverEventCallback(renderingBuildingNameDom);
                         initializeTexture();
@@ -949,6 +952,7 @@ const Init = (function () {
     }
 
     const buildingDblclick = async (buildingInfo) => {
+        console.log("buildingInfo : ", buildingInfo);
         const {area_no} = buildingInfo.property;
         const building = BuildingManager.findAll().find(building => building.code != null && building.code.split("-")[1] === area_no);
 

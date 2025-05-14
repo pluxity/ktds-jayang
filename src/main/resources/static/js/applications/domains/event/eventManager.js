@@ -283,8 +283,6 @@ const EventManager = (() => {
 
         api.get("/cctv/config").then(res => {
             const cctvConfig = res.data.result;
-            console.log("cctvCode : ", cctvCode);
-            console.log("cctvConfig : ", cctvConfig);
             const livePlayer = new PluxPlayer({
                 wsRelayUrl: cctvConfig.wsRelayUrl,
                 wsRelayPort: cctvConfig.wsRelayPort,

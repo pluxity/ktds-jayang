@@ -5,18 +5,22 @@ function initCctv() {
     const dummyCanvas = document.createElement("canvas");
     dummyCanvas.width = 640;
     dummyCanvas.height = 480;
-    let pluxPlayer = new PluxPlayer({
-        wsRelayUrl: "http://127.0.0.1",
-        wsRelayPort: 4001,
-        httpRelayUrl: "http://127.0.0.1",
-        httpRelayPort: 4002,
+    let pluxPlayer = null;
+    api.get("/cctv/config").then(res => {
+        const cctvConfig = res.data.result;
+        pluxPlayer = new PluxPlayer({
+            wsRelayUrl: cctvConfig.wsRelayUrl,
+            wsRelayPort: cctvConfig.wsRelayPort,
+            httpRelayUrl: cctvConfig.httpRelayUrl,
+            httpRelayPort: cctvConfig.httpRelayPort,
 
-        canvasDom: dummyCanvas,
-        LG_server_ip: "192.168.4.45",
-        LG_server_port: "9100",
+            LG_server_ip: cctvConfig.lgServerIp,
+            LG_server_port: cctvConfig.lgServerPort,
 
-        LG_live_port: "555",
-        LG_playback_port: "554"
+            LG_live_port: cctvConfig.lgLivePort,
+            LG_playback_port: cctvConfig.lgPlaybackPort,
+            canvasDom: canvasElement
+        });
     })
 
     pluxPlayer.getDeviceInfo(function(cameraList) {
@@ -253,18 +257,23 @@ document.getElementById('selectPoiCategoryIdModify').addEventListener('change', 
 const dummyCanvas = document.createElement("canvas");
 dummyCanvas.width = 640;
 dummyCanvas.height = 480;
+let pluxPlayer = null;
+api.get("/cctv/config").then(res => {
+    const cctvConfig = res.data.result;
+    pluxPlayer = new PluxPlayer({
+        wsRelayUrl: cctvConfig.wsRelayUrl,
+        wsRelayPort: cctvConfig.wsRelayPort,
+        httpRelayUrl: cctvConfig.httpRelayUrl,
+        httpRelayPort: cctvConfig.httpRelayPort,
 
-const pluxPlayer = new PluxPlayer({
-    wsRelayUrl: "http://127.0.0.1",
-    wsRelayPort: 4001,
-    httpRelayUrl: "http://127.0.0.1",
-    httpRelayPort: 4002,
-    canvasDom: dummyCanvas,
-    LG_server_ip: "192.168.4.45",
-    LG_server_port: "9100",
-    LG_live_port: "555",
-    LG_playback_port: "554"
-});
+        LG_server_ip: cctvConfig.lgServerIp,
+        LG_server_port: cctvConfig.lgServerPort,
+
+        LG_live_port: cctvConfig.lgLivePort,
+        LG_playback_port: cctvConfig.lgPlaybackPort,
+        canvasDom: canvasElement
+    });
+})
 
 function getCctvList(callback) {
     pluxPlayer.getDeviceInfo(function(cameraList) {

@@ -1444,12 +1444,24 @@ const layerPopup = (function () {
         setTab('elevator', {
             onBuildingChange: (building, floor) => {
                 console.log("building", building);
-
             },
             onFloorChange: (building, floor) => {
                 console.log("floor", floor);
             }
         });
+        const param = new URLSearchParams(window.location.search);
+        const buildingId = param.get("buildingId");
+        const building = BuildingManager.findById(buildingId);
+        const buildingName = building.name;
+
+        api.get(`/api/tags/elevator`, {
+            params: {
+                buildingId,
+                buildingName
+            }
+        }).then(res => {
+            console.log(res);
+        })
     }
 
     const elevatorPopup = document.getElementById('elevatorPop');

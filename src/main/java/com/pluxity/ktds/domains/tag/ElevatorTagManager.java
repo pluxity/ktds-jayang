@@ -1,10 +1,8 @@
 package com.pluxity.ktds.domains.tag;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ElevatorTagManager {
@@ -85,6 +83,22 @@ public class ElevatorTagManager {
         Stop("Stop", Map.of("0", "OFF", "1", "정지")),
         Run("Run", Map.of("0", "OFF", "1", "운행")),
         Fault("Fault", Map.of("0", "OFF", "1", "고장"));
+
+        private final String tagName;
+        private final Map<String, String> valueMap;
+
+        public String getValueDescription(String value) {
+            return valueMap.get(value);
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum VavTag {
+        CoolHeap("COOL_HEAP", Map.of("0", "냉방", "1", "난방")),
+        ManualDmpOpen("MANUAL_DMP_OPEN", Map.of("0", "자동", "1", "100%개방")),
+        Fan("FAN", Map.of("0", "정지", "1", "기동")),
+        Vlv24vOnOff("VLV_24V_ON_OFF", Map.of("0", "닫힘", "1", "열림"));
 
         private final String tagName;
         private final Map<String, String> valueMap;

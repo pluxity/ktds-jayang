@@ -288,6 +288,19 @@ function getCctvList(callback) {
     }
 }
 
+['Register', 'Modify'].forEach(suffix => {
+    const isLightCheck = document.getElementById(`isLightPoi${suffix}`);
+    const lightGroup = document.getElementById(`lightGroup${suffix}`);
+    if (!isLightCheck || !lightGroup) {
+        return
+    }
+    lightGroup.disabled = !isLightCheck.checked;
+
+    isLightCheck.addEventListener('change', (e) => {
+        lightGroup.disabled = !isLightCheck.checked;
+    })
+})
+
 const registerModal = document.querySelector('#poiRegisterModal');
 registerModal.addEventListener('show.bs.modal', () => {
 
@@ -433,6 +446,8 @@ function getTagNames(type) {
         params.name = document.querySelector(`#poiName${type}`).value;
         // params.tagNames = document.querySelector(`#tag${type}`).value;
         params.tagNames = getTagNames(`${type}`);
+        params.isLight = document.getElementById(`isLightPoi${type}`).checked;
+        params.lightGroup = document.getElementById(`lightGroup${type}`).value;
         if (!poiCategory.name.toLowerCase().includes('cctv')) {
             params.cctvList = [];
             const mainCctvValue = document.querySelector(`#mainCctv${type}`).value;

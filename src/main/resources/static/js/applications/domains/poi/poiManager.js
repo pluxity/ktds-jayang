@@ -213,6 +213,10 @@ const PoiManager = (() => {
             Px.Poi.GetDataAll().forEach((poi) => {
                 Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
                 Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
+                if (poi.property.isLight) {
+                    Px.Poi.SetTextSize(poi.id, 1);
+                    Px.Poi.SetIconSize(poi.id, 50);
+                }
                 if (poi.property.code.toLowerCase().includes("tms")) {
                     TmsEventHandler.renderSetColor(poi.property.code);
                 }

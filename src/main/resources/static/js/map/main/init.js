@@ -428,7 +428,8 @@ const Init = (function () {
             });
         });
     };
-
+    let selectedGroup = null;
+    let selectedId = null;
     const getBuilding = async (buildingId) => {
         const container = document.getElementById('webGLContainer');
         container.innerHTML = '';
@@ -467,6 +468,7 @@ const Init = (function () {
                     Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                         moveToPoi(poiInfo.id);
                     });
+
                     Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
                         const clickedPoiId = String(poiInfo.id);
                         const allPopups = document.querySelectorAll('.popup-info');
@@ -482,10 +484,31 @@ const Init = (function () {
                                 popup.remove();
                             }
                         });
+                        if (poiInfo.property.isLight) {
+
+                            if (selectedGroup === poiInfo.property.lightGroup) {
+                                if (selectedId === poiInfo.id) {
+                                    Px.Poi.RestoreColorAll();
+                                    selectedGroup = null;
+                                    selectedId = null;
+                                } else {
+                                    selectedId = poiInfo.id;
+                                }
+
+                            } else {
+                                Px.Poi.RestoreColorAll();
+                                Px.Poi.SetColorByProperty('lightGroup', poiInfo.property.lightGroup, '#f80606');
+                                selectedGroup = poiInfo.property.lightGroup;
+                                selectedId = poiInfo.id;
+                            }
+                        }
+                        console.log("selectedId : ", selectedId);
                         if (samePopupOpen) return;
                         renderPoiInfo(poiInfo);
+
                     });
                     Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
+                        console.log("event : ", event);
                     })
 
                     Px.Effect.Outline.HoverEventOn('area_no');
@@ -921,8 +944,11 @@ const Init = (function () {
             () => {
                 // TODO: top-view 위치
                 const building = BuildingManager.findById(buildingId);
-                let option = JSON.parse(building.camera2d);
-                if (option === null) {
+                let option = '';
+                const camera2dStr = building?.camera2d;
+                console.log("option : ", option);
+                if (camera2dStr === null || camera2dStr === "" || camera2dStr === undefined) {
+                    option = JSON.parse(camera2dStr);
                     option = {
                         position: {x: -134.91073489593867, y: 4048.653041121009, z: -418.59942425930194},
                         rotation: {x: 0, y: 0, z: 0},
@@ -1202,6 +1228,7 @@ const Init = (function () {
         setBuildingNameAndFloors,
         changeFloor,
         getBuilding,
-        renderPoiInfo
+        renderPoiInfo,
+        getPoiRenderingAndList
     }
 })();

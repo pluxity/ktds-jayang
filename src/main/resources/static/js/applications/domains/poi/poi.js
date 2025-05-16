@@ -11,6 +11,8 @@ class Poi {
     #property;
     #tagNames;
     #cctvList;
+    #isLight;
+    #lightGroup;
 
     constructor(
         id,
@@ -27,6 +29,8 @@ class Poi {
         property,
         tagNames,
         cctvList,
+        isLight,
+        lightGroup
     ) {
         this.#id = id;
         this.#name = name;
@@ -49,6 +53,8 @@ class Poi {
         this.#floorId = floorId;
         this.#tagNames = tagNames;
         this.#cctvList = cctvList;
+        this.#isLight = isLight;
+        this.#lightGroup = lightGroup;
     }
 
     get id() {
@@ -97,6 +103,12 @@ class Poi {
     }
     get cctvList() {
         return this.#cctvList;
+    }
+    get isLight() {
+        return this.#isLight;
+    }
+    get lightGroup() {
+        return this.#lightGroup;
     }
     // Px.Poi.Add 용
     get poiOptions() {

@@ -3,7 +3,9 @@ package com.pluxity.ktds.domains.tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ElevatorTagManager {
 
@@ -69,6 +71,17 @@ public class ElevatorTagManager {
 
         private final String tagName;
         private final Map<String, String> valueMap;
+        private static final Map<String, ElevatorCTag> BY_TAG_NAME =
+                Arrays.stream(values())
+                        .collect(Collectors.toMap(ElevatorCTag::getTagName, e -> e));
+
+        public static ElevatorCTag fromTagName(String tagName) {
+            ElevatorCTag e = BY_TAG_NAME.get(tagName);
+            if (e == null) {
+                throw new IllegalArgumentException("Unknown tagName: " + tagName);
+            }
+            return e;
+        }
 
         public String getValueDescription(String value) {
             return valueMap.get(value);
@@ -119,6 +132,18 @@ public class ElevatorTagManager {
 
         private final String tagName;
         private final Map<String, String> valueMap;
+
+        private static final Map<String, HeHTag> BY_TAG_NAME =
+                Arrays.stream(values())
+                        .collect(Collectors.toMap(HeHTag::getTagName, e -> e));
+
+        public static HeHTag fromTagName(String tagName) {
+            HeHTag e = BY_TAG_NAME.get(tagName);
+            if (e == null) {
+                throw new IllegalArgumentException("Unknown tagName: " + tagName);
+            }
+            return e;
+        }
 
         public String getValueDescription(String value) {
             return valueMap.get(value);

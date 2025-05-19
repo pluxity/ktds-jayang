@@ -21,7 +21,7 @@ public class TagService {
     private final PoiRepository poiRepository;
     private final RestTemplate restTemplate;
 
-    public Map<Long, TagResponseDTO> processTagDataByPoi(Long buildingId, String buildingName) {
+    public Map<Long, TagResponseDTO> processTagDataByPoi(String type, Long buildingId, String buildingName) {
 
         String prefixEv = String.format("%s-null-EV-ELEV-", buildingName);
         String prefixEs = String.format("%s-null-EV-ESCL-", buildingName);
@@ -70,16 +70,17 @@ public class TagService {
 
                         if (full.startsWith(prefixEv)) {
                             try {
-                                if ("C".equals(buildingName)) {
-                                    desc = ElevatorTagManager.ElevatorCTag.valueOf(enumName).getValueDescription(raw);
-                                } else {
+                                if ("A".equals(buildingName) || "B".equals(buildingName)) {
                                     desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(raw);
+                                } else {
+                                    desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(raw);
                                 }
                                 result.add(new TagData(full, desc, td.tagStatus(), td.alarmStatus()));
                             } catch (IllegalArgumentException e) {
+                                e.printStackTrace();
                                 result.add(new TagData(full, raw, td.tagStatus(), td.alarmStatus()));
                             }
-                        } else if (full.startsWith(prefixEs) && "C".equals(buildingName)) {
+                        } else if (full.startsWith(prefixEs)) {
                             try {
                                 desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(raw);
                                 result.add(new TagData(full, desc, td.tagStatus(), td.alarmStatus()));
@@ -88,10 +89,11 @@ public class TagService {
                             }
                         }
                     }
-                    poiTagResponseMap.put(poiId, new TagResponseDTO(result.size(), all.timestamp(), result));
+                    if (!result.isEmpty()) {
+                        poiTagResponseMap.put(poiId, new TagResponseDTO(result.size(), all.timestamp(), result));
+                    }
                 }
             }
-            System.out.println("poiTagResponseMap : " + poiTagResponseMap);
         }
         return poiTagResponseMap;
     }

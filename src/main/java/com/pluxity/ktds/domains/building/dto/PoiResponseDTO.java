@@ -9,6 +9,8 @@ public record PoiResponseDTO(
         Long id,
         String code,
         String name,
-        List<String> tagNames
+        List<String> tagNames,
+        Boolean isLight,
+        String lightGroup
 ) {
 }

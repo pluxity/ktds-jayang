@@ -10,10 +10,7 @@ import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
 import org.springframework.util.StringUtils;
 
@@ -81,14 +78,22 @@ public class Poi {
     @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PoiCctv> poiCctvs = new ArrayList<>();
 
+    @Column(name = "is_light")
+    private Boolean isLight;
+
+    @Column(name = "light_group")
+    private String lightGroup;
+
     @Builder
-    public Poi(String name, String code, List<String> tagNames) {
+    public Poi(String name, String code, List<String> tagNames, Boolean isLight, String lightGroup) {
         this.name = name;
         this.code = code;
         this.tagNames = tagNames != null ? new ArrayList<>(tagNames) : new ArrayList<>();
+        this.isLight = isLight;
+        this.lightGroup = lightGroup;
     }
 
-    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs) {
+    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup) {
         if (StringUtils.hasText(name)) {
             this.name = name;
         }
@@ -102,6 +107,12 @@ public class Poi {
         if (poiCctvs != null) {
             this.poiCctvs.clear();
             this.poiCctvs.addAll(poiCctvs);
+        }
+        if (isLight != null) {
+            this.isLight = isLight;
+        }
+        if (lightGroup != null) {
+            this.lightGroup = lightGroup;
         }
     }
 
@@ -128,6 +139,12 @@ public class Poi {
 
     public void changeIconSet(IconSet iconSet) {
         this.iconSet = iconSet;
+    }
+    public void changeIsLight(Boolean isLight) {
+        this.isLight = isLight;
+    }
+    public void changeLightGroup(String lightGroup) {
+        this.lightGroup = lightGroup;
     }
 
     public void changePosition(Spatial position) {
@@ -165,6 +182,8 @@ public class Poi {
                                 .isMain(cctv.getIsMain())
                                 .build())
                         .toList())
+                .isLight(this.getIsLight())
+                .lightGroup(this.getLightGroup())
                 .build();
     }
 
@@ -173,6 +192,8 @@ public class Poi {
                 .id(this.id)
                 .name(this.name)
                 .code(this.code)
+                .isLight(isLight)
+                .lightGroup(this.lightGroup)
                 .build();
     }
 }

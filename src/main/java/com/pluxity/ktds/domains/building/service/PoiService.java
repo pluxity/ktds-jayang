@@ -134,6 +134,8 @@ public class PoiService {
                             .code(base.code())
                             .tagNames(base.tagNames())
                             .cctvList(cctvDtoList)
+                            .isLight(base.isLight())
+                            .lightGroup(base.lightGroup())
                             .build();
                 })
                 .toList();
@@ -157,6 +159,8 @@ public class PoiService {
                 .code(dto.code())
                 .name(dto.name())
                 .tagNames(dto.tagNames() != null ? new ArrayList<>(dto.tagNames()) : new ArrayList<>())
+                .isLight(dto.isLight())
+                .lightGroup(dto.lightGroup())
                 .build();
 
         validateAssociation(dto);
@@ -179,7 +183,7 @@ public class PoiService {
         }
         Poi savedPoi = poiRepository.save(poi);
         if (dto.tagNames() != null) {
-            tagClientService.addTags(dto.tagNames());
+//            tagClientService.addTags(dto.tagNames());
         }
 
         return savedPoi.getId();
@@ -241,7 +245,7 @@ public class PoiService {
                             .isMain(c.isMain())
                             .build())
                     .toList();
-            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs);
+            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup());
         }
 //        List<PoiCctv> newCctvs = dto.cctvList().stream()
 //                .map(c -> PoiCctv.builder()
@@ -250,9 +254,9 @@ public class PoiService {
 //                        .isMain(c.isMain())
 //                        .build())
 //                .toList();
-        poi.update(dto.name(), dto.code(), dto.tagNames(), null);
+        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup());
         if (dto.tagNames() != null) {
-            tagClientService.addTags(dto.tagNames());
+//            tagClientService.addTags(dto.tagNames());
         }
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
         updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);

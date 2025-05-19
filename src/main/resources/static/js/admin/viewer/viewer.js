@@ -302,6 +302,7 @@ function initBuilding() {
                 initPoi();
                 initPatrol();
                 Px.Event.On();
+                Px.Camera.EnableScreenPanning()
                 if(camera3d)
                     Px.Camera.SetState(JSON.parse(camera3d));
                 Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {

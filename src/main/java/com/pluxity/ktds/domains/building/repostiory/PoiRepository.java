@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     Optional<Poi> findByPoiCategoryId(@Param(value = "id") Long id);
 
     List<Poi> findBybuilding(Building building);
+    List<Poi> findPoisByBuildingId(@Param(value = "id") Long id);
 
     boolean existsByBuilding(Building building);
 
@@ -30,4 +32,7 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     boolean existsByName(String name);
 
     boolean existsByPoiMiddleCategoryId(Long id);
+
+    @Query("SELECT p FROM Poi p JOIN p.tagNames t WHERE t IN :tagNames")
+    List<Poi> findByTagNamesIn(@Param("tagNames") List<String> tagNames);
 }

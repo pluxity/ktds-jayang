@@ -1454,6 +1454,41 @@ const layerPopup = (function () {
         const building = BuildingManager.findById(buildingId);
         const buildingName = building.name;
 
+        let dataById = null;
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'elevator',
+                buildingId,
+                buildingName
+            }
+        }).then(res => {
+            dataById = res.data;
+            console.log(dataById);
+            const elevatorUl = document.getElementById('elevatorList');
+            elevatorUl.innerHTML = '';
+            // 여기서 세팅하면 될듯?
+            Object.entries(dataById).forEach(([idStr, dto]) => {
+                const poiInfo = Px.Poi.GetData(Number(idStr));
+                console.log("poiInfo : ", poiInfo);
+                console.log("dto : ", dto);
+            })
+        })
+    }
+
+    const setEscalator = () => {
+        setTab('escalator', {
+            onBuildingChange: (building, floor) => {
+                console.log("building", building);
+            },
+            onFloorChange: (building, floor) => {
+                console.log("floor", floor);
+            }
+        });
+        const param = new URLSearchParams(window.location.search);
+        const buildingId = param.get("buildingId");
+        const building = BuildingManager.findById(buildingId);
+        const buildingName = building.name;
+
         api.get(`/api/tags/elevator`, {
             params: {
                 buildingId,

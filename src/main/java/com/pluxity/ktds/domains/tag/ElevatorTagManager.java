@@ -108,4 +108,20 @@ public class ElevatorTagManager {
         }
     }
 
+    @Getter
+    @AllArgsConstructor
+    public enum HeHTag {
+        Status("상태", Map.of("0", "OFF", "1", "ON")),
+        Alarm("경보", Map.of("0", "Normal", "1", "Alarm")),
+        Auto("자동수동", Map.of("0", "수동", "1", "자동")),
+        Heating("냉방난방", Map.of("0", "냉방", "1", "난방")),
+        Stop("운전정지", Map.of("0", "OFF", "1", "ON"));
+
+        private final String tagName;
+        private final Map<String, String> valueMap;
+
+        public String getValueDescription(String value) {
+            return valueMap.get(value);
+        }
+    }
 }

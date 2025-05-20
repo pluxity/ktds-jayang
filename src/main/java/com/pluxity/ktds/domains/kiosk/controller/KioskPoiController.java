@@ -5,6 +5,7 @@ import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.kiosk.dto.*;
 import com.pluxity.ktds.domains.kiosk.service.KioskPoiService;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
+import com.pluxity.ktds.global.constant.SuccessCode;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import com.pluxity.ktds.global.response.ResponseBody;
 import jakarta.validation.Valid;
@@ -30,6 +31,14 @@ public class KioskPoiController {
     @ResponseStatus(HttpStatus.OK)
     public DataResponseBody<?> getKioskPoi(@PathVariable Long id) {
         return DataResponseBody.of(kioskPoiService.findKioskPoiById(id));
+    }
+
+    @PostMapping("/batch-register")
+    public ResponseBody postBatchPoi(@RequestParam(value = "floorId") Long floorId,
+                                     @RequestParam(value = "isKiosk") boolean isKiosk,
+                                     @RequestBody MultipartFile file) {
+        kioskPoiService.batchRegisterKioskPoi(floorId, isKiosk, file);
+        return ResponseBody.of(SuccessCode.SUCCESS_CREATE);
     }
 
     @GetMapping

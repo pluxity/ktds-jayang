@@ -351,7 +351,7 @@ public class KioskPoiService {
             }
 
             int kioskFlag = isKiosk ? 1 : 0;
-            List<Map<String, Object>> rows = ExcelUtil.readExcelBatchkiosk(file, kioskFlag);
+            List<Map<String, Object>> rows = ExcelUtil.readExcelBatchKiosk(file, kioskFlag);
 
             int headerLength = rows.get(0).size();
 

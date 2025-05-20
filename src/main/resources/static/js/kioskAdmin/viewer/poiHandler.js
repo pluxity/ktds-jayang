@@ -1,15 +1,22 @@
 const registerBtn = document.querySelector('#poiRegisterBtn');
+const batchRegisterBtn = document.querySelector("#poiBatchRegisterBtn")
 const radioButtons = document.querySelectorAll('input[name="type"]');
 const registerStoreForm = document.getElementById('registerStoreForm');
 const registerKioskForm = document.getElementById('registerKioskForm');
 const poiRegisterModal = new bootstrap.Modal(document.getElementById('poiRegisterModal'));
+const poiBatchRegisterModal = new bootstrap.Modal(document.getElementById('poiBatchRegisterModal'));
 const poiModifyModal = new bootstrap.Modal(document.getElementById('poiModifyModal'));
 const poiRegisterForm = document.getElementById("poiRegisterForm");
+const poiBatchRegisterForm = document.getElementById("poiBatchRegisterForm");
 const modalEl = document.getElementById('poiRegisterModal');
 const popup = document.getElementById('poiRegisterPopup');
 registerBtn.addEventListener('click', () => {
     handlePoiRegisterBtnClick();
 });
+
+batchRegisterBtn.addEventListener('click', () => {
+    handlePoiBatchRegisterBtnClick();
+})
 
 function handlePoiRegisterBtnClick() {
     poiRegisterForm.reset();
@@ -28,6 +35,55 @@ function handlePoiRegisterBtnClick() {
     registerKioskForm.style.display = 'none';
     poiRegisterModal.show();
 }
+
+function handlePoiBatchRegisterBtnClick() {
+    poiBatchRegisterForm.reset();
+
+    const floors = BuildingManager.findStore().floors;
+    const batchRegisterFloorSelect = document.getElementById('registerBatchFloor');
+
+    poiBatchRegisterForm.querySelectorAll('input[name="type"]').forEach(radio => {
+        radio.checked = radio.value === ("store");
+    });
+
+    appendFloorOptionsToSelect(floors, batchRegisterFloorSelect);
+    poiBatchRegisterModal.show();
+}
+
+// 일괄 등록 버튼
+document.getElementById('kioskPoiBatchRegisterBtn')
+    .addEventListener('pointerup', () => {
+
+        if(!validationForm(poiBatchRegisterForm)) return;
+
+        const formData = new FormData();
+
+        formData.set('isKiosk', document.querySelector('input[name="type"]:checked')?.value);
+        formData.set('floorId', document.getElementById('registerBatchFloor').value);
+        formData.set('file', document.querySelector('#kioskBatchRegisterFile').files[0]);
+
+
+        api.post('/kiosk/batch-register', formData).then((res) => {
+            alertSwal('일괄등록이 완료 되었습니다.').then(() => {
+                document
+                    .querySelector(
+                        '#poiBatchRegisterModal > div > div > div.modal-header > button',
+                    ).click();
+                KioskPoiManager.getKioskPoiList().then(() => {
+                    getKioskPoiListRendering();
+                });
+            });
+        }).catch(() => {
+            document.querySelector('#batchRegisterFile').value = ''
+        })
+    })
+
+document.getElementById('kioskSampleFileBtn').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = '/static/sample/kiosk_batchRegister_sample.xlsx';
+    link.download = 'kiosk_batchRegister_sample.xlsx';
+    link.click();
+});
 
 function appendFloorOptionsToSelect(floors, selectElement) {
     if (selectElement.id.startsWith("register")) {

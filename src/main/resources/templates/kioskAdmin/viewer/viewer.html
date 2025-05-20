@@ -83,9 +83,12 @@
                         </div>
                     </div>
                     <hr class="hr-margin">
-                    <div class="txt-center">
-                        <button type="button" style="width: 100%; height: 3rem" class="btn btn-secondary btn-md"
+                    <div class="poi-register-buttons">
+                        <button type="button" style="width: 50%; height: 3rem" class="btn btn-secondary btn-md"
                                 id="poiRegisterBtn">POI 등록
+                        </button>
+                        <button type="button" style="width: 50%; height: 3rem" class="btn btn-success btn-md"
+                                id="poiBatchRegisterBtn">POI 일괄 등록
                         </button>
                     </div>
                 </div>
@@ -144,6 +147,60 @@
             </select>
         </div>
         <div id="poiSelect">
+        </div>
+    </div>
+
+    <!-- 일괄등록 폼 -->
+    <div class="modal fade" id="poiBatchRegisterModal" tabindex="-1" aria-labelledby="poiBatchRegisterModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poiBatchRegisterModalLabel">일괄 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form name="" id="poiBatchRegisterForm" autocomplete="off">
+                        <fieldset>
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width:15%">
+                                    <col style="width:40%">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>유형</th>
+                                    <td colspan="3">
+                                        <label><input type="radio" name="type" value="0"> 상가</label>
+                                        <label><input type="radio" name="type" value="1"> 키오스크</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>층 선택</th>
+                                    <td colspan="3">
+                                        <select name="floorId" id="registerBatchFloor" class="form-select" title="층 선택" required data-rules="required" data-tagname="층">
+                                            <option class="selected" value="">층 선택</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>일괄등록 파일</th>
+                                    <td colspan="3">
+                                        <input type="file" name="batchRegisterFile" id="kioskBatchRegisterFile" class="form-control input-sm" title="POI 일괄등록 파일" required data-rules="required,excelFile" data-tagname="POI 일괄등록 파일" data-ext="xlsx,xls,csv" accept=".xlsx,.xls,.csv">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-success" id="kioskSampleFileBtn">샘플파일 다운로드</button>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-primary" id="kioskPoiBatchRegisterBtn">등록</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

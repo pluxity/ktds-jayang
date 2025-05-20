@@ -250,9 +250,6 @@ btnPoiCategoryRegister.onclick = () => {
 
     if (!validationForm(form)) return;
 
-    formData.set('iconSetIds[]', [document.getElementById('registerIconSetId').value]);
-    formData.delete('iconSetId');
-
     api.post('/poi-categories', formData, {
         headers: {
             'Content-Type': 'application/json',
@@ -302,6 +299,9 @@ btnPoiMiddleCategoryModify.onclick = () => {
     formData.set('poiMiddleCategoryIds[]', [document.getElementById('middleModifyMajorId').value]);
     formData.delete('poiMiddleCategoryId');
 
+    formData.set('iconSetIds[]', [document.getElementById('modifyIconSetId').value]);
+    formData.delete('iconSetId');
+
     const id = Number(
         document
             .getElementById('poiMiddleCategoryModifyForm')
@@ -340,6 +340,9 @@ btnPoiMiddleCategoryRegister.onclick = () => {
 
     formData.set('poiCategoryIds[]', [document.getElementById('middleRegisterMajorId').value]);
     formData.delete('poiCategoryId');
+
+    formData.set('iconSetIds[]', [document.getElementById('registerIconSetId').value]);
+    formData.delete('iconSetId');
 
     api.post('/poi-middle-categories', formData, {
         headers: {

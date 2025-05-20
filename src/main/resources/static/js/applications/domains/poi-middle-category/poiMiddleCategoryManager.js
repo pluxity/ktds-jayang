@@ -7,7 +7,7 @@ const PoiMiddleCategoryManager = (function () {
         return new Promise((resolve) => {
             api.get(uri).then((result) => {
                 const { result: data } = result.data;
-                poiMiddleCategoryList = data.map((poiMiddleCategory) => new PoiMiddleCategory(poiMiddleCategory.id,poiMiddleCategory.name));
+                poiMiddleCategoryList = data.map((poiMiddleCategory) => new PoiMiddleCategory(poiMiddleCategory.id,poiMiddleCategory.name, poiMiddleCategory.iconFile));
 
                 resolve(poiMiddleCategoryList);
             });

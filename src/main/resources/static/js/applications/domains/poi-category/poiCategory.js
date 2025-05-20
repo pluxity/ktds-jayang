@@ -2,12 +2,10 @@ class PoiCategory {
 
     #id;
     #name;
-    #imageFile;
 
-    constructor(id, name, imageFile) {
+    constructor(id, name) {
         this.#id = id;
         this.#name = name;
-        this.#imageFile = imageFile;
     }
 
     get id() {
@@ -18,7 +16,4 @@ class PoiCategory {
         return this.#name;
     }
 
-    get imageFile() {
-        return this.#imageFile;
-    }
 }

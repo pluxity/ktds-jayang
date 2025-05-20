@@ -91,9 +91,6 @@ public class IconSetService {
 
     @Transactional
     public void delete(Long id) {
-        if (!poiCategoryRepository.findByIconSetsId(id).isEmpty()) {
-            throw new CustomException(EXIST_CATEGORY_CONTAINING_ICON_SET);
-        }
         repository.deleteById(id);
     }
 

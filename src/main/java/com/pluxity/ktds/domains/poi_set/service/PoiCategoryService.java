@@ -4,15 +4,11 @@ import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryRequestDTO;
 import com.pluxity.ktds.domains.poi_set.dto.PoiCategoryResponseDTO;
-import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
-import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
-import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveImage;
-import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
 import com.pluxity.ktds.global.exception.CustomException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
@@ -34,8 +30,6 @@ public class PoiCategoryService {
     private final FileInfoService fileService;
 
     private final PoiCategoryRepository repository;
-
-    private final IconSetRepository iconSetRepository;
 
     private final SaveImage imageStrategy;
     private final PoiRepository poiRepository;
@@ -70,12 +64,6 @@ public class PoiCategoryService {
         PoiCategory poiCategory = PoiCategory.builder()
                 .name(dto.name())
                 .build();
-        Optional<IconSet> iconSet = iconSetRepository.findById(dto.iconSetIds().get(0));
-        Long imageFileId = iconSet.map(IconSet::getIconFile2D)
-                .map(FileInfo::getId)
-                .orElse(null);
-        updateIconFile(poiCategory, imageFileId);
-        updateIconSets(poiCategory, dto.iconSetIds());
 
         PoiCategory savePoiCategory = repository.save(poiCategory);
         return savePoiCategory.getId();
@@ -89,31 +77,6 @@ public class PoiCategoryService {
 
         if (StringUtils.isNotBlank(dto.name())) {
             fetchPoiCategory.updateName(dto.name());
-        }
-        Optional<IconSet> iconSet = iconSetRepository.findById(dto.iconSetIds().get(0));
-        Long imageFileId = iconSet.map(IconSet::getIconFile2D)
-                .map(FileInfo::getId)
-                .orElse(null);
-
-        updateIconFile(fetchPoiCategory, imageFileId);
-        updateIconSets(fetchPoiCategory, dto.iconSetIds());
-    }
-
-    private void updateIconSets(@NotNull PoiCategory poiCategory, List<Long> iconSetIds) throws CustomException {
-        if (iconSetIds != null) {
-            poiCategory.updateIconSets(iconSetIds.stream()
-                    .map(id -> iconSetRepository.findById(id).orElseThrow(() -> {
-                        throw new CustomException(NOT_FOUND_ICON_SET);
-                    }))
-                    .toList()
-            );
-        }
-    }
-
-    private void updateIconFile(@NotNull PoiCategory poiCategory, Long fileId) {
-        if (fileId != null) {
-            FileInfo fileInfo = fileService.findById(fileId);
-            poiCategory.updateImageFile(fileInfo);
         }
     }
 

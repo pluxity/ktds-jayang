@@ -35,4 +35,7 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
 
     @Query("SELECT p FROM Poi p JOIN p.tagNames t WHERE t IN :tagNames")
     List<Poi> findByTagNamesIn(@Param("tagNames") List<String> tagNames);
+
+    List<Poi> findByPoiMiddleCategoryId(Long id);
+
 }

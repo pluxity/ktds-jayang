@@ -42,10 +42,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -61,10 +59,7 @@ public class PoiService {
     private final PoiCategoryRepository poiCategoryRepository;
     private final IconSetRepository iconSetRepository;
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
-    private final EventRepository eventRepository;
-    private final CctvRepository cctvRepository;
     private final PoiCctvRepository poiCctvRepository;
-    private final TagClientService tagClientService;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -379,7 +374,7 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiMiddleCategory Name: " + poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)));
 
-                if(poiCategory.getIconSets().get(0).getId() != iconSet.getId()) {
+                if(poiMiddleCategory.getIconSets().get(0).getId() != iconSet.getId()) {
                     throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
                             "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
                                     + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));

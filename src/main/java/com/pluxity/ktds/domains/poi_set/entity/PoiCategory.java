@@ -25,17 +25,6 @@ public class PoiCategory {
     @Column(name = "name", nullable = false, length = 20)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_info_id")
-    private FileInfo imageFile;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "poi_category_icon_set",
-            joinColumns = @JoinColumn(name = "poi_category_id"),
-            inverseJoinColumns = @JoinColumn(name = "icon_set_id")
-    )
-    private final List<IconSet> iconSets = new ArrayList<>();
 
     @Builder
     public PoiCategory(String name) {
@@ -47,34 +36,10 @@ public class PoiCategory {
         this.name = name;
     }
 
-    public void updateImageFile(@NotNull FileInfo fileInfo) {
-        this.imageFile = fileInfo;
-    }
-
-    public void updateIconSets(@NotNull List<IconSet> iconSets) {
-        ArrayList<IconSet> newIconSets = new ArrayList<>(iconSets);
-        this.iconSets.clear();
-        this.iconSets.addAll(newIconSets);
-    }
-
     public PoiCategoryResponseDTO toDto() {
         return PoiCategoryResponseDTO.builder()
                 .id(id)
                 .name(name)
-                .imageFile(imageFile)
-                .iconSets(iconSets.stream()
-                        .map(this::iconSetMapper)
-                        .toList()
-                )
-                .build();
-    }
-
-    private IconSetResponseDTO iconSetMapper(@NotNull IconSet iconSet) {
-        return IconSetResponseDTO.builder()
-                .id(iconSet.getId())
-                .name(iconSet.getName())
-                .iconFile2D(iconSet.getIconFile2D() != null ? iconSet.getIconFile2D().toDto() : null)
-                .iconFile3D(iconSet.getIconFile3D() != null ? iconSet.getIconFile3D().toDto() : null)
                 .build();
     }
 }

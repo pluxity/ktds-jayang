@@ -440,7 +440,7 @@ function getTagNames(type) {
         params.poiMiddleCategoryId = Number(document.querySelector(`#selectPoiMiddleCategoryId${type}`).value);
         const poiMiddleCategory = data.poiMiddleCategory.find((poiMiddleCategory) =>
             poiMiddleCategory.id === params.poiMiddleCategoryId);
-        params.iconSetId = poiCategory.iconSets[0].id;
+        params.iconSetId = poiMiddleCategory.iconSets[0].id;
 
         params.code = document.querySelector(`#poiCode${type}`).value;
         params.name = document.querySelector(`#poiName${type}`).value;

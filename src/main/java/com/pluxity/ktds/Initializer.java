@@ -185,8 +185,6 @@ public class Initializer implements CommandLineRunner {
                 PoiCategory poiCategory = PoiCategory.builder()
                         .name(fileNameWithoutExt)
                         .build();
-                poiCategory.updateImageFile(savedIconSet.getIconFile2D());
-                poiCategory.updateIconSets(List.of(savedIconSet));
                 poiCategoryRepository.save(poiCategory);
             }
 
@@ -233,8 +231,6 @@ public class Initializer implements CommandLineRunner {
                 PoiCategory poiCategory = PoiCategory.builder()
                         .name(fileNameWithoutExt)
                         .build();
-                poiCategory.updateImageFile(savedIconSet.getIconFile2D());
-                poiCategory.updateIconSets(List.of(savedIconSet));
                 poiCategoryRepository.save(poiCategory);
             }
 

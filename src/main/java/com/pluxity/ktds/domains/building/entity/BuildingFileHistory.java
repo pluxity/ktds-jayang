@@ -24,9 +24,25 @@ public class BuildingFileHistory {
     @JoinColumn(name = "file_info_id")
     private FileInfo fileInfo;
 
+    @Column(name = "building_version")
+    private String buildingVersion;
+
+    @Column(name = "history_content")
+    private String historyContent;
+
+    @Column(name = "reg_user")
+    private String regUser;
+
+    @Column(name = "reg_dt")
+    private String regDt;
+
     @Builder
-    public BuildingFileHistory(@NotNull Building building, @NotNull FileInfo fileInfo) {
+    public BuildingFileHistory(@NotNull Building building, @NotNull FileInfo fileInfo, String historyContent, String buildingVersion, String regUser, String regDt) {
         this.building = building;
         this.fileInfo = fileInfo;
+        this.historyContent = historyContent;
+        this.buildingVersion = buildingVersion;
+        this.regUser = regUser;
+        this.regDt = regDt;
     }
 }

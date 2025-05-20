@@ -179,7 +179,7 @@
                         //     canvas.removeEventListener('touchend',  handleTouchEndPan);
                         // }
 
-                        canvas.addEventListener('touchstart', handleTouchStartPan, { passive: false });
+                        // canvas.addEventListener('touchstart', handleTouchStartPan, { passive: false });
 
                         Px.Effect.Outline.HoverEventOn('area_no');
                         if (onComplete) onComplete();
@@ -235,7 +235,10 @@
         const floorTabList = document.getElementById('storeFloorList');
         const kioskInfo    = document.querySelector('.kiosk-info');
         const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
-
+        const nameMap = {
+            B2: 'B1',
+            B1: 'G1'
+        };
         storeBuilding.floors
             .filter(floor => kioskSet.has(floor.name))
             .forEach((floor, index) => {
@@ -245,11 +248,12 @@
 
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.textContent = floor.name;
+                const displayName = nameMap[floor.name] || floor.name;
+                button.textContent = displayName;
 
                 if (floor.id === kioskPoi.floorId) {
                     button.classList.add('active');
-                    kioskInfo.textContent = floor.name;
+                    kioskInfo.textContent = displayName;
                 }
                 li.appendChild(button);
                 floorTabList.appendChild(li);

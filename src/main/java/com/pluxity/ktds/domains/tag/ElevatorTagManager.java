@@ -4,26 +4,32 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ElevatorTagManager {
 
+    private static Map<String,String> createFloorMap(int maxP, int maxF) {
+        Map<String,String> m = new LinkedHashMap<>();
+        for(int p = maxP; p >= 1; p--) {
+            m.put("P" + p, String.valueOf(-(p + 1)));
+        }
+        m.put("B1", "-1");
+        m.put("0G", "0");
+        for(int f = 1; f <= maxF; f++) {
+            m.put(f + "F", String.valueOf(f));
+        }
+
+        return Collections.unmodifiableMap(m);
+    }
+
     @Getter
     @AllArgsConstructor
     public enum ElevatorABTag {
 
-        CurrentFloor("CurrentFloor", Map.ofEntries(
-                Map.entry("P4", "-5"),
-                Map.entry("P3", "-4"),
-                Map.entry("P2", "-3"),
-                Map.entry("P1", "-2"),
-                Map.entry("B1", "-1"),
-                Map.entry("0G", "0"),
-                Map.entry("1F", "1"),
-                Map.entry("2F", "2"),
-                Map.entry("3F", "3")
-        )),
+        CurrentFloor("CurrentFloor", createFloorMap(10, 20)),
         Direction("Direction", Map.of("0", "STOP", "1", "UP", "2", "DOWN")),
         Door("Door", Map.of("0", "Open", "1", "Close")),
         DrivingState("DrivingState", Map.of("0", "정상운전", "1", "운전휴지", "2", "독립운전", "3", "전용운전", "4", "보수운전", "5", "정전운전", "6", "화재운전", "7", "지진운전", "8", "고장"));
@@ -39,19 +45,7 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum ElevatorCTag {
-        CurrentFloor("CurrentFloor", Map.ofEntries(
-                Map.entry("P5", "-6"),
-                Map.entry("P4", "-5"),
-                Map.entry("P3", "-4"),
-                Map.entry("P2", "-3"),
-                Map.entry("P1", "-2"),
-                Map.entry("B1", "-1"),
-                Map.entry("0G", "0"),
-                Map.entry("1F", "1"),
-                Map.entry("2F", "2"),
-                Map.entry("3F", "3"),
-                Map.entry("4F", "4")
-        )),
+        CurrentFloor("CurrentFloor", createFloorMap(10, 20)),
         UpDir("UpDir", Map.of("0", "OFF", "1", "상향")),
         DownDir("DownDir", Map.of("0", "OFF", "1", "하향")),
         Driving("Driving", Map.of("0", "OFF", "1", "주행중")),

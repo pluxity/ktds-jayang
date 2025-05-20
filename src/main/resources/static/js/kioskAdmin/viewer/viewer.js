@@ -11,6 +11,10 @@
             const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
             document.getElementById('buildingId').value = buildingId;
 
+            const nameMap = {
+                B2: 'B1',
+                B1: 'G1'
+            };
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {
@@ -58,7 +62,8 @@
             BuildingManager.findStore().floors
                 .filter(floor => kioskSet.has(floor.name))
                 .forEach((item) => {
-                    floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
+                    const displayName = nameMap[item.name] || item.name;
+                    floorListOpt += `<option value='${item.id}'>${displayName}</option>`;
                 });
 
             const floorNo = document.querySelector('#floorNo');
@@ -268,14 +273,20 @@
         { label: "키오스크", value: "kiosk" }
     ];
     const initLeftSelect = (buildingId, kioskSet) => {
+        const selectEl = document.getElementById("leftFloorSelect");
+        selectEl.innerHTML = "";
         const initLeftFloorSelect = () => {
             let floors = BuildingManager.findStore().floors;
+            const nameMap = {
+                B2: 'B1',
+                B1: 'G1'
+            };
             floors
                 .filter(floor => kioskSet.has(floor.name))
                 .forEach(floor => {
-                document.getElementById("leftFloorSelect")
-                    .appendChild(
-                        new Option(floor.name, floor.id),
+                    const displayName = nameMap[floor.name] || floor.name;
+                    selectEl.appendChild(
+                        new Option(displayName, floor.id)
                     );
             })
         }

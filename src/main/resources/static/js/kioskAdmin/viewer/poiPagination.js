@@ -235,7 +235,6 @@ function poiPaging(records) {
             // dropdownItemInfo.id = 'poiModifyBtn';
             dropdownItemInfo.textContent = 'POI 속성';
             dropdownItemInfo.addEventListener('click', () => {
-                console.log("records[index] : ", records[index]);
                 handlePoiModifyBtnClick(records[index]);
             });
 

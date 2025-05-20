@@ -37,12 +37,16 @@ function appendFloorOptionsToSelect(floors, selectElement) {
     }
 
     const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
+    const nameMap = {
+        B2: 'B1',
+        B1: 'G1'
+    };
     floors
         .filter(floor => kioskSet.has(floor.name))
         .forEach((floor) => {
         const option = document.createElement('option');
         option.value = floor.id;
-        option.textContent = floor.name;
+        option.textContent = nameMap[floor.name] || floor.name;
         selectElement.appendChild(option);
     });
 }
@@ -815,6 +819,11 @@ const handlePoiModifyBtnClick = async (kioskPoi) => {
             radio.checked = radio.value === "store";
         }
     });
+
+    if (kioskPoi.position) {
+        document.getElementById('modifyStoreFloor').disabled = true;
+        document.getElementById('modifyKioskFloor').disabled = true;
+    }
     document.getElementById('poiModifyForm').dataset.id = kioskPoi.id;
     if (kioskPoi.isKiosk || kioskPoi.property.isKiosk) {
         document.getElementById('modifyKioskForm').style.display = 'block';

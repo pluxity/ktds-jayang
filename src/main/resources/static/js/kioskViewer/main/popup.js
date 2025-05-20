@@ -71,6 +71,11 @@ const popup = (function () {
             } else {
                 thumbnailUrl = '/static/img/kiosk/img_kiosk_thumb.svg';
             }
+            const nameMap = {
+                B2: 'B1',
+                B1: 'G1'
+            };
+            const displayName = nameMap[poi.detail.floorNm] || poi.detail.floorNm;
             const li = document.createElement('li');
             li.innerHTML = `
                 <div class="list__header">
@@ -89,7 +94,7 @@ const popup = (function () {
                   <span class="list__desc">${poi.detail.phoneNumber || '&nbsp;'}</span>
                 </div>
                 <ul class="list__footer">
-                  <li><button type="button" class="button">${poi.detail.floorNm}</button></li>
+                  <li><button type="button" class="button">${displayName}</button></li>
                   <li><button type="button" class="button button--location" data-poi-id="${poi.common.id}" data-floor-id="${poi.common.floorId}">위치 확인</button></li>
                 </ul>
               `;
@@ -182,14 +187,18 @@ const popup = (function () {
 
         const storeBuilding = await BuildingManager.findStore();
         const kioskSet = new Set(['B2','B1','1F','2F']);
-
+        const nameMap = {
+            B2: 'B1',
+            B1: 'G1'
+        };
         storeBuilding.floors
             .filter(floor => kioskSet.has(floor.name))
             .forEach((floor, idx) => {
             const floorLi = document.createElement('li');
             floorLi.setAttribute('role', 'tab');
             floorLi.id = `${floor.id}`;
-            floorLi.innerHTML = `<button type="button">${floor.name}</button>`;
+            const displayName = nameMap[floor.name] || floor.name;
+            floorLi.innerHTML = `<button type="button">${displayName}</button>`;
             floorLi.addEventListener('click', () => {
                 floorTabList.querySelectorAll('li').forEach(li => li.classList.remove('active'));
                 floorLi.classList.add('active');

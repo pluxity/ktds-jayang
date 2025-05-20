@@ -1,5 +1,7 @@
 package com.pluxity.ktds.domains.kiosk.entity;
 
+import java.util.Arrays;
+
 public enum KioskCategory {
     FOOD("F&B"),
     LIFE("라이프스타일"),
@@ -16,4 +18,12 @@ public enum KioskCategory {
         return value;
     }
 
+    public static KioskCategory fromValue(String value) {
+        return Arrays.stream(values())
+                .filter(c -> c.getValue().equals(value))
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Unknown category: " + value)
+                );
+    }
 }

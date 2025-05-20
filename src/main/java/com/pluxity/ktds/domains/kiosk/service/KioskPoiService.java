@@ -3,37 +3,52 @@ package com.pluxity.ktds.domains.kiosk.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
 import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Floor;
+import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
 import com.pluxity.ktds.domains.kiosk.dto.*;
+import com.pluxity.ktds.domains.kiosk.entity.KioskCategory;
 import com.pluxity.ktds.domains.kiosk.repository.BannerRepository;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveImage;
+import com.pluxity.ktds.domains.poi_set.entity.IconSet;
+import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
+import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.domains.kiosk.entity.Banner;
 import com.pluxity.ktds.domains.kiosk.entity.KioskPoi;
 import com.pluxity.ktds.domains.kiosk.repository.KioskPoiRepository;
+import com.pluxity.ktds.global.utils.ExcelUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
+import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 
 
 @Service
@@ -325,5 +340,112 @@ public class KioskPoiService {
         kioskPoiRepository.delete(kioskPoi);
     }
 
+    @Transactional
+    public void batchRegisterKioskPoi(Long floorId, Boolean isKiosk, MultipartFile file) {
+        try {
+            String fileName = file.getOriginalFilename();
+            String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
 
+            if (!ext.equals("xlsx") && !ext.equals("xls") && !ext.equals("csv")) {
+                throw new CustomException(ErrorCode.INVALID_FILE);
+            }
+
+            int kioskFlag = isKiosk ? 1 : 0;
+            List<Map<String, Object>> rows = ExcelUtil.readExcelBatchkiosk(file, kioskFlag);
+
+            int headerLength = rows.get(0).size();
+
+            List<KioskPoi> result = new ArrayList<>();
+
+            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
+            for(int i = 1; i < rows.size(); i++) {
+                Map<String, String> kioskPoiMap = createMapByRows(rows, headerLength, i);
+                kioskPoiRepository.findByName(kioskPoiMap.get("POI명"))
+                        .ifPresent(found -> {
+                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + kioskPoiMap.get("POI명"));
+                        });
+
+                if (isKiosk) {
+                    CreateKioskPoiDTO kioskPoiDTO = CreateKioskPoiDTO.builder()
+                            .isKiosk(true)
+                            .name(kioskPoiMap.get("POI명"))
+                            .kioskCode(kioskPoiMap.get("장비코드"))
+                            .floorId(floor.getId())
+                            .description(kioskPoiMap.get("비고"))
+                            .build();
+
+                    KioskPoi kioskPoi = KioskPoi.builder()
+                            .isKiosk(true)
+                            .name(kioskPoiMap.get("POI명"))
+                            .kioskCode(kioskPoiMap.get("장비코드"))
+                            .description(kioskPoiMap.get("비고"))
+                            .build();
+
+                    updateIfNotNull(kioskPoiDTO.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
+                    updateIfNotNull(kioskPoiDTO.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+
+                    result.add(kioskPoi);
+                } else {
+                    CreateStorePoiDTO storePoiDTO = CreateStorePoiDTO.builder()
+                            .isKiosk(false)
+                            .name(kioskPoiMap.get("POI명"))
+                            .floorId(floor.getId())
+                            .buildingId(floor.getBuilding().getId())
+                            .phoneNumber(kioskPoiMap.get("전화번호"))
+                            .category(KioskCategory.fromValue(kioskPoiMap.get("업종")))
+                            .build();
+
+                    KioskPoi kioskPoi = KioskPoi.builder()
+                            .isKiosk(false)
+                            .name(kioskPoiMap.get("POI명"))
+                            .phoneNumber(kioskPoiMap.get("전화번호"))
+                            .category(KioskCategory.fromValue(kioskPoiMap.get("업종")))
+                            .build();
+
+
+                    changeField(storePoiDTO, kioskPoi);
+
+                    result.add(kioskPoi);
+                }
+            }
+
+            try {
+                kioskPoiRepository.saveAll(result);
+            } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
+                if(e.getRootCause().getMessage().contains("Data too long for column")) {
+                    String errorMessage = e.getRootCause().getMessage();
+
+                    Pattern pattern = Pattern.compile("'(.*?)'");
+                    Matcher matcher = pattern.matcher(errorMessage);
+
+                    if (matcher.find()) {
+                        String columnName = matcher.group(1);
+                        throw new CustomException(ErrorCode.TOO_LONG_EXCEL_FIELD, columnName);
+                    } else {
+                        throw new CustomException(ErrorCode.TOO_LONG_EXCEL_FIELD);
+                    }
+                }
+
+                throw new CustomException(FAILED_BATCH_REGISTER_POI);
+            }
+
+        } catch(IOException e) {
+            throw new CustomException(ErrorCode.FAILED_BATCH_REGISTER_POI);
+        }
+    }
+
+    @NotNull
+    private Map<String, String> createMapByRows(List<Map<String, Object>> rows, int headerLength, int i) {
+        Map<String, String> workMap = new HashMap<>();
+        for(int j = 0; j < headerLength; j++) {
+            String o = String.valueOf(rows.get(i).get(String.valueOf(j)));
+            workMap.put(String.valueOf(rows.get(0).get(String.valueOf(j))), o);
+        }
+        return workMap;
+    }
+
+    private void changeField(CreateStorePoiDTO dto, KioskPoi kioskPoi) {
+        updateIfNotNull(dto.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
+        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+    }
 }

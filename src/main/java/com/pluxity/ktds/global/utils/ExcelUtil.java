@@ -6,6 +6,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,6 +94,53 @@ public class ExcelUtil {
 
         //첫번째 시트 읽어오기
         sheet = workbook.getSheetAt(0);
+
+        //행의 개수
+        int numberOfRows = sheet.getPhysicalNumberOfRows();
+        //열의 개수
+        currentRow = sheet.getRow(0);
+
+        int columnSize = currentRow.getPhysicalNumberOfCells();
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+
+        for (int rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+            Map<String, Object> map = new HashMap<String, Object>();
+
+            //현재 행 가져오기
+            currentRow = sheet.getRow(rowIndex);
+            if (currentRow != null) {
+                int count = 0;
+                for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
+                    XSSFCell cell = currentRow.getCell(columnIndex);
+                    //행에 해당하는 cell 내용 저장
+                    String key = String.valueOf(columnIndex);
+                    map.put(key, getCellValue(cell));
+
+                    //Row의 공백 count
+                    if(!validString(getCellValue(cell))){
+                        count++;
+                    }
+                }
+
+                //모든 열이 비어있으면 return
+                if(count == columnSize){
+                    return result;
+                }
+
+                //저장된 행을 result에 저장
+                result.add(map);
+            }
+        }
+        return result;
+    }
+
+    public static List<Map<String, Object>> readExcelBatchKiosk(MultipartFile excelFile, int isKiosk) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook(excelFile.getInputStream());
+        XSSFSheet sheet;
+        XSSFRow currentRow;
+
+        //첫번째 시트 읽어오기
+        sheet = workbook.getSheetAt(isKiosk);
 
         //행의 개수
         int numberOfRows = sheet.getPhysicalNumberOfRows();

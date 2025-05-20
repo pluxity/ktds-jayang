@@ -371,6 +371,7 @@ public class KioskPoiService {
                             .name(kioskPoiMap.get("POI명"))
                             .kioskCode(kioskPoiMap.get("장비코드"))
                             .floorId(floor.getId())
+                            .buildingId(floor.getBuilding().getId())
                             .description(kioskPoiMap.get("비고"))
                             .build();
 
@@ -401,7 +402,6 @@ public class KioskPoiService {
                             .phoneNumber(kioskPoiMap.get("전화번호"))
                             .category(KioskCategory.fromValue(kioskPoiMap.get("업종")))
                             .build();
-
 
                     changeField(storePoiDTO, kioskPoi);
 

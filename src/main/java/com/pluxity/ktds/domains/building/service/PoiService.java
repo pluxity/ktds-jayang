@@ -30,6 +30,7 @@ import com.pluxity.ktds.global.utils.ExcelUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -346,11 +347,14 @@ public class PoiService {
                 Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
                 existValidCheck(poiMap);
 
-                poiRepository.findByName(poiMap.get(POI_NAME.value))
-                        .ifPresent(found -> {
-                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + poiMap.get(POI_NAME.value));
-                        });
-
+//                poiRepository.findByName(poiMap.get(POI_NAME.value))
+//                        .ifPresent(found -> {
+//                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + poiMap.get(POI_NAME.value));
+//                        });
+                Optional<Poi> currentPoi = poiRepository.findByName(poiMap.get(POI_NAME.value));
+                if (currentPoi.isPresent()) {
+                    continue;
+                }
                 if (poiRepository.existsByCode(poiMap.get(POI_CODE.value))) {
                     throw new CustomException(ErrorCode.DUPLICATED_POI_CODE, "Duplcate Poi Code: " + poiMap.get(POI_CODE.value));
                 }
@@ -384,7 +388,8 @@ public class PoiService {
                         .map(String::trim)
                         .filter(StringUtils::hasText)
                         .toList();
-                CreatePoiDTO poiDto = CreatePoiDTO.builder()
+
+                CreatePoiDTO.CreatePoiDTOBuilder poiDTOBuilder = CreatePoiDTO.builder()
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
                         .buildingId(building.getId())
@@ -392,21 +397,64 @@ public class PoiService {
                         .poiCategoryId(poiCategory.getId())
                         .iconSetId(iconSet.getId())
                         .poiMiddleCategoryId(poiMiddleCategory.getId())
-                        .tagNames(tags)
-                        .build();
+                        .tagNames(tags);
 
-                Poi poi = Poi.builder()
+                Poi.PoiBuilder poiBuilder = Poi.builder()
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
-                        .tagNames(tags)
-                        .build();
+                        .tagNames(tags);
+
+                String lightGroup = poiMap.get(LIGHT_GROUP.value);
+                boolean isLight = lightGroup != null && !lightGroup.isBlank();
+
+                poiDTOBuilder.lightGroup(lightGroup != null ? lightGroup : "")
+                        .isLight(isLight);
+                poiBuilder.lightGroup(lightGroup != null ? lightGroup : "")
+                        .isLight(isLight);
+
+                List<PoiCctvDTO> cctvDTOList = Collections.emptyList();
+                if (!poiCategory.getName().equalsIgnoreCase("cctv")) {
+                    cctvDTOList = new ArrayList<>();
+                    String mainCctv = poiMap.get(MAIN_CCTV.value);
+                    if (mainCctv != null && !mainCctv.isBlank()) {
+                        cctvDTOList.add(
+                                PoiCctvDTO.builder()
+                                        .code(mainCctv)
+                                        .isMain("Y")
+                                        .build()
+                        );
+                    }
+                    for (String key : List.of(SUB_CCTV1.value, SUB_CCTV2.value, SUB_CCTV3.value, SUB_CCTV4.value)) {
+                        String subCctv = poiMap.get(key);
+                        if (subCctv != null && !subCctv.isBlank()) {
+                            cctvDTOList.add(
+                                    PoiCctvDTO.builder()
+                                            .code(subCctv)
+                                            .isMain("N")
+                                            .build()
+                            );
+                        }
+                    }
+
+                    poiDTOBuilder.cctvList(cctvDTOList);
+                }
+
+                CreatePoiDTO poiDto = poiDTOBuilder.build();
+                Poi poi = poiBuilder.build();
+
+                for (PoiCctvDTO dto : cctvDTOList) {
+                    PoiCctv cctv = PoiCctv.builder()
+                            .poi(poi)
+                            .code(dto.code())
+                            .isMain(dto.isMain())
+                            .build();
+                    poi.getPoiCctvs().add(cctv);
+                }
 
                 changeField(poiDto, poi);
 
                 result.add(poi);
             }
-
-
 
             try {
                 poiRepository.saveAll(result);

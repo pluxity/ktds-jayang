@@ -351,6 +351,12 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
     const form = document.querySelector('#poiModifyForm');
     form.dataset.id = modifyPoiData.id;
 
+    if (modifyPoiData.isLight) {
+        modifyModal.querySelector('#isLightPoiModify').checked = true;
+        modifyModal.querySelector('#lightGroupModify').disabled = false;
+        modifyModal.querySelector('#lightGroupModify').value = modifyPoiData.lightGroup;
+    }
+
     const cctvRows = form.querySelectorAll('.selectCctv');
     if (poiCategory.name.toLowerCase() !== 'cctv') {
 

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../publishing/css/common.css" rel="stylesheet"/>
+    <link href="./css/map.css" rel="stylesheet"/>
+    <title>KT 자양 통합 운영 플랫폼</title>
+</head>
+<body>
+    <div class="container" style="background-image:url(/dashboard/img/bg_map.png)">
+        <header class="header">
+            <h1 class="header__logo"><a href="/dashboard/index.html">KT 자양 통합운영 플랫폼</a></h1>
+            <ul class="header__tab" role="tablist">
+                <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+                <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">건물 A</a></li>
+                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 B</a></li>
+                <li role="tab" id="tab3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">지하 주차장</a></li>
+            </ul>
+            <div class="header__info">
+                <p class="date">2024년 11월 20일(월요일 21:25:20)</p>
+                <div class="profile">
+                    <!-- [D] 클릭 시 profile__btn--active 클래스 추가 -->
+                    <a class="profile__btn" href="#none">
+                        <img src="/dashboard/img/icon_profile.svg" alt="profile" width="40" height="40">
+                        <span class="hide">profile</span>
+                        <span class="badge">N</span>
+                    </a>
+
+                    <div class="profile__layer">
+                        <a href="#none" class="head">
+                            <img src="/dashboard/img/icon_profile02.svg" alt="profile" width="41" height="42">
+                            <div>
+                                <p class="head__level">슈퍼슈퍼 관리자</p>
+                                <p class="head__name">관리자이름</p>
+                            </div>
+                        </a>
+
+                        <div class="detail">
+                            <div class="detail__group">
+                                <a href="#none">공지사항<span class="badge">N</span></a>
+                                <a href="#none" class="icon icon--manage" target="_blank">결재 관리</a>
+                                <a href="#none" class="icon icon--download">CCTV 다운로드</a>
+                            </div>
+                            <div class="detail__group">
+                                <a href="#none">로그아웃</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="contents">
+            <div class="poi-menu">
+                <div class="poi-menu__all">
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <div class="all">
+                        <a href="#none">장비보기</a>
+                        <!-- 장비 목록 팝업 -->
+                        <div class="popup-basic popup-basic--small">
+                            <div class="popup-basic__head">
+                                <span class="checkbox-wrap">
+                                    <input type="checkbox" id="check">
+                                    <label for="check">전체문구</label>
+                                </span>
+                            </div>
+                            <!-- 장비 표시 영역 -->
+                            <div id="equipmentGroup" class="equip-group">
+                                <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
+                                <a href="#none" class="cctv">CCTV</a>
+                                <a href="#none" class="shutter">셔터</a>
+                                <a href="#none" class="fire">소방시설</a>
+                                <a href="#none" class="air">공기질센서</a>
+                                <a href="#none" class="alarmbell">비상벨</a>
+                                <a href="#none" class="invasion">침입탐지</a>
+                                <a href="#none" class="enter">출입탐지</a>
+                                <a href="#none" class="elevator" >엘리베이터</a>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+                <div id="poiMenuList" class="poi-menu__list">
+                    <ul>
+                        <li class="cctv">
+                            <a href="#none"><span class="hide">cctv</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">CCTV</span>
+                            </div>
+                        </li>
+                        <li class="shutter">
+                            <a href="#none"><span class="hide">셔텨</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">셔터</span>
+                            </div>
+                        </li>
+                        <li class="fire">
+                            <a href="#none"><span class="hide">소방</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">소방</span>
+                            </div>
+                        </li>
+                        <li class="alarmbell">
+                            <a href="#none"><span class="hide">공기질센서</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">공기질센서</span>
+                            </div>
+                        </li>
+                        <li class="air">
+                            <a href="#none"><span class="hide">비상벨</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">비상벨</span>
+                            </div>
+                        </li>
+                        <li class="invasion">
+                            <a href="#none"><span class="hide">침입탐지</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">침입탐지</span>
+                            </div>
+                        </li>
+                        <li class="enter">
+                            <a href="#none"><span class="hide">출입관리</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">출입관리</span>
+                            </div>
+                        </li>
+                        <li class="elevator">
+                            <a href="#none"><span class="hide">엘리베이터</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">엘리베이터</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div id="poiMenuListMap" class="poi-menu__list poi-menu__list--map">
+                    <ul>
+                        <!-- [D] 선택 시 active 클래스 추가 -->
+                        <li class="patrol active">
+                            <a href="#none"><span class="hide">가상순찰</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">가상순찰</span>
+                            </div>
+                        </li>
+                        <li class="sop">
+                            <a href="#none"><span class="hide">SOP</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">SOP</span>
+                            </div>
+                        </li>
+                        <li class="shelter">
+                            <a href="#none"><span class="hide">대피경로</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">대피경로</span>
+                            </div>
+                        </li>
+                        <li class="maintenance">
+                            <a href="#none"><span class="hide">유지보수</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--right">유지보수</span>
+                            </div>
+                        </li>
+                    </ul>       
+                </div>
+            </div>
+            <div class="system-tap">
+                <ul>
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <li class="active">설비</li>
+                    <li>주차</li>
+                    <li>충전소</li>
+                    <li>엘리베이터</li>
+                </ul>
+            </div>
+            <div class="tool-box">
+                <ul class="tool-box__list">
+                <!-- [D] 선택 시 active 클래스 추가 -->
+                    <li class="home active">
+                        <a href="#none"><span class="hide">도면 홈</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">도면 홈</span>
+                        </div>
+                    </li>
+                    <li class="pov">
+                        <a href="#none"><span class="hide">1인칭</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">1인칭</span>
+                        </div>
+                    </li>
+                    <li class="twd">
+                        <a href="#none"><span class="hide">2d</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">2D</span>
+                        </div>
+                    </li>
+                    <li class="minus">
+                        <a href="#none"><span class="hide">minus</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">축소</span>
+                        </div>
+                    </li>
+                    <li class="plus">
+                        <a href="#none"><span class="hide">plus</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--top">확대</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- [!] floor-info 위치 : 이벤트 메뉴 영역과 같이 확인 진행 예정 추후 작업 진행 -->
+            <div class="floor-info floor-info--active">
+                <div class="floor-info__inner">
+                    <!-- [D] 버튼 클릭 시 floor-info__detail show/hide 적용 -->
+                    <button type="button" class="floor-info__button">층별</button>
+                    <div class="floor-info__detail">
+                        <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
+                        <button type="button" class="up"><span class="hide">UP</span></button>
+                        <ul>
+                            <li>1</li>
+                            <li>2</li>
+                            <li>3</li>
+                            <li>4</li>
+                            <li>5</li>
+                            <li>6</li>
+                            <li>7</li>
+                            <li>8</li>
+                            <li>9</li>
+                            <li>10</li>
+                        </ul>
+                        <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
+                        <button type="button" class="down"><span class="hide">DOWN</span></button>
+                    </div>
+                    <div class="floor-info__ctrl">
+                        <span class="all">전체</span>
+                        <!-- 축소 scale--down 클래스 추가 및 문구 축소 적용 -->
+                        <span class="scale scale--down"><span class="hide">축소</span></span>
+                    </div>
+                </div>
+            </div>
+            <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
+            <aside class="event-state event-state--active"></aside>
+        </div>
+    </div>
+</body>
+</html>

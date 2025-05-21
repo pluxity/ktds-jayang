@@ -18,6 +18,7 @@ public enum ViewPath {
     ADMIN_USER_GROUP("/admin/user-group", "admin/user-group/user-group"),
     ADMIN_SYSTEM_SETTING("/admin/system-setting", "admin/system-setting/system-setting"),
     ADMIN_NOTICE("/admin/notice", "admin/notice/notice"),
+    ADMIN_MNG_VENDOR("/admin/management/vendor", "admin/management/vendor"),
 
     LOGIN("/login", "login/login"),
     KIOSK_LOGIN("/kiosk-login", "login/kiosk-login"),

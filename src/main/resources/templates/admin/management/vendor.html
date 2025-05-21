@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 거래처 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}" />
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}" />
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">거래처</h1>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <form name="searchForm" id="searchForm" class="d-flex mb-3">
+                                <div class="input-group me-2">
+                                    <select id="searchType" name="searchType" class="form-select" style="max-width: fit-content;">
+                                        <option value="vendorName">거래처명</option>
+                                        <option value="representativeName">대표자명</option>
+                                        <option value="businessNumber">사업자번호</option>
+                                        <option value="contactNumber">연락처</option>
+                                    </select>
+                                    <input type="text" name="searchName" id="searchName" class="form-control" placeholder="검색명을 입력하세요." aria-label="" aria-describedby="button-addon2">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" id="searchButton">검색</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-7 text-right">
+                            <button type="button" class="btn btn-primary btn-md" id="btnRegisterVendor" data-bs-toggle="modal" data-bs-target="#vendorRegisterModal">
+                                등록
+                            </button>
+                            <button type="button" class="btn btn-danger delete" id="btnDeleteVendor">일괄 삭제</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div id="wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div class="modal fade" id="vendorRegisterModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">거래처 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="vendorRegisterForm" id="vendorRegisterForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:30%">
+                                <col style="width:70%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>거래처명</th>
+                                <td ><input type="text" name="vendorName" id="registerVendorName" class="form-control input-sm" title="거래처명" required data-rules="required" data-tagname="거래처명" ></td>
+                            </tr>
+                            <tr>
+                                <th>대표자명</th>
+                                <td ><input type="text" name="representativeName" id="registerRepresentativeName" class="form-control input-sm" title="대표자명" required data-rules="required" data-tagname="대표자명"></td>
+                            </tr>
+                            <tr>
+                                <th>사업자번호</th>
+                                <td ><input type="text" name="businessNumber" id="registerBusinessNumber" class="form-control input-sm" title="사업자번호" required data-rules="required" data-tagname="사업자번호" ></td>
+                            </tr>
+                            <tr>
+                                <th>연락처</th>
+                                <td ><input type="text" name="contactNumber" id="registerContactNumber" class="form-control input-sm" title="연락처" required data-rules="required" data-tagname="연락처"></td>
+                            </tr>
+                            <tr>
+                                <th>비고</th>
+                                <td colspan="3">
+                                    <textarea name="description" id="registerDescription" class="form-control input-sm" style="height:120px;" title="비고"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnVendorRegister">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="vendorModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">거래처 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="vendorModifyForm" id="vendorModifyForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:30%">
+                                <col style="width:70%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>거래처명</th>
+                                <td ><input type="text" name="vendorName" id="modifyVendorName" class="form-control input-sm" title="거래처명" required data-rules="required" data-tagname="거래처명" ></td>
+                            </tr>
+                            <tr>
+                                <th>대표자명</th>
+                                <td ><input type="text" name="representativeName" id="modifyRepresentativeName" class="form-control input-sm" title="대표자명" required data-rules="required" data-tagname="대표자명"></td>
+                            </tr>
+                            <tr>
+                                <th>사업자번호</th>
+                                <td ><input type="text" name="businessNumber" id="modifyBusinessNumber" class="form-control input-sm" title="사업자번호" required data-rules="required" data-tagname="사업자번호" ></td>
+                            </tr>
+                            <tr>
+                                <th>연락처</th>
+                                <td ><input type="text" name="contactNumber" id="modifyContactNumber" class="form-control input-sm" title="연락처" required data-rules="required" data-tagname="연락처"></td>
+                            </tr>
+                            <tr>
+                                <th>비고</th>
+                                <td colspan="3">
+                                    <textarea name="description" id="modifyDescription" class="form-control input-sm" style="height:120px;" title="비고"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnVendorModify">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/admin/management/vendor.js}"></script>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

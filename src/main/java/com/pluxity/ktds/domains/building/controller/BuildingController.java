@@ -5,6 +5,7 @@ import com.pluxity.ktds.domains.building.entity.LodSettings;
 import com.pluxity.ktds.domains.building.service.BuildingService;
 import com.pluxity.ktds.global.response.ResponseBody;
 import com.pluxity.ktds.global.response.DataResponseBody;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,11 @@ public class BuildingController {
         return DataResponseBody.of(service.findFloorByFloorId(id, floorId));
     }
 
+    @GetMapping("/history/{id}")
+    public DataResponseBody<List<HistoryResponseDTO>> getHistoryByBuildingId(@PathVariable Long id){
+        return DataResponseBody.of(service.findHistoryByBuildingId(id));
+    }
+
     @PostMapping("/upload/file")
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseBody<FileInfoDTO> postBuilding(@RequestBody MultipartFile file) throws IOException {
@@ -71,6 +77,11 @@ public class BuildingController {
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseBody<Long> postBuilding(@Valid @RequestBody CreateBuildingDTO dto) {
         return DataResponseBody.of(service.saveBuilding(dto));
+    }
+
+    @PostMapping("/history")
+    public DataResponseBody<Long> postBuildingHistory(@RequestBody CreateBuildingHistoryDTO dto, HttpServletRequest request) {
+        return DataResponseBody.of(service.saveBuildingHistory(dto, request));
     }
 
     @PatchMapping("/{id}/force")

@@ -15,11 +15,11 @@ import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
 import com.pluxity.ktds.global.exception.CustomException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +35,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -145,11 +147,12 @@ public class BuildingService {
 
         if (dto.fileInfoId() != null) {
             fileInfo = getFileInfo(dto.fileInfoId());
-            validationFile(fileInfo, building);
+//            validationFile(fileInfo, building);
         }
 
-        updateFields(dto, building, fileInfo);
+//        updateFields(dto, building, fileInfo);
 
+        forceUpdateFloor(dto, fileInfo, building);
         return id;
     }
 
@@ -168,7 +171,7 @@ public class BuildingService {
         if (fileInfo != null) {
             building.changeFileInfo(fileInfo);
             updateFloor(fileInfo, building);
-            createHistory(fileInfo, building);
+//            createHistory(fileInfo, building);
         }
         building.update(dto);
 
@@ -280,10 +283,13 @@ public class BuildingService {
     }
 
     private void createHistory(FileInfo fileInfo, Building building) {
-        buildingFileHistoryRepository.save(BuildingFileHistory.builder()
+        BuildingFileHistory history = BuildingFileHistory.builder()
                 .building(building)
                 .fileInfo(fileInfo)
-                .build());
+                .build();
+
+        history = buildingFileHistoryRepository.save(history);
+        history.updateBuildingVersion(toVersion(history.getCreatedAt()));
     }
 
     private void updateFloor(FileInfo fileInfo, Building building) {
@@ -310,11 +316,14 @@ public class BuildingService {
         });
     }
 
-    private void forceUpdateFloor(FileInfo fileInfo, Building building) {
+    private void forceUpdateFloor(UpdateBuildingDTO dto, FileInfo fileInfo, Building building) {
+        building.changeFileInfo(fileInfo);
         List<Floor> newFloors = createFloors(fileInfo);
+        building.removeFloors();
         for (Floor newFloor : newFloors) {
             building.addFloor(newFloor);
         }
+        building.update(dto);
     }
 
     private void validateDuplicationCode(CreateBuildingDTO dto) {
@@ -503,5 +512,49 @@ public class BuildingService {
         buildingRepository.findById(id)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
                 .changeCamera3d(camera3d);
+    }
+
+    @Transactional
+    public Long saveBuildingHistory(CreateBuildingHistoryDTO dto, HttpServletRequest request) {
+
+        Building building = buildingRepository.findById(dto.buildingId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
+
+        String username = null;
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if("USER_ID".equals(cookie.getName())){
+                    username = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        FileInfo fileInfo = getFileInfo(dto.fileInfoId());
+
+        BuildingFileHistory history = BuildingFileHistory.builder()
+                .building(building)
+                .fileInfo(fileInfo)
+                .historyContent(dto.historyContent())
+                .regUser(username)
+                .build();
+
+        history = buildingFileHistoryRepository.save(history);
+        history.updateBuildingVersion(toVersion(history.getCreatedAt()));
+        return history.getId();
+    }
+
+    private String toVersion(LocalDateTime dateTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        return dateTime.format(formatter);
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoryResponseDTO> findHistoryByBuildingId(Long id){
+
+        return buildingFileHistoryRepository.findByBuildingId(id).stream()
+                .map(BuildingFileHistory::toHistoryResponseDTO)
+                .collect(Collectors.toList());
     }
 }

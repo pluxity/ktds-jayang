@@ -98,8 +98,13 @@ function modifyBuildingModal(id) {
     document.getElementById('btnBuildingModify').innerHTML = '수정';
     form.querySelector('#modifyId').value = id;
     form.reset();
-    api.get(`/buildings/${id}`).then((res) => {
-        const {result: resultData} = res.data;
+    let currentBuildingFileId = null;
+
+    Promise.all([
+        api.get(`/buildings/${id}`),
+        getHistoryList(id)
+    ]).then(([buildingRes, historyList]) => {
+        const {result: resultData} = buildingRes.data;
         form.querySelector('#modifyName').value = resultData.name;
         form.querySelector('#modifyCode').value = resultData.code;
         if (resultData.isIndoor === 'Y') {
@@ -107,8 +112,29 @@ function modifyBuildingModal(id) {
         } else {
             form.querySelector('input[name="isIndoor"][value="N"]').checked = true;
         }
-        form.querySelector('#modifyDescription').innerHTML =
-            resultData.description;
+        form.querySelector('#modifyDescription').innerHTML = resultData.description;
+        currentBuildingFileId = resultData.buildingFile.id;
+
+        setBuildingVersionSelect(historyList, currentBuildingFileId);
+    });
+
+}
+
+// select에 버전과 id를 넣는 함수
+function setBuildingVersionSelect(historyList, currentBuildingFileId) {
+    console.log("currentBuildingFileId =",currentBuildingFileId);
+    const select = document.getElementById('buildingVersionSelect');
+    select.innerHTML = ''; // 기존 옵션들 제거
+    
+    historyList.forEach(history => {
+        const option = document.createElement('option');
+        option.value = history.fileId;
+        option.textContent = history.buildingVersion;
+        console.log("fileId = ",history.fileId);
+        if(history.fileId === currentBuildingFileId){
+            option.selected = true;
+        }
+        select.appendChild(option);
     });
 }
 
@@ -182,44 +208,98 @@ btnBuildingModify.onclick = () => {
         code: document.getElementById('modifyCode').value,
         name: formData.get('name'),
         isIndoor: formData.get('isIndoor'),
-        description: formData.get('description')
+        description: formData.get('description'),
+        fileInfoId: document.getElementById('buildingVersionSelect').value  // 선택된 fileId 추가
     }
 
-    if(document.getElementById('modifyMultipartFile').value === '') {
-        api.put(`/buildings/${formData.get('id')}`, buildingParam, { headers })
-            .then(() => {
-                alertSwal('수정되었습니다.').then(()=> {
-                    document.querySelector('#buildingModifyModal .btn-close').click();
-                    getBuildingInfoList();
-                });
+    api.put(`/buildings/${formData.get('id')}`, buildingParam, { headers })
+        .then(() => {
+            alertSwal('수정되었습니다.').then(()=> {
+                document.querySelector('#buildingModifyModal .btn-close').click();
+                getBuildingInfoList();
+            });
 
-            })
-            .catch(() => {
-                document.getElementById('btnBuildingModify').disabled = false;
-                document.getElementById('btnBuildingModify').innerHTML = '수정';
-            });
-    } else {
-        const fileFormData = new FormData();
-        fileFormData.set('file', formData.get('multipartFile'));
-        api.post('/buildings/upload/file', fileFormData).then((res) => {
-            const {result: data} = res.data;
-            buildingParam.fileInfoId = data.id;
-            api.put(`/buildings/${formData.get('id')}`, buildingParam, { headers })
-                .then(() => {
-                    alertSwal('수정되었습니다.').then(() => {
-                        document.querySelector('#buildingModifyModal .btn-close').click();
-                        getBuildingInfoList();
-                    });
-                }).catch(() => {
-                document.getElementById('btnBuildingModify').disabled = false;
-                document.getElementById('btnBuildingModify').innerHTML = '수정';
-            });
-        }).catch(() => {
-            document.getElementById('btnBuildingRegist').disabled = false;
-            document.getElementById('btnBuildingRegist').innerHTML = '수정';
+        })
+        .catch(() => {
+            document.getElementById('btnBuildingModify').disabled = false;
+            document.getElementById('btnBuildingModify').innerHTML = '수정';
         });
-    }
 };
+
+// file 업로드 처리
+const buildingUploadBtn = document.getElementById('buildingUploadBtn');
+
+buildingUploadBtn.onclick = () => {
+    const getHistoryContent = document.getElementById('buildingHistoryContent').value;
+    const uploadFile = document.getElementById('buildingUploadFile');
+    const getBuildingId = document.getElementById('modifyId').value;
+
+    const fileFormData = new FormData();
+    fileFormData.set('file', uploadFile.files[0]);
+
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    api.post('/buildings/upload/file', fileFormData).then((res) => {
+        const {result: data} = res.data;
+        const param = {
+            buildingId: getBuildingId,
+            historyContent: getHistoryContent,
+            fileInfoId: data.id
+        }
+        api.post('/buildings/history', param, {headers}).then(() => {
+            alertSwal('등록되었습니다.');
+            // history load
+            getHistoryList(getBuildingId);
+        })
+    })
+}
+
+function getHistoryList(id) {
+    return api.get(`/buildings/history/${id}`).then((res) => {
+        const {result: historyList} = res.data;
+        renderHistoryList(historyList);
+        return historyList;
+    });
+}
+
+const renderHistoryList = (historyList) => {
+
+    const tbody = document.getElementById('historyListBody');
+    tbody.innerHTML = ''; // 기존 내용 초기화
+
+    if (historyList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">등록된 이력이 없습니다.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    historyList.forEach(history => {
+        console.log("history = ",history);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${history.buildingVersion || '-'}</td>
+            <td>${history.fileName || '-'}</td>
+            <td>${history.historyContent || '-'}</td>
+            <td>${history.regUser || '-'}</td>
+            <td>${history.createdAt || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-primary">
+                    <i class="fas fa-download"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+};
+
+
+
+
 
 function deleteBuilding(id) {
     confirmSwal('정말로 삭제 하시겠습니까?<br>' +

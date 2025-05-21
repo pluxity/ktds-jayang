@@ -1,6 +1,8 @@
 package com.pluxity.ktds.domains.building.entity;
 
+import com.pluxity.ktds.domains.building.dto.HistoryResponseDTO;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
+import com.pluxity.ktds.global.auditing.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -11,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "building_file_history")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class BuildingFileHistory {
+public class BuildingFileHistory extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,16 +35,29 @@ public class BuildingFileHistory {
     @Column(name = "reg_user")
     private String regUser;
 
-    @Column(name = "reg_dt")
-    private String regDt;
-
     @Builder
-    public BuildingFileHistory(@NotNull Building building, @NotNull FileInfo fileInfo, String historyContent, String buildingVersion, String regUser, String regDt) {
+    public BuildingFileHistory(@NotNull Building building, @NotNull FileInfo fileInfo, String historyContent, String buildingVersion, String regUser) {
         this.building = building;
         this.fileInfo = fileInfo;
         this.historyContent = historyContent;
         this.buildingVersion = buildingVersion;
         this.regUser = regUser;
-        this.regDt = regDt;
+    }
+
+    public HistoryResponseDTO toHistoryResponseDTO() {
+        return HistoryResponseDTO.builder()
+                .historyId(this.id)
+                .buildingId(this.building.getId())
+                .fileId(this.fileInfo.getId())
+                .buildingVersion(this.buildingVersion)
+                .historyContent(this.historyContent)
+                .createdAt(this.getCreatedAt())
+                .regUser(this.getRegUser())
+                .fileName(this.fileInfo.getOriginName())
+                .build();
+    }
+
+    public void updateBuildingVersion(String version) {
+        this.buildingVersion = version;
     }
 }

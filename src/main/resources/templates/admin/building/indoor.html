@@ -144,12 +144,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>도면파일</th>
-                                <td colspan="3">
-                                    <input type="file" name="multipartFile" id="modifyMultipartFile" class="form-control input-sm" title="도면파일" data-rules="buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
-                                </td>
-                            </tr>
-                            <tr>
                                 <th>구분</th>
                                 <td colspan="3">
                                     <label style="margin-right: 20px">
@@ -168,14 +162,72 @@
                                     <textarea name="description" id="modifyDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255"></textarea>
                                 </td>
                             </tr>
+                            <tr>
+                                <th>도면 버전</th>
+                                <td colspan="3">
+                                    <select id="buildingVersionSelect"></select>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </fieldset>
+                    <button type="button" class="btn btn-primary" id="btnBuildingModify">수정</button>
                 </form>
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:10%">
+                                <col style="width:35%">
+                                <col style="width:10%">
+                                <col style="width:35%">
+                                <col style="width:10%;">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>도면수정 내용</th>
+                                <td>
+                                    <input type="text" id="buildingHistoryContent" >
+                                </td>
+                                <th>도면파일</th>
+                                <td>
+                                    <input type="file" name="multipartFile" id="buildingUploadFile" class="form-control input-sm" title="도면파일" data-rules="buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                </td>
+                                <td>
+                                    <button id="buildingUploadBtn" class="btn btn-success">업로드</button>
+                                </td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:15%">
+                                <col style="width:15%">
+                                <col style="width:15%">
+                                <col style="width:15%">
+                                <col style="width:15%">
+                                <col style="width:15%">
+                            </colgroup>
+                            <tbody id="historyListBody">
+                            <tr>
+                                <th>도면 버전</th>
+                                <th>도면 파일명</th>
+                                <th>수정 내용</th>
+                                <th>등록자</th>
+                                <th>등록일</th>
+                                <th>관리</th>
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                <button type="button" class="btn btn-primary" id="btnBuildingModify">수정</button>
+
             </div>
         </div>
     </div>

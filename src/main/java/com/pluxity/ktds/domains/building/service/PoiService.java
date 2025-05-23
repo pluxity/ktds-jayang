@@ -342,7 +342,6 @@ public class PoiService {
             List<PoiCategory> poiCategoryList = poiCategoryRepository.findAll();
             List<IconSet> iconSetList = iconSetRepository.findAll();
             List<PoiMiddleCategory> poiMiddleCategoryList = poiMiddleCategoryRepository.findAll();
-
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
                 existValidCheck(poiMap);
@@ -365,11 +364,12 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiCategory Name: " + poiMap.get(POI_CATEGORY_NAME.value)));
 
-                IconSet iconSet = iconSetList.stream()
-                        .filter(c -> c.getName().equalsIgnoreCase(poiMap.get(POI_ICONSET_NAME.value)))
-                        .limit(1)
-                        .findFirst()
-                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ICON_SET, "NotFound Iconset Name: " + poiMap.get(POI_ICONSET_NAME.value)));
+//                IconSet iconSet = iconSetList.stream()
+//                        .filter(c -> c.getName().equalsIgnoreCase(poiMap.get(POI_ICONSET_NAME.value)))
+//                        .limit(1)
+//                        .findFirst()
+//                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ICON_SET, "NotFound Iconset Name: " + poiMap.get(POI_ICONSET_NAME.value)));
+
 
                 PoiMiddleCategory poiMiddleCategory = poiMiddleCategoryList.stream()
                         .filter(m -> m.getPoiCategory().getId().equals(poiCategory.getId()))
@@ -378,11 +378,11 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiMiddleCategory Name: " + poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)));
 
-                if(poiMiddleCategory.getIconSets().get(0).getId() != iconSet.getId()) {
-                    throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
-                            "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
-                                    + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));
-                }
+//                if(poiMiddleCategory.getIconSets().get(0).getId() != iconSet.getId()) {
+//                    throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
+//                            "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
+//                                    + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));
+//                }
 
                 List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split(","))
                         .map(String::trim)
@@ -395,7 +395,7 @@ public class PoiService {
                         .buildingId(building.getId())
                         .floorId(floor.getId())
                         .poiCategoryId(poiCategory.getId())
-                        .iconSetId(iconSet.getId())
+                        .iconSetId(poiMiddleCategory.getIconSets().get(0).getId())
                         .poiMiddleCategoryId(poiMiddleCategory.getId())
                         .tagNames(tags);
 
@@ -458,6 +458,7 @@ public class PoiService {
 
             try {
                 poiRepository.saveAll(result);
+
             } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
                 if(e.getRootCause().getMessage().contains("Data too long for column")) {
                     String errorMessage = e.getRootCause().getMessage();
@@ -494,8 +495,6 @@ public class PoiService {
     private void existValidCheck(Map<String, String> poiMap) {
 
         if (poiMap.get(POI_CATEGORY_NAME.value) == null || poiMap.get(POI_CATEGORY_NAME.value).equals("")) {
-            throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
-        } else if (poiMap.get(POI_ICONSET_NAME.value) == null || poiMap.get(POI_ICONSET_NAME.value).equals("")) {
             throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);
         } else if (poiMap.get(POI_CODE.value) == null || poiMap.get(POI_CODE.value).equals("")) {
             throw new CustomException(ErrorCode.EMPTY_VALUE_EXCEL_FIELD);

@@ -18,4 +18,5 @@ public interface PoiCategoryRepository extends JpaRepository<PoiCategory, Long> 
     @Override
     Optional<PoiCategory> findById(@Param(value = "id") Long id);
 
+    boolean existsByName(String name);
 }

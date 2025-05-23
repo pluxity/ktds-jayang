@@ -1,18 +1,24 @@
 package com.pluxity.ktds;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pluxity.ktds.domains.building.dto.CreateBuildingDTO;
 import com.pluxity.ktds.domains.building.dto.FileInfoDTO;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.building.service.BuildingService;
+import com.pluxity.ktds.domains.kiosk.service.KioskPoiService;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveImage;
 import com.pluxity.ktds.domains.poi_set.dto.IconSetRequestDTO;
+import com.pluxity.ktds.domains.poi_set.dto.PoiMiddleCategoryRequestDTO;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
+import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
+import com.pluxity.ktds.domains.poi_set.service.PoiMiddleCategoryService;
 import com.pluxity.ktds.domains.system_setting.dto.SystemSettingRequestDTO;
 import com.pluxity.ktds.domains.system_setting.repository.SystemSettingRepository;
 import com.pluxity.ktds.domains.system_setting.service.SystemSettingService;
@@ -58,9 +64,15 @@ public class Initializer implements CommandLineRunner {
     private final BuildingService buildingService;
     private final KioskUserRepository kioskUserRepository;
     private static final String ICON_RESOURCE_PATH = "static/images/viewer/categoryIcon";
+    private final KioskPoiService kioskPoiService;
+    private final PoiMiddleCategoryService poiMiddleCategoryService;
+    private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println("init start");
         if (!userRepository.existsByUsername("admin")) {
             List<UserGroup> userGroups = getUserGroups();
 
@@ -136,12 +148,14 @@ public class Initializer implements CommandLineRunner {
                         .build();
 
                 Long buildingId = buildingService.saveBuilding(dto);
-                System.out.println("Outdoor building created with id: " + buildingId);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        initIconSet();
+        initPoiCategoryFromJson();
+        initMiddleCategoryFromJson();
     }
 
     private List<UserGroup> getUserGroups() {
@@ -169,23 +183,21 @@ public class Initializer implements CommandLineRunner {
             FileInfoDTO fileInfo = fileInfoService.saveFile(file, FileEntityType.ICON2D, imageStrategy);
             String fileNameWithoutExt = fileInfo.originName().replace("." + fileInfo.extension(), "").toUpperCase();
             if ("svg".equalsIgnoreCase(fileInfo.extension())) {
-                IconSetRequestDTO iconSetRequestDTO = IconSetRequestDTO.builder()
-                        .name(fileNameWithoutExt)
-                        .iconFile2DId(fileInfo.id())
-                        .build();
-                IconSet iconSet = IconSet.builder()
-                        .name(iconSetRequestDTO.name())
-                        .build();
+                String iconName = fileNameWithoutExt;
+                if (!iconSetRepository.existsByName(iconName)) {
+                    IconSetRequestDTO iconSetRequestDTO = IconSetRequestDTO.builder()
+                            .name(fileNameWithoutExt)
+                            .iconFile2DId(fileInfo.id())
+                            .build();
+                    IconSet iconSet = IconSet.builder()
+                            .name(iconSetRequestDTO.name())
+                            .build();
 
-                updateIcons(iconSetRequestDTO.iconFile2DId(), iconSet::updateFileInfo2D);
-                updateIcons(iconSetRequestDTO.iconFile3DId(), iconSet::updateFileInfo3D);
+                    updateIcons(iconSetRequestDTO.iconFile2DId(), iconSet::updateFileInfo2D);
+                    updateIcons(iconSetRequestDTO.iconFile3DId(), iconSet::updateFileInfo3D);
 
-                IconSet savedIconSet = iconSetRepository.save(iconSet);
-
-                PoiCategory poiCategory = PoiCategory.builder()
-                        .name(fileNameWithoutExt)
-                        .build();
-                poiCategoryRepository.save(poiCategory);
+                    iconSetRepository.save(iconSet);
+                }
             }
 
             return fileInfo;
@@ -227,16 +239,90 @@ public class Initializer implements CommandLineRunner {
                 updateIcons(iconSetRequestDTO.iconFile3DId(), iconSet::updateFileInfo3D);
 
                 IconSet savedIconSet = iconSetRepository.save(iconSet);
-
-                PoiCategory poiCategory = PoiCategory.builder()
-                        .name(fileNameWithoutExt)
-                        .build();
-                poiCategoryRepository.save(poiCategory);
             }
 
             return fileInfo;
         } catch (IOException e) {
             throw new CustomException(ErrorCode.INVALID_FILE);
+        }
+    }
+
+    public void initPoiCategoryFromJson() {
+        Resource categoryJson = new ClassPathResource("static/sample/categories.json");
+        try (InputStream is = categoryJson.getInputStream()) {
+            Map<String, List<String>> categories = objectMapper.readValue(is, new TypeReference<>() {});
+
+            categories.keySet().stream()
+                    .filter(major -> !poiCategoryRepository.existsByName(major))
+                    .map(major -> PoiCategory.builder().name(major).build())
+                    .forEach(poiCategoryRepository::save);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // icon 경로는 추후 수정
+    public void initIconSet() {
+        File folder = null;
+        try {
+            folder = new ClassPathResource("static/images/viewer/iconTest").getFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        File[] svgFiles = folder.listFiles((dir, name) ->
+                name.toLowerCase().endsWith(".svg")
+        );
+        if (svgFiles != null) {
+            for (File svg : svgFiles) {
+                try {
+                    String fileName = svg.getName();
+                    String iconSetName = fileName.substring(0, fileName.lastIndexOf("."));
+                    System.out.println("iconSetName : " + iconSetName);
+                    if (!iconSetRepository.existsByName(iconSetName)) {
+                        uploadFile(svg);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void initMiddleCategoryFromJson() {
+        Resource res = new ClassPathResource("static/sample/categories.json");
+        List<String> manualCategories = List.of("전력", "조명", "태양광", "주차관제", "VAV", "지열");
+        try (InputStream is = res.getInputStream()) {
+            Map<String, List<String>> categories = objectMapper.readValue(is, new TypeReference<>() {});
+
+            for (Map.Entry<String, List<String>> entry : categories.entrySet()) {
+                String majorName = entry.getKey();
+                List<String> minors = entry.getValue();
+                if (minors == null)
+                    continue;
+
+                PoiCategory poiCategory = poiCategoryRepository.findByName(majorName).orElse(null);
+                if (poiCategory == null)
+                    continue;
+                for (String minorName : minors) {
+                    if (poiMiddleCategoryRepository.existsByNameAndPoiCategoryId(minorName, poiCategory.getId())) {
+                        continue;
+                    }
+
+                    String iconSetName = manualCategories.contains(majorName) ? majorName : minorName;
+                    Optional<IconSet> optionalIconSet = iconSetRepository.findByName(iconSetName);
+                    if (optionalIconSet.isEmpty())
+                        continue;
+
+                    PoiMiddleCategoryRequestDTO dto = PoiMiddleCategoryRequestDTO.builder()
+                            .name(minorName)
+                            .majorCategory(poiCategory.getId())
+                            .iconSetIds(List.of(optionalIconSet.get().getId()))
+                            .build();
+                    poiMiddleCategoryService.save(dto);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

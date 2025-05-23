@@ -21,4 +21,5 @@ public interface IconSetRepository extends JpaRepository<IconSet, Long> {
     @Override
     Optional<IconSet> findById(@Param(value = "id") Long id);
 
+    boolean existsByName(String name);
 }

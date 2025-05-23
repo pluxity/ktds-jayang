@@ -203,6 +203,7 @@
                 filteredPois.forEach(poi => {
                     Px.Poi.Show(Number(poi.id));
                 });
+                Px.Camera.ExtendView();
             })
         })
         // allFloor
@@ -213,6 +214,7 @@
             Px.Poi.ShowAll();
             Px.Model.Visible.ShowAll();
             Px.VirtualPatrol.Clear();
+            Px.Camera.ExtendView();
         })
 
         const expandBtn = document.querySelector('.floor-info__ctrl .scale');

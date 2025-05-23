@@ -957,15 +957,21 @@ const layerPopup = (function () {
         tdEquipment.setAttribute('data-poi-id', poi.id);
         tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
         // tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
-        tdEquipment.addEventListener('click', function() {
-            // popup close추가
-            closePopup();
-            movePoi(poi.id);
-        });
         tr.appendChild(tdBuilding);
         tr.appendChild(tdFloor);
         tr.appendChild(tdEquipment);
         tbody.appendChild(tr);
+        tdEquipment.addEventListener('click', function() {
+            // popup close추가
+
+            if (!poi.position) {
+                alertSwal('POI를 배치해주세요');
+                return;
+            }
+
+            closePopup();
+            movePoi(poi.id);
+        });
     }
 
 
@@ -1216,14 +1222,14 @@ const layerPopup = (function () {
         const statusBtn = statusBox?.querySelector('.select-box__btn');
         buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn, statusBtn);
         floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn, statusBtn)
-        console.log("sysPopup : ", sysPopup);
+        console.log("type : ", type);
         if (type == 'elevator') {
             sysPopup.querySelector('#elevatorContent')
             const statusBtn = statusBox.querySelector('.select-box__btn');
             const statusContent = statusBox.querySelector('.select-box__content');
-            if (statusContent.querySelector('ul')) {
+            if (!statusContent.querySelector('ul')) {
                 const statusUl = document.createElement('ul');
-                ['자동', '수동', '독립', '통신이상', '소방', '파킹', '만원', '고장'].forEach(text => {
+                ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장'].forEach(text => {
                     const li = document.createElement('li');
                     li.dataset.id  = text;
                     li.textContent = text;
@@ -1444,33 +1450,111 @@ const layerPopup = (function () {
         setTab('elevator', {
             onBuildingChange: (building, floor) => {
                 console.log("building", building);
+                if (['A', 'B'].includes(building.name)) {
+                    addABElevatorList(building, floor);
+                } else {
+                    addCElevatorList(building, floor);
+                }
             },
             onFloorChange: (building, floor) => {
                 console.log("floor", floor);
             }
         });
-        const param = new URLSearchParams(window.location.search);
-        const buildingId = param.get("buildingId");
-        const building = BuildingManager.findById(buildingId);
+    }
+
+    // A, B
+    const addABElevatorList = (building, floor) => {
+
         const buildingName = building.name;
+        const buildingId = building.id;
 
         let dataById = null;
         api.get(`/api/tags/elevator`, {
             params: {
-                type: 'elevator',
+                type: 'EV',
                 buildingId,
-                buildingName
+                buildingName,
             }
         }).then(res => {
             dataById = res.data;
-            console.log(dataById);
             const elevatorUl = document.getElementById('elevatorList');
             elevatorUl.innerHTML = '';
             // 여기서 세팅하면 될듯?
             Object.entries(dataById).forEach(([idStr, dto]) => {
                 const poiInfo = Px.Poi.GetData(Number(idStr));
+
+                const tagMap = dto.TAGs.reduce((map, t) => {
+                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                    map[key] = t.currentValue;
+                    return map;
+                }, {})
+
                 console.log("poiInfo : ", poiInfo);
-                console.log("dto : ", dto);
+                console.log("tagMap : ", tagMap);
+                const elevatorLi = document.createElement('li');
+                // A, B동일때만
+                elevatorLi.innerHTML = `
+                        <div class="head">
+                            <div class="head__title">
+                                <span>${tagMap['DrivingState']}</span>
+                            </div>
+                            <div class="head__title">
+                                <span>[${poiInfo?.property.buildingName}] [${poiInfo?.property.floorNo}] [${poiInfo?.property.name}]</span>
+                            </div>
+                        </div>
+                        <div class="detail">
+                            <div class="elevator-info">
+                                <div class="elevator-info__detail">
+                                    <div class="info info--location">
+                                        <dl>
+                                            <dt class="info__floor">${tagMap['CurrentFloor']}</dt>
+                                        </dl>
+                                        <dl>
+                                            <dt class="info__floor">${tagMap['Direction']}</dt>
+                                        </dl>
+                                        <dl>
+                                            <dt class="info__floor">${tagMap['Door']}</dt>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                elevatorUl.appendChild(elevatorLi);
+            })
+        })
+    }
+    // C
+    const addCElevatorList = (building, floor) => {
+
+        const buildingName = building.name;
+        const buildingId = building.id;
+
+        let dataById = null;
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'EV',
+                buildingId,
+                buildingName,
+            }
+        }).then(res => {
+            dataById = res.data;
+            const elevatorUl = document.getElementById('elevatorList');
+            elevatorUl.innerHTML = '';
+            // 여기서 세팅하면 될듯?
+            Object.entries(dataById).forEach(([idStr, dto]) => {
+                const poiInfo = Px.Poi.GetData(Number(idStr));
+
+                const tagMap = dto.TAGs.reduce((map, t) => {
+                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                    map[key] = t.currentValue;
+                    return map;
+                }, {})
+
+                console.log("poiInfo : ", poiInfo);
+                console.log("tagMap : ", tagMap);
+                const elevatorLi = document.createElement('li');
+
             })
         })
     }

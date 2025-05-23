@@ -218,6 +218,7 @@ function changeEventFloor(floorId) {
 
     if (floorId === '') {
         Px.Model.Visible.ShowAll();
+        Px.Camera.ExtendView();
     } else {
 
         Px.Model.Visible.HideAll();
@@ -226,6 +227,7 @@ function changeEventFloor(floorId) {
             (floor) => floor.id === Number(floorId),
         );
         Px.Model.Visible.Show(floor.id);
+        Px.Camera.ExtendView();
     }
     const activeId = document.querySelector(
         '#wrapper > div.viewer-sidebar > ul > li > a.active',

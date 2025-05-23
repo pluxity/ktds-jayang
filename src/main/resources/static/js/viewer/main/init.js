@@ -271,6 +271,7 @@ const Init = (function () {
                 filteredPois.forEach(poi => {
                     Px.Poi.Show(Number(poi.id));
                 });
+                Px.Camera.ExtendView();
                 // PoiManager.getPoisByFloorId(floorId).then(pois => {
                 //     pois.forEach(poi => {
                 //         Px.Poi.Show(Number(poi.id));
@@ -282,6 +283,7 @@ const Init = (function () {
         const allFloor = document.querySelector('.floor-info__ctrl');
         allFloor.addEventListener('click', event => {
             Px.Model.Visible.ShowAll();
+            Px.Camera.ExtendView();
         })
     }
 
@@ -365,6 +367,7 @@ const Init = (function () {
                                 }
                             }, 10)
                         );
+
                         // Px.Effect.Outline.Add(sbmDataArray[0].baseFloor)
                         Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                             // Px.Effect.Outline 참고
@@ -456,7 +459,7 @@ const Init = (function () {
                 // TODO: top-view 위치
                 const building = BuildingManager.findById(buildingId);
                 let option = JSON.parse(building.camera2d);
-                if (option === null) {
+                if (option === null || option === "" || option === undefined) {
                     option = {
                         position: {x: -134.91073489593867, y: 4048.653041121009, z: -418.59942425930194},
                         rotation: {x: 0, y: 0, z: 0},

@@ -34,29 +34,6 @@
         Cron.addCronjob('* * * * * *', renderDateTime);
     };
 
-    // test
-
-    function Vec2(x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
-    }
-    Vec2.prototype.set = function(x, y) { this.x = x; this.y = y; return this; };
-    Vec2.prototype.subVectors = function(a, b) {
-        this.x = a.x - b.x;
-        this.y = a.y - b.y;
-        return this;
-    };
-    Vec2.prototype.multiplyScalar = function(s) {
-        this.x *= s;
-        this.y *= s;
-        return this;
-    };
-    Vec2.prototype.copy = function(v) {
-        this.x = v.x;
-        this.y = v.y;
-        return this;
-    };
-
     const initializeStoreBuilding = async (onComplete) => {
         try {
             const container = document.getElementById('webGLContainer');
@@ -70,16 +47,6 @@
                 return;
             }
             const kioskPoi = await KioskPoiManager.getKioskPoiByCode(kioskCode);
-
-            const origAdd = EventTarget.prototype.addEventListener;
-            EventTarget.prototype.addEventListener = function(type, listener, options) {
-
-                if (this instanceof HTMLCanvasElement &&
-                    ['touchstart','touchmove','touchend'].includes(type)) {
-                    return;
-                }
-                return origAdd.call(this, type, listener, options);
-            };
 
             Px.Core.Initialize(container, async () => {
 
@@ -127,60 +94,6 @@
 
                         });
                         Px.Camera.EnableScreenPanning();
-                        // EventTarget.prototype.addEventListener = origAdd;
-                        const canvas = container.querySelector('canvas');
-                        // const panStart = new Vec2();
-                        // const panEnd   = new Vec2();
-                        // const panDelta = new Vec2();
-                        // const panSpeed = 1;
-                        //
-                        // canvas.style.touchAction = 'none';
-                        //
-                        // function pan(dx, dy) {
-                        //     const state = Px.Camera.GetState();
-                        //     state.position.x -= dx;
-                        //     state.position.y += dy;
-                        //
-                        //     state.target.x -= dx;
-                        //     state.target.y += dy;
-                        //     Px.Camera.SetState(state);
-                        // }
-                        //
-                        // function handleTouchStartPan(e) {
-                        //     if (e.touches.length === 1) {
-                        //         panStart.set(e.touches[0].pageX, e.touches[0].pageY);
-                        //     } else {
-                        //         const x = 0.5 * (e.touches[0].pageX + e.touches[1].pageX);
-                        //         const y = 0.5 * (e.touches[0].pageY + e.touches[1].pageY);
-                        //         panStart.set(x, y);
-                        //     }
-                        //     canvas.addEventListener('touchmove', handleTouchMovePan, { passive: false });
-                        //     canvas.addEventListener('touchend',  handleTouchEndPan);
-                        // }
-                        //
-                        // function handleTouchMovePan(e) {
-                        //     if (e.touches.length === 1) {
-                        //         panEnd.set(e.touches[0].pageX, e.touches[0].pageY);
-                        //     } else {
-                        //         const x = 0.5 * (e.touches[0].pageX + e.touches[1].pageX);
-                        //         const y = 0.5 * (e.touches[0].pageY + e.touches[1].pageY);
-                        //         panEnd.set(x, y);
-                        //     }
-                        //
-                        //     panDelta.subVectors(panEnd, panStart).multiplyScalar(panSpeed);
-                        //
-                        //     pan(panDelta.x, panDelta.y);
-                        //
-                        //     panStart.copy(panEnd);
-                        // }
-                        //
-                        // function handleTouchEndPan() {
-                        //     canvas.removeEventListener('touchmove', handleTouchMovePan);
-                        //     canvas.removeEventListener('touchend',  handleTouchEndPan);
-                        // }
-
-                        // canvas.addEventListener('touchstart', handleTouchStartPan, { passive: false });
-
                         Px.Effect.Outline.HoverEventOn('area_no');
                         if (onComplete) onComplete();
                         if(storeBuilding?.camera3d)
@@ -203,19 +116,6 @@
         await KioskPoiManager.renderAllPoiToEngine();
 
     };
-
-    // const moveToKiosk =  (kioskPoi, poiId = '') => {
-    //     Px.Model.Visible.HideAll();
-    //     Px.Model.Visible.Show(kioskPoi.floorId);
-    //     Px.Poi.HideAll();
-    //     Px.Poi.ShowByProperty("floorId", kioskPoi.floorId);
-    //     Px.Camera.MoveToPoi({
-    //         id: kioskPoi.id,
-    //         isAnimation: true,
-    //         duration: 500,
-    //         distanceOffset: 300
-    //     });
-    // }
 
     const homeButton = document.querySelector('.kiosk-3d__control .home');
     homeButton.addEventListener('click', async () => {

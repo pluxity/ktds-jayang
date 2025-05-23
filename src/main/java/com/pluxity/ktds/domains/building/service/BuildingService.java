@@ -195,6 +195,13 @@ public class BuildingService {
             patrolRepository.deleteByBuildingId(building.getId());
         }
 
+        List<Poi> pois = poiRepository.findPoisByBuildingId(building.getId());
+        if (!pois.isEmpty()) {
+            for (Poi poi : pois) {
+                poiRepository.delete(poi);
+            }
+        }
+
         buildingRepository.delete(building);
     }
 

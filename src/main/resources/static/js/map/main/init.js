@@ -334,7 +334,7 @@ const Init = (function () {
             Px.Core.Initialize(container, async () => {
                 Px.Util.SetBackgroundColor('#1b1c2f'); // 백그라운드 색깔지정
                 // BuildingManager.findById(BUILDING_ID).getDetail();
-                const { buildingFile, code} = BuildingManager.findById(firstBuildingId);
+                const { buildingFile, code, camera3d} = BuildingManager.findById(firstBuildingId);
                 const { directory, storedName, extension } = buildingFile;
 
                 const {floors} = BuildingManager.findById(firstBuildingId);
@@ -948,13 +948,14 @@ const Init = (function () {
                 const camera2dStr = building?.camera2d;
                 console.log("option : ", option);
                 if (camera2dStr === null || camera2dStr === "" || camera2dStr === undefined) {
-                    option = JSON.parse(camera2dStr);
                     option = {
                         position: {x: -134.91073489593867, y: 4048.653041121009, z: -418.59942425930194},
                         rotation: {x: 0, y: 0, z: 0},
                         target: {x: -134.91382798752565, y: 6.060831375368665e-14, z: -418.59681190865894}
                     };
                     Px.Camera.SetOrthographic();
+                }else{
+                    option = JSON.parse(camera2dStr);
                 }
                 option.onComplete = () => {
                     Px.Camera.SetOrthographic();

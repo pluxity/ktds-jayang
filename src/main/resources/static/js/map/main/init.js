@@ -186,17 +186,28 @@
 
     const clickFloor = () => {
         const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
-
         // btnClick
         floorBtns.forEach(floorBtn => {
             floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', event => {
+
                 floorBtns.forEach(btn => btn.classList.remove('active'));
                 floorBtn.classList.add('active');
                 Px.VirtualPatrol.Clear();
                 Px.Model.Visible.HideAll();
                 Px.Poi.HideAll();
                 let floorId = floorBtn.getAttribute('floor-id');
+                // 다른 층 클릭하면 기존 poi popup 제거
+                const allPopups = document.querySelectorAll('.popup-info');
+                if (allPopups) {
+                    allPopups.forEach(popup => {
+                        const popupPoiId = popup.querySelector('.poi-id').value;
+                        const poiInfo = Px.Poi.GetData(popupPoiId);
+                        if (poiInfo.property.floorId !== Number(floorId)) {
+                            popup.remove();
+                        }
+                    })
+                }
                 Px.Model.Visible.Show(Number(floorId));
                 const allPois = PoiManager.findAll();
                 const filteredPois = allPois.filter(poi => poi.floorId === Number(floorId));
@@ -428,6 +439,13 @@ const Init = (function () {
                 .filter(poiInfo => poiInfo.poiCategoryDetail?.name?.toLowerCase() === 'cctv').forEach((poiInfo) => {
                 Px.Poi.Show(poiInfo.id);
             });
+
+            if (filteredList.some(poiInfo => poiInfo.poiCategoryDetail?.name?.toLowerCase() === 'cctv')) {
+                const cctvLink = document.querySelector('#equipmentGroup .cctv');
+                if (cctvLink) {
+                    cctvLink.classList.add('active');
+                }
+            }
         });
     };
     let selectedGroup = null;
@@ -465,7 +483,7 @@ const Init = (function () {
                     Px.Camera.FPS.SetHeightOffset(15);
                     Px.Camera.FPS.SetMoveSpeed(500);
                     Px.Camera.EnableScreenPanning();
-                    PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
+                    // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
                     Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                         moveToPoi(poiInfo.id);

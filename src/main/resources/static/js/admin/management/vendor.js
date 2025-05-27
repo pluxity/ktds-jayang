@@ -15,7 +15,7 @@ const dataManufacturer = (rowData) =>
                 modifier,
                 gridjs.html(`
                     <button class="btn btn-warning modifyModalButton" data-bs-toggle="modal" data-bs-target="#vendorModifyModal" data-id="${id}">수정</button>
-                    <button class="btn btn-danger deleteButton"  onclick="deletevendor(${id})" data-id="${id}">삭제</button>`),
+                    <button class="btn btn-danger deleteButton"  onclick="deleteVendor(${id})" data-id="${id}">삭제</button>`),
             ]
         });
 
@@ -156,7 +156,7 @@ document
         });
     });
 
-const deletevendor = (vendorId) => {
+const deleteVendor = (vendorId) => {
     const id = Number(vendorId);
     confirmSwal('정말 삭제 하시겠습니까?').then(() => {
         api.delete(`/vendor/${id}`).then(() => {

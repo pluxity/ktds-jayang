@@ -23,6 +23,7 @@ public class TagService {
 
     public Map<Long, TagResponseDTO> processTagDataByPoi(String type, Long buildingId, String buildingName) {
 
+        System.out.println("type : " + type);
         String prefixEv = String.format("%s-null-EV-ELEV-", buildingName);
         String prefixEs = String.format("%s-null-EV-ESCL-", buildingName);
         List<Poi> pois = poiRepository.findPoisByBuildingId(buildingId);
@@ -36,7 +37,7 @@ public class TagService {
             if (tagNamesList != null) {
                 for (String tagName : tagNamesList) {
                     String[] parts = tagName.split("-");
-                    if (parts.length > 2 && parts[2].equalsIgnoreCase("EV")) {
+                    if (parts.length > 2 && parts[2].equalsIgnoreCase(type)) {
                         allTagNamesToFetch.add(tagName);
                         tagNamePoiIdMap.put(tagName, poiId);
                     }
@@ -70,10 +71,14 @@ public class TagService {
 
                         if (full.startsWith(prefixEv)) {
                             try {
-                                if ("A".equals(buildingName) || "B".equals(buildingName)) {
-                                    desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(raw);
+                                if (type.equals("EV")) {
+                                    if ("A".equals(buildingName) || "B".equals(buildingName)) {
+                                        desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(raw);
+                                    } else {
+                                        desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(raw);
+                                    }
                                 } else {
-                                    desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(raw);
+
                                 }
                                 result.add(new TagData(full, desc, td.tagStatus(), td.alarmStatus()));
                             } catch (IllegalArgumentException e) {
@@ -95,6 +100,8 @@ public class TagService {
                 }
             }
         }
+        System.out.println("poiTagResponseMap : " + poiTagResponseMap);
         return poiTagResponseMap;
     }
+
 }

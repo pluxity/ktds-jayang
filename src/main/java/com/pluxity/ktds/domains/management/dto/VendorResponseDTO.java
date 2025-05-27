@@ -2,6 +2,9 @@ package com.pluxity.ktds.domains.management.dto;
 
 import lombok.Builder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Builder
 public record VendorResponseDTO(
         Long id,
@@ -11,7 +14,7 @@ public record VendorResponseDTO(
         String contactNumber,
         String description,
         String modifier,
-        String createdAt,
-        String modifiedAt
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
 ) {
 }

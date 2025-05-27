@@ -29,10 +29,10 @@ public class ElevatorTagManager {
     @AllArgsConstructor
     public enum ElevatorABTag {
 
-        CurrentFloor("CurrentFloor", createFloorMap(10, 20)),
-        Direction("Direction", Map.of("0", "STOP", "1", "UP", "2", "DOWN")),
-        Door("Door", Map.of("0", "Open", "1", "Close")),
-        DrivingState("DrivingState", Map.of("0", "정상운전", "1", "운전휴지", "2", "독립운전", "3", "전용운전", "4", "보수운전", "5", "정전운전", "6", "화재운전", "7", "지진운전", "8", "고장"));
+        CurrentFloor("층위치", createFloorMap(10, 20)),
+        Direction("방향", Map.of("0", "STOP", "1", "UP", "2", "DOWN")),
+        Door("도어상태", Map.of("0", "Open", "1", "Close")),
+        DrivingState("승강기상태", Map.of("0", "정상운전", "1", "운전휴지", "2", "독립운전", "3", "전용운전", "4", "보수운전", "5", "정전운전", "6", "화재운전", "7", "지진운전", "8", "고장"));
 
         private final String tagName;
         private final Map<String, String> valueMap;
@@ -85,14 +85,25 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum EscalatorTag {
-        UpDir("UpDir", Map.of("0", "OFF", "1", "상향")),
-        DownDir("DownDir", Map.of("0", "OFF", "1", "하향")),
-        Stop("Stop", Map.of("0", "OFF", "1", "정지")),
-        Run("Run", Map.of("0", "OFF", "1", "운행")),
-        Fault("Fault", Map.of("0", "OFF", "1", "고장"));
+        UpDir("상향", Map.of("0", "OFF", "1", "상향")),
+        DownDir("하향", Map.of("0", "OFF", "1", "하향")),
+        Stop("정지", Map.of("0", "OFF", "1", "정지")),
+        Run("운행", Map.of("0", "OFF", "1", "운행")),
+        Fault("고장", Map.of("0", "OFF", "1", "고장"));
 
         private final String tagName;
         private final Map<String, String> valueMap;
+        private static final Map<String, EscalatorTag> BY_TAG_NAME =
+                Arrays.stream(values())
+                        .collect(Collectors.toMap(EscalatorTag::getTagName, e -> e));
+
+        public static EscalatorTag fromTagName(String tagName) {
+            EscalatorTag e = BY_TAG_NAME.get(tagName);
+            if (e == null) {
+                throw new IllegalArgumentException("Unknown tagName: " + tagName);
+            }
+            return e;
+        }
 
         public String getValueDescription(String value) {
             return valueMap.get(value);

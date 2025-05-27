@@ -54,6 +54,8 @@ public class Vendor extends AuditableEntity {
                 .contactNumber(this.contactNumber)
                 .description(this.description)
                 .modifier(this.modifier)
+                .createdAt(getCreatedAt())
+                .modifiedAt(getLastModifiedAt())
                 .build();
     }
 

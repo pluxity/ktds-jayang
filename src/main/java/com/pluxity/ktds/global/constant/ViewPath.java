@@ -19,6 +19,7 @@ public enum ViewPath {
     ADMIN_SYSTEM_SETTING("/admin/system-setting", "admin/system-setting/system-setting"),
     ADMIN_NOTICE("/admin/notice", "admin/notice/notice"),
     ADMIN_MNG_VENDOR("/admin/management/vendor", "admin/management/vendor"),
+    ADMIN_MNG_MAINTENANCE("/admin/management/maintenance", "admin/management/maintenance"),
 
     LOGIN("/login", "login/login"),
     KIOSK_LOGIN("/kiosk-login", "login/kiosk-login"),

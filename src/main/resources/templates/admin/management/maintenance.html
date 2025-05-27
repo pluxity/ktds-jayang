@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 유지보수 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}" />
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}" />
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">유지보수</h1>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <form name="searchForm" id="searchForm" class="d-flex mb-3">
+                                <div class="input-group me-2">
+                                    <select id="searchType" name="searchType" class="form-select" style="max-width: fit-content;">
+                                        <option value="maintenanceCategory">카테고리명</option>
+                                        <option value="maintenanceName">유지보수명</option>
+                                    </select>
+                                    <input type="text" name="searchName" id="searchName" class="form-control" placeholder="검색어을 입력하세요." aria-label="" aria-describedby="button-addon2">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" id="searchButton">검색</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-7 text-right">
+                            <button type="button" class="btn btn-primary btn-md" id="btnRegisterMaintenance" data-bs-toggle="modal" data-bs-target="#maintenanceRegisterModal">
+                                등록
+                            </button>
+                            <button type="button" class="btn btn-danger delete" id="btnDeleteMaintenance">일괄 삭제</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div id="wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div class="modal fade" id="maintenanceRegisterModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">거래처 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="maintenanceRegisterForm" id="maintenanceRegisterForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:30%">
+                                <col style="width:70%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>카테고리</th>
+                                <td>
+                                    <select name="category" id="selectCategoryRegister" class="form-select" title="카테고리 선택" required data-rules="required" data-tagname="카테고리">
+                                        <option class="selected" value="">카테고리 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>유지보수명</th>
+                                <td ><input type="text" name="maintenanceName" id="registerMaintenanceName" class="form-control input-sm" title="유지보수명" required data-rules="required" data-tagname="유지보수명" ></td>
+                            </tr>
+                            <tr>
+                                <th>담당자(정)</th>
+                                <td>
+                                    <input type="text" name="mainManagerDivision" id="registerMainManagerDivision" class="form-control mb-2" title="담당자(정) 소속" placeholder="소속" required data-rules="required" data-tagname="담당자(정) 소속">
+                                    <input type="text" name="mainManagerName" id="registerMainManagerName" class="form-control mb-2" title="담당자(정) 이름" placeholder="이름" required data-rules="required" data-tagname="담당자(정) 이름">
+                                    <input type="text" name="mainManagerContact" id="registerMainManagerContact" class="form-control mb-2" title="담당자(정) 연락처" placeholder="연락처" required data-rules="required" data-tagname="담당자(정) 연락처">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>담당자(부)</th>
+                                <td>
+                                    <input type="text" name="subManagerDivision" id="registerSubManagerDivision" class="form-control mb-2" title="담당자(부) 소속" placeholder="소속" required data-rules="required" data-tagname="담당자(부) 소속">
+                                    <input type="text" name="subManagerName" id="registerSubManagerName" class="form-control mb-2" title="담당자(부) 이름" placeholder="이름" required data-rules="required" data-tagname="담당자(부) 소속">
+                                    <input type="text" name="subManagerContact" id="registerSubManagerContact" class="form-control input-sm mb-2" title="담당자(부) 연락처" placeholder="연락처" required data-rules="required" data-tagname="담당자(부) 소속">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnMaintenanceRegister">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="maintenanceModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">유지보수 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="maintenanceModifyForm" id="maintenanceModifyForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:30%">
+                                <col style="width:70%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>카테고리</th>
+                                <td>
+                                    <select name="category" id="selectCategoryModify" class="form-select" title="카테고리 선택" required data-rules="required" data-tagname="카테고리">
+                                        <option class="selected" value="">카테고리 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>유지보수명</th>
+                                <td ><input type="text" name="maintenanceName" id="modifyMaintenanceName" class="form-control input-sm" title="유지보수명" required data-rules="required" data-tagname="유지보수명" ></td>
+                            </tr>
+                            <tr>
+                                <th>담당자(정)</th>
+                                <td>
+                                    <input type="text" name="mainManagerDivision" id="modifyMainManagerDivision" class="form-control mb-2" title="담당자(정) 소속" placeholder="소속" required data-rules="required" data-tagname="담당자(정) 소속">
+                                    <input type="text" name="mainManagerName" id="modifyMainManagerName" class="form-control mb-2" title="담당자(정) 이름" placeholder="이름" required data-rules="required" data-tagname="담당자(정) 이름">
+                                    <input type="text" name="mainManagerContact" id="modifyMainManagerContact" class="form-control mb-2" title="담당자(정) 연락처" placeholder="연락처" required data-rules="required" data-tagname="담당자(정) 연락처">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>담당자(부)</th>
+                                <td>
+                                    <input type="text" name="subManagerDivision" id="modifySubManagerDivision" class="form-control mb-2" title="담당자(부) 소속" placeholder="소속" required data-rules="required" data-tagname="담당자(부) 소속">
+                                    <input type="text" name="subManagerName" id="modifySubManagerName" class="form-control mb-2" title="담당자(부) 이름" placeholder="이름" required data-rules="required" data-tagname="담당자(부) 소속">
+                                    <input type="text" name="subManagerContact" id="modifySubManagerContact" class="form-control input-sm mb-2" title="담당자(부) 연락처" placeholder="연락처" required data-rules="required" data-tagname="담당자(부) 소속">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnMaintenanceModify">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/admin/management/maintenance.js}"></script>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -38,6 +38,10 @@ public class VendorService {
 
     @Transactional(readOnly = true)
     public List<VendorResponseDTO> findAll() {
+        String currentUser = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        System.out.println("currentUser : " + currentUser);
         return vendorRepository.findAll().stream()
                 .map(Vendor::toResponseDTO)
                 .toList();

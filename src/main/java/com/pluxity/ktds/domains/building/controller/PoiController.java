@@ -1,6 +1,13 @@
 package com.pluxity.ktds.domains.building.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pluxity.ktds.domains.tag.ElevatorTagManager;
+import com.pluxity.ktds.domains.tag.TestTagService;
+import java.util.*;
 import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
@@ -32,6 +39,7 @@ import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
 public class PoiController {
     private final PoiService service;
     private final TagClientService tagClientService;
+    private final ObjectMapper objectMapper;
 
 //    @GetMapping
 //    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
@@ -135,7 +143,46 @@ public class PoiController {
 
     @PostMapping("/status")
     public ResponseEntity<String> getPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
-        return tagClientService.readTags(tags);
+        return null;
+//        return tagClientService.readTags(tags);
+    }
+
+    private Map<String, Object> getPoiTagData(List<String> tags) {
+        String tagDataStr = tagClientService.readTags(tags).getBody();
+        try {
+            JsonNode root = objectMapper.readTree(tagDataStr);
+            int tagCnt = root.get("TAGCNT").asInt(0);
+            ArrayNode tagsNode = (ArrayNode) root.withArray("TAGs");
+            List<Map<String, Object>> mappedTags = new ArrayList<>();
+            for (JsonNode node : tagsNode) {
+                String fullTag = node.path("T").asText("");
+                String rawValue = node.path("V").asText("");
+                String suffix = "";
+                int idx = fullTag.lastIndexOf('-');
+                if (idx >= 0 && idx + 1 < fullTag.length()) {
+                    suffix = fullTag.substring(idx + 1);
+                }
+                // 대분류에따라 이부분이 바뀔듯?
+                ElevatorTagManager.ElevatorABTag tagEnum;
+                tagEnum = ElevatorTagManager.ElevatorABTag.valueOf(suffix);
+                String desc = tagEnum.getValueDescription(rawValue);
+                if (desc == null) {
+                    desc = rawValue;
+                }
+                mappedTags.add(Map.of(
+                        "fullTag", fullTag,
+                        "label",   tagEnum.getTagName(),
+                        "value",   rawValue,
+                        "desc",    desc
+                ));
+            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("TAGCNT", tagCnt);
+            result.put("TAGs", mappedTags);
+            return result;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

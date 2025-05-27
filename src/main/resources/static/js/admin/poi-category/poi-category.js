@@ -188,8 +188,8 @@ const modifyCategory = () => {
 
     modal.querySelector('#modifyId').value = poiCategory.id;
     modal.querySelector('#modifyName').value = poiCategory.name;
-    modal.querySelector('#modifyIconSetId').value =
-        poiCategory.iconSets[0].id ?? '';
+    // modal.querySelector('#modifyIconSetId').value =
+    //     poiCategory.iconSets[0].id ?? '';
 
     let myModal = new bootstrap.Modal(document.getElementById('poiCategoryModifyModal'), {
         keyboard: false

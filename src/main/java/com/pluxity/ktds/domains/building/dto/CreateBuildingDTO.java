@@ -26,6 +26,7 @@ public record CreateBuildingDTO(
         LodSettings lodSettings,
         String topology,
         String evacuationRoute,
-        String isIndoor
+        String isIndoor,
+        String version
 ) {
 }

@@ -25,13 +25,22 @@ public interface SaveStrategy {
     default FileInfo saveFileInfo(MultipartFile file, Path directoryPath) throws IOException {
         String storedName = UUID.randomUUID().toString();
         String extension = FileUtil.getExtension(file.getOriginalFilename());
+
+        // building인 경우와 아닌 경우 경로 처리 다르게
+        String directoryName;
+        if (directoryPath.toString().contains("Building")) {
+            directoryName = directoryPath.getParent().getFileName().toString();  // version
+        } else {
+            directoryName = directoryPath.getParent().relativize(directoryPath).toString();  // uuid
+        }
+
         Files.copy(file.getInputStream(), directoryPath.resolve(storedName + "." + extension));
 
         return FileInfo.builder()
                 .originName(file.getOriginalFilename())
                 .extension(extension)
                 .storedName(storedName)
-                .directoryName(directoryPath.getParent().relativize(directoryPath).toString())
+                .directoryName(directoryName)
                 .build();
     }
 

@@ -539,7 +539,7 @@ const layerPopup = (function () {
         }
 
         filterPoiList.forEach((poi) => {
-            const floorInfo = buildingInfo.floors.find((floor) => floor.id === poi.floorId);
+            const floorInfo = buildingInfo.floors.find((floor) => floor.no === poi.floorNo);
 
             equipmentTbody.innerHTML += `
               <tr class='equipment-tr' data-category=${poi.poiCategory} data-poi-id=${poi.id}>
@@ -861,8 +861,7 @@ const layerPopup = (function () {
         const tr = document.createElement('tr');
 
         const buildingInfo = BuildingManager.findById(poi.buildingId);
-        const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
-
+        const floorInfo = buildingInfo.floors.find(floor => Number(floor.no) === Number(poi.floorNo));
         const tdBuilding = document.createElement('td');
         tdBuilding.textContent = buildingInfo.name;
 
@@ -944,7 +943,7 @@ const layerPopup = (function () {
         const tr = document.createElement('tr');
 
         const buildingInfo = BuildingManager.findById(poi.buildingId);
-        const floorInfo = buildingInfo.floors.find(floor => floor.id === poi.floorId);
+        const floorInfo = buildingInfo.floors.find(floor => floor.no === poi.floorNo);
 
         const tdBuilding = document.createElement('td');
         tdBuilding.textContent = buildingInfo.name;
@@ -2167,7 +2166,7 @@ const layerPopup = (function () {
                 floorSelect.querySelector(".select-box__content").classList.remove("active");
 
                 const allPois = PoiManager.findAll();
-                const filteredPois = allPois.filter(poi => poi.floorId === Number(floor.id));
+                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floor.id));
                 updatePoiSelectBox(filteredPois);
             }
 

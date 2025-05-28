@@ -22,10 +22,13 @@ class Building {
     #camera3d;
 
     #topology;
+
     #isIndoor;
 
+    #version;
+
     constructor(buildingListDto) {
-        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology, isIndoor } =
+        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology, isIndoor ,version} =
             buildingListDto;
 
         this.#id = id;
@@ -39,6 +42,8 @@ class Building {
         this.#camera3d = camera3d;
         this.#topology = topology;
         this.#isIndoor = isIndoor;
+        this.#version = version;
+
     }
 
     get id() {
@@ -61,11 +66,12 @@ class Building {
         if(!this.#floors) return [];
         return this.#floors?.map((floor) => {
             const floorInfo = {};
-            const { id, name, sbmFloor } = floor;
+            const { id, name, sbmFloor, no } = floor;
 
             floorInfo.id = id;
             floorInfo.name = name;
             floorInfo.sbmFloor = sbmFloor;
+            floorInfo.no = no;
 
             return floorInfo;
         });
@@ -184,5 +190,9 @@ class Building {
                 return acc;
             }
         }, []);
+    }
+
+    getVersion() {
+        return this.#version;
     }
 }

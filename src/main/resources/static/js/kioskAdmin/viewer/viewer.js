@@ -19,12 +19,13 @@
                 let sbmDataArray = [];
                 if (storeBuilding) {
                     const { buildingFile, floors } = storeBuilding;
+                    const version = storeBuilding.getVersion();
                     const { directory } = buildingFile;
 
                     sbmDataArray = floors
                         .filter(floor => kioskSet.has(floor.name))
                         .map(floor => {
-                            const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                            const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
                             return {
                                 url,
                                 id: floor.sbmFloor[0].id,

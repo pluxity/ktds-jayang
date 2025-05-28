@@ -141,47 +141,52 @@
     const initFloors = () => {
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
-        const { floors } = BuildingManager.findById(buildingId);
-        // floor setting
-        const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
-        const upButton = document.querySelector('#floor-info .floor-info__detail .up');
-        const downButton = document.querySelector('#floor-info .floor-info__detail .down');
-        // upButton.style.transform = "rotate(-90deg)";
-        // downButton.style.transform = "rotate(-90deg)";
-        floors.forEach(floor => {
-            const floorLi = document.createElement('li');
-            floorLi.setAttribute('floor-id', floor.id);
-            floorLi.textContent = floor.name
-            floorUl.appendChild(floorLi);
-        })
+        const building = BuildingManager.findById(buildingId);
+        const version = building.getVersion();
 
-        const itemsPerPage = 10;
-        const totalItems = floors.length;
-        let startIndex = 0;
+        BuildingManager.getFloorsByHistoryVersion(version).then((floors) => {
 
-        updateFloorPage(floorUl, startIndex, itemsPerPage);
-        updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+            // floor setting
+            const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
+            const upButton = document.querySelector('#floor-info .floor-info__detail .up');
+            const downButton = document.querySelector('#floor-info .floor-info__detail .down');
+            // upButton.style.transform = "rotate(-90deg)";
+            // downButton.style.transform = "rotate(-90deg)";
+            floors.forEach(floor => {
+                const floorLi = document.createElement('li');
+                floorLi.setAttribute('floor-id', floor.no);
+                floorLi.textContent = floor.name
+                floorUl.appendChild(floorLi);
+            })
 
-        // 1층단위
-        upButton.addEventListener('click', () => {
-            if (startIndex > 0) {
-                startIndex -= 10;
-                // startIndex = Math.max(0, startIndex - 10);
-                updateFloorPage(floorUl, startIndex, itemsPerPage);
-                updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
-            }
+            const itemsPerPage = 10;
+            const totalItems = floors.length;
+            let startIndex = 0;
+
+            updateFloorPage(floorUl, startIndex, itemsPerPage);
+            updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+
+            // 1층단위
+            upButton.addEventListener('click', () => {
+                if (startIndex > 0) {
+                    startIndex -= 10;
+                    // startIndex = Math.max(0, startIndex - 10);
+                    updateFloorPage(floorUl, startIndex, itemsPerPage);
+                    updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+                }
+            });
+
+            downButton.addEventListener('click', () => {
+                if (startIndex + itemsPerPage < totalItems) {
+                    startIndex += 10;
+                    // startIndex = Math.min(totalItems - itemsPerPage, startIndex + 10);
+                    updateFloorPage(floorUl, startIndex, itemsPerPage);
+                    updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+                }
+            });
+            clickFloor();
         });
 
-        downButton.addEventListener('click', () => {
-            if (startIndex + itemsPerPage < totalItems) {
-                startIndex += 10;
-                // startIndex = Math.min(totalItems - itemsPerPage, startIndex + 10);
-                updateFloorPage(floorUl, startIndex, itemsPerPage);
-                updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
-            }
-        });
-
-        clickFloor();
     }
 
     const clickFloor = () => {
@@ -208,9 +213,13 @@
                         }
                     })
                 }
-                Px.Model.Visible.Show(Number(floorId));
+                const floor = BuildingManager.findFloorsByHistory().find(
+                    (floor) => Number(floor.no) === Number(floorId),
+                );
+
+                Px.Model.Visible.Show(floor.id);
                 const allPois = PoiManager.findAll();
-                const filteredPois = allPois.filter(poi => poi.floorId === Number(floorId));
+                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floorId));
                 filteredPois.forEach(poi => {
                     Px.Poi.Show(Number(poi.id));
                 });
@@ -347,13 +356,13 @@ const Init = (function () {
             Px.Core.Initialize(container, async () => {
                 Px.Util.SetBackgroundColor('#1b1c2f'); // 백그라운드 색깔지정
                 // BuildingManager.findById(BUILDING_ID).getDetail();
-                const { buildingFile, code, camera3d} = BuildingManager.findById(firstBuildingId);
+                const { buildingFile, code, camera3d, version} = BuildingManager.findById(firstBuildingId);
                 const { directory, storedName, extension } = buildingFile;
 
                 const {floors} = BuildingManager.findById(firstBuildingId);
                 const sbmDataArray = floors.map((floor) => {
 
-                    const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                    const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
                     const sbmData = {
                         url,
                         id: floor.sbmFloor[0].id,
@@ -458,12 +467,14 @@ const Init = (function () {
         Px.Core.Initialize(container, async () => {
 
             const building = await BuildingManager.findById(buildingId);
-            const { buildingFile, floors } = building;
+            const { buildingFile} = building;
             const { directory } = buildingFile;
+            const version = building.getVersion();
+            const floors =  await BuildingManager.getFloorsByHistoryVersion(building.getVersion());
 
             const sbmDataArray = floors.map((floor) => {
 
-                const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
                 const sbmData = {
                     url,
                     id: floor.sbmFloor[0].id,

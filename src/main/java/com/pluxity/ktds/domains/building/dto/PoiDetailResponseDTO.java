@@ -10,7 +10,7 @@ import java.util.List;
 public record PoiDetailResponseDTO(
         Long id,
         Long buildingId,
-        Long floorId,
+        Integer floorNo,
         Long poiCategoryId,
         Long poiMiddleCategoryId,
         Long iconSetId,

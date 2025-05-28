@@ -62,15 +62,43 @@ public class BuildingController {
         return DataResponseBody.of(service.findFloorByFloorId(id, floorId));
     }
 
-    @GetMapping("/history/{id}")
+    @GetMapping("/history/building/{id}")
     public DataResponseBody<List<HistoryResponseDTO>> getHistoryByBuildingId(@PathVariable Long id){
         return DataResponseBody.of(service.findHistoryByBuildingId(id));
+    }
+
+    @GetMapping("/history/{id}")
+    public DataResponseBody<List<HistoryResponseDTO>> getHistoryById(@PathVariable Long id){
+        return DataResponseBody.of(service.findHistoryById(id));
+    }
+
+    @GetMapping("/history/{version}/floors")
+    public List<FloorDetailResponseDTO> getFloorsByHistoryId(@PathVariable String version) {
+        List<FloorDetailResponseDTO> floors = service.findFloorsByHistoryVersion(version);
+        return floors;
     }
 
     @PostMapping("/upload/file")
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseBody<FileInfoDTO> postBuilding(@RequestBody MultipartFile file) throws IOException {
         return DataResponseBody.of(service.saveFile(file));
+    }
+
+    @PostMapping("/{buildingId}/history/files")
+    @ResponseStatus(HttpStatus.CREATED)
+    public DataResponseBody<FileInfoDTO> uploadHistoryFile(
+            @PathVariable Long buildingId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("version") String version) throws IOException {
+        return DataResponseBody.of(service.saveFile(file, version, buildingId));
+    }
+
+    @PostMapping("/files")
+    @ResponseStatus(HttpStatus.CREATED)
+    public DataResponseBody<FileInfoDTO> uploadBuildingFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("version") String version) throws IOException {
+        return DataResponseBody.of(service.saveFile(file, version));
     }
 
     @PostMapping()
@@ -84,13 +112,13 @@ public class BuildingController {
         return DataResponseBody.of(service.saveBuildingHistory(dto, request));
     }
 
-    @PatchMapping("/{id}/force")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseBody patchBuildingForce(@PathVariable Long id,
-                                           @Valid @RequestBody UpdateBuildingDTO dto) {
-        service.updateForceBuilding(id, dto);
-        return ResponseBody.of(SUCCESS_PATCH);
-    }
+//    @PatchMapping("/{id}/force")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public ResponseBody patchBuildingForce(@PathVariable Long id,
+//                                           @Valid @RequestBody UpdateBuildingDTO dto) {
+//        service.updateForceBuilding(id, dto);
+//        return ResponseBody.of(SUCCESS_PATCH);
+//    }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -135,6 +163,13 @@ public class BuildingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseBody deleteBuildings(@PathVariable List<Long> ids) {
         service.deleteAll(ids);
+        return ResponseBody.of(SUCCESS_DELETE);
+    }
+
+    @DeleteMapping("/history/{historyId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteBuildingHistory(@PathVariable Long historyId) {
+        service.deleteHistory(historyId);
         return ResponseBody.of(SUCCESS_DELETE);
     }
 

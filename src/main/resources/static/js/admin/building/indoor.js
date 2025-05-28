@@ -115,23 +115,22 @@ function modifyBuildingModal(id) {
         form.querySelector('#modifyDescription').innerHTML = resultData.description;
         currentBuildingFileId = resultData.buildingFile.id;
 
-        setBuildingVersionSelect(historyList, currentBuildingFileId);
+        setBuildingVersionSelect(historyList, resultData.version);
     });
 
 }
 
 // select에 버전과 id를 넣는 함수
-function setBuildingVersionSelect(historyList, currentBuildingFileId) {
-    console.log("currentBuildingFileId =",currentBuildingFileId);
+function setBuildingVersionSelect(historyList, version) {
     const select = document.getElementById('buildingVersionSelect');
     select.innerHTML = ''; // 기존 옵션들 제거
     
     historyList.forEach(history => {
         const option = document.createElement('option');
-        option.value = history.fileId;
+        option.value = history.historyId;
         option.textContent = history.buildingVersion;
         console.log("fileId = ",history.fileId);
-        if(history.fileId === currentBuildingFileId){
+        if(history.buildingVersion === version) {
             option.selected = true;
         }
         select.appendChild(option);
@@ -150,18 +149,21 @@ btnBuildingRegist.onclick = () => {
 
     const isIndoor = form.querySelector('input[name="isIndoor"]:checked').value;
     const buildingType = (isIndoor === 'Y') ? 'indoor' : 'outdoor';
+    const version = getVersionString();
 
     const formData = new FormData(form);
     formData.set('buildingType', buildingType);
 
     const fileFormData = new FormData();
     fileFormData.set('file', formData.get('multipartFile'));
+    fileFormData.set('version', version);
 
     const headers = {
         'Content-Type': 'application/json',
     };
 
-    api.post('/buildings/upload/file', fileFormData).then((res) => {
+    // 빌딩 파일 업로드
+    api.post('/buildings/files', fileFormData).then((res) => {
         const {result: data} = res.data;
         const param = {
             buildingType: buildingType,
@@ -169,7 +171,8 @@ btnBuildingRegist.onclick = () => {
             code: formData.get('code'),
             description: formData.get('description'),
             fileInfoId: data.id,
-            isIndoor: isIndoor
+            isIndoor: isIndoor,
+            version: version
             // floors
         }
         api.post('/buildings', param, {headers}).then(() => {
@@ -209,7 +212,8 @@ btnBuildingModify.onclick = () => {
         name: formData.get('name'),
         isIndoor: formData.get('isIndoor'),
         description: formData.get('description'),
-        fileInfoId: document.getElementById('buildingVersionSelect').value  // 선택된 fileId 추가
+        historyId: document.getElementById('buildingVersionSelect').value
+
     }
 
     api.put(`/buildings/${formData.get('id')}`, buildingParam, { headers })
@@ -230,23 +234,27 @@ btnBuildingModify.onclick = () => {
 const buildingUploadBtn = document.getElementById('buildingUploadBtn');
 
 buildingUploadBtn.onclick = () => {
+    const version = getVersionString();
     const getHistoryContent = document.getElementById('buildingHistoryContent').value;
     const uploadFile = document.getElementById('buildingUploadFile');
     const getBuildingId = document.getElementById('modifyId').value;
 
     const fileFormData = new FormData();
     fileFormData.set('file', uploadFile.files[0]);
+    fileFormData.set('version', version);
 
     const headers = {
         'Content-Type': 'application/json',
     };
 
-    api.post('/buildings/upload/file', fileFormData).then((res) => {
+    // history 파일 등록
+    api.post(`/buildings/${getBuildingId}/history/files`, fileFormData).then((res) => {
         const {result: data} = res.data;
         const param = {
             buildingId: getBuildingId,
             historyContent: getHistoryContent,
-            fileInfoId: data.id
+            fileInfoId: data.id,
+            version: version
         }
         api.post('/buildings/history', param, {headers}).then(() => {
             alertSwal('등록되었습니다.');
@@ -256,8 +264,20 @@ buildingUploadBtn.onclick = () => {
     })
 }
 
+const getVersionString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    return `v${year}${month}${day}_${hours}${minutes}${seconds}`;
+}
+
 function getHistoryList(id) {
-    return api.get(`/buildings/history/${id}`).then((res) => {
+    return api.get(`/buildings/history/building/${id}`).then((res) => {
         const {result: historyList} = res.data;
         renderHistoryList(historyList);
         return historyList;
@@ -287,9 +307,16 @@ const renderHistoryList = (historyList) => {
             <td>${history.historyContent || '-'}</td>
             <td>${history.regUser || '-'}</td>
             <td>${history.createdAt || '-'}</td>
+            <input type="hidden" id="historyId" value="${history.historyId}">
             <td>
-                <button class="btn btn-sm btn-primary">
+                <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}')" >
+                    <i class="fas fa-map"></i>
+                </button>
+                <button class="btn btn-sm btn-warning">
                     <i class="fas fa-download"></i>
+                </button>
+               <button class="btn btn-sm btn-danger" onclick="deleteHistory('${history.buildingVersion}', ${history.buildingId}, ${history.historyId})">
+                    <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
@@ -297,8 +324,30 @@ const renderHistoryList = (historyList) => {
     });
 };
 
+const deleteHistory = async (version, buildingId, historyId) => {
+    try {
+        const res = await api.get(`/buildings/${buildingId}`);
+        const building = res.data.result;
 
+        if (building.version === version) {
+            confirmSwal('현재 활성화된 버전은 삭제할 수 없습니다.');
+            return;
+        }
 
+        if (!confirmSwal('정말로 이 히스토리를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        const response = await api.delete(`/buildings/history/${historyId}`);
+        if (response.data.status === 'OK') {
+            confirmSwal('히스토리가 삭제되었습니다.');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('히스토리 삭제 실패:', error);
+        confirmSwal('히스토리 삭제에 실패했습니다.');
+    }
+};
 
 
 function deleteBuilding(id) {

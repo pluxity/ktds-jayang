@@ -4,33 +4,23 @@ import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
-import com.pluxity.ktds.domains.building.entity.Building;
-import com.pluxity.ktds.domains.building.entity.Floor;
-import com.pluxity.ktds.domains.building.entity.Poi;
-import com.pluxity.ktds.domains.building.entity.Spatial;
-import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
-import com.pluxity.ktds.domains.building.repostiory.FloorRepository;
-import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.building.entity.*;
+import com.pluxity.ktds.domains.building.repostiory.*;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
-import com.pluxity.ktds.domains.cctv.entity.Cctv;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
-import com.pluxity.ktds.domains.cctv.repository.CctvRepository;
 import com.pluxity.ktds.domains.cctv.repository.PoiCctvRepository;
-import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
-import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -61,6 +51,8 @@ public class PoiService {
     private final IconSetRepository iconSetRepository;
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
     private final PoiCctvRepository poiCctvRepository;
+    private final BuildingFileHistoryRepository buildingFileHistoryRepository;
+    private final FloorHistoryRepository floorHistoryRepository;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -83,8 +75,8 @@ public class PoiService {
 
     // floorId로 조회
     @Transactional(readOnly = true)
-    public List<PoiDetailResponseDTO> findPoisByFloorId(@NotNull final Long id) {
-        return poiRepository.findPoisByfloorId(id).stream()
+    public List<PoiDetailResponseDTO> findPoisByFloorNo(@NotNull final Integer floorNo) {
+        return poiRepository.findPoisByFloorNo(floorNo).stream()
                 .map(Poi::toDetailResponseDTO)
                 .toList();
     }
@@ -119,7 +111,7 @@ public class PoiService {
                     return PoiDetailResponseDTO.builder()
                             .id(base.id())
                             .buildingId(base.buildingId())
-                            .floorId(base.floorId())
+                            .floorNo(base.floorNo())
                             .poiCategoryId(base.poiCategoryId())
                             .poiMiddleCategoryId(base.poiMiddleCategoryId())
                             .iconSetId(base.iconSetId())
@@ -161,8 +153,11 @@ public class PoiService {
 
         validateAssociation(dto);
 
+        if (dto.floorNo() != null) {
+            poi.changeFloorNo(dto.floorNo());
+        }
+
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
@@ -188,7 +183,7 @@ public class PoiService {
     private void validateAssociation(CreatePoiDTO dto) {
         this.validateAssociation(UpdatePoiDTO.builder()
                         .buildingId(dto.buildingId())
-                        .floorId(dto.floorId())
+                        .floorNo(dto.floorNo())
                         .poiCategoryId(dto.poiCategoryId())
                         .iconSetId(dto.iconSetId())
                         .build());
@@ -199,8 +194,13 @@ public class PoiService {
         Building building = buildingRepository.findById(dto.buildingId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUILDING));
 
-        boolean isNoneMatchFloorId = building.getFloors().stream()
-                .noneMatch(floor -> floor.getId().equals(dto.floorId()));
+        BuildingFileHistory history = buildingFileHistoryRepository.findByBuildingVersion(building.getActiveVersion())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
+
+        List<FloorHistory> floorHistories = floorHistoryRepository.findByBuildingFileHistoryId(history.getId());
+
+        boolean isNoneMatchFloorId = floorHistories.stream()
+                .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
         if (isNoneMatchFloorId) {
             throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
         }
@@ -254,8 +254,12 @@ public class PoiService {
         if (dto.tagNames() != null) {
 //            tagClientService.addTags(dto.tagNames());
         }
+
+        if (dto.floorNo() != null) {
+            poi.changeFloorNo(dto.floorNo());
+        }
+
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
         updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
@@ -393,7 +397,7 @@ public class PoiService {
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
                         .buildingId(building.getId())
-                        .floorId(floor.getId())
+                        .floorNo(floor.getFloorNo())
                         .poiCategoryId(poiCategory.getId())
                         .iconSetId(poiMiddleCategory.getIconSets().get(0).getId())
                         .poiMiddleCategoryId(poiMiddleCategory.getId())
@@ -506,8 +510,11 @@ public class PoiService {
     }
 
     private void changeField(CreatePoiDTO dto, Poi poi) {
+
+        if (dto.floorNo() != null) {
+            poi.changeFloorNo(dto.floorNo());
+        }
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
         updateIfNotNull(dto.poiCategoryId(), poi::changePoiCategory, poiCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
         updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);

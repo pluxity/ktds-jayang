@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pluxity.ktds.domains.tag.ElevatorTagManager;
-import com.pluxity.ktds.domains.tag.TestTagService;
 import java.util.*;
 import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
@@ -62,8 +61,8 @@ public class PoiController {
     }
 
     @GetMapping("/floor/{id}")
-    public DataResponseBody<List<PoiDetailResponseDTO>> getPoisFloorId(@PathVariable Long id) {
-        return DataResponseBody.of(service.findPoisByFloorId(id));
+    public DataResponseBody<List<PoiDetailResponseDTO>> getPoisFloorId(@PathVariable Integer floorNo) {
+        return DataResponseBody.of(service.findPoisByFloorNo(floorNo));
     }
 
     @GetMapping("/{id}")

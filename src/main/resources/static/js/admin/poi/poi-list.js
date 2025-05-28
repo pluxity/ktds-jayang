@@ -40,14 +40,16 @@ function initCctv() {
 }
 const dataManufacturer = (rowData) =>
     rowData.map((poi) => {
-        const { id, name, code, buildingId, floorId, poiCategoryId, poiMiddleCategoryId, position } = poi;
+        const { id, name, code, buildingId, floorNo, poiCategoryId, poiMiddleCategoryId, position } = poi;
+        const building = data.building.find(building => building.id === buildingId);
+        const floorName = building.floors.find(floor => floor.no === floorNo)?.name;
+
         return [
             id,
             name,
             code,
-            data.building.find(building => building.id === buildingId).name,
-            data.building.find(building => building.id === buildingId)
-                .floors.find(floor => floor.id === floorId).name,
+            building.name,
+            floorName,
             data.poiCategory.find(category => category.id === poiCategoryId).name,
             data.poiMiddleCategory.find(middleCategory => middleCategory.id === poiMiddleCategoryId).name,
             position === null ? 'N' : 'Y',
@@ -159,7 +161,7 @@ const removeAllChildElements = (selectTags) => {
 const addFloorOptionToSelect = (data, selectTag) => {
     data.forEach((floor) => {
         selectTag.forEach((select) => {
-            select.appendChild(new Option(floor.name, floor.id));
+            select.appendChild(new Option(floor.name, floor.no));
         });
     });
 };
@@ -205,7 +207,12 @@ const initializeBuildings = async () => {
                 removeAllChildElements(getFloorSelectTags());
                 return;
             }
-            initializeSelectTag(building.floors, getFloorSelectTags());
+
+            await api.get(`/buildings/history/${building.version}/floors`).then((res) => {
+                const floors = res.data;
+                initializeSelectTag(floors, getFloorSelectTags());
+            });
+
         });
     }
 
@@ -438,7 +445,7 @@ function getTagNames(type) {
         const params = {};
 
         params.buildingId = Number(document.querySelector(`#selectBuildingId${type}`).value);
-        params.floorId = Number(document.querySelector(`#selectFloorId${type}`).value);
+        params.floorNo = Number(document.querySelector(`#selectFloorId${type}`).value);
         params.poiCategoryId = Number(document.querySelector(`#selectPoiCategoryId${type}`).value);
         const poiCategory = data.poiCategory.find((poiCategory) =>
             poiCategory.id === params.poiCategoryId);
@@ -584,7 +591,7 @@ const searchPoi = () => {
     if (document.querySelector('#searchSelectFloor').value !== '') {
         poiList = poiList.filter(
             (poi) =>
-                poi.floorId ===
+                poi.floorNo ===
                 Number(document.querySelector('#searchSelectFloor').value),
         );
     }

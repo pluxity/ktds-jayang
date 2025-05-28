@@ -160,14 +160,14 @@ const Init = (function () {
             const container = document.getElementById('container');
             container.innerHTML = '';
             Px.Core.Initialize(container, async () => {
-                const {buildingFile, floors, code, camera3d, lod} = BuildingManager.findById(BUILDING_ID);
+                const {buildingFile, floors, code, camera3d, lod, version} = BuildingManager.findById(BUILDING_ID);
                 const {directory, storedName, extension} = buildingFile;
 
                 const minimap = document.getElementById('minimapBox');
                 minimap.className = "B"+code.split('-')[1];
 
                 Px.Loader.LoadFbx({
-                    url: `/Building/${directory}/${storedName}.${extension}`,
+                    url: `/Building/${directory}/${version}/${storedName}.${extension}`,
                     onLoad: async () => {
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
@@ -267,7 +267,7 @@ const Init = (function () {
                 let floorId = floorBtn.getAttribute('floor-id')
                 Px.Model.Visible.Show(Number(floorId));
                 const poiList = PoiManager.findAll();
-                const filteredPois = poiList.filter(poi => poi.floorId === Number(floorId));
+                const filteredPois = poiList.filter(poi => poi.floorNo === Number(floorId));
                 filteredPois.forEach(poi => {
                     Px.Poi.Show(Number(poi.id));
                 });
@@ -320,9 +320,10 @@ const Init = (function () {
                 let sbmDataArray = [];
                 if (outdoorBuilding) {
                     const { buildingFile, floors } = outdoorBuilding;
+                    const version = outdoorBuilding.getVersion();
                     const { directory } = buildingFile;
                     sbmDataArray = floors.map((floor) => {
-                        const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+                        const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
                         const sbmData = {
                             url,
                             id: floor.sbmFloor[0].id,

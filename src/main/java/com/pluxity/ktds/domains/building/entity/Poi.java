@@ -31,9 +31,8 @@ public class Poi {
     @JoinColumn(name = "building_id")
     private Building building;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "floor_id")
-    private Floor floor;
+    @Column
+    private Integer floorNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poi_category_id")
@@ -126,8 +125,8 @@ public class Poi {
         this.building = building;
     }
 
-    public void changeFloor(Floor floor) {
-        this.floor = floor;
+    public void changeFloorNo(Integer floorNo) {
+        this.floorNo = floorNo;
     }
 
     public void changePoiCategory(PoiCategory poiCategory) {
@@ -163,7 +162,7 @@ public class Poi {
         return PoiDetailResponseDTO.builder()
                 .id(this.getId())
                 .buildingId(this.getBuilding().getId())
-                .floorId(this.getFloor().getId())
+                .floorNo(this.getFloorNo())
                 .poiCategoryId(this.getPoiCategory().getId())
                 .poiMiddleCategoryId(Optional.ofNullable(this.getPoiMiddleCategory())
                         .map(PoiMiddleCategory::getId)

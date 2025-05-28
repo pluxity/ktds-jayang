@@ -20,7 +20,7 @@ public record BuildingDetailResponseDTO(
         List<FloorResponseDTO> floors,
         String isIndoor,
         String camera2d,
-        String camera3d
-//        Long poiSetId
+        String camera3d,
+        String version
 ) {
 }

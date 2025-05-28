@@ -3,7 +3,7 @@ class Poi {
     #name;
     #code;
     #buildingId;
-    #floorId;
+    #floorNo;
     #poiCategory;
     #poiMiddleCategory;
     #iconSet;
@@ -19,7 +19,7 @@ class Poi {
         name,
         code,
         buildingId,
-        floorId,
+        floorNo,
         poiCategoryId,
         poiMiddleCategoryId,
         iconSetId,
@@ -43,14 +43,15 @@ class Poi {
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
-        property.floorNo = BuildingManager.findById(buildingId).floors.find(floor => floor.id === floorId)?.name
+        property.floorNo = floorNo;
+        property.floorName = BuildingManager.findById(buildingId).floors.find(floor => floor.floorNo === floorNo)?.name;
         property.buildingName = BuildingManager.findById(buildingId)?.name
         property.poiCategoryName = PoiCategoryManager.findById(poiCategoryId)?.name
         property.poiMiddleCategoryName = PoiMiddleCategoryManager.findById(poiMiddleCategoryId)?.name
         this.#property = property;
         this.assignYn = property.assignYn;
         this.#buildingId = buildingId;
-        this.#floorId = floorId;
+        this.#floorNo= floorNo;
         this.#tagNames = tagNames;
         this.#cctvList = cctvList;
         this.#isLight = isLight;
@@ -95,8 +96,8 @@ class Poi {
     get property() {
         return this.#property;
     }
-    get floorId() {
-        return this.#floorId;
+    get floorNo() {
+        return this.#floorNo;
     }
     get tagNames() {
         return this.#tagNames;

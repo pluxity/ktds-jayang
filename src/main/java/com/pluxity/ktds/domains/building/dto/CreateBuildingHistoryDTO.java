@@ -3,6 +3,7 @@ package com.pluxity.ktds.domains.building.dto;
 public record CreateBuildingHistoryDTO(
         Long buildingId,
         String historyContent,
-        Long fileInfoId
+        Long fileInfoId,
+        String version
 ) {
 }

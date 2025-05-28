@@ -2,13 +2,13 @@ const PoiManager = (() => {
     let poiList = [];
 
     const dtoToModel = (poiDto) => {
-        const { id, name, code, poiCategoryId, poiMiddleCategoryId, iconSetId, buildingId, floorId, position, rotation, scale, tagNames, cctvList } = poiDto;
+        const { id, name, code, poiCategoryId, poiMiddleCategoryId, iconSetId, buildingId, floorNo, position, rotation, scale, tagNames, cctvList } = poiDto;
         return new Poi(
             id,
             name,
             code,
             buildingId,
-            floorId,
+            floorNo,
             poiCategoryId,
             poiMiddleCategoryId,
             iconSetId,

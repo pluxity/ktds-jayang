@@ -39,8 +39,7 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
 
     @Query("""
             SELECT p FROM Poi p
-            JOIN FETCH p.floor f
-            JOIN FETCH f.building b
+            JOIN FETCH p.building b
             WHERE b.id = :id
             """)
     List<Poi> findPoisByBuildingId(@Param("id") Long id);

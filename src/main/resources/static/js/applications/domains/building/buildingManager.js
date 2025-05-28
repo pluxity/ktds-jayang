@@ -1,6 +1,7 @@
 const BuildingManager = (() => {
     let buildingList = [];
     let storeBuilding = null;
+    let historyFloors = [];
 
     const getBuildingList = () => {
         const uri = `/buildings`;
@@ -122,6 +123,23 @@ const BuildingManager = (() => {
         return storeBuilding;
     }
 
+    const getFloorsByHistoryVersion = async (version) => {
+        const uri = `/buildings/history/${version}/floors`;
+
+        return new Promise((resolve) => {
+            api.get(uri).then((result) => {
+                historyFloors = result.data;
+                resolve(result.data);
+            }).catch(() => {
+                resolve(null);
+            });
+        });
+    }
+
+    const findFloorsByHistory = () => {
+        return historyFloors;
+    }
+
     return {
         getBuildingList,
         getOutdoorBuilding,
@@ -133,6 +151,8 @@ const BuildingManager = (() => {
         findById,
         findByCode,
         getStoreBuilding,
-        findStore
+        findStore,
+        getFloorsByHistoryVersion,
+        findFloorsByHistory
     };
 })();

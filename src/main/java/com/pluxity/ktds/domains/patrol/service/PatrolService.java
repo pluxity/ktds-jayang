@@ -169,8 +169,8 @@ public class PatrolService {
         });
     }
 
-    private Poi getPoiByFloorId(Long id) {
-        return poiRepository.findByFloorId(id).orElseThrow(() -> {
+    private Poi getPoiByFloorId(Integer floorNo) {
+        return poiRepository.findByFloorNo(floorNo).orElseThrow(() -> {
            throw new CustomException(NOT_FOUND_POI);
         });
     }

@@ -62,12 +62,16 @@ public class Building {
     @Column(name = "camera_3d", columnDefinition = "LONGTEXT")
     private String camera3d;
 
+    @Column(name = "active_version")
+    private String activeVersion;
+
     @Builder
-    public Building(String code, String name, String description, String isIndoor) {
+    public Building(String code, String name, String description, String isIndoor, String activeVersion) {
         this.code = code;
         this.name = name;
         this.isIndoor = isIndoor;
         this.description = description;
+        this.activeVersion = activeVersion;
     }
 
     public void update(@NotNull UpdateBuildingDTO other) {
@@ -105,6 +109,10 @@ public class Building {
         this.fileInfo = fileInfo;
     }
 
+    public void changeActiveVersion(String activeVersion) {
+        this.activeVersion = activeVersion;
+    }
+
     public void addFloor(@NotNull Floor floor) {
         this.floors.add(floor);
         floor.changeBuilding(this);
@@ -140,12 +148,18 @@ public class Building {
                 .lodSettings(this.lodSettings)
                 .evacuationRoute(this.evacuationRoute)
                 .topology(this.topology)
-                .floors(this.getFloors().stream().map(Floor::toResponseDto).toList())
+                .floors(this.getFloors().stream()
+                        .filter(floor -> floor.getFloorHistories().stream()
+                                .anyMatch(history -> history.getBuildingFileHistory()
+                                        .getBuildingVersion().equals(this.activeVersion)))
+                        .map(Floor::toResponseDto)
+                        .toList())
                 .buildingFile(this.fileInfo == null ? null : this.fileInfo.toDto())
                 .floorIds(this.floors.stream().map(Floor::getId).toList())
                 .isIndoor(this.isIndoor)
                 .camera2d(this.camera2d)
                 .camera3d(this.camera3d)
+                .version(this.activeVersion)
                 .build();
 
     }

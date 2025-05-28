@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -52,6 +53,46 @@ public class FileInfoService {
 
         String uuid = UUID.randomUUID().toString();
         Path targetDirectoryPath = Path.of(uploadRootPath, type.getType(), uuid);
+
+        FileInfo fileInfo = saveStrategy.fileSave(file, targetDirectoryPath);
+        fileInfo.changeFileEntityType(type);
+        fileInfoRepository.save(fileInfo);
+        return fileInfo.toDto();
+    }
+
+    public FileInfoDTO saveFile(MultipartFile file, FileEntityType type, SaveStrategy saveStrategy, String version, String directoryName) throws IOException {
+
+        Objects.requireNonNull(saveStrategy, () -> {
+            log.error(INVALID_FILE_IO_STRATEGY.getMessage());
+            throw new CustomException(INVALID_FILE_IO_STRATEGY);
+        });
+
+        String uuid = UUID.randomUUID().toString();
+        Path targetDirectoryPath;
+        
+        if (StringUtils.hasText(directoryName)) {
+            targetDirectoryPath = Path.of(uploadRootPath, type.getType(), directoryName, version);
+        } else {
+            targetDirectoryPath = Path.of(uploadRootPath, type.getType(), uuid, version);
+        }
+
+        // 디렉토리가 없으면 생성
+        Files.createDirectories(targetDirectoryPath);
+
+        FileInfo fileInfo = saveStrategy.fileSave(file, targetDirectoryPath);
+        fileInfo.changeFileEntityType(type);
+        fileInfoRepository.save(fileInfo);
+        return fileInfo.toDto();
+    }
+
+    public FileInfoDTO saveFile(MultipartFile file, FileEntityType type, SaveStrategy saveStrategy, String version) throws IOException {
+        Objects.requireNonNull(saveStrategy, () -> {
+            log.error(INVALID_FILE_IO_STRATEGY.getMessage());
+            throw new CustomException(INVALID_FILE_IO_STRATEGY);
+        });
+
+        String uuid = UUID.randomUUID().toString();
+        Path targetDirectoryPath = Path.of(uploadRootPath, type.getType(), uuid ,version);
 
         FileInfo fileInfo = saveStrategy.fileSave(file, targetDirectoryPath);
         fileInfo.changeFileEntityType(type);

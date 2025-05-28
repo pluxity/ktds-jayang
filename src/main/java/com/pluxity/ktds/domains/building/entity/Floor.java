@@ -28,9 +28,14 @@ public class Floor {
     @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL)
     private List<SbmFloor> sbmFloors = new ArrayList<>();
 
+    @Column(name = "floor_no", nullable = false)
+    private Integer floorNo;
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL)
+    private List<FloorHistory> floorHistories = new ArrayList<>();
 
     @Builder
     public Floor(String name, @NotNull List<SbmFloor> sbmFloors) {
@@ -44,6 +49,10 @@ public class Floor {
 
     public void changeName(@NotNull String name) {
         this.name = name;
+    }
+
+    public void changeFloorNo(@NotNull Integer floorNo) {
+        this.floorNo = floorNo;
     }
 
     public void update(@NotNull Floor floor) {
@@ -63,6 +72,7 @@ public class Floor {
         return FloorResponseDTO.builder()
                 .id(this.getId())
                 .name(this.getName())
+                .no(this.getFloorNo())
                 .sbmFloor(this.getSbmFloors().stream().map(SbmFloor::toResponseDTO).toList())
                 .build();
     }

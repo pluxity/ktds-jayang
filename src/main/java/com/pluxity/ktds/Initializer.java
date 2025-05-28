@@ -137,7 +137,7 @@ public class Initializer implements CommandLineRunner {
                         "application/zip",
                         fileContent
                 );
-                FileInfoDTO fileInfoDTO = buildingService.saveFile(multipartFile);
+                FileInfoDTO fileInfoDTO = buildingService.saveFile(multipartFile, "v1");
 
                 CreateBuildingDTO dto = CreateBuildingDTO.builder()
                         .code("Outdoor")
@@ -145,6 +145,7 @@ public class Initializer implements CommandLineRunner {
                         .fileInfoId(fileInfoDTO.id())
                         .isIndoor("N")
                         .name("외부 전경")
+                        .version("v1")
                         .build();
 
                 Long buildingId = buildingService.saveBuilding(dto);

@@ -21,8 +21,7 @@ public record UpdateBuildingDTO(
         @NotBlank(message = "설명은 공백이 될 수 없습니다.")
         @Size(min = 1, max = 200, message = "설명은 200자 이하 입니다.")
         String description,
-        @Digits(integer = 20, fraction = 0, message = "Px파일 번호는 20자리 이하의 숫자 입니다.")
-        Long fileInfoId,
+        Long historyId,
         LodSettings lodSettings,
         String topology,
         String isIndoor

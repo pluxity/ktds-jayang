@@ -18,8 +18,12 @@
 
             // 층 콤보 박스 생성
             let floorListOpt = "<option value=''>전체</option>";
-            BuildingManager.findById(BUILDING_ID).floors.forEach((item) => {
-                floorListOpt += `<option value='${item.id}'>${item.name}</option>`;
+
+            const building = await BuildingManager.findById(BUILDING_ID);
+            const floors =  await BuildingManager.getFloorsByHistoryVersion(building.getVersion());
+
+            floors.forEach((floor) => {
+                floorListOpt += `<option value='${floor.no}'>${floor.name}</option>`;
             });
             const floorNo = document.querySelector('#floorNo');
             floorNo.innerHTML = floorListOpt;
@@ -213,18 +217,18 @@
 })();
 
 // 층 콤보 박스 변경
-function changeEventFloor(floorId) {
-    document.getElementById('floorNo').value = floorId;
+function changeEventFloor(floorNo) {
+    document.getElementById('floorNo').value = floorNo;
 
-    if (floorId === '') {
+    if (floorNo === '') {
         Px.Model.Visible.ShowAll();
         Px.Camera.ExtendView();
     } else {
 
         Px.Model.Visible.HideAll();
 
-        const floor = BuildingManager.findById(BUILDING_ID).floors.find(
-            (floor) => floor.id === Number(floorId),
+        const floor = BuildingManager.findFloorsByHistory().find(
+            (floor) => floor.no === Number(floorNo),
         );
         Px.Model.Visible.Show(floor.id);
         Px.Camera.ExtendView();
@@ -277,18 +281,24 @@ function initBuilding() {
     const container = document.getElementById('webGLContainer');
 
     Px.Core.Initialize(container, async () => {
-        Px.Util.SetBackgroundColor('#1b1c2f'); // 백그라운드 색깔지정
-        // BuildingManager.findById(BUILDING_ID).getDetail();
+        Px.Util.SetBackgroundColor('#1b1c2f');
         const { buildingFile, code, camera3d} = BuildingManager.findById(BUILDING_ID);
+        const building = BuildingManager.findById(BUILDING_ID);
         const { directory, storedName, extension } = buildingFile;
+        const version = building.getVersion();
 
-        const {floors} = BuildingManager.findById(BUILDING_ID);
+
+        const floors =  await BuildingManager.getFloorsByHistoryVersion(version);
+        console.log(floors);
+
+        // histotry에 맞는 floor를 가져오면?
+        // 층 + history를 갖는 엔티티
+
         const sbmDataArray = floors.map((floor) => {
-
-            const url = `/Building/${directory}/${floor.sbmFloor[0].sbmFileName}`;
+            const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
             const sbmData = {
                 url,
-                id: floor.sbmFloor[0].id, // 기존 sbmfloorId
+                id: floor.sbmFloor[0].id,
                 displayName: floor.sbmFloor[0].sbmFileName,
                 baseFloor: floor.sbmFloor[0].sbmFloorBase,
                 groupId: floor.sbmFloor[0].sbmFloorGroup,

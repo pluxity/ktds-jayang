@@ -2,9 +2,7 @@ package com.pluxity.ktds.domains.building.service;
 
 import com.pluxity.ktds.domains.building.dto.*;
 import com.pluxity.ktds.domains.building.entity.*;
-import com.pluxity.ktds.domains.building.repostiory.BuildingFileHistoryRepository;
-import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
-import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.building.repostiory.*;
 import com.pluxity.ktds.domains.patrol.entity.Patrol;
 import com.pluxity.ktds.domains.patrol.entity.PatrolPoint;
 import com.pluxity.ktds.domains.patrol.repository.PatrolPointRepository;
@@ -14,6 +12,7 @@ import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
+import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,6 +56,8 @@ public class BuildingService {
     private final PoiRepository poiRepository;
     private final PatrolRepository patrolRepository;
     private final PatrolPointRepository patrolPointRepository;
+    private final FloorRepository floorRepository;
+    private final FloorHistoryRepository floorHistoryRepository;
 
     @Value("${root-path.upload}")
     private String uploadRootPath;
@@ -112,19 +113,34 @@ public class BuildingService {
         return saveZipFileAndGetFileInfo(file);
     }
 
+    // building 등록용
+    @Transactional
+    public FileInfoDTO saveFile(@NotNull final MultipartFile file, String version) throws IOException {
+        return fileIoService.saveFile(file, FileEntityType.BUILDING, saveZipFile, version);
+    }
+
+    // history 등록용
+    @Transactional
+    public FileInfoDTO saveFile(@NotNull final MultipartFile file, String version, Long buildingId) throws IOException {
+
+        Building building = buildingRepository.findById(buildingId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
+        return fileIoService.saveFile(file, FileEntityType.BUILDING, saveZipFile, version, building.getFileInfo().getDirectoryName());
+    }
+
     @Transactional
     public Long saveBuilding(@NotNull final CreateBuildingDTO dto) {
         validateDuplicationCode(dto);
         FileInfo fileInfo = getFileInfo(dto.fileInfoId());
         Building building = createBuildingByDto(dto, fileInfo);
 
-        List<Floor> floors = createFloors(fileInfo);
+        List<Floor> floors = createFloors(fileInfo, dto.version());
 
         for (Floor floor : floors) {
             building.addFloor(floor);
         }
 
-        createHistory(fileInfo, building);
+        createHistory(fileInfo, building, dto.version());
 
         buildingRepository.save(building);
 
@@ -140,48 +156,48 @@ public class BuildingService {
 
     @Transactional
     public Long updateBuilding(@NotNull Long id, @NotNull UpdateBuildingDTO dto) {
-        FileInfo fileInfo = null;
         validateDuplicationCode(id, dto.code());
 
+        BuildingFileHistory updateHistory = buildingFileHistoryRepository.findById(dto.historyId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+
         Building building = getBuildingById(id);
+        building.changeActiveVersion(updateHistory.getBuildingVersion());
 
-        if (dto.fileInfoId() != null) {
-            fileInfo = getFileInfo(dto.fileInfoId());
-//            validationFile(fileInfo, building);
-        }
-
-//        updateFields(dto, building, fileInfo);
-
-        forceUpdateFloor(dto, fileInfo, building);
+        building.update(dto);
         return id;
     }
 
 
-    @Transactional
-    public Long updateForceBuilding(@NotNull final Long id, @NotNull final UpdateBuildingDTO dto) {
-        validateDuplicationCode(id, dto.code());
-
-        Building building = getBuildingById(id);
-        FileInfo fileInfo = getFileInfo(dto.fileInfoId());
-        updateFields(dto, building, fileInfo);
-        return building.getId();
-    }
-
-    private void updateFields(UpdateBuildingDTO dto, Building building, FileInfo fileInfo) {
-        if (fileInfo != null) {
-            building.changeFileInfo(fileInfo);
-            updateFloor(fileInfo, building);
-//            createHistory(fileInfo, building);
-        }
-        building.update(dto);
-
-    }
+//    @Transactional
+//    public Long updateForceBuilding(@NotNull final Long id, @NotNull final UpdateBuildingDTO dto) {
+//        validateDuplicationCode(id, dto.code());
+//
+//        Building building = getBuildingById(id);
+//        FileInfo fileInfo = getFileInfo(dto.fileInfoId());
+//        updateFields(dto, building, fileInfo);
+//        return building.getId();
+//    }
+//
+//    private void updateFields(UpdateBuildingDTO dto, Building building, FileInfo fileInfo) {
+//        if (fileInfo != null) {
+//            building.changeFileInfo(fileInfo);
+//            updateFloor(fileInfo, building);
+////            createHistory(fileInfo, building);
+//        }
+//        building.update(dto);
+//
+//    }
 
     @Transactional
     public void delete(@NotNull final Long id) {
         Building building = getBuildingById(id);
 
         List<BuildingFileHistory> buildingFileHistories = buildingFileHistoryRepository.findByBuildingId(building.getId());
+
+        floorHistoryRepository.deleteByBuildingFileHistoryIdIn(buildingFileHistories.stream()
+                .map(BuildingFileHistory::getId)
+                .toList());
 
         buildingFileHistoryRepository.deleteAll(buildingFileHistories);
 
@@ -245,6 +261,7 @@ public class BuildingService {
                 .name(dto.name())
                 .description(dto.description())
                 .isIndoor(dto.isIndoor())
+                .activeVersion(dto.version())
                 .build();
         building.changeFileInfo(fileInfo);
         return building;
@@ -289,49 +306,59 @@ public class BuildingService {
                 .getTextContent();
     }
 
-    private void createHistory(FileInfo fileInfo, Building building) {
+    private void createHistory(FileInfo fileInfo, Building building, String version) {
         BuildingFileHistory history = BuildingFileHistory.builder()
                 .building(building)
                 .fileInfo(fileInfo)
+                .buildingVersion(version)
                 .build();
 
         history = buildingFileHistoryRepository.save(history);
-        history.updateBuildingVersion(toVersion(history.getCreatedAt()));
-    }
 
-    private void updateFloor(FileInfo fileInfo, Building building) {
-        List<Floor> newFloors = createFloors(fileInfo);
-        List<Floor> oldFloors = building.getFloors();
+        List<Floor> floors = building.getFloors();
+        for (Floor floor : floors) {
+            FloorHistory floorHistory = FloorHistory.builder()
+                    .floor(floor)
+                    .buildingFileHistory(history)
+                    .build();
 
-        oldFloors.forEach(oldFloor -> {
-            if (oldFloor.getSbmFloors() != null) {
-                newFloors.stream()
-                        .filter(newFloor -> oldFloor.getSbmFloors()
-                                .stream()
-                                .anyMatch(oldSbmFloor -> newFloor.getSbmFloors()
-                                        .stream()
-                                        .anyMatch(newSbmFloor -> oldSbmFloor.getSbmFloorId().equals(newSbmFloor.getSbmFloorId()))))
-                        .findFirst()
-                        .ifPresent(oldFloor::update);
-                oldFloor.getSbmFloors().forEach(oldSbmFloor ->
-                        newFloors.stream()
-                                .flatMap(newFloor -> newFloor.getSbmFloors().stream())
-                                .filter(newSbmFloor -> oldSbmFloor.getSbmFloorId().equals(newSbmFloor.getSbmFloorId()))
-                                .findFirst()
-                                .ifPresent(oldSbmFloor::update));
-            }
-        });
-    }
-
-    private void forceUpdateFloor(UpdateBuildingDTO dto, FileInfo fileInfo, Building building) {
-        building.changeFileInfo(fileInfo);
-        List<Floor> newFloors = createFloors(fileInfo);
-        building.removeFloors();
-        for (Floor newFloor : newFloors) {
-            building.addFloor(newFloor);
+            floorHistoryRepository.save(floorHistory);
         }
-        building.update(dto);
     }
+
+//    private void updateFloor(FileInfo fileInfo, Building building) {
+//        List<Floor> newFloors = createFloors(fileInfo);
+//        List<Floor> oldFloors = building.getFloors();
+//
+//        oldFloors.forEach(oldFloor -> {
+//            if (oldFloor.getSbmFloors() != null) {
+//                newFloors.stream()
+//                        .filter(newFloor -> oldFloor.getSbmFloors()
+//                                .stream()
+//                                .anyMatch(oldSbmFloor -> newFloor.getSbmFloors()
+//                                        .stream()
+//                                        .anyMatch(newSbmFloor -> oldSbmFloor.getSbmFloorId().equals(newSbmFloor.getSbmFloorId()))))
+//                        .findFirst()
+//                        .ifPresent(oldFloor::update);
+//                oldFloor.getSbmFloors().forEach(oldSbmFloor ->
+//                        newFloors.stream()
+//                                .flatMap(newFloor -> newFloor.getSbmFloors().stream())
+//                                .filter(newSbmFloor -> oldSbmFloor.getSbmFloorId().equals(newSbmFloor.getSbmFloorId()))
+//                                .findFirst()
+//                                .ifPresent(oldSbmFloor::update));
+//            }
+//        });
+//    }
+
+//    private void forceUpdateFloor(UpdateBuildingDTO dto, FileInfo fileInfo, Building building) {
+//        building.changeFileInfo(fileInfo);
+//        List<Floor> newFloors = createFloors(fileInfo);
+//        building.removeFloors();
+//        for (Floor newFloor : newFloors) {
+//            building.addFloor(newFloor);
+//        }
+//        building.update(dto);
+//    }
 
     private void validateDuplicationCode(CreateBuildingDTO dto) {
         if (buildingRepository.existsByCode(dto.code())) {
@@ -352,8 +379,8 @@ public class BuildingService {
         return fileIoService.saveFile(file, FileEntityType.BUILDING, saveZipFile);
     }
 
-    private List<Floor> createFloors(FileInfo fileInfo) {
-        Path xmlFilePath = findXmlFileName(Path.of(uploadRootPath, fileInfo.getFileEntityType(), fileInfo.getDirectoryName()));
+    private List<Floor> createFloors(FileInfo fileInfo, String version) {
+        Path xmlFilePath = findXmlFileName(Path.of(uploadRootPath, fileInfo.getFileEntityType(),fileInfo.getDirectoryName(), version));
         return parseFloors(xmlFilePath);
     }
 
@@ -395,6 +422,7 @@ public class BuildingService {
                     .orElseThrow(() -> new CustomException(NOT_FOUND_XML_FILE_IS_MAIN));
 
             floor.changeName(sbmFloorNames);
+            floor.changeFloorNo(Integer.parseInt(floor.getSbmFloors().get(0).getSbmFloorBase()));
             ArrayList<SbmFloor> sbmFloorsCopy = new ArrayList<>(floor.getSbmFloors());
             sbmFloorsCopy.forEach(sbmFloor -> sbmFloor.changeFloor(floor));
             return floor;
@@ -523,33 +551,76 @@ public class BuildingService {
 
     @Transactional
     public Long saveBuildingHistory(CreateBuildingHistoryDTO dto, HttpServletRequest request) {
-
         Building building = buildingRepository.findById(dto.buildingId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
 
-        String username = null;
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null){
-            for(Cookie cookie : cookies){
-                if("USER_ID".equals(cookie.getName())){
-                    username = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
+        String username = getUsernameFromCookies(request);
         FileInfo fileInfo = getFileInfo(dto.fileInfoId());
 
+        // 1. BuildingFileHistory 생성 및 저장
         BuildingFileHistory history = BuildingFileHistory.builder()
                 .building(building)
                 .fileInfo(fileInfo)
                 .historyContent(dto.historyContent())
                 .regUser(username)
+                .buildingVersion(dto.version())
                 .build();
 
         history = buildingFileHistoryRepository.save(history);
-        history.updateBuildingVersion(toVersion(history.getCreatedAt()));
+
+
+        List<Floor> floors = createFloors(fileInfo, dto.version());
+
+        // 기존 층의 최대 floorNo 찾기
+        int maxFloorNo = building.getFloors().stream()
+        .mapToInt(Floor::getFloorNo)
+        .max()
+        .orElse(0);
+
+
+        for (Floor floor : floors) {
+
+            floor.changeBuilding(building); 
+
+            boolean found = building.getFloors().stream()
+            .filter(f -> f.getName().equals(floor.getName()))
+            .findFirst()
+            .map(f -> {
+                floor.changeFloorNo(f.getFloorNo());
+                return true;
+            })
+            .orElse(false);
+    
+
+            if (!found) {
+                maxFloorNo++;
+                floor.changeFloorNo(maxFloorNo);
+            }
+
+
+            FloorHistory floorHistory = FloorHistory.builder()
+                    .floor(floor)
+                    .buildingFileHistory(history)
+                    .build();
+
+            floorHistoryRepository.save(floorHistory);  // FloorHistoryRepository 주입 필요
+            floorRepository.save(floor);
+        }
+
         return history.getId();
+    }
+
+    private String getUsernameFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+
+        return Arrays.stream(cookies)
+                .filter(cookie -> "USER_ID".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
     }
 
     private String toVersion(LocalDateTime dateTime){
@@ -563,5 +634,59 @@ public class BuildingService {
         return buildingFileHistoryRepository.findByBuildingId(id).stream()
                 .map(BuildingFileHistory::toHistoryResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoryResponseDTO> findHistoryById(Long id){
+
+        return buildingFileHistoryRepository.findById(id).stream()
+                .map(BuildingFileHistory::toHistoryResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // BuildingService.java
+    @Transactional(readOnly = true)
+    public List<FloorDetailResponseDTO> findFloorsByHistoryVersion(String version) {
+        BuildingFileHistory history = buildingFileHistoryRepository.findByBuildingVersion(version)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+
+        return floorHistoryRepository.findByBuildingFileHistoryId(history.getId()).stream()
+                .map(FloorHistory::getFloor)
+                .map(floor -> FloorDetailResponseDTO.builder()
+                        .id(floor.getId())
+                        .name(floor.getName())
+                        .no(floor.getFloorNo())
+                        .sbmFloor(floor.getSbmFloors().stream()
+                                .map(sbmFloor -> SbmFloorDTO.builder()
+                                        .id(sbmFloor.getId())
+                                        .sbmFloorId(sbmFloor.getSbmFloorId())
+                                        .sbmFloorName(sbmFloor.getSbmFloorName())
+                                        .sbmFloorBase(sbmFloor.getSbmFloorBase())
+                                        .sbmFloorGroup(sbmFloor.getSbmFloorGroup())
+                                        .isMain(sbmFloor.getIsMain())
+                                        .sbmFileName(sbmFloor.getSbmFileName())
+                                        .build())
+                                .toList())
+                        .build())
+                .toList();
+    }
+
+    @Transactional
+    public void deleteHistory(Long historyId) {
+        // BuildingFileHistory 먼저 찾기
+        BuildingFileHistory history = buildingFileHistoryRepository.findById(historyId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
+        floorHistoryRepository.findByBuildingFileHistoryId(historyId)
+                .forEach(floorHistory -> {
+                    // FloorHistory 삭제
+                    floorHistoryRepository.delete(floorHistory);
+
+                    // 해당 Floor의 SbmFloor 삭제
+                    Floor floor = floorHistory.getFloor();
+                    if (floor != null) {
+                        floorRepository.delete(floor);
+                    }
+                });
+        buildingFileHistoryRepository.delete(history);
     }
 }

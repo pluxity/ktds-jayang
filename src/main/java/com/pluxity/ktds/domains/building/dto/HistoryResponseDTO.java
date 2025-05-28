@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 public record HistoryResponseDTO(
         Long historyId,
         Long buildingId,
-        Long fileId,
+        FileInfoDTO fileInfo,
         String buildingVersion,
         String historyContent,
         String regUser,
-        LocalDateTime createdAt,
+        String createdAt,
         String fileName
 ) {}

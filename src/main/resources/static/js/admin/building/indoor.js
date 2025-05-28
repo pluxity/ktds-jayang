@@ -98,6 +98,7 @@ function modifyBuildingModal(id) {
     document.getElementById('btnBuildingModify').innerHTML = '수정';
     form.querySelector('#modifyId').value = id;
     form.reset();
+    clearBuildingUploadFile();
     let currentBuildingFileId = null;
 
     Promise.all([
@@ -129,7 +130,6 @@ function setBuildingVersionSelect(historyList, version) {
         const option = document.createElement('option');
         option.value = history.historyId;
         option.textContent = history.buildingVersion;
-        console.log("fileId = ",history.fileId);
         if(history.buildingVersion === version) {
             option.selected = true;
         }
@@ -238,6 +238,7 @@ buildingUploadBtn.onclick = () => {
     const getHistoryContent = document.getElementById('buildingHistoryContent').value;
     const uploadFile = document.getElementById('buildingUploadFile');
     const getBuildingId = document.getElementById('modifyId').value;
+    const currentVersion = document.getElementById('buildingVersionSelect').value;
 
     const fileFormData = new FormData();
     fileFormData.set('file', uploadFile.files[0]);
@@ -258,10 +259,17 @@ buildingUploadBtn.onclick = () => {
         }
         api.post('/buildings/history', param, {headers}).then(() => {
             alertSwal('등록되었습니다.');
-            // history load
-            getHistoryList(getBuildingId);
+            getHistoryList(getBuildingId).then((historyList) => {
+                setBuildingVersionSelect(historyList,currentVersion);
+            });
+            clearBuildingUploadFile();
         })
     })
+}
+
+const clearBuildingUploadFile = () => {
+    document.getElementById('buildingUploadFile').value = '';
+    document.getElementById('buildingHistoryContent').value = '';
 }
 
 const getVersionString = () => {
@@ -312,7 +320,7 @@ const renderHistoryList = (historyList) => {
                 <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}&version=${history.buildingVersion}')" >
                     <i class="fas fa-map"></i>
                 </button>
-                <button class="btn btn-sm btn-warning">
+                <button class="btn btn-sm btn-warning" onclick="downloadFile('${history.fileInfo.fileEntityType}', '${history.fileInfo.directory}', '${history.buildingVersion}', '${history.fileInfo.storedName}', '${history.fileInfo.extension}')">
                     <i class="fas fa-download"></i>
                 </button>
                <button class="btn btn-sm btn-danger" onclick="deleteHistory('${history.buildingVersion}', ${history.buildingId}, ${history.historyId})">
@@ -323,6 +331,18 @@ const renderHistoryList = (historyList) => {
         tbody.appendChild(row);
     });
 };
+
+function downloadFile(fileEntityType, directory, version, storedName, extension) {
+    const url = `${CONTEXT_PATH}/${fileEntityType}/${directory}/${version}/${storedName}.${extension}`;
+
+    // 다운로드 링크 생성
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${storedName}.${extension}`;  // 다운로드될 파일명
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 const deleteHistory = async (version, buildingId, historyId) => {
     try {
@@ -338,11 +358,12 @@ const deleteHistory = async (version, buildingId, historyId) => {
             return;
         }
 
-        const response = await api.delete(`/buildings/history/${historyId}`);
-        if (response.data.status === 'OK') {
+        await api.delete(`/buildings/history/${historyId}`).then(() => {
             confirmSwal('히스토리가 삭제되었습니다.');
-            location.reload();
-        }
+            getHistoryList(buildingId).then((historyList) => {
+               setBuildingVersionSelect(historyList, building.version);
+            });
+        });
     } catch (error) {
         console.error('히스토리 삭제 실패:', error);
         confirmSwal('히스토리 삭제에 실패했습니다.');

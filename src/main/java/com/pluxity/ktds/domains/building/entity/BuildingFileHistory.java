@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.format.DateTimeFormatter;
+
 @Entity
 @Getter
 @Table(name = "building_file_history")
@@ -48,10 +50,10 @@ public class BuildingFileHistory extends AuditableEntity {
         return HistoryResponseDTO.builder()
                 .historyId(this.id)
                 .buildingId(this.building.getId())
-                .fileId(this.fileInfo.getId())
+                .fileInfo(this.fileInfo.toDto())
                 .buildingVersion(this.buildingVersion)
                 .historyContent(this.historyContent)
-                .createdAt(this.getCreatedAt())
+                .createdAt(this.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .regUser(this.getRegUser())
                 .fileName(this.fileInfo.getOriginName())
                 .build();

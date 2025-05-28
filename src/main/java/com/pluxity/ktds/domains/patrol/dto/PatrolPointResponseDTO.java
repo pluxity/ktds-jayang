@@ -9,7 +9,7 @@ import java.util.List;
 public record PatrolPointResponseDTO(
         Long id,
 
-        Long floorId,
+        Integer floorNo,
 
         String name,
 

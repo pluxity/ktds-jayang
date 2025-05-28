@@ -28,9 +28,8 @@ public class PatrolPoint {
     @JoinColumn(name = "patrol_id", nullable = false)
     private Patrol patrol;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "floor_id", nullable = false)
-    private Floor floor;
+    @Column
+    private Integer floorNo;
 
     @Column(name = "name", nullable = false, length = 20)
     private String name;
@@ -54,10 +53,11 @@ public class PatrolPoint {
     private final List<Poi> pois = new ArrayList<>();
 
     @Builder
-    public PatrolPoint(String name, Integer sortOrder, Spatial point) {
+    public PatrolPoint(String name, Integer sortOrder, Spatial point, Integer floorNo) {
         this.name = name;
         this.sortOrder = sortOrder;
         this.point = point;
+        this.floorNo = floorNo;
     }
 
     public void changePatrol(@NotNull Patrol patrol) {
@@ -77,15 +77,11 @@ public class PatrolPoint {
         this.sortOrder = sortOrder;
     }
 
-    public void changeFloor(@NotNull Floor floor) {
-        this.floor = floor;
-        this.name = floor.getName();
-    }
 
     public PatrolPointResponseDTO toResponseDTO() {
         return PatrolPointResponseDTO.builder()
                 .id(id)
-                .floorId(floor.getId())
+                .floorNo(floorNo)
                 .sortOrder(sortOrder)
                 .name(name)
                 .pointLocation(convertPointToString(point))

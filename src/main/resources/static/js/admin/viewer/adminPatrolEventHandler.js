@@ -66,12 +66,12 @@ const adminPatrolButtonEvent = (() => {
             if(this.isPaused) return;
 
             const point = patrol.patrolPoints[getCurrentPatrolNumber()];
+            if( point.floorNo !== Number(document.querySelector('#floorNo').value) ) {
 
-            if( point.floorId !== Number(document.querySelector('#floorNo').value) ) {
+                document.getElementById('floorNo').value = point.floorNo;
 
-                document.getElementById('floorNo').value = point.floorId;
                 BuildingManager.findById(patrol.buildingId).getDetail().then((data) => {
-                    const floor = data.floors.find(floor => floor.id === point.floorId);
+                    const floor = data.floors.find(floor => floor.no === point.floorNo);
                     Px.Model.Visible.HideAll();
                     Px.Model.Visible.Show(floor.id);
                 });
@@ -80,7 +80,7 @@ const adminPatrolButtonEvent = (() => {
                 //remove all paths
                 Px.VirtualPatrol.Editor.Off();
 
-                Px.VirtualPatrol.Import(PatrolManager.findByIdByImport(id, point.floorId));
+                Px.VirtualPatrol.Import(PatrolManager.findByIdByImport(id, point.floorNo));
                 index = 0;
                 const pointLocation = JSON.parse(point.pointLocation);
                 Px.Camera.MoveToPosition(0, 200, pointLocation.x, pointLocation.y, pointLocation.z);

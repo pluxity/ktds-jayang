@@ -17,7 +17,7 @@ const PatrolManager = (function () {
                         if(prev.sortOrder > next.sortOrder) return 1;
                         if(prev.sortOrder === next.sortOrder) return 0;
                     });
-                    const patrolPoints = patrols.patrolPoints.map((patrolPointData) => new PatrolPoint(patrolPointData.id, patrolPointData.name, patrolPointData.floorId, order++, patrolPointData.pointLocation, patrolPointData.pois));
+                    const patrolPoints = patrols.patrolPoints.map((patrolPointData) => new PatrolPoint(patrolPointData.id, patrolPointData.name, patrolPointData.floorNo, order++, patrolPointData.pointLocation, patrolPointData.pois));
                     return new Patrol(patrols.id, patrols.name, patrols.buildingId, patrolPoints, patrols.createdAt);
                 });
                 resolve(patrolList);
@@ -49,9 +49,9 @@ const PatrolManager = (function () {
         return foundItem;
     }
 
-    const findByIdByImport = (id, floorId) => {
+    const findByIdByImport = (id, floorNo) => {
         const find = patrolList.find((patrol) => patrol.id === Number(id));
-        const filter = find.patrolPoints.filter(patrolPoint => floorId ? patrolPoint.floorId === Number(floorId) : true);
+        const filter = find.patrolPoints.filter(patrolPoint => floorNo ? patrolPoint.floorNo === Number(floorNo) : true);
         let points = [];
         if(filter.length !== 0) {
             points = filter.map((patrolPoint) =>  JSON.parse(patrolPoint.pointLocation))

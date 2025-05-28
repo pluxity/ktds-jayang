@@ -17,11 +17,14 @@ const savePoint = (pointData) => {
 
     const id = document.querySelector("#patrolListTable > tbody > tr.active").dataset.id;
     const floorNo = document.querySelector("#floorNo").value;
+    const floorName = document.querySelector("#floorNo").selectedOptions[0].textContent;
+    console.log("floorName",floorName);
+
 
     let param = {
-        floorId : floorNo
-        // ,pointLocation : JSON.stringify(pointData.position)
-        ,pointLocation : pointData.position
+        floorNo : floorNo,
+        floorName : floorName,
+        pointLocation : pointData.position
     };
 
     api.patch(`/patrols/${id}/points`,param).then(() => {
@@ -298,7 +301,7 @@ const modifyPatrolPointPoiModal = (pointId) => {
     const poiList = PoiManager.findByBuilding(BUILDING_ID).filter(poi => foundItem != null ? poi.property.floorId === foundItem.floorId : true).filter(poi => poi.poiCategoryDetail.name.toLowerCase().includes("CCTV".toLowerCase()));
 
     poiList.forEach(poi => {
-
+        console.log(poi);
         const checked = foundItem != null && foundItem.pois.includes(poi.id) ? 'checked' : '';
 
         html += `

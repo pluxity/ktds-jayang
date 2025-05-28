@@ -114,9 +114,13 @@ public class PatrolService {
                 .mapToInt(PatrolPoint::getSortOrder)
                 .max()
                 .orElse(0);
-        PatrolPoint patrolPoint = PatrolPoint.builder().sortOrder(max).point(dto.pointLocation()).build();
+        PatrolPoint patrolPoint = PatrolPoint.builder()
+                .sortOrder(max)
+                .point(dto.pointLocation())
+                .name(dto.floorName())
+                .floorNo(dto.floorNo())
+                .build();
         patrolPoint.changePatrol(patrol);
-        patrolPoint.changeFloor(getFloorById(dto.floorId()));
 
         patrol.addPatrolPoint(patrolPoint);
 

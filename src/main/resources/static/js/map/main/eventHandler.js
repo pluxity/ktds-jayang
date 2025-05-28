@@ -973,27 +973,31 @@
             const floorElement = document.querySelector(".floor-info__detail .active");
 
                //층 이동 또는 처음시작할때 화면 렌더링
-            if(!floorElement || point.floorId !== Number(floorElement.getAttribute("floor-id"))){
+            if(!floorElement || point.floorNo !== Number(floorElement.getAttribute("floor-id"))){
 
                 // 기존 `active` 제거
                 document.querySelectorAll(".floor-info__detail li").forEach(li => li.classList.remove("active"));
 
                 // 새롭게 선택된 `li`에 `active` 추가
-                const currentFloor = document.querySelector(`.floor-info__detail li[floor-id="${point.floorId}"]`);
+                const currentFloor = document.querySelector(`.floor-info__detail li[floor-id="${point.floorNo}"]`);
                 if (currentFloor) {
                     currentFloor.classList.add("active");
                 }
 
+                BuildingManager.findById(patrol.buildingId).getDetail().then((data) => {
+                    const floor = data.floors.find(floor => floor.no === point.floorNo);
+                    Px.Model.Visible.HideAll();
+                    Px.Model.Visible.Show(floor.id);
+                });
+
                 Px.VirtualPatrol.RemoveAll();
                 Px.VirtualPatrol.Editor.Off();
-                Px.VirtualPatrol.Import(PatrolManager.findByIdByImport(id, point.floorId));
+                Px.VirtualPatrol.Import(PatrolManager.findByIdByImport(id, point.floorNo));
                 index = 0;
-                Px.Model.Visible.HideAll();
-                Px.Model.Visible.Show(point.floorId);
                 Px.Poi.HideAll();
 
                 patrol.patrolPoints
-                      .filter(p => p.floorId === point.floorId)
+                      .filter(p => p.floorNo === point.floorNo)
                       .flatMap(p => p.pois)
                       .forEach(poiId => Px.Poi.Show(poiId));
             }

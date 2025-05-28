@@ -4,7 +4,7 @@ class PatrolPoint {
 
     #name;
 
-    #floorId;
+    #floorNo;
 
     #sortOrder;
 
@@ -12,10 +12,10 @@ class PatrolPoint {
 
     #pois;
 
-    constructor(id, name, floorId, sortOrder, pointLocation, pois) {
+    constructor(id, name, floorNo, sortOrder, pointLocation, pois) {
         this.#id = id;
         this.#name = name;
-        this.#floorId = floorId;
+        this.#floorNo = floorNo;
         this.#sortOrder = sortOrder;
         this.#pointLocation = pointLocation;
         this.#pois = pois;
@@ -29,8 +29,8 @@ class PatrolPoint {
         return this.#name;
     }
 
-    get floorId() {
-        return this.#floorId;
+    get floorNo() {
+        return this.#floorNo;
     }
 
     get sortOrder() {

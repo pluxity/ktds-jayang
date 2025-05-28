@@ -10,7 +10,8 @@ import java.util.List;
 @Builder
 @Valid
 public record CreatePatrolPointDTO(
-        Long floorId,
+        Integer floorNo,
+        String floorName,
         Spatial pointLocation,
         List<Long> pois
 ){

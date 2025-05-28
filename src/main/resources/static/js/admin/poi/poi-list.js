@@ -702,7 +702,7 @@ document.getElementById('btnPoiBatchRegister')
 
         const formData = new FormData();
         formData.set('buildingId', document.getElementById('selectBuildingIdBatchRegister').value);
-        formData.set('floorId', document.getElementById('selectFloorIdBatchRegister').value);
+        formData.set('floorNo', document.getElementById('selectFloorIdBatchRegister').value);
         formData.set('file', document.querySelector('#batchRegisterFile').files[0]);
 
 

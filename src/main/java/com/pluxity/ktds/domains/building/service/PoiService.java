@@ -324,7 +324,7 @@ public class PoiService {
 
     // 일괄 등록 테스트
     @Transactional
-    public void batchRegisterPoi(Long buildingId, Long floorId, MultipartFile file) {
+    public void batchRegisterPoi(Long buildingId, Integer floorNo, MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
             String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -341,7 +341,6 @@ public class PoiService {
 
             Building building = buildingRepository.findById(buildingId)
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUILDING));
-            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
 
             List<PoiCategory> poiCategoryList = poiCategoryRepository.findAll();
             List<IconSet> iconSetList = iconSetRepository.findAll();
@@ -397,7 +396,7 @@ public class PoiService {
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
                         .buildingId(building.getId())
-                        .floorNo(floor.getFloorNo())
+                        .floorNo(floorNo)
                         .poiCategoryId(poiCategory.getId())
                         .iconSetId(poiMiddleCategory.getIconSets().get(0).getId())
                         .poiMiddleCategoryId(poiMiddleCategory.getId())

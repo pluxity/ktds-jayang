@@ -309,7 +309,7 @@ const renderHistoryList = (historyList) => {
             <td>${history.createdAt || '-'}</td>
             <input type="hidden" id="historyId" value="${history.historyId}">
             <td>
-                <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}')" >
+                <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}&version=${history.buildingVersion}')" >
                     <i class="fas fa-map"></i>
                 </button>
                 <button class="btn btn-sm btn-warning">

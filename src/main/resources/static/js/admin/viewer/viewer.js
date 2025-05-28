@@ -285,7 +285,8 @@ function initBuilding() {
         const { buildingFile, code, camera3d} = BuildingManager.findById(BUILDING_ID);
         const building = BuildingManager.findById(BUILDING_ID);
         const { directory, storedName, extension } = buildingFile;
-        const version = building.getVersion();
+        const params = new URLSearchParams(window.location.search);
+        const version = params.get('version') || building.getVersion();
 
 
         const floors =  await BuildingManager.getFloorsByHistoryVersion(version);

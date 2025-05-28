@@ -1,6 +1,5 @@
 package com.pluxity.ktds.domains.management.dto;
 
-import com.pluxity.ktds.domains.management.constant.ManagementCategory;
 import lombok.Builder;
 
 @Builder

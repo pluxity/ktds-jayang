@@ -1,6 +1,5 @@
 package com.pluxity.ktds.domains.management.entity;
 
-import com.pluxity.ktds.domains.management.constant.ManagementCategory;
 import com.pluxity.ktds.domains.management.dto.MaintenanceResponseDTO;
 import com.pluxity.ktds.global.auditing.AuditableEntity;
 import jakarta.persistence.*;

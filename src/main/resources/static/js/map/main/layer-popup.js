@@ -582,7 +582,7 @@ const popup = (function () {
         }
 
         filterPoiList.forEach((poi) => {
-            const floorInfo = buildingInfo.floors.find((floor) => floor.id === poi.floorId);
+            const floorInfo = buildingInfo.floors.find((floor) => floor.no === poi.floorNo);
 
             equipmentTbody.innerHTML += `
               <tr class='equipment-tr' data-category=${poi.poiCategory} data-poi-id=${poi.id}>
@@ -740,7 +740,7 @@ const popup = (function () {
     })
 
     const moveToPoi = async (id, callback, distanceOffset = 0, showEvacRoute = false) => {
-        const { buildingId, floorId } = PoiManager.findById(id);
+        const { buildingId, floorNo } = PoiManager.findById(id);
 
         if(Number(buildingId) !== BUILDING_ID) {
             BUILDING_ID = Number(buildingId);
@@ -761,7 +761,7 @@ const popup = (function () {
                 EvacRouteHandler.load(() => {
                     document.querySelector('.left-information .floor-list li.on')?.classList.remove('on');
 
-                    const {floorName: poiFloorName} = BuildingManager.findById(BUILDING_ID).floors.find(floor => floor.id === floorId);
+                    const {floorName: poiFloorName} = BuildingManager.findById(BUILDING_ID).floors.find(floor => floor.no === floorNo);
                     document.querySelector(`.left-information .floor-list li[data-floor-name='${poiFloorName}']`).classList.add('on');
                     document.querySelector("body > main > div.left-information > div.floor").dataset.floorName = poiFloorName;
                     Init.changeFloor(poiFloorName, () => {
@@ -780,7 +780,7 @@ const popup = (function () {
             } else {
                 document.querySelector('.left-information .floor-list li.on')?.classList.remove('on');
 
-                const {floorName} = BuildingManager.findById(BUILDING_ID).floors.find(floor => floor.id === floorId);
+                const {floorName} = BuildingManager.findById(BUILDING_ID).floors.find(floor => floor.no === floorNo);
                 document.querySelector(`.left-information .floor-list li[data-floor-name='${floorName}']`).classList.add('on');
                 document.querySelector('.left-information .floor .btn-floor-change .txt').innerText = floorName;
 
@@ -800,9 +800,9 @@ const popup = (function () {
     }
 
     const setPoiEvent = (id) => {
-        const { code, name, property, floorId, buildingId, } = PoiManager.findById(Number(id));
+        const { code, name, property, floorNo, buildingId, } = PoiManager.findById(Number(id));
         const { name: buildingName, floors } = BuildingManager.findById(buildingId);
-        const { floorName } = floors.find(floor => floor.id === floorId);
+        const { floorName } = floors.find(floor => floor.no === floorNo);
         document.querySelector('#sensorLayerPopup .motion-pictogram')?.remove();
 
         if(code.toLowerCase().includes('cctv')) {

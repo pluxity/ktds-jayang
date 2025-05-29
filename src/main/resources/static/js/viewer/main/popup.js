@@ -2050,10 +2050,14 @@ const layerPopup = (function () {
             window.location.href = `/map?buildingId=${poi.buildingId}`;
             return;
         }
+        const floor = BuildingManager.findFloorsByHistory().find(
+            (floor) => Number(floor.no) === Number(poiData.property.floorNo),
+        );
+        console.log("floor",floor);
     
         // 같은 building 내에서의 이동
         Px.Model.Visible.HideAll();
-        Px.Model.Visible.Show(Number(poiData.property.floorId));
+        Px.Model.Visible.Show(Number(floor.id));
         Px.Camera.MoveToPoi({
             id: poiId,
             isAnimation: true,
@@ -2166,7 +2170,7 @@ const layerPopup = (function () {
                 floorSelect.querySelector(".select-box__content").classList.remove("active");
 
                 const allPois = PoiManager.findAll();
-                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floor.id));
+                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floor.no));
                 updatePoiSelectBox(filteredPois);
             }
 
@@ -2192,7 +2196,7 @@ const layerPopup = (function () {
         const poiBtn = poiSelect.querySelector(".select-box__btn");
         const poiContent = poiSelect.querySelector(".select-box__content ul");
         poiContent.innerHTML = '';
-
+        console.log("poiList : ", poiList);
         if (poiList.length == 0) {
             poiBtn.textContent = "없음";
             poiBtn.classList.add("select__btn--disabled");

@@ -34,8 +34,8 @@ public class Floor {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL)
-    private List<FloorHistory> floorHistories = new ArrayList<>();
+    @OneToOne(mappedBy = "floor")
+    private FloorHistory floorHistory;
 
     @Builder
     public Floor(String name, @NotNull List<SbmFloor> sbmFloors) {

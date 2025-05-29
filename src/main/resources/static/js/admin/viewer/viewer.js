@@ -387,7 +387,7 @@ function initBuilding() {
 }
 
 const selectedFloor = (floorId) => (poi) =>
-    floorId === '' || poi.property.floorId === Number(floorId);
+    floorId === '' || poi.property.floorNo === Number(floorId);
 
 document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) => {
     const target = event.currentTarget;

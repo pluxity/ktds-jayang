@@ -12,7 +12,6 @@ import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
-import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,8 +33,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -163,6 +160,7 @@ public class BuildingService {
 
         Building building = getBuildingById(id);
         building.changeActiveVersion(updateHistory.getBuildingVersion());
+        building.changeFileInfo(getFileInfo(updateHistory.getFileInfo().getId()));
 
         building.update(dto);
         return id;
@@ -193,16 +191,19 @@ public class BuildingService {
     public void delete(@NotNull final Long id) {
         Building building = getBuildingById(id);
 
+        // 1. 먼저 연관된 모든 엔티티들을 삭제
         List<BuildingFileHistory> buildingFileHistories = buildingFileHistoryRepository.findByBuildingId(building.getId());
-
+        
+        // FloorHistory 먼저 삭제(floor는 cascade로 삭제)
         floorHistoryRepository.deleteByBuildingFileHistoryIdIn(buildingFileHistories.stream()
                 .map(BuildingFileHistory::getId)
                 .toList());
-
+        
+        // BuildingFileHistory 삭제
         buildingFileHistoryRepository.deleteAll(buildingFileHistories);
 
+        // Patrol 관련 삭제
         List<Patrol> patrols = patrolRepository.findByBuildingId(building.getId());
-
         if (!patrols.isEmpty()) {
             for (Patrol patrol : patrols) {
                 List<PatrolPoint> patrolPoints = patrolPointRepository.findByPatrolId(patrol.getId());
@@ -211,13 +212,13 @@ public class BuildingService {
             patrolRepository.deleteByBuildingId(building.getId());
         }
 
+        // POI 삭제
         List<Poi> pois = poiRepository.findPoisByBuildingId(building.getId());
         if (!pois.isEmpty()) {
-            for (Poi poi : pois) {
-                poiRepository.delete(poi);
-            }
+            poiRepository.deleteAll(pois);
         }
 
+        // 2. 마지막으로 Building 삭제
         buildingRepository.delete(building);
     }
 
@@ -603,7 +604,7 @@ public class BuildingService {
                     .buildingFileHistory(history)
                     .build();
 
-            floorHistoryRepository.save(floorHistory);  // FloorHistoryRepository 주입 필요
+            floorHistoryRepository.save(floorHistory);
             floorRepository.save(floor);
         }
 
@@ -621,11 +622,6 @@ public class BuildingService {
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
-    }
-
-    private String toVersion(LocalDateTime dateTime){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        return dateTime.format(formatter);
     }
 
     @Transactional(readOnly = true)
@@ -676,17 +672,17 @@ public class BuildingService {
         // BuildingFileHistory 먼저 찾기
         BuildingFileHistory history = buildingFileHistoryRepository.findById(historyId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
-        floorHistoryRepository.findByBuildingFileHistoryId(historyId)
-                .forEach(floorHistory -> {
-                    // FloorHistory 삭제
-                    floorHistoryRepository.delete(floorHistory);
 
-                    // 해당 Floor의 SbmFloor 삭제
-                    Floor floor = floorHistory.getFloor();
-                    if (floor != null) {
-                        floorRepository.delete(floor);
-                    }
-                });
+        // 해당 history가 활성화 되어 있다면 예외처리
+        Building activeBuilding = buildingRepository.findByActiveVersion(history.getBuildingVersion());
+        if (activeBuilding != null) {
+            throw new IllegalStateException("활성화된 버전의 히스토리는 삭제할 수 없습니다.");
+        }
+
+        // FloorHistory 삭제(cascade로 Floor도 삭제됨)
+        floorHistoryRepository.findByBuildingFileHistoryId(historyId)
+                .forEach(floorHistoryRepository::delete);
+
         buildingFileHistoryRepository.delete(history);
     }
 }

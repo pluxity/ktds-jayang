@@ -54,10 +54,10 @@ const PoiManager = (() => {
             });
         });
     };
-    // by floorId
-    const getPoisByFloorId = (id) => {
+    // by floorNo
+    const getPoisByFloorNo = (no) => {
         return new Promise((resolve) => {
-            api.get(`/poi/floor/${id}`).then((result) => {
+            api.get(`/poi/floor/${no}`).then((result) => {
                 const { result: data } = result.data;
 
                 poiList = data.map(dtoToModel);
@@ -181,14 +181,14 @@ const PoiManager = (() => {
         return poiList.find((poi) => poi.code.toLowerCase() === code.toLowerCase());
     };
 
-    const findByPoiCategory = (buildingId = '', floorId = '', poiCategoryId) => {
+    const findByPoiCategory = (buildingId = '', floorNo = '', poiCategoryId) => {
         let filteringPoiList = poiList;
         if (buildingId !== '') {
             filteringPoiList = filteringPoiList.filter((poi) => poi.buildingId === Number(buildingId));
         }
 
-        if (floorId !== '') {
-            filteringPoiList = filteringPoiList.filter((poi) => poi.floorId === Number(floorId));
+        if (floorNo !== '') {
+            filteringPoiList = filteringPoiList.filter((poi) => poi.floorNo === Number(floorNo));
         }
 
         if (poiCategoryId !== '') {
@@ -258,6 +258,6 @@ const PoiManager = (() => {
         findByPoiCategory,
         renderAllPoiToEngineByBuildingId,
         renderPoiByIdAddByMouse,
-        getPoisByFloorId
+        getPoisByFloorNo
     };
 })();

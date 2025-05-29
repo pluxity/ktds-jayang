@@ -106,6 +106,7 @@ function modifyBuildingModal(id) {
         getHistoryList(id)
     ]).then(([buildingRes, historyList]) => {
         const {result: resultData} = buildingRes.data;
+        console.log("resultData = ", resultData);
         form.querySelector('#modifyName').value = resultData.name;
         form.querySelector('#modifyCode').value = resultData.code;
         if (resultData.isIndoor === 'Y') {
@@ -114,6 +115,9 @@ function modifyBuildingModal(id) {
             form.querySelector('input[name="isIndoor"][value="N"]').checked = true;
         }
         form.querySelector('#modifyDescription').innerHTML = resultData.description;
+        form.querySelector('#modifyFloorInfo').innerHTML = resultData.floors.map(floor => 
+            floor.sbmFloor[0].sbmFileName
+        ).join('&#10;');
         currentBuildingFileId = resultData.buildingFile.id;
 
         setBuildingVersionSelect(historyList, resultData.version);
@@ -353,11 +357,6 @@ const deleteHistory = async (version, buildingId, historyId) => {
             confirmSwal('현재 활성화된 버전은 삭제할 수 없습니다.');
             return;
         }
-
-        if (!confirmSwal('정말로 이 히스토리를 삭제하시겠습니까?')) {
-            return;
-        }
-
         await api.delete(`/buildings/history/${historyId}`).then(() => {
             confirmSwal('히스토리가 삭제되었습니다.');
             getHistoryList(buildingId).then((historyList) => {

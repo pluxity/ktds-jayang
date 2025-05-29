@@ -201,25 +201,25 @@
                 Px.VirtualPatrol.Clear();
                 Px.Model.Visible.HideAll();
                 Px.Poi.HideAll();
-                let floorId = floorBtn.getAttribute('floor-id');
+                let floorNo = floorBtn.getAttribute('floor-id');
                 // 다른 층 클릭하면 기존 poi popup 제거
                 const allPopups = document.querySelectorAll('.popup-info');
                 if (allPopups) {
                     allPopups.forEach(popup => {
                         const popupPoiId = popup.querySelector('.poi-id').value;
                         const poiInfo = Px.Poi.GetData(popupPoiId);
-                        if (poiInfo.property.floorId !== Number(floorId)) {
+                        if (poiInfo.property.floorNo !== Number(floorNo)) {
                             popup.remove();
                         }
                     })
                 }
                 const floor = BuildingManager.findFloorsByHistory().find(
-                    (floor) => Number(floor.no) === Number(floorId),
+                    (floor) => Number(floor.no) === Number(floorNo),
                 );
 
                 Px.Model.Visible.Show(floor.id);
                 const allPois = PoiManager.findAll();
-                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floorId));
+                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
                 filteredPois.forEach(poi => {
                     Px.Poi.Show(Number(poi.id));
                 });
@@ -516,6 +516,7 @@ const Init = (function () {
                             }
                         });
                         if (poiInfo.property.isLight) {
+                            console.log("poiInfo.property : ", poiInfo.property);
 
                             if (selectedGroup === poiInfo.property.lightGroup) {
                                 if (selectedId === poiInfo.id) {
@@ -532,6 +533,7 @@ const Init = (function () {
                                 selectedGroup = poiInfo.property.lightGroup;
                                 selectedId = poiInfo.id;
                             }
+                            console.log("selectedGroup",selectedGroup);
                         }
                         console.log("selectedId : ", selectedId);
                         if (samePopupOpen) return;
@@ -594,7 +596,7 @@ const Init = (function () {
         if (poiId) {
             const poiData = Px.Poi.GetData(poiId);
             if (poiData) {
-                Px.Model.Visible.Show(String(poiData.property.floorId));
+                Px.Model.Visible.Show(String(poiData.property.floorNo));
                 Px.Camera.MoveToPoi({
                     id: poiId,
                     isAnimation: true,
@@ -623,7 +625,7 @@ const Init = (function () {
 
         if (poiData) {
             // Px.Model.Visible.HideAll();
-            Px.Model.Visible.Show(Number(poiData.property.floorId));
+            Px.Model.Visible.Show(Number(poiData.property.floorNo));
             Px.Camera.MoveToPoi({
                 id: poiId,
                 isAnimation: true,
@@ -734,7 +736,7 @@ const Init = (function () {
                     <button type="button" class="close"><span class="hide">close</span></button>
                 </div>
                 <div class="popup-info__content">
-                    <div class="title">${poiProperty.buildingName} - ${poiProperty.floorNo}</div>
+                    <div class="title">${poiProperty.buildingName} - ${poiProperty.floorName}</div>
                     <div class="date">
                         <span class="timestamp">업데이트 일시 : ${new Date().toLocaleString()}</span>
                         <button type="button" class="date__refresh"><span class="hide date">새로고침</span></button>
@@ -1158,8 +1160,8 @@ const Init = (function () {
                     const floorName = document.querySelector("body > main > div.left-information > div.floor").dataset.floorName;
                     if(floorName) {
                         BuildingManager.findById(BUILDING_ID).getDetail().then((data) => {
-                            const {id: floorId} = data.floors.find(floor => floor.floorName === floorName);
-                            Px.Poi.ShowByPropertyArray({"floorId": floorId, "poiCategoryId": Number(poiCategoryId)});
+                            const {id: floorNo} = data.floors.find(floor => floor.floorName === floorName);
+                            Px.Poi.ShowByPropertyArray({"floorNo": floorNo, "poiCategoryId": Number(poiCategoryId)});
                         });
                     } else {
                         Px.Poi.ShowByPropertyArray({"poiCategoryId": Number(poiCategoryId)});
@@ -1272,8 +1274,8 @@ const Init = (function () {
 
                     Px.Poi.HideAll();
 
-                    const {id: floorId} = floors.find(floor => floor.floorName === floorName);
-                    Px.Poi.ShowByProperty("floorId", floorId);
+                    const {id: floorNo} = floors.find(floor => floor.floorName === floorName);
+                    Px.Poi.ShowByProperty("floorNo", floorNo);
 
                     if (onComplete) onComplete();
                 }

@@ -309,6 +309,8 @@ const Init = (function () {
             container.innerHTML = '';
             const contents = document.querySelector('.contents');
             const outdoorBuilding = await BuildingManager.getOutdoorBuilding();
+            const version = outdoorBuilding.getVersion();
+            await BuildingManager.getFloorsByHistoryVersion(version);
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
             let buildingId = outdoorBuilding ? outdoorBuilding.id : null;
             initFloors(buildingId);

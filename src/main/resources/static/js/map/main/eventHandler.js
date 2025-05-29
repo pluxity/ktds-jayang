@@ -98,14 +98,14 @@
         event.preventDefault();
         const categoryId = Number(event.target.getAttribute('data-category-id'));
         const floor = document.querySelector('#floor-info .floor-info__detail ul li.active');
-        const floorId = floor ? Number(floor.getAttribute('floor-id')) : null;
+        const floorNo = floor ? Number(floor.getAttribute('floor-id')) : null;
         const isActive = event.target.classList.toggle('active');
 
-        if (floorId !== null) {
+        if (floorNo !== null) {
             if (isActive) {
-                Px.Poi.ShowByPropertyArray({ "floorId": floorId, "poiCategoryId": categoryId });
+                Px.Poi.ShowByPropertyArray({ "floorNo": floorNo, "poiCategoryId": categoryId });
             } else {
-                Px.Poi.HideByPropertyArray({ "floorId": floorId, "poiCategoryId": categoryId });
+                Px.Poi.HideByPropertyArray({ "floorNo": floorNo, "poiCategoryId": categoryId });
             }
         } else {
             if (isActive) {

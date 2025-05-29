@@ -35,9 +35,8 @@ public class KioskPoiController {
 
     @PostMapping("/batch-register")
     public ResponseBody postBatchPoi(@RequestParam(value = "floorNo") Integer floorNo,
-                                     @RequestParam(value = "isKiosk") boolean isKiosk,
                                      @RequestBody MultipartFile file) {
-        kioskPoiService.batchRegisterKioskPoi(floorNo, isKiosk, file);
+        kioskPoiService.batchRegisterKioskPoi(floorNo, file);
         return ResponseBody.of(SuccessCode.SUCCESS_CREATE);
     }
 

@@ -55,13 +55,7 @@ document.getElementById('kioskPoiBatchRegisterBtn')
     .addEventListener('pointerup', () => {
 
         if(!validationForm(poiBatchRegisterForm)) return;
-        const selectedType = document.querySelector('input[name="type"]:checked');
-        if (!selectedType) {
-            alertSwal('유형을 선택해주세요.');
-            return;
-        }
         const formData = new FormData();
-        formData.set('isKiosk', selectedType.value);
         formData.set('floorNo', document.getElementById('registerBatchFloor').value);
         formData.set('file', document.querySelector('#kioskBatchRegisterFile').files[0]);
 

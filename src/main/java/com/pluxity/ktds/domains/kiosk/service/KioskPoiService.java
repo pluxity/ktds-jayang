@@ -349,7 +349,7 @@ public class KioskPoiService {
     }
 
     @Transactional
-    public void batchRegisterKioskPoi(Integer floorNo, Boolean isKiosk, MultipartFile file) {
+    public void batchRegisterKioskPoi(Integer floorNo, MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
             String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -358,27 +358,21 @@ public class KioskPoiService {
                 throw new CustomException(ErrorCode.INVALID_FILE);
             }
 
-            int kioskFlag = isKiosk ? 1 : 0;
-            List<Map<String, Object>> rows = ExcelUtil.readExcelBatchKiosk(file, kioskFlag);
-
-            int headerLength = rows.get(0).size();
+            List<Map<String, Object>> storeRows = ExcelUtil.readExcelBatchKiosk(file, 0);
+            List<Map<String, Object>> kioskRows = ExcelUtil.readExcelBatchKiosk(file, 1);
 
             List<KioskPoi> result = new ArrayList<>();
-
             Building building = buildingRepository.findByCode("store")
                     .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
-//            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
-            for(int i = 1; i < rows.size(); i++) {
-                Map<String, String> kioskPoiMap = createMapByRows(rows, headerLength, i);
-//                kioskPoiRepository.findByName(kioskPoiMap.get("POI명"))
-//                        .ifPresent(found -> {
-//                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + kioskPoiMap.get("POI명"));
-//                        });
-                Optional<KioskPoi> existKiosk = kioskPoiRepository.findByName(kioskPoiMap.get("POI명"));
-                if (existKiosk.isPresent()) {
-                    continue;
-                }
-                if (isKiosk) {
+
+            if (kioskRows.size() > 1) {
+                int headerLength = kioskRows.get(0).size();
+                for(int i = 1; i < kioskRows.size(); i++) {
+                    Map<String, String> kioskPoiMap = createMapByRows(kioskRows, headerLength, i);
+                    Optional<KioskPoi> existKiosk = kioskPoiRepository.findByName(kioskPoiMap.get("POI명"));
+                    if (existKiosk.isPresent()) {
+                        continue;
+                    }
                     CreateKioskPoiDTO kioskPoiDTO = CreateKioskPoiDTO.builder()
                             .isKiosk(true)
                             .name(kioskPoiMap.get("POI명"))
@@ -396,13 +390,18 @@ public class KioskPoiService {
                             .build();
 
                     updateIfNotNull(kioskPoiDTO.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-//                    updateIfNotNull(kioskPoiDTO.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
-                    if (kioskPoiDTO.floorNo() != null) {
-                        kioskPoi.changeFloorNo(kioskPoiDTO.floorNo());
-                    }
+                    kioskPoi.changeFloorNo(kioskPoiDTO.floorNo());
                     result.add(kioskPoi);
-                } else {
-                    System.out.println("floorNo : " + floorNo);
+                }
+            }
+            if (storeRows.size() > 1) {
+                int headerLength = storeRows.get(0).size();
+                for(int i = 1; i < storeRows.size(); i++) {
+                    Map<String, String> kioskPoiMap = createMapByRows(storeRows, headerLength, i);
+                    Optional<KioskPoi> existKiosk = kioskPoiRepository.findByName(kioskPoiMap.get("POI명"));
+                    if (existKiosk.isPresent()) {
+                        continue;
+                    }
                     CreateStorePoiDTO storePoiDTO = CreateStorePoiDTO.builder()
                             .isKiosk(false)
                             .name(kioskPoiMap.get("POI명"))
@@ -420,9 +419,7 @@ public class KioskPoiService {
                             .build();
 
                     changeField(storePoiDTO, kioskPoi);
-                    if (storePoiDTO.floorNo() != null) {
-                        kioskPoi.changeFloorNo(storePoiDTO.floorNo());
-                    }
+                    kioskPoi.changeFloorNo(storePoiDTO.floorNo());
                     result.add(kioskPoi);
                 }
             }

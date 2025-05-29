@@ -15,6 +15,7 @@ import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
+import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -53,6 +54,7 @@ public class PoiService {
     private final PoiCctvRepository poiCctvRepository;
     private final BuildingFileHistoryRepository buildingFileHistoryRepository;
     private final FloorHistoryRepository floorHistoryRepository;
+    private final TagClientService tagClientService;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -174,7 +176,7 @@ public class PoiService {
         }
         Poi savedPoi = poiRepository.save(poi);
         if (dto.tagNames() != null) {
-//            tagClientService.addTags(dto.tagNames());
+            tagClientService.addTags(dto.tagNames());
         }
 
         return savedPoi.getId();
@@ -252,7 +254,7 @@ public class PoiService {
 //                .toList();
         poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup());
         if (dto.tagNames() != null) {
-//            tagClientService.addTags(dto.tagNames());
+            tagClientService.addTags(dto.tagNames());
         }
 
         if (dto.floorNo() != null) {

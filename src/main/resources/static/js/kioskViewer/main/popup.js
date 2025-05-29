@@ -75,7 +75,13 @@ const popup = (function () {
                 B2: 'B1',
                 B1: 'G1'
             };
-            const displayName = nameMap[poi.detail.floorNm] || poi.detail.floorNm;
+
+            const floor = BuildingManager.findFloorsByHistory().find(
+                (floor) => floor.no === Number(poi.detail.floorNo),
+            );
+
+            const displayName = nameMap[floor.name] || floor.name;
+
             const li = document.createElement('li');
             li.innerHTML = `
                 <div class="list__header">
@@ -95,7 +101,7 @@ const popup = (function () {
                 </div>
                 <ul class="list__footer">
                   <li><button type="button" class="button">${displayName}</button></li>
-                  <li><button type="button" class="button button--location" data-poi-id="${poi.common.id}" data-floor-id="${poi.common.floorId}">위치 확인</button></li>
+                  <li><button type="button" class="button button--location" data-poi-id="${poi.common.id}" data-floor-id="${poi.common.floorNo}">위치 확인</button></li>
                 </ul>
               `;
             // const layer = createBanner(poi);
@@ -104,7 +110,7 @@ const popup = (function () {
 
                     eventHandler.updateKioskUIState({
                         showFloor: true,
-                        floor: poi.common.floorId
+                        floor: poi.common.floorNo
                     });
                     popup.showPoiPopup(poi.common);
                     Init.moveToKiosk(poi.common);
@@ -134,22 +140,27 @@ const popup = (function () {
     }
 
     let cachedStoreList = [];
-    const setStores = async (floorId, term = '') => {
+    const setStores = async (floorNo, term = '') => {
 
         const searchInput = document.querySelector('.store__search input');
         term = searchInput?.value.trim();
 
-        currentFloor = floorId;
+        const floor = BuildingManager.findFloorsByHistory().find(
+            (floor) => floor.no === Number(floorNo),
+        );
+        if (floor) {
+            currentFloor = floor.id;
+        }
         currentTerm = term.trim().toLowerCase();
-        if (floorId === 'all') {
+        if (floorNo === 'all') {
             const kioskPoiList = await KioskPoiManager.getKioskPoiDetailList();
             cachedStoreList = kioskPoiList
                 .filter(poi => poi.common?.position != null)
                 .filter(poi => poi.common?.isKiosk === false);
         }
-        let storePoiList = floorId === 'all'
+        let storePoiList = floorNo === 'all'
             ? cachedStoreList
-            : cachedStoreList.filter(poi => `${poi.common.floorId}` === `${floorId}`);
+            : cachedStoreList.filter(poi => `${poi.common.floorNo}` === `${floorNo}`);
 
         if (currentTerm) {
             storePoiList = storePoiList.filter(poi => {
@@ -191,18 +202,20 @@ const popup = (function () {
             B2: 'B1',
             B1: 'G1'
         };
-        storeBuilding.floors
+        const version = storeBuilding.getVersion()
+        const floors = BuildingManager.findFloorsByHistory();
+        floors
             .filter(floor => kioskSet.has(floor.name))
             .forEach((floor, idx) => {
             const floorLi = document.createElement('li');
             floorLi.setAttribute('role', 'tab');
-            floorLi.id = `${floor.id}`;
+            floorLi.id = `${floor.no}`;
             const displayName = nameMap[floor.name] || floor.name;
             floorLi.innerHTML = `<button type="button">${displayName}</button>`;
             floorLi.addEventListener('click', () => {
                 floorTabList.querySelectorAll('li').forEach(li => li.classList.remove('active'));
                 floorLi.classList.add('active');
-                setStores(`${floor.id}`);
+                setStores(`${floor.no}`);
             });
             floorTabList.appendChild(floorLi);
         })

@@ -58,8 +58,8 @@ const eventHandler = (function () {
 
             searchInput.value += btn.textContent;
             removeBtn.classList.add('remove--active');
-            const floorId = document.querySelector('.kiosk-list__tab li.active').id;
-            popup.setStores(floorId, searchInput.value.trim());
+            const floorNo = document.querySelector('.kiosk-list__tab li.active').id;
+            popup.setStores(floorNo, searchInput.value.trim());
         });
     });
 
@@ -70,8 +70,8 @@ const eventHandler = (function () {
 
         document.querySelectorAll('.store__letters button')
             .forEach(b => b.classList.remove('active'));
-        const floorId = document.querySelector('.kiosk-list__tab li.active').id;
-        popup.setStores(floorId, term);
+        const floorNo = document.querySelector('.kiosk-list__tab li.active').id;
+        popup.setStores(floorNo, term);
     });
 
     removeBtn.addEventListener('click', () => {
@@ -83,8 +83,8 @@ const eventHandler = (function () {
         if (!term) {
             letterButtons.forEach(b => b.classList.remove('active'));
         }
-        const floorId = document.querySelector('.kiosk-list__tab li.active').id;
-        popup.setStores(floorId, term);
+        const floorNo = document.querySelector('.kiosk-list__tab li.active').id;
+        popup.setStores(floorNo, term);
 
     });
 

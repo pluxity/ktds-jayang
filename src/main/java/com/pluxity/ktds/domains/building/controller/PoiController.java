@@ -142,8 +142,7 @@ public class PoiController {
 
     @PostMapping("/status")
     public ResponseEntity<String> getPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
-        return null;
-//        return tagClientService.readTags(tags);
+        return tagClientService.readTags(tags);
     }
 
     private Map<String, Object> getPoiTagData(List<String> tags) {

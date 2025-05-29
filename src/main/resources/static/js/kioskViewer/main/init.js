@@ -52,11 +52,12 @@
 
                 let sbmDataArray = [];
                 if (storeBuilding) {
-                    const { buildingFile, floors } = storeBuilding;
+                    const { buildingFile } = storeBuilding;
                     const version = storeBuilding.getVersion();
                     const { directory } = buildingFile;
                     const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
 
+                    const floors = await BuildingManager.getFloorsByHistoryVersion(version);
                     sbmDataArray = floors
                         .filter(floor => kioskSet.has(floor.name))
                         .map(floor => {
@@ -127,7 +128,7 @@
             Init.moveToKiosk(kioskPoi);
             eventHandler.updateKioskUIState({
                     showFloor: true,
-                    floor: kioskPoi.floorId
+                    floor: kioskPoi.floorNo
             });
         }
     });
@@ -143,7 +144,6 @@
         storeBuilding.floors
             .filter(floor => kioskSet.has(floor.name))
             .forEach((floor, index) => {
-                console.log("floor : ", floor);
                 const li = document.createElement('li');
                 li.setAttribute('role', 'tab');
                 li.id = floor.no;
@@ -173,16 +173,21 @@
                 kioskInfo.textContent = btn.textContent;
                 //btn의 상위 노드 li의 id값
                 const li = btn.closest('li');
-                const floorId = li.id;
+                const floorNo = li.id;
+
+                const floor = BuildingManager.findFloorsByHistory().find(
+                    (floor) => floor.no === Number(floorNo),
+                );
+
                 Px.Model.Visible.HideAll();
-                Px.Model.Visible.Show(Number(floorId));
-                Px.Camera.MoveToObject(Number(floorId), 50, 1);
+                Px.Model.Visible.Show(Number(floor.id));
+                Px.Camera.MoveToObject(Number(floor.id), 50, 1);
                 Px.Poi.HideAll();
-                Px.Poi.ShowByProperty("floorId", Number(floorId));
+                // Px.Poi.ShowByProperty("floorId", Number(floor.id));
+                Px.Poi.ShowByProperty("floorNo", Number(floorNo));
             });
         });
     };
-
 
     setDateTime();
     setInterval(updateCurrentTime, 1000);
@@ -202,10 +207,14 @@ const Init = (function () {
     }
 
     const moveToKiosk =  (kioskPoi) => {
+        const floor = BuildingManager.findFloorsByHistory().find(
+            (floor) => floor.no === Number(kioskPoi.floorNo),
+        );
         Px.Model.Visible.HideAll();
-        Px.Model.Visible.Show(kioskPoi.floorId);
+        Px.Model.Visible.Show(floor.id);
         Px.Poi.HideAll();
-        Px.Poi.ShowByProperty("floorId", kioskPoi.floorId);
+        // Px.Poi.ShowByProperty("floorId", floor.id);
+        Px.Poi.ShowByProperty("floorNo", kioskPoi.floorNo);
         Px.Camera.MoveToPoi({
             id: kioskPoi.id,
             isAnimation: true,

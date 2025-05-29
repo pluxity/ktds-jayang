@@ -532,7 +532,6 @@
             const option = document.createElement('option');
             option.value = history.historyId;
             option.textContent = history.buildingVersion;
-            console.log("fileId = ",history.fileId);
             if(history.buildingVersion === version) {
                 option.selected = true;
             }
@@ -561,7 +560,6 @@
         }
         const select = document.getElementById('kioskBuildingVersionSelect');
         historyList.forEach(history => {
-            console.log("history = ",history);
             const row = document.createElement('tr');
             row.innerHTML = `
             <td>${history.buildingVersion || '-'}</td>

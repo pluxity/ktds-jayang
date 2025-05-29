@@ -370,11 +370,14 @@ public class KioskPoiService {
 //            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> kioskPoiMap = createMapByRows(rows, headerLength, i);
-                kioskPoiRepository.findByName(kioskPoiMap.get("POI명"))
-                        .ifPresent(found -> {
-                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + kioskPoiMap.get("POI명"));
-                        });
-
+//                kioskPoiRepository.findByName(kioskPoiMap.get("POI명"))
+//                        .ifPresent(found -> {
+//                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + kioskPoiMap.get("POI명"));
+//                        });
+                Optional<KioskPoi> existKiosk = kioskPoiRepository.findByName(kioskPoiMap.get("POI명"));
+                if (existKiosk.isPresent()) {
+                    continue;
+                }
                 if (isKiosk) {
                     CreateKioskPoiDTO kioskPoiDTO = CreateKioskPoiDTO.builder()
                             .isKiosk(true)

@@ -15,23 +15,6 @@
                 .addEventListener('mousedown wheel resize ', () => {
                     hidePoiMenu();
                 });
-
-            // 층 콤보 박스 생성
-            let floorListOpt = "<option value=''>전체</option>";
-
-            const building = await BuildingManager.findById(BUILDING_ID);
-            const floors =  await BuildingManager.getFloorsByHistoryVersion(building.getVersion());
-
-            floors.forEach((floor) => {
-                floorListOpt += `<option value='${floor.no}'>${floor.name}</option>`;
-            });
-            const floorNo = document.querySelector('#floorNo');
-            floorNo.innerHTML = floorListOpt;
-
-            floorNo.addEventListener('change', function () {
-                changeEventFloor(this.value);
-            });
-
         });
     });
     await PatrolManager.getPatrolList();
@@ -380,6 +363,19 @@ function initBuilding() {
                 });
                 console.log('sbm loading complete');
             },
+        });
+
+        // 층 콤보 박스 생성
+        let floorListOpt = "<option value=''>전체</option>";
+
+        floors.forEach((floor) => {
+            floorListOpt += `<option value='${floor.no}'>${floor.name}</option>`;
+        });
+        const floorNo = document.querySelector('#floorNo');
+        floorNo.innerHTML = floorListOpt;
+
+        floorNo.addEventListener('change', function () {
+            changeEventFloor(this.value);
         });
     });
 }

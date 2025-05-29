@@ -115,9 +115,13 @@ function modifyBuildingModal(id) {
             form.querySelector('input[name="isIndoor"][value="N"]').checked = true;
         }
         form.querySelector('#modifyDescription').innerHTML = resultData.description;
-        form.querySelector('#modifyFloorInfo').innerHTML = resultData.floors.map(floor => 
-            floor.sbmFloor[0].sbmFileName
-        ).join('&#10;');
+
+        form.querySelector('#modifyFloorInfo').innerHTML = resultData.floors
+            .map(floor =>
+                floor.sbmFloor
+                    .map(sbm => `${floor.name} / ${sbm.sbmFileName}`)
+                    .join(', &#10;')).join('&#10;');
+
         currentBuildingFileId = resultData.buildingFile.id;
 
         setBuildingVersionSelect(historyList, resultData.version);

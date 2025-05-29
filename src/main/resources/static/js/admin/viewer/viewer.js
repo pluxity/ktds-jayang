@@ -295,17 +295,15 @@ function initBuilding() {
         // histotry에 맞는 floor를 가져오면?
         // 층 + history를 갖는 엔티티
 
-        const sbmDataArray = floors.map((floor) => {
-            const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
-            const sbmData = {
-                url,
-                id: floor.sbmFloor[0].id,
-                displayName: floor.sbmFloor[0].sbmFileName,
-                baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                groupId: floor.sbmFloor[0].sbmFloorGroup,
-            };
-            return sbmData;
-        });
+        const sbmDataArray = floors.flatMap(floor =>
+            floor.sbmFloor.map(sbm => ({
+                url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
+                id: floor.id,
+                displayName: sbm.sbmFileName,
+                baseFloor: sbm.sbmFloorBase,
+                groupId: sbm.sbmFloorGroup,
+            }))
+        );
 
         Px.Loader.LoadSbmUrlArray({
             urlDataList: sbmDataArray,

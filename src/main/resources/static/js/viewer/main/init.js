@@ -324,17 +324,26 @@ const Init = (function () {
                     const { buildingFile, floors } = outdoorBuilding;
                     const version = outdoorBuilding.getVersion();
                     const { directory } = buildingFile;
-                    sbmDataArray = floors.map((floor) => {
-                        const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
-                        const sbmData = {
-                            url,
-                            id: floor.sbmFloor[0].id,
-                            displayName: floor.sbmFloor[0].sbmFileName,
-                            baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                            groupId: floor.sbmFloor[0].sbmFloorGroup,
-                        };
-                        return sbmData;
-                    });
+                    // sbmDataArray = floors.map((floor) => {
+                    //     const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
+                    //     const sbmData = {
+                    //         url,
+                    //         id: floor.sbmFloor[0].id,
+                    //         displayName: floor.sbmFloor[0].sbmFileName,
+                    //         baseFloor: floor.sbmFloor[0].sbmFloorBase,
+                    //         groupId: floor.sbmFloor[0].sbmFloorGroup,
+                    //     };
+                    //     return sbmData;
+                    // });
+                    sbmDataArray = floors.flatMap(floor =>
+                        floor.sbmFloor.map(sbm => ({
+                            url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
+                            id: floor.id,
+                            displayName: sbm.sbmFileName,
+                            baseFloor: sbm.sbmFloorBase,
+                            groupId: sbm.sbmFloorGroup,
+                        }))
+                    );
 
                 } else {
                     sbmDataArray.push({

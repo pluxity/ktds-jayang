@@ -34,6 +34,7 @@ import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.CustomMultipartFile;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -69,6 +70,9 @@ public class Initializer implements CommandLineRunner {
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
 
     private final ObjectMapper objectMapper;
+
+    @Value("${root-path.files}")
+    private String rootPath;
 
     @Override
     public void run(String... args) throws Exception {
@@ -249,8 +253,9 @@ public class Initializer implements CommandLineRunner {
     }
 
     public void initPoiCategoryFromJson() {
-        Resource categoryJson = new ClassPathResource("static/sample/categories.json");
-        try (InputStream is = categoryJson.getInputStream()) {
+//        Resource categoryJson = new ClassPathResource("static/sample/categories.json");
+        File jsonFile = new File(rootPath + File.separator + "categories.json");
+        try (InputStream is = new FileInputStream(jsonFile)) {
             Map<String, List<String>> categories = objectMapper.readValue(is, new TypeReference<>() {});
 
             categories.keySet().stream()
@@ -264,11 +269,9 @@ public class Initializer implements CommandLineRunner {
 
     // icon 경로는 추후 수정
     public void initIconSet() {
-        File folder = null;
-        try {
-            folder = new ClassPathResource("static/images/viewer/iconTest").getFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        File folder = new File(rootPath + File.separator + "icon");
+        if (!folder.exists()) {
+            throw new CustomException(ErrorCode.INVALID_FILE);
         }
         File[] svgFiles = folder.listFiles((dir, name) ->
                 name.toLowerCase().endsWith(".svg")
@@ -290,9 +293,9 @@ public class Initializer implements CommandLineRunner {
     }
 
     public void initMiddleCategoryFromJson() {
-        Resource res = new ClassPathResource("static/sample/categories.json");
+        File jsonFile = new File(rootPath + File.separator + "categories.json");
         List<String> manualCategories = List.of("전력", "조명", "태양광", "주차관제", "VAV", "지열");
-        try (InputStream is = res.getInputStream()) {
+        try (InputStream is = new FileInputStream(jsonFile)) {
             Map<String, List<String>> categories = objectMapper.readValue(is, new TypeReference<>() {});
 
             for (Map.Entry<String, List<String>> entry : categories.entrySet()) {

@@ -56,8 +56,11 @@ class KioskPoi {
     get isKiosk() {
         return this.#isKiosk;
     }
-    get pinUrl() {
-        return `${CONTEXT_PATH}2D/pin/pin.svg`;
+    get storeIconUrl() {
+        return `${CONTEXT_PATH}2D/kiosk/store.svg`;
+    }
+    get kioskIconUrl() {
+        return `${CONTEXT_PATH}2D/kiosk/kiosk.svg`;
     }
     // Px.Poi.Add 용
     get poiOptions() {
@@ -67,7 +70,7 @@ class KioskPoi {
             group: this.isKiosk ? 'Kiosk' : 'Store',
             lineHeight: SystemSettingManager.find().poiLineLength ?? 10,
             position: this.position ? this.position : {x:0,y:0,z:0},
-            iconUrl: this.pinUrl,
+            iconUrl: this.isKiosk ? this.kioskIconUrl : this.storeIconUrl,
             property: this.property,
             rotation: {
                 "x": 0,

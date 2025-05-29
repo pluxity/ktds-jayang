@@ -14,7 +14,7 @@ public record StorePoiDetailResponseDTO (
     String name,
     KioskCategory category,
     Long buildingId,
-    Long floorId,
+    Integer floorNo,
     String floorNm,
     String phoneNumber,
     Long logo,

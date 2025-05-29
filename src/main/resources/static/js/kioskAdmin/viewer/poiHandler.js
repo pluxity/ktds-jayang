@@ -55,13 +55,15 @@ document.getElementById('kioskPoiBatchRegisterBtn')
     .addEventListener('pointerup', () => {
 
         if(!validationForm(poiBatchRegisterForm)) return;
-
+        const selectedType = document.querySelector('input[name="type"]:checked');
+        if (!selectedType) {
+            alertSwal('유형을 선택해주세요.');
+            return;
+        }
         const formData = new FormData();
-
-        formData.set('isKiosk', document.querySelector('input[name="type"]:checked')?.value);
-        formData.set('floorId', document.getElementById('registerBatchFloor').value);
+        formData.set('isKiosk', selectedType.value);
+        formData.set('floorNo', document.getElementById('registerBatchFloor').value);
         formData.set('file', document.querySelector('#kioskBatchRegisterFile').files[0]);
-
 
         api.post('/kiosk/batch-register', formData).then((res) => {
             alertSwal('일괄등록이 완료 되었습니다.').then(() => {
@@ -101,7 +103,7 @@ function appendFloorOptionsToSelect(floors, selectElement) {
         .filter(floor => kioskSet.has(floor.name))
         .forEach((floor) => {
         const option = document.createElement('option');
-        option.value = floor.id;
+        option.value = floor.no;
         option.textContent = nameMap[floor.name] || floor.name;
         selectElement.appendChild(option);
     });
@@ -257,7 +259,7 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
             const buildingId = document.getElementById('buildingId').value;
             const storeName = document.getElementById('registerStoreName').value;
             const category = document.getElementById('registerBusiness').value;
-            const floorId=  Number(document.getElementById('registerStoreFloor').value);
+            const floorNo=  Number(document.getElementById('registerStoreFloor').value);
             const phoneNumber =  document.getElementById('registerPhone').value;
 
             // 입력값 검증
@@ -269,7 +271,7 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
                 alertSwal('업종을 입력해주세요.');
                 return;
             }
-            if(!floorId){
+            if(!floorNo){
                 alertSwal('층을 선택해주세요.');
                 return;
             }
@@ -363,7 +365,7 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
                     name: storeName,
                     category: category,
                     buildingId: buildingId,
-                    floorId: floorId,
+                    floorNo: floorNo,
                     phoneNumber: phoneNumber,
                     fileInfoId: logoFileId,
                     banners: banners
@@ -391,7 +393,7 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
             const name =  document.getElementById('registerKioskName').value;
             const kioskCode = document.getElementById('registerEquipmentCode').value;
             const buildingId = Number(document.getElementById('buildingId').value);
-            const floorId = Number(document.getElementById('registerKioskFloor').value);
+            const floorNo = Number(document.getElementById('registerKioskFloor').value);
             const description = document.getElementById('registerRemarks').value;
 
             // 입력값 검증
@@ -403,7 +405,7 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
                 alertSwal('키오스크 코드를 입력해주세요.');
                 return;
             }
-            if(!floorId){
+            if(!floorNo){
                 alertSwal('층을 선택해주세요.');
                 return;
             }
@@ -414,7 +416,7 @@ document.querySelector('#btnPoiRegister').addEventListener('click', async functi
                 name: name,
                 kioskCode: kioskCode,
                 buildingId: buildingId,
-                floorId: floorId,
+                floorNo: floorNo,
                 description: description
             };
 
@@ -459,7 +461,7 @@ const updateKioskPoi = async () => {
         name: document.getElementById("modifyKioskName").value,
         kioskCode: document.getElementById("modifyEquipmentCode").value,
         buildingId: Number(buildingId),
-        floorId: Number(document.getElementById("modifyKioskFloor").value),
+        floorNo: Number(document.getElementById("modifyKioskFloor").value),
         description: document.getElementById("modifyRemarks").value
     }
 
@@ -477,7 +479,7 @@ const updateStorePoi = async () => {
     try {
         const name = document.getElementById("modifyStoreName").value.trim();
         const category = document.getElementById("modifyBusiness").value;
-        const floorId = document.getElementById("modifyStoreFloor").value;
+        const floorNo = document.getElementById("modifyStoreFloor").value;
         const bannerRows = document.querySelectorAll("#modifyBannerTbody tr");
         
         if (!name) {
@@ -488,7 +490,7 @@ const updateStorePoi = async () => {
             alertSwal("업종을 선택하세요.");
             return;
         }
-        if (!floorId) {
+        if (!floorNo) {
             alertSwal("층을 선택하세요.");
             return;
         }
@@ -520,7 +522,7 @@ const updateStorePoi = async () => {
             name: document.getElementById("modifyStoreName").value,
             category: document.getElementById("modifyBusiness").value,
             buildingId: Number(document.getElementById("buildingId").value),
-            floorId: Number(document.getElementById("modifyStoreFloor").value),
+            floorNo: Number(document.getElementById("modifyStoreFloor").value),
             phoneNumber: document.getElementById("modifyPhone").value,
             fileInfoId: Number(logoInput.getAttribute("data-file-id")) || null,
             banners: Array.from(bannerRows).map(row => {
@@ -571,7 +573,7 @@ const allocatePoi = (id) => {
 
     const selectedFloorNo = document.querySelector('#floorNo').value;
     const poi = KioskPoiManager.findById(id);
-    if (poi.floorId !== Number(selectedFloorNo)) {
+    if (poi.floorNo !== Number(selectedFloorNo)) {
         alertSwal('POI의 층과 선택한 층이 다릅니다.');
         return;
     }
@@ -610,10 +612,10 @@ const getKioskPoiListRendering = async () => {
 
         let filteredList = KioskPoiManager.findAll();
 
-        const selectedFloorId = Number(document.querySelector('#leftFloorSelect').value);
-        if (selectedFloorId) {
+        const selectedFloorNo = Number(document.querySelector('#leftFloorSelect').value);
+        if (selectedFloorNo) {
             filteredList = filteredList.filter(
-                (poi) => poi.floorId === selectedFloorId);
+                (poi) => poi.floorNo === selectedFloorNo);
         }
 
         const selectedPoiType = document.querySelector('#leftPoiCategorySelect').value;
@@ -636,8 +638,8 @@ const getKioskPoiListRendering = async () => {
             filteredList = filteredList.filter((poi) => poi.position === null);
         } else if (document.querySelector('#poiUnAllocateByFloor').classList.contains('active')) { // 미배치(층별)
             filteredList = filteredList.filter((poi) => {
-                    if(selectedFloorId){
-                        return poi.position === null && poi.floorId === selectedFloorId
+                    if(selectedFloorNo){
+                        return poi.position === null && poi.floorNo === selectedFloorNo
                     }else{
                         return poi.position === null;
                     }
@@ -660,7 +662,7 @@ const getKioskPoiDisplayRendering = async () => {
     if(selectedFloorNo) {
         leftFloorSelect.value = selectedFloorNo;
         displayList = displayList.filter(
-            (poi) => poi.floorId === Number(selectedFloorNo));
+            (poi) => poi.floorNo === Number(selectedFloorNo));
     }else{
         leftFloorSelect.selectedIndex = 0;
     }
@@ -690,7 +692,7 @@ const getKioskPoiDisplayRendering = async () => {
     } else if (document.querySelector('#poiUnAllocateByFloor').classList.contains('active')) { // 미배치(층별)
         filteredList = filteredList.filter((poi) => {
             if(selectedFloorNo){
-                return poi.position === null && poi.floorId === Number(selectedFloorNo)
+                return poi.position === null && poi.floorNo === Number(selectedFloorNo)
             }else{
                 return poi.position === null;
             }
@@ -789,7 +791,7 @@ const moveToPoi = (id) => {
     const poiData = Px.Poi.GetData(poiId);
 
     if (poiData) {
-        Px.Model.Visible.Show(String(poiData.property.floorId));
+        Px.Model.Visible.Show(String(poiData.property.floorNo));
         Px.Camera.MoveToPoi({
             id: poiId,
             isAnimation: true,
@@ -887,7 +889,7 @@ const handlePoiModifyBtnClick = async (kioskPoi) => {
         document.getElementById("modifyEquipmentCode").disabled = true;
         document.getElementById("modifyKioskName").value = poiDetail.name || '';
         document.getElementById("modifyEquipmentCode").value = poiDetail.kiosk.kioskCode || '';
-        document.getElementById("modifyKioskFloor").value = poiDetail.kiosk.floorId || '';
+        document.getElementById("modifyKioskFloor").value = poiDetail.kiosk.floorNo || '';
         document.getElementById("modifyRemarks").value = poiDetail.kiosk.description || '';
         poiModifyModal.show();
     } else {
@@ -896,7 +898,7 @@ const handlePoiModifyBtnClick = async (kioskPoi) => {
 
         document.getElementById("modifyStoreName").value = poiDetail.name || '';
         document.getElementById("modifyBusiness").value = poiDetail.store.category || '';
-        document.getElementById("modifyStoreFloor").value = poiDetail.store.floorId || '';
+        document.getElementById("modifyStoreFloor").value = poiDetail.store.floorNo || '';
         document.getElementById("modifyPhone").value = poiDetail.store.phoneNumber || '';
 
         // 로고 표시

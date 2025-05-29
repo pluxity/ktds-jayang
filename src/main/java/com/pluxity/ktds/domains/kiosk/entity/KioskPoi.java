@@ -45,9 +45,8 @@ public class KioskPoi {
     @JoinColumn(name = "building_id")
     private Building building;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "floor_id")
-    private Floor floor;
+    @Column
+    private Integer floorNo;
 
     @Embedded
     @AttributeOverride(name = "x", column = @Column(name = "position_x"))
@@ -115,8 +114,8 @@ public class KioskPoi {
         this.building = building;
     }
 
-    public void changeFloor(Floor floor) {
-        this.floor = floor;
+    public void changeFloorNo(Integer floorNo) {
+        this.floorNo = floorNo;
     }
 
     public void changePosition(Spatial position) {
@@ -167,7 +166,7 @@ public class KioskPoi {
                 .isKiosk(this.isKiosk)
                 .name(this.name)
                 .buildingId(this.building.getId())
-                .floorId(this.floor.getId())
+                .floorNo(this.floorNo)
                 .kioskCode(this.kioskCode)
                 .description(this.description)
                 .position(this.position)
@@ -183,8 +182,7 @@ public class KioskPoi {
                 .name(this.name)
                 .category(this.category)
                 .buildingId(this.building.getId())
-                .floorId(this.floor.getId())
-                .floorNm(this.floor.getName())
+                .floorNo(this.floorNo)
                 .phoneNumber(this.phoneNumber)
                 .logo(this.logo != null ? this.logo.getId() : null)
                 .logoFile(this.logo == null ? null : this.logo.toDto())
@@ -198,7 +196,7 @@ public class KioskPoi {
     public StorePoiBasicResponseDTO toStorePoiBasicResponseDTO() {
         return StorePoiBasicResponseDTO.builder()
                 .category(this.category)
-                .floorNm(this.floor.getName())
+                .floorNo(this.floorNo)
                 .phoneNumber(this.phoneNumber)
                 .logo(this.logo != null ? this.logo.getId() : null)
                 .logoFile(this.logo == null ? null : this.logo.toDto())
@@ -211,7 +209,7 @@ public class KioskPoi {
                 .name(this.name)
                 .isKiosk(this.isKiosk)
                 .buildingId(this.building.getId())
-                .floorId(this.floor.getId())
+                .floorNo(this.floorNo)
                 .scale(this.scale)
                 .rotation(this.rotation)
                 .position(this.position)

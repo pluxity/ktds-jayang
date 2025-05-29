@@ -3,7 +3,7 @@ class KioskPoi {
     #isKiosk;
     #name;
     #buildingId;
-    #floorId;
+    #floorNo;
     #description;
     #property;
     #store;
@@ -13,7 +13,7 @@ class KioskPoi {
         id,
         name,
         buildingId,
-        floorId,
+        floorNo,
         isKiosk,
         property,
         position,
@@ -25,7 +25,7 @@ class KioskPoi {
         this.#id = id;
         this.#name = name;
         this.#buildingId = buildingId;
-        this.#floorId = floorId;
+        this.#floorNo = floorNo;
         this.#isKiosk = isKiosk;
         this.position = position;
         this.rotation = rotation;
@@ -44,8 +44,8 @@ class KioskPoi {
     get buildingId() {
         return this.#buildingId;
     }
-    get floorId() {
-        return this.#floorId;
+    get floorNo() {
+        return this.#floorNo;
     }
     get property() {
         return this.#property;

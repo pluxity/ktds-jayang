@@ -9,6 +9,7 @@ import lombok.Builder;
 public record StorePoiBasicResponseDTO (
         KioskCategory category,
         String floorNm,
+        Integer floorNo,
         String phoneNumber,
         Long logo,
         FileInfoDTO logoFile

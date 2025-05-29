@@ -1,6 +1,20 @@
 (async function() {
 
     await BuildingManager.getStoreBuilding();
+    initRegisterBuildingBtn();
+    function initRegisterBuildingBtn() {
+        const registerBtn = document.getElementById('registerKioskBuilding');
+        const modifyBtn = document.getElementById('modifyKioskBuilding');
+        BuildingManager.getStoreBuilding().then(building => {
+            if (building) {
+                registerBtn.style.display = 'none';
+                modifyBtn.style.display = 'block';
+            } else {
+                registerBtn.style.display = 'block';
+                modifyBtn.style.display = 'none';
+            }
+        })
+    }
 
     const initializeStoreBuilding = async (onComplete) => {
         try {
@@ -18,9 +32,11 @@
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (storeBuilding) {
-                    const { buildingFile, floors } = storeBuilding;
+                    const { buildingFile } = storeBuilding;
                     const version = storeBuilding.getVersion();
                     const { directory } = buildingFile;
+
+                    const floors = await BuildingManager.getFloorsByHistoryVersion(version);
 
                     sbmDataArray = floors
                         .filter(floor => kioskSet.has(floor.name))
@@ -64,7 +80,7 @@
                 .filter(floor => kioskSet.has(floor.name))
                 .forEach((item) => {
                     const displayName = nameMap[item.name] || item.name;
-                    floorListOpt += `<option value='${item.id}'>${displayName}</option>`;
+                    floorListOpt += `<option value='${item.no}'>${displayName}</option>`;
                 });
 
             const floorNo = document.querySelector('#floorNo');
@@ -255,15 +271,15 @@
         updatePosition();
     }
 
-    function changeEventFloor(floorId, buildingId) {
-        if (floorId === '') {
+    function changeEventFloor(floorNo, buildingId) {
+        if (floorNo === '') {
             Px.Model.Visible.ShowAll();
         } else {
 
             Px.Model.Visible.HideAll();
 
-            const floor = BuildingManager.findStore().floors.find(
-                (floor) => floor.id === Number(floorId),
+            const floor = BuildingManager.findFloorsByHistory().find(
+                (floor) => floor.no === Number(floorNo),
             );
             Px.Model.Visible.Show(floor.id);
         }
@@ -287,7 +303,7 @@
                 .forEach(floor => {
                     const displayName = nameMap[floor.name] || floor.name;
                     selectEl.appendChild(
-                        new Option(displayName, floor.id)
+                        new Option(displayName, floor.no)
                     );
             })
         }
@@ -348,7 +364,6 @@
         });
     }
 
-
     document.getElementById("btnChangePw").addEventListener("click", submitPwChange);
 
     document.querySelector('#pwChangeModal').addEventListener('hide.bs.modal', function () {
@@ -357,6 +372,246 @@
             form.reset();
         }
     });
+
+    const kioskBuildingRegistModal = document.getElementById('kioskBuildingRegistModal');
+    kioskBuildingRegistModal.addEventListener('shown.bs.modal', () => {
+        document.getElementById('btnKioskBuildingRegist').disabled = false;
+        document.getElementById('btnKioskBuildingRegist').innerHTML = '등록';
+        document.getElementById('kioskBuildingRegistForm').reset();
+    });
+
+    // kioskBuilding
+    const btnKioskBuildingRegist = document.getElementById('btnKioskBuildingRegist');
+    btnKioskBuildingRegist.onclick = () => {
+        const form = document.getElementById('kioskBuildingRegistForm');
+        if (!validationForm(form)) return;
+
+        document.getElementById('btnKioskBuildingRegist').disabled = true;
+        document.getElementById('btnKioskBuildingRegist').innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading...';
+
+        const isIndoor = form.querySelector('input[name="isIndoor"]:checked').value;
+        const buildingType = (isIndoor === 'Y') ? 'indoor' : 'outdoor';
+        const version = getVersionString();
+
+        const formData = new FormData(form);
+        formData.set('buildingType', buildingType);
+
+        const fileFormData = new FormData();
+        fileFormData.set('file', formData.get('multipartFile'));
+        fileFormData.set('version', version);
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // 빌딩 파일 업로드
+        api.post('/buildings/files', fileFormData).then((res) => {
+            const {result: data} = res.data;
+            const param = {
+                buildingType: buildingType,
+                name: formData.get('name'),
+                code: formData.get('code'),
+                description: formData.get('description'),
+                fileInfoId: data.id,
+                isIndoor: isIndoor,
+                version: version
+                // floors
+            }
+            api.post('/buildings', param, {headers}).then(() => {
+                alertSwal('등록되었습니다.').then(() => {
+                    kioskBuildingRegistModal.querySelector('.btn-close').click();
+                    window.location.reload();
+                });
+            }).catch(() => {
+                document.getElementById('btnKioskBuildingRegist').disabled = false;
+                document.getElementById('btnKioskBuildingRegist').innerHTML = '등록';
+            })
+        }).catch(() => {
+            document.getElementById('btnKioskBuildingRegist').disabled = false;
+            document.getElementById('btnKioskBuildingRegist').innerHTML = '등록';
+        });
+    }
+
+    const getVersionString = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        return `v${year}${month}${day}_${hours}${minutes}${seconds}`;
+    }
+
+    const modifyModal = document.getElementById('kioskBuildingModifyModal');
+    modifyModal.addEventListener('show.bs.modal', event => {
+        const id = document.getElementById('buildingId').value;
+        const form = document.getElementById('kioskBuildingModifyForm');
+        document.getElementById('btnKioskBuildingModify').disabled = false;
+        document.getElementById('btnKioskBuildingModify').innerHTML = '수정';
+        form.querySelector('#modifyId').value = id;
+        form.reset();
+        let currentBuildingFileId = null;
+
+        if (id) {
+            Promise.all([
+                api.get(`/buildings/${id}`),
+                getHistoryList(id)
+            ]).then(([buildingRes, historyList]) => {
+                const {result: resultData} = buildingRes.data;
+                form.querySelector('#modifyName').value = resultData.name;
+                form.querySelector('#modifyCode').value = resultData.code;
+                if (resultData.isIndoor === 'Y') {
+                    form.querySelector('input[name="isIndoor"][value="Y"]').checked = true;
+                } else {
+                    form.querySelector('input[name="isIndoor"][value="N"]').checked = true;
+                }
+                form.querySelector('#modifyDescription').innerHTML = resultData.description;
+                currentBuildingFileId = resultData.buildingFile.id;
+
+                setBuildingVersionSelect(historyList, resultData.version);
+            });
+        }
+    });
+
+    // 수정폼 수정 처리
+    const btnKioskBuildingModify = document.getElementById('btnKioskBuildingModify');
+    btnKioskBuildingModify.onclick = () => {
+        const form = document.getElementById('kioskBuildingModifyForm');
+        if (!validationForm(form)) return;
+
+        document.getElementById('btnKioskBuildingModify').disabled = true;
+        document.getElementById('btnKioskBuildingModify').innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading...';
+
+        const formData = new FormData(form);
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        const buildingParam = {
+            buildingType: 'indoor',
+            code: document.getElementById('modifyCode').value,
+            name: formData.get('name'),
+            isIndoor: formData.get('isIndoor'),
+            description: formData.get('description'),
+            historyId: document.getElementById('kioskBuildingVersionSelect').value
+
+        }
+
+        api.put(`/buildings/${formData.get('id')}`, buildingParam, { headers })
+            .then(() => {
+                alertSwal('수정되었습니다.').then(()=> {
+                    document.querySelector('#kioskBuildingModifyModal .btn-close').click();
+                    window.location.reload();
+                });
+
+            })
+            .catch(() => {
+                document.getElementById('btnKioskBuildingModify').disabled = false;
+                document.getElementById('btnKioskBuildingModify').innerHTML = '수정';
+            });
+    };
+
+    function getHistoryList(id) {
+        return api.get(`/buildings/history/building/${id}`).then((res) => {
+            const {result: historyList} = res.data;
+            renderHistoryList(historyList);
+            return historyList;
+        });
+    }
+
+    function setBuildingVersionSelect(historyList, version) {
+        const select = document.getElementById('kioskBuildingVersionSelect');
+        select.innerHTML = ''; // 기존 옵션들 제거
+
+        historyList.forEach(history => {
+            const option = document.createElement('option');
+            option.value = history.historyId;
+            option.textContent = history.buildingVersion;
+            console.log("fileId = ",history.fileId);
+            if(history.buildingVersion === version) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    }
+
+    const renderHistoryList = (historyList) => {
+
+        const tbody = document.getElementById('historyListBody');
+        tbody.innerHTML = ''; // 기존 내용 초기화
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `
+            <th>도면 버전</th>
+            <th>도면 파일명</th>
+            <th>수정 내용</th>
+        `;
+        tbody.appendChild(headerRow);
+        if (historyList.length === 0) {
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">등록된 이력이 없습니다.</td>
+            </tr>
+        `;
+            return;
+        }
+        const select = document.getElementById('kioskBuildingVersionSelect');
+        historyList.forEach(history => {
+            console.log("history = ",history);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${history.buildingVersion || '-'}</td>
+            <td>${history.fileName || '-'}</td>
+            <td>${history.historyContent || '-'}</td>
+            <input type="hidden" id="historyId" value="${history.historyId}">
+        `;
+            tbody.appendChild(row);
+
+            if (!select.querySelector(`option[value="${history.historyId}"]`)) {
+                const option = document.createElement('option');
+                option.value = history.historyId;
+                option.textContent = history.buildingVersion || '-';
+                select.appendChild(option);
+            }
+        });
+    };
+
+    const buildingUploadBtn = document.getElementById('kioskBuildingUploadBtn');
+
+    buildingUploadBtn.onclick = () => {
+        const version = getVersionString();
+        const getHistoryContent = document.getElementById('kioskBuildingHistoryContent').value;
+        const uploadFile = document.getElementById('kioskBuildingUploadFile');
+        const getBuildingId = document.getElementById('modifyId').value;
+
+        const fileFormData = new FormData();
+        fileFormData.set('file', uploadFile.files[0]);
+        fileFormData.set('version', version);
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // history 파일 등록
+        api.post(`/buildings/${getBuildingId}/history/files`, fileFormData).then((res) => {
+            const {result: data} = res.data;
+            const param = {
+                buildingId: getBuildingId,
+                historyContent: getHistoryContent,
+                fileInfoId: data.id,
+                version: version
+            }
+            api.post('/buildings/history', param, {headers}).then(() => {
+                alertSwal('등록되었습니다.');
+                // history load
+                getHistoryList(getBuildingId);
+            })
+        })
+    }
 
     await initializeStoreBuilding();
 })();

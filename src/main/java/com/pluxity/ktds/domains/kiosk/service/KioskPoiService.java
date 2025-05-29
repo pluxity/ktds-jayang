@@ -115,7 +115,7 @@ public class KioskPoiService {
                     .rotation(kioskPoi.getRotation())
                     .scale(kioskPoi.getScale())
                     .buildingId(kioskPoi.getBuilding() != null ? kioskPoi.getBuilding().getId() : null)
-                    .floorId(kioskPoi.getFloor() != null ? kioskPoi.getFloor().getId() : null)
+                    .floorNo(kioskPoi.getFloorNo())
                     .build();
 
             Object detailDto;
@@ -168,7 +168,10 @@ public class KioskPoiService {
                     .build();
 
             updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-            updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+//            updateIfNotNull(dto.floorId(), poi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+            if (dto.floorNo() != null) {
+                poi.changeFloorNo(dto.floorNo());
+            }
             updateIfNotNull(dto.fileInfoId(), poi::changeLogo, fileInfoRepository, ErrorCode.NOT_FOUND_FILE);
 
             try{
@@ -222,13 +225,11 @@ public class KioskPoiService {
     public Long saveKioskPoi(CreateKioskPoiDTO dto) {
         Building building = buildingRepository.findById(dto.buildingId()).orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
 
-        Floor floor = floorRepository.findById(dto.floorId()).orElseThrow(() -> new CustomException(NOT_FOUND_FLOOR));
-
         KioskPoi kioskPoi = KioskPoi.builder().name(dto.name()).kioskCode(dto.kioskCode()).description(dto.description()).isKiosk(dto.isKiosk()).build();
 
         // 연관관계 설정
         kioskPoi.changeBuilding(building);
-        kioskPoi.changeFloor(floor);
+        kioskPoi.changeFloorNo(dto.floorNo());
 
         return kioskPoiRepository.save(kioskPoi).getId();
     }
@@ -239,8 +240,12 @@ public class KioskPoiService {
         KioskPoi kioskPoi = getKioskPoi(id);
         kioskPoi.storePoiUpdate(dto.name(), dto.category(), dto.phoneNumber());
 
+        if (dto.floorNo() != null) {
+            kioskPoi.changeFloorNo(dto.floorNo());
+        }
+
         updateIfNotNull(dto.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+//        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
 
         if (dto.fileInfoId() != null) {
             FileInfo logoFile = fileIoService.findById(dto.fileInfoId());
@@ -293,7 +298,10 @@ public class KioskPoiService {
 
         kioskPoi.kioskPoiUpdate(dto.name(), dto.kioskCode(), dto.description());
 
-        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+        if (dto.floorNo() != null) {
+            kioskPoi.changeFloorNo(dto.floorNo());
+        }
+//        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
     }
 
     private <T, ID> void updateIfNotNull(final ID id, final Consumer<T> setter, final JpaRepository<T, ID> repository, final ErrorCode errorCode) {
@@ -341,7 +349,7 @@ public class KioskPoiService {
     }
 
     @Transactional
-    public void batchRegisterKioskPoi(Long floorId, Boolean isKiosk, MultipartFile file) {
+    public void batchRegisterKioskPoi(Integer floorNo, Boolean isKiosk, MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
             String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -357,7 +365,9 @@ public class KioskPoiService {
 
             List<KioskPoi> result = new ArrayList<>();
 
-            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
+            Building building = buildingRepository.findByCode("store")
+                    .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING));
+//            Floor floor = floorRepository.findById(floorId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FLOOR));
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> kioskPoiMap = createMapByRows(rows, headerLength, i);
                 kioskPoiRepository.findByName(kioskPoiMap.get("POI명"))
@@ -370,8 +380,8 @@ public class KioskPoiService {
                             .isKiosk(true)
                             .name(kioskPoiMap.get("POI명"))
                             .kioskCode(kioskPoiMap.get("장비코드"))
-                            .floorId(floor.getId())
-                            .buildingId(floor.getBuilding().getId())
+                            .floorNo(floorNo)
+                            .buildingId(building.getId())
                             .description(kioskPoiMap.get("비고"))
                             .build();
 
@@ -383,15 +393,18 @@ public class KioskPoiService {
                             .build();
 
                     updateIfNotNull(kioskPoiDTO.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-                    updateIfNotNull(kioskPoiDTO.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
-
+//                    updateIfNotNull(kioskPoiDTO.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
+                    if (kioskPoiDTO.floorNo() != null) {
+                        kioskPoi.changeFloorNo(kioskPoiDTO.floorNo());
+                    }
                     result.add(kioskPoi);
                 } else {
+                    System.out.println("floorNo : " + floorNo);
                     CreateStorePoiDTO storePoiDTO = CreateStorePoiDTO.builder()
                             .isKiosk(false)
                             .name(kioskPoiMap.get("POI명"))
-                            .floorId(floor.getId())
-                            .buildingId(floor.getBuilding().getId())
+                            .floorNo(floorNo)
+                            .buildingId(building.getId())
                             .phoneNumber(kioskPoiMap.get("전화번호"))
                             .category(KioskCategory.fromValue(kioskPoiMap.get("업종")))
                             .build();
@@ -404,7 +417,9 @@ public class KioskPoiService {
                             .build();
 
                     changeField(storePoiDTO, kioskPoi);
-
+                    if (storePoiDTO.floorNo() != null) {
+                        kioskPoi.changeFloorNo(storePoiDTO.floorNo());
+                    }
                     result.add(kioskPoi);
                 }
             }
@@ -446,6 +461,5 @@ public class KioskPoiService {
 
     private void changeField(CreateStorePoiDTO dto, KioskPoi kioskPoi) {
         updateIfNotNull(dto.buildingId(), kioskPoi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
-        updateIfNotNull(dto.floorId(), kioskPoi::changeFloor, floorRepository, ErrorCode.NOT_FOUND_FLOOR);
     }
 }

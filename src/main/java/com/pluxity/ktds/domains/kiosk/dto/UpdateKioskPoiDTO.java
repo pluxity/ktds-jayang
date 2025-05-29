@@ -16,7 +16,7 @@ public record UpdateKioskPoiDTO(
         @NotNull(message = "빌딩은 필수 입니다.")
         Long buildingId,
         @NotNull(message = "층은 필수 입니다.")
-        Long floorId,
+        Integer floorNo,
         String description
 ) {
 }

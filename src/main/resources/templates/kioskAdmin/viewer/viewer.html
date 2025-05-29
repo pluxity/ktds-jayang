@@ -84,11 +84,21 @@
                     </div>
                     <hr class="hr-margin">
                     <div class="poi-register-buttons">
-                        <button type="button" style="width: 50%; height: 3rem" class="btn btn-secondary btn-md"
+                        <button type="button" style="width: 30%; height: 3rem" class="btn btn-secondary btn-md"
                                 id="poiRegisterBtn">POI 등록
                         </button>
-                        <button type="button" style="width: 50%; height: 3rem" class="btn btn-success btn-md"
+                        <button type="button" style="width: 30%; height: 3rem" class="btn btn-success btn-md"
                                 id="poiBatchRegisterBtn">POI 일괄 등록
+                        </button>
+                        <button type="button" style="width: 30%; height: 3rem" class="btn btn-success btn-md"
+                                id="registerKioskBuilding"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kioskBuildingRegistModal">도면 등록
+                        </button>
+                        <button type="button" style="width: 30%; height: 3rem;display: none" class="btn btn-success btn-md"
+                                id="modifyKioskBuilding"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kioskBuildingModifyModal">도면 수정
                         </button>
                     </div>
                 </div>
@@ -625,6 +635,187 @@
                 <div class="modal-footer pw-modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                     <button type="button" class="btn btn-primary" id="btnChangePw">수정</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- kiosk 도면 등록 -->
+    <div class="modal fade" id="kioskBuildingRegistModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">도면 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="kioskBuildingRegistForm" id="kioskBuildingRegistForm" autocomplete="off">
+                        <fieldset>
+                            <table class="table table-bordered ">
+                                <colgroup>
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>도면명</th>
+                                    <td>
+                                        <input type="text" name="name" id="registName" class="form-control input-sm" maxlength="20" title="도면명" required data-rules="required" data-tagname="도면명">
+                                    </td>
+                                    <th>도면코드</th>
+                                    <td>
+                                        <input type="text" name="code" value="store" id="registCode" class="form-control input-sm" maxlength="36" title="도면코드" required data-rules="required" data-tagname="도면코드">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면파일</th>
+                                    <td colspan="3">
+                                        <input type="file" name="multipartFile" id="registMultipartFile" class="form-control input-sm" title="도면파일" required data-rules="required+buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>구분</th>
+                                    <td colspan="3">
+                                        <label style="margin-right: 20px">
+                                            <input type="radio" name="isIndoor" value="Y" checked required>
+                                            실내
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="isIndoor" value="N" required>
+                                            실외
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면설명</th>
+                                    <td colspan="3">
+                                        <textarea name="description" id="registDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255" data-tagname="도면설명"></textarea>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnKioskBuildingRegist">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="kioskBuildingModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">도면 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="kioskBuildingModifyForm" id="kioskBuildingModifyForm" method="post" enctype="multipart/form-data" autocomplete="off">
+                        <fieldset>
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>도면명</th>
+                                    <td>
+                                        <input type="hidden" name="id" id="modifyId">
+                                        <input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="30" title="도면명" required data-rules="required" data-tagname="도면명">
+                                    </td>
+                                    <th>도면코드</th>
+                                    <td>
+                                        <input type="text" name="code" id="modifyCode" class="form-control input-sm" maxlength="36" title="도면코드" required data-rules="required" data-tagname="도면코드" disabled>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>구분</th>
+                                    <td colspan="3">
+                                        <label style="margin-right: 20px">
+                                            <input type="radio" name="isIndoor" value="Y" required>
+                                            실내
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="isIndoor" value="N" required>
+                                            실외
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면설명</th>
+                                    <td colspan="3">
+                                        <textarea name="description" id="modifyDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255"></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면 버전</th>
+                                    <td colspan="3">
+                                        <select id="kioskBuildingVersionSelect"></select>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <div class="modal-footer" style="border-top: 0px">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="button" class="btn btn-primary" id="btnKioskBuildingModify">수정</button>
+                        </div>
+<!--                        <button type="button" class="btn btn-primary" id="btnKioskBuildingModify">수정</button>-->
+                    </form>
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:20%">
+                                <col style="width:60%">
+                            </colgroup>
+                            <tbody>
+                            <tr style="border-width: 1px">
+                                <th>도면수정 내용</th>
+                                <td>
+                                    <input type="text" id="kioskBuildingHistoryContent" >
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>도면파일</th>
+                                <td>
+                                    <div class="d-flex">
+                                        <input type="file" name="multipartFile" id="kioskBuildingUploadFile" class="form-control input-sm" title="도면파일" data-rules="buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <button id="kioskBuildingUploadBtn" class="btn btn-success">업로드</button>
+                                </td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:15%">
+                                <col style="width:15%">
+                                <col style="width:15%">
+                            </colgroup>
+                            <tbody id="historyListBody">
+
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+
+                </div>
+                <div class="modal-footer">
+
                 </div>
             </div>
         </div>

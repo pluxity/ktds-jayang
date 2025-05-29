@@ -18,8 +18,8 @@ public record UpdateStorePoiDTO(
         @NotNull(message = "빌딩은 필수 입니다.")
         Long buildingId,
         @NotNull(message = "층은 필수 입니다.")
-        Long floorId,
         Long fileInfoId,
+        Integer floorNo,
         String phoneNumber,
         List<UpdateBannerDTO> banners
 ) {}

@@ -143,16 +143,17 @@
         storeBuilding.floors
             .filter(floor => kioskSet.has(floor.name))
             .forEach((floor, index) => {
+                console.log("floor : ", floor);
                 const li = document.createElement('li');
                 li.setAttribute('role', 'tab');
-                li.id = floor.id;
+                li.id = floor.no;
 
                 const button = document.createElement('button');
                 button.type = 'button';
                 const displayName = nameMap[floor.name] || floor.name;
                 button.textContent = displayName;
 
-                if (floor.id === kioskPoi.floorId) {
+                if (floor.no === kioskPoi.floorNo) {
                     button.classList.add('active');
                     kioskInfo.textContent = displayName;
                 }

@@ -137,13 +137,16 @@ public class EventService {
         floorNm = (floorNm != null && !floorNm.isEmpty()) ? floorNm : null;
         deviceType = (deviceType != null && !deviceType.isEmpty()) ? deviceType : null;
         searchValue = (searchValue != null && !searchValue.isEmpty()) ? searchValue : null;
+//        String finalSearchValue = (searchValue != null && !searchValue.isEmpty()) ? searchValue : null;
 
         if (searchValue != null) {
+
             AlarmStatus status = AlarmStatus.fromLabel(searchValue);
             if (status != null) {
                 searchValue = status.name();
             }
         }
+
 
         return eventRepository.findAlarms(startDate, endDate, buildingNm, floorNm, deviceType, searchValue).stream()
                 .map(Alarm::toResponseDTO)

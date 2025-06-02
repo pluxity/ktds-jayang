@@ -11,7 +11,7 @@ spring:
       on-profile: local
   devtools:
     livereload:
-      enabled: false
+      enabled: true
     restart:
       enabled: false
   threads:
@@ -22,24 +22,26 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
     password: 1234
+
+    secondary:
+#      url: jdbc:sqlserver://10.107.10.30:1433;databaseName=Parking
+      url: "jdbc:sqlserver://192.168.4.95:1433;databaseName=Parking;encrypt=true;trustServerCertificate=true"
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      username: Digital_tw
+      password: Digital_tw
   jpa:
     hibernate:
       ddl-auto: update
-      database-platform: org.hibernate.dialect.MariaDBDialect
+    database-platform: org.hibernate.dialect.MariaDBDialect
 #    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: true
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      timeout: 1000
 rabbitmq:
-  host: localhost
+  host: 192.168.4.36
   port: 5672
-  username: guest
-  password: guest
+  username: pluxity
+  password: pluxity123
   queue:
     alarm-was1: alarm.queue.was1
     alarm-was2: alarm.queue.was2
@@ -67,3 +69,14 @@ logging:
 
 root-path:
   upload: C:/Dev/Upload
+  files: C:/Dev/files
+
+cctv:
+  ws-relay-url: ws://127.0.0.1
+  ws-relay-port: 4001
+  http-relay-url: http://127.0.0.1
+  http-relay-port: 4002
+  LG-server-ip: 10.20.11.231
+  LG-server-Port: 9100
+  LG-live-port: 555
+  LG-playback-port: 554

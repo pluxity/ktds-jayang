@@ -99,6 +99,13 @@
                         if (onComplete) onComplete();
                         if(storeBuilding?.camera3d)
                             Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
+
+                        KioskPoiManager.findAll()
+                            .forEach(poi => {
+                                if (poi.isKiosk && poi.id !== kioskPoi.id) {
+                                    Px.Poi.SetTextSize(poi.id, 1);
+                                }
+                            });
                     }
                 });
             });

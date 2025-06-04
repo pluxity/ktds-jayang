@@ -84,6 +84,10 @@ class KioskPoi {
         Px.Poi.Remove(this.id, onComplete);
     }
 
+    setName(name) {
+        this.#name = name;
+    }
+
 
     get store() {
         return this.#store;

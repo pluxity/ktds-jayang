@@ -2,6 +2,7 @@ const KioskPoiManager = (() => {
 
     let kioskPoiList = [];
     let kioskPoiDetailList = [];
+    let currentKioskPoi = null;
 
     const dtoToModel = (kioskPoiDto) => {
         const { id, name, buildingId, floorNo, isKiosk, position, rotation, scale, store, kiosk } = kioskPoiDto;
@@ -44,7 +45,8 @@ const KioskPoiManager = (() => {
         return new Promise((resolve) => {
             api.get(`/kiosk/code/${code}`).then((result) => {
                 const { result : data } = result.data;
-                resolve(data);
+                currentKioskPoi = data;
+                resolve(currentKioskPoi);
             })
         })
     }
@@ -113,6 +115,9 @@ const KioskPoiManager = (() => {
         kioskPoiList.forEach((kioskPoi) => {
         if (kioskPoi.position === null) {
             return;
+        }
+        if(currentKioskPoi && kioskPoi.id === currentKioskPoi.id){
+            kioskPoi.setName('현위치');
         }
         poiData.push(kioskPoi.poiOptions);
         });

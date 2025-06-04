@@ -885,6 +885,7 @@ html {
     border-radius: 50px;
   }
   .kiosk-list {
+    padding: 20.5rem 12.5rem 0 12.5rem;
     height: calc(100% - 22.5rem);
   }
   .kiosk-list__info {

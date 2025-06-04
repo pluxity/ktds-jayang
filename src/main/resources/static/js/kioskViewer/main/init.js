@@ -180,10 +180,23 @@
 
                 Px.Model.Visible.HideAll();
                 Px.Model.Visible.Show(Number(floor.id));
-                Px.Camera.MoveToObject(Number(floor.id), 50, 1);
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const kioskCode = urlParams.get('kioskCode');
+                const kioskPoi = KioskPoiManager.getKioskPoiByCode(kioskCode);
+
+                Px.Camera.MoveToPoi({
+                    id: kioskPoi.id,
+                    isAnimation: true,
+                    duration: 500,
+                    distanceOffset: 500
+                });
+
+                // Px.Camera.MoveToObject(Number(floor.id), 50, 1);
                 Px.Poi.HideAll();
                 // Px.Poi.ShowByProperty("floorId", Number(floor.id));
                 Px.Poi.ShowByProperty("floorNo", Number(floorNo));
+
             });
         });
     };
@@ -218,7 +231,7 @@ const Init = (function () {
             id: kioskPoi.id,
             isAnimation: true,
             duration: 500,
-            distanceOffset: 300
+            distanceOffset: 500
         });
     }
 

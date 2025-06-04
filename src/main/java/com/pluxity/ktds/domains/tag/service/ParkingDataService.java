@@ -13,21 +13,13 @@ import java.util.Map;
 public class ParkingDataService {
 
     private final JdbcTemplate secondaryJdbcTemplate;
+    private static final String COLUMN_LIST =
+            "parkingLotName, parkingLotId, deviceId, deviceName, inoutType, gateDatetime, carNo, inoutCarId, parkingFee, regularType";
+    private static final String BASE_QUERY = "SELECT " + COLUMN_LIST + " FROM dbo.INOUT";
+
 
     public List<Map<String, Object>> getAllColumn() {
-        String sql = ""
-                + "SELECT parkingLotName     \n"
-                + "     , parkingLotId       \n"
-                + "     , deviceId           \n"
-                + "     , deviceName         \n"
-                + "     , inoutType          \n"
-                + "     , gateDatetime       \n"
-                + "     , carNo              \n"
-                + "     , inoutCarId         \n"
-                + "     , parkingFee         \n"
-                + "     , regularType        \n"
-                + "FROM dbo.INOUT            \n";
-        return secondaryJdbcTemplate.queryForList(sql);
+        return secondaryJdbcTemplate.queryForList(BASE_QUERY);
     }
 
     public List<Map<String, Object>> searchInput(
@@ -41,18 +33,8 @@ public class ParkingDataService {
             String parkingLotName,
             String deviceName
     ) {
-        String baseSql = ""
-                + "SELECT parkingLotName \n"
-                + "     , parkingLotId   \n"
-                + "     , deviceId       \n"
-                + "     , deviceName     \n"
-                + "     , inoutType      \n"
-                + "     , gateDatetime   \n"
-                + "     , carNo          \n"
-                + "     , inoutCarId     \n"
-                + "     , parkingFee     \n"
-                + "     , regularType    \n"
-                + "FROM dbo.INOUT";
+
+        StringBuilder sql = new StringBuilder(BASE_QUERY);
 
         List<String> conditions = new ArrayList<>();
         List<Object> params = new ArrayList<>();
@@ -91,11 +73,10 @@ public class ParkingDataService {
             params.add("%" + deviceName + "%");
         }
 
-        String whereClause = conditions.isEmpty()
-                ? ""
-                : " WHERE " + String.join(" AND ", conditions);
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
 
-        String finalSql = baseSql + whereClause;
-        return secondaryJdbcTemplate.queryForList(finalSql, params.toArray());
+        return secondaryJdbcTemplate.queryForList(sql.toString(), params.toArray());
     }
 }

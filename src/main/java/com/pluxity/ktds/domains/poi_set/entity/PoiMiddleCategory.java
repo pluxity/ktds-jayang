@@ -40,7 +40,7 @@ public class PoiMiddleCategory {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "poi_category_icon_set",
-            joinColumns = @JoinColumn(name = "poi_category_id"),
+            joinColumns = @JoinColumn(name = "poi_middle_category_id"),
             inverseJoinColumns = @JoinColumn(name = "icon_set_id")
     )
     private final List<IconSet> iconSets = new ArrayList<>();

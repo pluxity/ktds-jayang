@@ -9,14 +9,20 @@ import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
+import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,6 +36,8 @@ public class IconSetService {
 
     private final IconSetRepository repository;
     private final PoiCategoryRepository poiCategoryRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public IconSetResponseDTO findById(Long id) {
 
@@ -91,12 +99,24 @@ public class IconSetService {
 
     @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+        try{
+            repository.deleteById(id);
+            entityManager.flush();
+        }catch (ConstraintViolationException e){
+            throw new CustomException(ErrorCode.EXIST_CATEGORY_CONTAINING_ICON_SET);
+        }
+
     }
 
     @Transactional
     public void deleteAllById(@NotNull List<Long> ids) {
-        repository.deleteAllById(ids);
+        try{
+            repository.deleteAllById(ids);
+            entityManager.flush();
+        }catch (ConstraintViolationException e) {
+            throw new CustomException(ErrorCode.EXIST_CATEGORY_CONTAINING_ICON_SET);
+        }
+
     }
 
     private void updateIcons(Long iconFileId, Consumer<FileInfo> updater) {

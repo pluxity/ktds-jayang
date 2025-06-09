@@ -175,7 +175,7 @@ public class PoiService {
             poi.getPoiCctvs().addAll(cctvEntities);
         }
         Poi savedPoi = poiRepository.save(poi);
-        if (dto.tagNames() != null) {
+        if (!dto.tagNames().isEmpty()) {
             tagClientService.addTags(dto.tagNames());
         }
 

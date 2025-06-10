@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body th:fragment="script">
+<script th:inline="javascript">
+    const ACTIVE_PROFILES = [[${@environment.getProperty('spring.profiles.active')}]];
+    const CONTEXT_PATH = /*[[@{/}]]*/ '';
+</script>
+<script th:src="@{/static/js/lib/bootstrap/js/bootstrap.min.js}"></script>
+<script th:src="@{/static/js/lib/bootstrap/js/virtual-select.min.js}"></script>
+<script th:src="@{/static/js/lib/swal/sweetalert2.all.js}"></script>
+<script th:src="@{/static/js/lib/axios/axios.min.js}"></script>
+<script th:src="@{/static/js/lib/axios/axios.interceptor.js}" ></script>
+<script th:src="@{/static/js/lib/pluxity/Px.Engine.js}"></script>
+<script th:src="@{/static/js/lib/gridjs/gridjs.umd.js}"></script>
+<script th:src="@{/static/js/lib/gridjs/selection.umd.js}"></script>
+<script th:src="@{/static/js/admin/gridjs/gridjsHandler.js}"></script>
+<script th:src="@{/static/js/common/common.js}"></script>
+<script th:src="@{/static/js/common/aside.js}"></script>
+<script th:src="@{/static/js/common/customSwal.js}"></script>
+<script th:src="@{/static/js/common/validation.js}"></script>
+<script th:src="@{/static/js/lib/tagify/tagify.min.js}"></script>
+<script th:src="@{/static/js/admin/tagify/tagifyHandler.js}"></script>
+<script th:src="@{/static/js/map/cctv/plux-live-worker.js}"></script>
+<script th:src="@{/static/js/map/cctv/plux-playback-worker.js}"></script>
+<script th:src="@{/static/js/map/cctv/plux-player.js}"></script>
+<script th:src="@{/static/js/admin/sidebarToggle.js}"></script>
+</body>
+</html>

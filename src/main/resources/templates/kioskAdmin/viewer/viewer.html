@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{kioskAdmin/fragments/head :: head}">
+</head>
+
+<body>
+<div class="main" id="wrapper" style="display: flex; flex-direction: column; height: 100%;">
+    <nav th:replace="~{kioskAdmin/fragments/navbar :: nav}"></nav>
+    <div style="display: flex; flex: 1; overflow: hidden;">
+        <!-- Sidebar -->
+        <div class="viewer-sidebar" style="height: 100%; width: 30rem">
+            <ul class="nav nav-tabs d-flex" style="margin-bottom:5px;" role="tablist">
+                <li class="nav-item" role="presentation" style="flex: 1">
+                    <a class="nav-link active txt-center">POI관리</a>
+                </li>
+            </ul>
+            <div class="tab-content"
+                 style="padding:5px; display: flex; width: 100%;height: 100%;padding-bottom: 50px;position: relative;">
+                <input type="hidden" name="mapNo" id="buildingId">
+                <input type="hidden" name="poiListTabType" id="poiListTabType" value="0">
+                <div class="tab-pane fade show active" name="poi-tab" style="width: 100%">
+                    <ul class="nav nav-pills nav-fill">
+                        <li class="nav-item" style="width: 33.33%">
+                            <div class="nav-link active poi-position" data-tab-type="0" data-poi-position="Y" id="poiAllocate"
+                            >배치
+                            </div>
+                        </li>
+                        <li class="nav-item" style="width: 33.33%">
+                            <div class="nav-link poi-position" data-tab-type="1" data-poi-position="N" id="poiUnAllocateByFloor"
+                            >미배치(층)
+                            </div>
+                        </li>
+                        <li class="nav-item" style="width: 33.33%">
+                            <div class="nav-link poi-position" data-tab-type="2" data-poi-position="N" id="poiUnAllocate"
+                            >미배치(전체)
+                            </div>
+                        </li>
+                    </ul>
+                    <hr class="mg7070">
+                    <form name="schFrm" id="schFrm" method="post">
+                        <input type="hidden" name="pageSize" value="10">
+                        <input type="hidden" name="page" value="1">
+                        <div class="row">
+                            <div class="col-md-12 d-flex gap-2">
+                                <select class="form-select input-sm" id="leftFloorSelect">
+                                    <option value="">층 전체</option>
+                                </select>
+                                <select class="form-select input-sm" id="leftPoiCategorySelect">
+                                    <option value="">분류 전체</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group hr-margin">
+                            <input type="text" name="searchKeyword" id="searchKeyword"
+                                   class="form-control text-primary border-primary small" placeholder="POI 이름을 입력하세요.">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" id="searchBtn">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="leftPoiList" style="height: 33rem">
+                        <table class="table">
+                            <colgroup>
+                                <col style="width:85%">
+                                <col style="width:15%">
+                            </colgroup>
+                            <tbody id="poiInfoList">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="txt-center">
+                        <ul class="paging-list pagination">
+                        </ul>
+                        <div class="pagination__wrapper">
+                            <section class="pagination__items" style="display: flex; align-items: center; gap: 10px;">
+                                <button class="pagination__navigate-btn" onclick="prevPage()">이전</button>
+                                <ul class="pagination__pages pagination" style="margin: 0;">
+                                </ul>
+                                <button class="pagination__navigate-btn" onclick="nextPage()">다음</button>
+                            </section>
+                        </div>
+                    </div>
+                    <hr class="hr-margin">
+                    <div class="poi-register-buttons">
+                        <button type="button" style="width: 30%; height: 3rem" class="btn btn-secondary btn-md"
+                                id="poiRegisterBtn">POI 등록
+                        </button>
+                        <button type="button" style="width: 30%; height: 3rem" class="btn btn-success btn-md"
+                                id="poiBatchRegisterBtn">POI 일괄 등록
+                        </button>
+                        <button type="button" style="width: 30%; height: 3rem" class="btn btn-success btn-md"
+                                id="registerKioskBuilding"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kioskBuildingRegistModal">도면 등록
+                        </button>
+                        <button type="button" style="width: 30%; height: 3rem;display: none" class="btn btn-success btn-md"
+                                id="modifyKioskBuilding"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kioskBuildingModifyModal">도면 수정
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Sidebar -->
+        <div id="content-wrapper">
+            <div class="container-fluid" style="overflow-x:hidden; overflow-y: hidden">
+                <div id="webGLContainer">
+                </div>
+            </div>
+
+            <div id="kioskCamPosToolbar" class="active ">
+                <div id="camPosTool" class="rounded">
+                    <button type="button" class="btn btn-dark btn-sm camPosTool" title="화면설정" data-btn-type="camera3d">
+                        3D 화면 설정
+                    </button>
+                </div>
+            </div>
+
+            <!-- 화면설정 툴바 -->
+            <div id="buildingCtrlToolBar" class="active" style="right: 1rem; top: 5rem">
+                <div id="buildingCtrlTool" class="rounded">
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 확대"
+                            data-btn-type="in">
+                        <i class="fas fa-search-plus"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 축소"
+                            data-btn-type="out">
+                        <i class="fas fa-search-minus"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(상)"
+                            data-btn-type="up">
+                        <i class="fas fa-arrow-up"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도 (하)"
+                            data-btn-type="down">
+                        <i class="fas fa-arrow-down"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(좌)"
+                            data-btn-type="left">
+                        <i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(우)"
+                            data-btn-type="right">
+                        <i class="fas fa-arrow-right"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="지도(중앙)"
+                            data-btn-type="center">
+                        <i class="fas fa-expand"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm i-tag btnBuildingTool" title="1인칭시점"
+                            data-btn-type="viewLook">
+                        <i class="fas fa-street-view"></i></button>
+                    <button type="button" class="btn btn-dark btn-sm btnBuildingTool" title="POI이동"
+                            data-btn-type="move">POI 이동
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="floorSelect">
+            <select name="floorNo" id="floorNo" class="form-select input-sm">
+            </select>
+        </div>
+        <div id="poiSelect">
+        </div>
+    </div>
+
+    <!-- 일괄등록 폼 -->
+    <div class="modal fade" id="poiBatchRegisterModal" tabindex="-1" aria-labelledby="poiBatchRegisterModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poiBatchRegisterModalLabel">일괄 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form name="" id="poiBatchRegisterForm" autocomplete="off">
+                        <fieldset>
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width:15%">
+                                    <col style="width:40%">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>층 선택</th>
+                                    <td colspan="3">
+                                        <select name="floorId" id="registerBatchFloor" class="form-select" title="층 선택" required data-rules="required" data-tagname="층">
+                                            <option class="selected" value="">층 선택</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>일괄등록 파일</th>
+                                    <td colspan="3">
+                                        <input type="file" name="batchRegisterFile" id="kioskBatchRegisterFile" class="form-control input-sm" title="POI 일괄등록 파일" required data-rules="required,excelFile" data-tagname="POI 일괄등록 파일" data-ext="xlsx,xls,csv" accept=".xlsx,.xls,.csv">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-success" id="kioskSampleFileBtn">샘플파일 다운로드</button>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-primary" id="kioskPoiBatchRegisterBtn">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="poiRegisterModal" tabindex="-1" role="dialog" aria-labelledby="poiRegisterModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poiRegisterModalLabel">POI 속성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="poiRegisterForm" autocomplete="off">
+                        <div class="form-row type-row">
+                            <div class="form-label">유형</div>
+                            <label><input type="radio" name="type" value="store"> 상가</label>
+                            <label><input type="radio" name="type" value="kiosk"> 키오스크</label>
+                        </div>
+
+                        <!-- 상가 폼 -->
+                        <div id="registerStoreForm">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>POI명<span class="required">*</span></th>
+                                    <td><input type="text" id="registerStoreName" name="storeName" required></td>
+                                    <th>업종<span class="required">*</span></th>
+                                    <td>
+                                        <select id="registerBusiness" name="business" required>
+                                            <option value="">업종 선택</option>
+                                            <option value="FOOD">F&B</option>
+                                            <option value="LIFE">라이프스타일</option>
+                                            <option value="FASHION">패션</option>
+                                            <option value="SERVICE">편의/서비스</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>층선택<span class="required">*</span></th>
+                                    <td>
+                                        <select id="registerStoreFloor" name="storeFloor">
+                                            <option>층 선택</option>
+                                        </select>
+                                    </td>
+                                    <th>전화번호</th>
+                                    <td><input type="text" id="registerPhone" name="phone"></td>
+                                </tr>
+                                <tr>
+                                    <th>로고</th>
+                                    <td colspan="3">
+                                        <div class="file-upload">
+                                            <input type="file" id="registerLogoFile" name="logoFile" style="display: none;">
+                                            <button class="file-select-btn">파일 선택
+                                            </button>
+                                            <span class="file-name"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </div>
+                                        <p class="notice">※ 로고는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 250*150</p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="banner-section">
+                                <h3>배너</h3>
+                                <table class="banner-table">
+                                    <thead>
+                                    <tr>
+                                        <th>기간</th>
+                                        <th>파일</th>
+                                        <th>순서</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="registerBannerTbody">
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="1">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="2">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="3">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="4">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <!-- 추가 배너 행들 -->
+                                    </tbody>
+                                </table>
+                                <p class="notice">※ 배너는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 200*300</p>
+                            </div>
+                        </div>
+
+                        <!-- 키오스크 폼 -->
+                        <div id="registerKioskForm" style="display: none;">
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-label">POI명<span class="required">*</span></div>
+                                        <input type="text" id="registerKioskName" name="kioskName" >
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-label">장비코드<span class="required">*</span></div>
+                                        <input type="text" id="registerEquipmentCode" name="equipmentCode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-label">층선택<span class="required">*</span></div>
+                                        <select id="registerKioskFloor" name="kioskFloor">
+                                            <option>층 선택</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-label">비고</div>
+                                        <input type="text" id="registerRemarks" name="remarks">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-cancel" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnPoiRegister">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modify form -->
+    <div class="modal fade" id="poiModifyModal" tabindex="-1" role="dialog" aria-labelledby="poiModifyModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poiModifyModalLabel">POI 속성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="poiModifyForm" autocomplete="off">
+                        <div class="form-row type-row">
+                            <div class="form-label">유형</div>
+                            <label><input type="radio" name="type" value="store"> 상가</label>
+                            <label><input type="radio" name="type" value="kiosk"> 키오스크</label>
+                        </div>
+
+                        <!-- 상가 폼 -->
+                        <div id="modifyStoreForm">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>POI명<span class="required">*</span></th>
+                                    <td><input type="text" id="modifyStoreName" name="ModifyStoreName" required></td>
+                                    <th>업종<span class="required">*</span></th>
+                                    <td>
+                                        <select id="modifyBusiness" name="business" required>
+                                            <option value="">업종 선택</option>
+                                            <option value="FOOD">F&B</option>
+                                            <option value="LIFE">라이프스타일</option>
+                                            <option value="FASHION">패션</option>
+                                            <option value="SERVICE">편의/서비스</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>층선택<span class="required">*</span></th>
+                                    <td>
+                                        <select id="modifyStoreFloor" name="storeFloor">
+                                            <option value="">층 선택</option>
+                                        </select>
+                                    </td>
+                                    <th>전화번호</th>
+                                    <td><input type="text" id="modifyPhone" name="phone"></td>
+                                </tr>
+                                <tr>
+                                    <th>로고</th>
+                                    <td colspan="3">
+                                        <div class="file-upload">
+                                            <input type="file" id="modifyLogoFile" name="logoFile" style="display: none;">
+                                            <button class="file-select-btn">파일 선택
+                                            </button>
+                                            <span class="file-name"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </div>
+                                        <p class="notice">※ 로고는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 250*150</p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="banner-section">
+                                <h3>배너</h3>
+                                <table class="banner-table">
+                                    <thead>
+                                    <tr>
+                                        <th>기간</th>
+                                        <th>파일</th>
+                                        <th>순서</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="modifyBannerTbody">
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="1">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="2">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="3">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="banner-date start-date" name="startDate"> ~ <input
+                                                type="date" class="banner-date end-date" name="endDate">
+                                            <input type="checkbox" class="banner-checkbox" name="always"> 상시
+                                            <input type="hidden" name="priority" value="4">
+                                        </td>
+                                        <td>
+                                            <input type="file" class="banner-file" name="bannerFile"
+                                                   style="display: none;">
+                                            <button class="file-select-btn">파일 선택</button>
+                                            <span class="selected-file"></span>
+                                            <span class="file-remove"
+                                                  style="cursor: pointer; margin-left: 5px; display: none;">×</span>
+                                        </td>
+                                        <td>
+                                            <button class="order-btn up-btn">▲</button>
+                                            <button class="order-btn down-btn">▼</button>
+                                        </td>
+                                    </tr>
+                                    <!-- 추가 배너 행들 -->
+                                    </tbody>
+                                </table>
+                                <p class="notice">※ 배너는 10MB 이하의 이미지만 첨부할 수 있습니다. 권장 사이즈 200*300</p>
+                            </div>
+                        </div>
+
+                        <!-- 키오스크 폼 -->
+                        <div id="modifyKioskForm" style="display: none;">
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-label">POI명<span class="required">*</span></div>
+                                        <input type="text" id="modifyKioskName" name="kioskName" >
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-label">장비코드<span class="required">*</span></div>
+                                        <input type="text" id="modifyEquipmentCode" name="equipmentCode">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-label">층선택<span class="required">*</span></div>
+                                        <select id="modifyKioskFloor" name="kioskFloor">
+                                            <option></option>
+                                        </select>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-label">비고</div>
+                                        <input type="text" id="modifyRemarks" name="remarks">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnPoiModify">수정</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- pw change modal -->
+    <div class="modal fade" id="pwChangeModal" tabindex="-1" aria-labelledby="pwChangeModalLabel" aria-hidden="true">
+        <div class="modal-dialog pw-modal-dialog">
+            <div class="modal-content border border-dark">
+                <div class="modal-header pw-modal-header">
+                    <h5 class="modal-title pw-modal-title" id="pwChangeModalLabel">비밀번호 변경</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <!-- 모달 안의 폼 부분만 수정된 버전 -->
+                <div class="modal-body pw-modal-body">
+                    <form id="pwChangeForm">
+                        <div class="pw-modal-group d-flex align-items-center mb-2">
+                            <label for="currentPw" class="pw-modal-label me-2" style="width: 110px;">현재 비밀번호</label>
+                            <input type="password" class="form-control pw-modal-input flex-grow-1" id="currentPw" />
+                        </div>
+                        <div class="pw-modal-group d-flex align-items-center mb-2">
+                            <label for="newPw" class="pw-modal-label me-2" style="width: 110px;">변경 비밀번호</label>
+                            <input type="password" class="form-control pw-modal-input flex-grow-1" id="newPw" />
+                        </div>
+                        <div class="pw-modal-group d-flex align-items-center mb-2">
+                            <label for="confirmPw" class="pw-modal-label me-2" style="width: 110px;">변경 비밀번호<br>재입력</label>
+                            <input type="password" class="form-control pw-modal-input flex-grow-1" id="confirmPw" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer pw-modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnChangePw">수정</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- kiosk 도면 등록 -->
+    <div class="modal fade" id="kioskBuildingRegistModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">도면 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="kioskBuildingRegistForm" id="kioskBuildingRegistForm" autocomplete="off">
+                        <fieldset>
+                            <table class="table table-bordered ">
+                                <colgroup>
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>도면명</th>
+                                    <td>
+                                        <input type="text" name="name" id="registName" class="form-control input-sm" maxlength="20" title="도면명" required data-rules="required" data-tagname="도면명">
+                                    </td>
+                                    <th>도면코드</th>
+                                    <td>
+                                        <input type="text" name="code" value="store" id="registCode" class="form-control input-sm" maxlength="36" readonly title="도면코드" required data-rules="required" data-tagname="도면코드">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면파일</th>
+                                    <td colspan="3">
+                                        <input type="file" name="multipartFile" id="registMultipartFile" class="form-control input-sm" title="도면파일" required data-rules="required+buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>구분</th>
+                                    <td colspan="3">
+                                        <label style="margin-right: 20px">
+                                            <input type="radio" name="isIndoor" value="Y" checked required>
+                                            실내
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="isIndoor" value="N" required>
+                                            실외
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면설명</th>
+                                    <td colspan="3">
+                                        <textarea name="description" id="registDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255" data-tagname="도면설명"></textarea>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnKioskBuildingRegist">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="kioskBuildingModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">도면 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="kioskBuildingModifyForm" id="kioskBuildingModifyForm" method="post" enctype="multipart/form-data" autocomplete="off">
+                        <fieldset>
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                    <col style="width:15%">
+                                    <col style="width:35%">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>도면명</th>
+                                    <td>
+                                        <input type="hidden" name="id" id="modifyId">
+                                        <input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="30" title="도면명" required data-rules="required" data-tagname="도면명">
+                                    </td>
+                                    <th>도면코드</th>
+                                    <td>
+                                        <input type="text" name="code" id="modifyCode" value="store" class="form-control input-sm" readonly maxlength="36" title="도면코드" required data-rules="required" data-tagname="도면코드">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>구분</th>
+                                    <td colspan="3">
+                                        <label style="margin-right: 20px">
+                                            <input type="radio" name="isIndoor" value="Y" required>
+                                            실내
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="isIndoor" value="N" required>
+                                            실외
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면설명</th>
+                                    <td colspan="3">
+                                        <textarea name="description" id="modifyDescription" class="form-control input-sm" style="height:120px;" title="도면설명" maxlength="255"></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>도면 버전</th>
+                                    <td colspan="3">
+                                        <select id="kioskBuildingVersionSelect"></select>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <div class="modal-footer" style="border-top: 0px">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="button" class="btn btn-primary" id="btnKioskBuildingModify">수정</button>
+                        </div>
+<!--                        <button type="button" class="btn btn-primary" id="btnKioskBuildingModify">수정</button>-->
+                    </form>
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:20%">
+                                <col style="width:60%">
+                            </colgroup>
+                            <tbody>
+                            <tr style="border-width: 1px">
+                                <th>도면수정 내용</th>
+                                <td>
+                                    <input type="text" id="kioskBuildingHistoryContent" >
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>도면파일</th>
+                                <td>
+                                    <div class="d-flex">
+                                        <input type="file" name="multipartFile" id="kioskBuildingUploadFile" class="form-control input-sm" title="도면파일" data-rules="buildingFile" data-ext="zip,FBX,glTF,glb" accept=".zip, .FBX,.glTF,.glb" data-tagname="도면파일">
+                                        <button style="margin-left: 20px;width: 20%" id="kioskBuildingUploadBtn" class="btn btn-success">업로드</button>
+                                    </div>
+                                </td>
+<!--                                <td class="text-center align-middle">-->
+<!--                                    <button id="kioskBuildingUploadBtn" class="btn btn-success">업로드</button>-->
+<!--                                </td>-->
+                            </tr>
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:15%">
+                                <col style="width:15%">
+                                <col style="width:15%">
+                            </colgroup>
+                            <tbody id="historyListBody">
+
+                            </tbody>
+
+                        </table>
+                    </fieldset>
+
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<th:block th:replace="~{kioskAdmin/fragments/script :: script }"></th:block>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+
+<div th:fragment="kiosk-template" id="floorInfo" style="display: block">
+    <div class="kiosk-3d">
+        <div id="webGLContainer" class="kiosk-3d__image"></div>
+        <div class="kiosk-3d__control">
+            <button type="button" class="home"><span class="hide">처음으로</span></button>
+            <button type="button" class="plus"><span class="hide">확대</span></button>
+            <button type="button" class="minus"><span class="hide">축소</span></button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

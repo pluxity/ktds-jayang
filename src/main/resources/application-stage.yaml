@@ -1,0 +1,52 @@
+server:
+  port: 8090
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+
+spring:
+  config:
+    activate:
+      on-profile: stage
+
+  datasource:
+    url: jdbc:mariadb://localhost:3306/ktds
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: pluxity
+    password: pluxity123!@#
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    properties:
+      hibernate:
+        format_sql: true
+        temp:
+          use_jdbc_metadata_defaults: false
+  data:
+    redis:
+      host: 192.168.0.252
+      port: 6379
+      timeout: 1000
+
+jwt:
+  access-token:
+    secret-key: +iBcUJRWGvl+94+ow4nXV1fzWIq4rph8x7MyRmrtWio=
+    expiration: 3600000
+  refresh-token:
+    secret-key: gtzRlqF6bIkmOi5i15A9G5xbLdwiAMmZi6JPOeemC1E=
+    expiration: 86400000
+
+logging:
+  level:
+    org: INFO
+    com: DEBUG
+    root: INFO
+
+root-path:
+  upload: D:/Dev/basic_project

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 아이콘 셋 관리 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}" />
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}" />
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">아이콘 셋 관리</h1>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <!-- 검색 폼-->
+                                    <form name="schFrm" id="schFrm">
+                                        <div class="input-group mb-3">
+                                            <input type="text" name="name" id="searchIconSet" class="form-control" placeholder="아이콘 셋 이름을 입력하세요." aria-label="아이콘셋명" aria-describedby="button-addon2">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="button">검색</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7 text-right">
+                            <button type="button" class="btn btn-primary btn-md" id="btnRegisterIconSet"
+                                    data-bs-toggle="modal" data-bs-target="#iconSetRegisterModal">아이콘 셋 등록
+                            </button>
+                            <button type="button" class="btn btn-danger delete" id="btnDeleteIconSet">일괄 삭제</button>
+                        </div>
+                    </div>
+                    <!-- gridJs -->
+                    <div class="row">
+                        <div class="col-md">
+                            <div id="wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- 등록 모달 -->
+<div class="modal fade" id="iconSetRegisterModal" tabindex="-1" role="dialog"
+     aria-labelledby="iconSetRegisterModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">아이콘셋 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="iconSetRegisterForm" id="iconSetRegisterForm" method="post" enctype="multipart/form-data">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>아이콘셋 이름</th>
+                                <td colspan="3">
+                                    <input type="text" name="name" id="registerName" class="form-control input-sm" maxlength="32" title="아이콘셋 이름" required data-rules="required" data-tagname="아이콘셋 이름">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>2D 아이콘 파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="multipartFile" id="register2dIconSetFile" class="form-control input-sm" title="2D 아이콘셋 파일" data-tagname="2D 아이콘 파일" accept="image/*">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>3D 아이콘 파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="multipartFile" id="register3dIconSetFile" class="form-control input-sm" title="3D 아이콘셋 파일" data-tagname="3D 아이콘 파일" accept="zip/*">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnIconSetRegister">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 수정 모달 -->
+<div class="modal fade" id="iconSetModifyModal" tabindex="-1" role="dialog"
+     aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">아이콘셋 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="iconSetModifyForm" id="iconSetModifyForm" method="post" enctype="multipart/form-data">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>아이콘셋 이름</th>
+                                <td colspan="3">
+                                    <input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="32" title="아이콘셋 이름" required data-rules="required" data-tagname="아이콘셋 이름">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>2D 아이콘 파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="multipartFile" id="modify2dIconSetFile" class="form-control input-sm" title="2D 아이콘셋 파일" data-tagname="2D 아이콘 파일" accept="image/*">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>3D 아이콘 파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="multipartFile" id="modify3dIconSetFile" class="form-control input-sm" title="3D 아이콘셋 파일" data-tagname="3D 아이콘 파일" accept="zip/*, .fbx, .gltf, .glb">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnIconSetModify">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<th:block th:replace="~{admin/fragments/script :: script}"></th:block>
+<script th:src="@{/static/js/admin/iconset/icon-set.js}"></script>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

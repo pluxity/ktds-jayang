@@ -65,12 +65,12 @@
                                 </span>
                             </div>
                             <!-- 장비 표시 영역 -->
-                            <div class="equip-group">
+                            <div id="equipmentGroup" class="equip-group">
                                 <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                                <a href="#none" class="cctv active">CCTV</a>
+                                <a href="#none" class="cctv">CCTV</a>
                                 <a href="#none" class="shutter">셔터</a>
                                 <a href="#none" class="fire">소방시설</a>
-                                <a href="#none" class="air">공기질센터</a>
+                                <a href="#none" class="air">공기질센서</a>
                                 <a href="#none" class="alarmbell">비상벨</a>
                                 <a href="#none" class="invasion">침입탐지</a>
                                 <a href="#none" class="enter">출입탐지</a>
@@ -79,7 +79,7 @@
                         </div> 
                     </div>
                 </div>
-                <div class="poi-menu__list">
+                <div id="poiMenuList" class="poi-menu__list">
                     <ul>
                         <li class="cctv">
                             <a href="#none"><span class="hide">cctv</span></a>
@@ -100,9 +100,9 @@
                             </div>
                         </li>
                         <li class="alarmbell">
-                            <a href="#none"><span class="hide">공기질센터</span></a>
+                            <a href="#none"><span class="hide">공기질센서</span></a>
                             <div class="tool-tip">
-                                <span class="tool-tip__text tool-tip__text--right">공기질센터</span>
+                                <span class="tool-tip__text tool-tip__text--right">공기질센서</span>
                             </div>
                         </li>
                         <li class="air">
@@ -131,7 +131,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="poi-menu__list poi-menu__list--map">
+                <div id="poiMenuListMap" class="poi-menu__list poi-menu__list--map">
                     <ul>
                         <!-- [D] 선택 시 active 클래스 추가 -->
                         <li class="patrol active">
@@ -236,125 +236,8 @@
                 </div>
             </div>
             <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
-            <aside class="event-state event-state--active">
-                <button type="button" class=event-state__ctrl><span class="hide">ctrl button</span></button>
-                <div class="event-state__title">
-                    이벤트 통계
-                    <a href="#none" class="event-state__button">
-                        <span class="hide">이벤트 통계 전체보기</span>
-                    </a>
-                </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
-                    <table class="table">
-                        <caption class="hide">출입구</caption>
-                        <colgroup>
-                            <col style="width:60px">
-                            <col style="width:25px">
-                            <col style="width:95px">
-                            <col style="width:95px">
-                            <col style="width:70px">
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th scope="col">건물</th>
-                                <th scope="col">층</th>
-                                <th scope="col">이벤트명</th>
-                                <th scope="col">장비명</th>
-                                <th scope="col">발생시각</th>
-                            </tr>
-                        </thead>
-                            <tbody>
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">8글자이상일경우말줄임</td>
-                                <td class="ellipsis">8글자이상일경우말줄임</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>   
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">8글자이상일경우말줄임</td>
-                                <td class="ellipsis">8글자이상일경우말줄임</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>  
-                            <tr>
-                                <td>상가시설</td>
-                                <td>12F</td>
-                                <td class="ellipsis">제한구역침입</td>
-                                <td class="ellipsis">CCTV</td>
-                                <td>23:54:12</td>
-                            </tr>     
-                        </tbody>
-                    </table>
-                </div>
-            </aside>
+            <aside class="event-state event-state--active"></aside>
         </div>
     </div>
 </body>
-<script src="../dashboard/js/index.js"></script>
 </html>

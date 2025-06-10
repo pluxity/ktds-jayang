@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 공지사항 관리 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}" />
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}" />
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">공지사항 목록</h1>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <!-- 검색 폼-->
+                                    <form name="schFrm" id="schFrm">
+                                        <div class="input-group mb-3">
+                                            <input type="text" name="name" id="searchIconSet" class="form-control" placeholder="검색어를 입력하세요." aria-label="검색어" aria-describedby="button-addon2">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="button">검색</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7 text-right">
+                            <button type="button" class="btn btn-primary btn-md" id="btnRegisterNotice"
+                                    data-bs-toggle="modal" data-bs-target="#noticeRegisterModal">등록
+                            </button>
+                            <button type="button" class="btn btn-danger delete" id="btnDeleteNotice">일괄 삭제</button>
+                        </div>
+                    </div>
+                    <!-- gridJs -->
+                    <div class="row">
+                        <div class="col-md">
+                            <div id="wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- 등록 모달 -->
+<div class="modal fade" id="noticeRegisterModal" tabindex="-1" role="dialog"
+     aria-labelledby="noticeRegisterModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">공지사항 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="noticeRegisterForm" id="noticeRegisterForm" method="post" enctype="multipart/form-data">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>제목</th>
+                                <td colspan="3">
+                                    <input type="text" name="title" id="registerTitle" class="form-control input-sm" maxlength="32" title="제목" required data-rules="required" data-tagname="제목">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>내용</th>
+                                <td colspan="3">
+                                    <textarea type="text" name="name" id="registerContent" class="form-control input-sm" title="내용" required data-rules="required" data-tagname="내용"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>공지 도면</th>
+                                <td colspan="3">
+                                    <div id="tree-container-register">
+
+                                    </div>
+                                    <input type="hidden" name="map" id="registerSelectedMap">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>공지 기간</th>
+                                <td colspan="3">
+                                    <div class="date-picker">
+                                        <input type="date" id="registerStartDate">
+                                        <span> ~ </span>
+                                        <input type="date" id="registerEndDate">
+                                    </div>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>긴급</th>
+                                <td colspan="3">
+                                    <input type="checkbox" name="isUrgent" id="registerIsUrgent" class="form-check-input" title="긴급" required data-rules="required" data-tagname="긴급"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>활성화</th>
+                                <td colspan="3">
+                                    <input type="checkbox" name="isActive" id="registerIsActive" class="form-check-input" title="활성화" required data-rules="required" data-tagname="활성화"/>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnNoticeRegister">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 수정 모달 -->
+<div class="modal fade" id="noticeModifyModal" tabindex="-1" role="dialog"
+     aria-labelledby="noticeModifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">공지사항 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="noticeModifyForm" id="noticeModifyForm" method="post" enctype="multipart/form-data">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>제목</th>
+                                <td colspan="3">
+                                    <input type="text" name="title" id="modifyTitle" class="form-control input-sm" maxlength="32" title="제목" required data-rules="required" data-tagname="제목">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>내용</th>
+                                <td colspan="3">
+                                    <textarea type="text" name="name" id="modifyContent" class="form-control input-sm" title="내용" required data-rules="required" data-tagname="내용"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>공지 도면</th>
+                                <td colspan="3">
+                                    <div id="tree-container-modify">
+
+                                    </div>
+                                    <input type="hidden" name="map" id="modifySelectedMap">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>공지 기간</th>
+                                <td colspan="3">
+                                    <div class="date-picker">
+                                        <input type="date" id="modifyStartDate">
+                                        <span> ~ </span>
+                                        <input type="date" id="modifyEndDate">
+                                    </div>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>긴급</th>
+                                <td colspan="3">
+                                    <input type="checkbox" name="isUrgent" id="modifyIsUrgent" class="form-check-input" title="긴급" required data-rules="required" data-tagname="긴급"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>활성화</th>
+                                <td colspan="3">
+                                    <input type="checkbox" name="isActive" id="modifyIsActive" class="form-check-input" title="활성화" required data-rules="required" data-tagname="활성화"/>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnNoticeModify">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<th:block th:replace="~{admin/fragments/script :: script}"></th:block>
+<script th:src="@{/static/js/admin/notice/notice-list.js}"></script>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 시스템 설정 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}"/>
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}"/>
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">시스템 설정</h1>
+                <input type="hidden" id="id" name="id">
+            </div>
+
+            <div class="d-flex flex-col align-center">
+                <!-- POI -->
+<!--                <div class="table-poi-wrapper">-->
+                <div class="w-50">
+                    <h1 class="h3 d-inline align-middle">POI</h1>
+                    <table class="table table-borderless mt-3">
+                        <colgroup>
+                            <col style="width:25%">
+                            <col style="">
+                        </colgroup>
+                        <tbody>
+                        <tr>
+                            <th>POI 라인 길이</th>
+                            <td>
+                                <input type="number" name="poiLineLength" class="form-control" required step="0.1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>POI 아이콘 크기 비율</th>
+                            <td>
+                                <input type="number" name="poiIconSizeRatio" class="form-control" required step="0.1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>POI 텍스트 크기 비율</th>
+                            <td>
+                                <input type="number" name="poiTextSizeRatio" class="form-control" required step="0.1">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <br>
+<!--                    <h1 class="h3 d-inline align-middle">토폴로지</h1>-->
+<!--                    <table class="table table-borderless mt-3">-->
+<!--                        <colgroup>-->
+<!--                            <col style="width:25%">-->
+<!--                            <col style="">-->
+<!--                        </colgroup>-->
+<!--                        <tr>-->
+<!--                            <th>기본 노드 및 링크 색상</th>-->
+<!--                            &lt;!&ndash; color-picker &ndash;&gt;-->
+<!--                            <td>-->
+<!--                                <input name="nodeDefaultColor"-->
+<!--                                       data-jscolor="{ preset: 'dark', closeButton: true, closeText: 'OK' }" class="form-control">-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                    </table>-->
+<!--                    <br>-->
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <!-- 등록 button -->
+                            <button style="align-self: self-end; margin-right: 5rem;" type="button" class="btn btn-primary" id="updateSystemSetting">저장
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/lib/jscolor/jscolor.min.js}"></script>
+<script th:src="@{/static/js/admin/system-setting/system-setting.js}"></script>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

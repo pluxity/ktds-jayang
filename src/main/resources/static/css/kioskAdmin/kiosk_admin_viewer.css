@@ -1,0 +1,436 @@
+/* POI 팝업 스타일 */
+.poi-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    width: 800px;
+    z-index: 1000;
+}
+
+.popup-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.popup-content {
+    padding: 20px;
+}
+
+/* 테이블 스타일 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th, .table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    width: 100px;
+    text-align: left;
+}
+
+/* 필수 입력 표시 */
+.required {
+    color: #ff0000;
+    margin-left: 2px;
+}
+
+/* 입력 필드 스타일 */
+input[type="text"], select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 파일 업로드 영역 */
+.file-upload {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-select-btn {
+    padding: 6px 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.file-name {
+    color: #666;
+}
+
+/* 배너 섹션 */
+.banner-section {
+    margin-top: 30px;
+}
+
+.banner-section h3 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.banner-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.banner-table th {
+    background-color: #f8f9fa;
+    text-align: center;
+}
+
+.banner-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* 순서 버튼 */
+.order-btn {
+    padding: 2px 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+/* 안내 문구 */
+.notice {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* 하단 버튼 그룹 */
+.button-group {
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cancel-btn, .submit-btn {
+    padding: 8px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.submit-btn {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+}
+
+/* 날짜 입력 필드 */
+input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 체크박스 스타일 */
+input[type="checkbox"] {
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+
+/* POI 팝업 스타일 */
+.poi-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    width: 800px;
+    z-index: 1000;
+}
+
+.popup-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.popup-content {
+    padding: 20px;
+}
+
+/* 테이블 스타일 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th, .table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    width: 100px;
+    text-align: left;
+}
+
+/* 필수 입력 표시 */
+.required {
+    color: #ff0000;
+    margin-left: 2px;
+}
+
+/* 입력 필드 스타일 */
+input[type="text"], select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 파일 업로드 영역 */
+.file-upload {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-select-btn {
+    padding: 6px 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.file-name {
+    color: #666;
+}
+
+/* 배너 섹션 */
+.banner-section {
+    margin-top: 30px;
+}
+
+.banner-section h3 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.banner-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.banner-table th {
+    background-color: #f8f9fa;
+    text-align: center;
+}
+
+.banner-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* 순서 버튼 */
+.order-btn {
+    padding: 2px 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+/* 안내 문구 */
+.notice {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* 하단 버튼 그룹 */
+.button-group {
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cancel-btn, .submit-btn {
+    padding: 8px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.submit-btn {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+}
+
+/* 날짜 입력 필드 */
+input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 체크박스 스타일 */
+input[type="checkbox"] {
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* 폼 전환 애니메이션 */
+#store-form, #kiosk-form {
+    transition: all 0.3s ease;
+}
+
+/* 키오스크 폼 전용 스타일 */
+#kiosk-form .form-group {
+    margin-top: 15px;
+}
+
+#kiosk-form .form-row {
+    margin-bottom: 10px;
+}
+
+#kiosk-form input[type="text"] {
+    background-color: #fff;
+}
+
+.type-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.type-row .form-label {
+    min-width: 40px;
+    margin-bottom: 0;
+}
+
+.type-row label {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.type-row input[type="radio"] {
+    margin-right: 5px;
+}
+
+.selected-file{
+    max-width: 75px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.pw-modal-header {
+    padding-bottom: 0;
+}
+
+.pw-modal-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.pw-modal-label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pw-modal-input {
+    height: 30px;
+    font-size: 13px;
+}
+
+.pw-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pw-modal-dialog {
+    max-width: 350px;
+}
+
+.pw-modal-body {
+    padding-top: 0;
+}
+
+.pw-modal-group {
+    margin-bottom: 10px;
+}
+
+#kioskCamPosToolbar {
+    position: absolute;
+    top: 5rem;
+    left: 25rem;
+}
+

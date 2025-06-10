@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+
+<div class="popup-basic popup-basic--middle" th:fragment="popup-template" id="sopLayerPopup" style="display: none">
+    <div class="popup-basic__head">
+        <button type="button" class="arrow"><span class="hide">되돌아가기</span></button>
+        <h2 class="name">SOP</h2>
+        <button type="button" class="close"><span class="hide">close</span></button>
+    </div>
+    <!-- SOP 영역 -->
+    <div class="sop-info">
+        <h3 class="sop-info__title"><em class="text-accent">에스컬레이터 끼임 사고</em></h3>
+        <div class="sop-info__contents">
+            <div class="image">
+                <img src="/static/images/viewer/img_sop.png" alt="에스컬레이터 끼임 사고" width="330">
+                <p class="image__text">(정) 홍길동 | 가나다라마팀 | 010-123-456</p>
+                <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
+            </div>
+            <div class="manual">
+                <div class="manual__title">매뉴얼</div>
+                <div class="sop-accord">
+                    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                    <div class="sop-accord__btn sop-accord__btn--active">
+                        <span class="label">1단계</span>
+                        사고 위치 파악
+                    </div>
+                    <div class="sop-accord__detail">
+                        <div class="message">
+                            <strong class="message__title">방송 송출</strong>
+                            <p>
+                                안내 방송 송출 문구 표출 <br>
+                                문구 없는 경우 영역 미노출
+                            </p>
+                        </div>
+                        <ul>
+                            <li>1. 사고 위치 파악합니다.</li>
+                            <li>2. 담당 직원을 현장 파견합니다.</li>
+                            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
+                        </ul>
+                    </div>
+                    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                    <div class="sop-accord__btn">
+                        <span class="label">2단계</span>
+                        안내 방송 송출
+                    </div>
+                    <div class="sop-accord__detail">
+                        <ul>
+                            <li>1. 사고 위치 파악합니다.</li>
+                            <li>2. 담당 직원을 현장 파견합니다.</li>
+                            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
+                        </ul>
+                    </div>
+                    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                    <div class="sop-accord__btn">
+                        <span class="label">3단계</span>
+                        초동 조치
+                    </div>
+                    <div class="sop-accord__detail">
+                        <ul>
+                            <li>1. 사고 위치 파악합니다.</li>
+                            <li>2. 담당 직원을 현장 파견합니다.</li>
+                            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
+                        </ul>
+                    </div>
+                    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                    <div class="sop-accord__btn">
+                        <span class="label">4단계</span>
+                        사고 상황 전파
+                    </div>
+                    <div class="sop-accord__detail">
+                        <ul>
+                            <li>1. 사고 위치 파악합니다.</li>
+                            <li>2. 담당 직원을 현장 파견합니다.</li>
+                            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
+                        </ul>
+                    </div>
+                    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
+                    <div class="sop-accord__btn">
+                        <span class="label">5단계</span>
+                        상황종료
+                    </div>
+                    <div class="sop-accord__detail">
+                        <ul>
+                            <li>1. 사고 위치 파악합니다.</li>
+                            <li>2. 담당 직원을 현장 파견합니다.</li>
+                            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

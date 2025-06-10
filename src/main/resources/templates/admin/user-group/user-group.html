@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/head :: head}">
+	<title> 사용자 그룹 관리 </title>
+</head>
+<body>
+	<div class="wrapper">
+		<aside th:replace="~{admin/fragments/sidebar :: nav}"/>
+		<div class="main">
+			<nav th:replace="~{admin/fragments/navbar :: nav}"/>
+			<main class="content">
+				<div class="mb-3">
+					<h1 class="h3 d-inline align-middle">사용자 그룹 관리</h1>
+				</div>
+				<div class="row">
+					<div class="col-md">
+						<div class="row">
+							<div class="col-md-5">
+								<div class="form-row">
+									<div class="col-md-12">
+										<form name="searchFrom" id="searchFrom" class="d-flex mb-3">
+											<div class="input-group mb-3">
+												<select id="searchType" name="type" class="form-select" style="max-width: fit-content;margin-right: 2px;">
+<!--													<option value="DEFAULT">전체</option>-->
+													<option value="name">그룹명</option>
+												</select>
+												<input type="text" name="name" id="searchName" class="form-control" placeholder="검색명을 입력하세요." aria-label="" aria-describedby="button-addon2">
+												<div class="input-group-append">
+													<button type="button" class="btn btn-primary" id="searchButton">검색</button>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-7 text-right">
+								<button type="button" class="btn btn-primary btn-md" id="btnRegistUserGroup" data-bs-toggle="modal" data-bs-target="#userGroupRegistModal">계정 그룹 등록</button>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md">
+								<div id="wrapper"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+		</main>
+	</div>
+	</div>
+	<div class="modal fade" id="userGroupRegistModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		<div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">그룹 등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					</button>
+				</div>
+				<div class="modal-body">
+					<form name="userGroupRegistFrm" id="userGroupRegistFrm" autocomplete="off">
+						<fieldset>
+							<table class="table table-bordered">
+								<colgroup>
+									<col style="width:30%">
+									<col style="width:70%">
+								</colgroup>
+								<tbody>
+									<tr>
+										<th>그룹 이름</th>
+										<td ><input type="text" name="name" id="registName" class="form-control input-sm" maxlength="16" title="이름" required data-rules="required" data-tagname="그룹이름"></td>
+									</tr>
+								</tbody>
+							</table>
+						</fieldset>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" id="btnUserGroupRegist">등록</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="userGroupModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		<div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">그룹 수정</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					</button>
+				</div>
+				<div class="modal-body">
+					<form name="userGroupModifyFrm" id="userGroupModifyFrm" method="post" enctype="multipart/form-data" autocomplete="off">
+						<fieldset>
+							<table class="table table-bordered">
+								<colgroup>
+									<col style="width:30%">
+									<col style="width:70%">
+								</colgroup>
+								<tbody>
+								<tr>
+									<th>이름</th>
+									<td >
+										<input type="hidden" name="id" id="modifyId">
+										<input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="16" title="이름" required data-rules="required" data-tagname="그룹이름">
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</fieldset>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" id="btnUserGroupModify">수정</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+	<script th:src="@{/static/js/admin/user-group/user-group.js}" ></script>
+
+	<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

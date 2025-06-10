@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>로그인</title>
+    <link rel="stylesheet" th:href="@{/static/css/common/common.css}"/>
+    <link rel="stylesheet" th:href="@{/static/css/login.css}"/>
+</head>
+<body>
+    <div class="container" th:style="'background-image: url(' + @{/static/images/viewer/bg_login.png} + ')'" >
+        <div class="login">
+            <h1 class="login__logo"><span class="hide">kt Login</span></h1>
+            <div class="login__box">
+                <h2 class="title">KT 자양 통합운영 플랫폼</h2>
+                <div class="login-forms">
+                    <!-- [D] 에러메시지 노출 시 input-error--active 추가 -->
+                    <div class="input-error input-error--active">
+                        <input id="id" type="text" placeholder="아이디를 입력하세요">
+                        <p class="input-error__text">아이디를 입력하세요.</p>
+                    </div>
+                    <div  class="input-error input-error--active">
+                        <input id="pw" type="password" placeholder="비밀번호를 입력하세요">
+                        <p class="input-error__text">비밀번호를 입력하세요</p>
+                    </div>
+                </div>
+                <div class="login-footer">
+                    <p class="login-footer__warning" style="display: none">
+                    </p>
+                    <button id="btn_login" type="button" class="button button--solid-middle">로그인</button>
+                </div>
+            </div>
+<!--            <div class="popup-basic">-->
+<!--                <div class="popup-basic__head">-->
+<!--                    <h2 class="name">비밀번호 변경</h2>-->
+<!--                    <button type="button" class="close"><span class="hide">close</span></button>-->
+<!--                </div>-->
+<!--                <div class="login-popup">-->
+<!--                    <div class="login-popup__info">-->
+<!--                        <p>-->
+<!--                            비밀번호 유효기간(180일)이 만료되었습니다. <br>-->
+<!--                            보안 강화를 위해 비밀번호를 변경하세요-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                    <div class="login-forms">-->
+<!--                        &lt;!&ndash; [D] 에러메시지 노출 시 input-error&#45;&#45;active 추가 &ndash;&gt;-->
+<!--                        <div class="input-error input-error&#45;&#45;active">-->
+<!--                            <input type="password" placeholder="새 비밀번호를 입력하세요.">-->
+<!--                            <p class="input-error__text">영문+숫자+특수문자를 포함하여 8~16자리로 설정하세요.</p>-->
+<!--                        </div>-->
+<!--                        <div class="input-error">-->
+<!--                            <input type="password" placeholder="세 비밀번호를 다시 한 번 입력하세요.">-->
+<!--                            &lt;!&ndash; [D] 에러메시지 노출 문자 show/hide-->
+<!--                                <p class="input-error__text">비밀번호가 일치하지 않습니다.</p>-->
+<!--                            &ndash;&gt;-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="login-footer">-->
+<!--                        <div class="login-footer__buttons">-->
+<!--                            <button type="button" class="button button&#45;&#45;ghost-middle">다음에 변경</button>-->
+<!--                            <button type="button" class="button button&#45;&#45;solid-middle">비밀번호 변경</button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+        </div>
+    </div>
+    <script th:inline="javascript">
+        const params = new URLSearchParams(location.search);
+        const isError = JSON.parse(params.get("error"));
+
+        if (isError) {
+            const alertTxt = document.querySelector("SPAN.alert_txt");
+            alertTxt.classList.add("on");
+        }
+    </script>
+    <th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+    <script th:src="@{/static/js/login/login.js}"></script>
+</body>
+</html>

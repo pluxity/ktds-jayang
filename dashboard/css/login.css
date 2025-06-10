@@ -333,8 +333,8 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   display: inline-block;
   width: 20px;
   height: 20px;
-  -webkit-mask-image: url("/static/images/viewer/icon20/icon20.svg");
-  mask-image: url("/static/images/viewer/icon20/icon20.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon_poi.svg");
+  mask-image: url("/static/images/viewer/icon_poi.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -20px -20px;
@@ -358,39 +358,79 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   background-color: var(--color-mint);
 }
 
-.equip-group a.shutter::before {
-  -webkit-mask-position: -60px -20px;
-  mask-position: -60px -20px;
+.equip-group a.facility::before {
+  -webkit-mask-position: -420px -70px;
+  mask-position: -420px -70px;
+}
+
+.equip-group a.power::before {
+  -webkit-mask-position: -320px -70px;
+  mask-position: -320px -70px;
+}
+
+.equip-group a.light::before {
+  -webkit-mask-position: -720px -20px;
+  mask-position: -720px -20px;
 }
 
 .equip-group a.fire::before {
-  -webkit-mask-position: -100px -20px;
-  mask-position: -100px -20px;
-}
-
-.equip-group a.air::before {
-  -webkit-mask-position: -140px -20px;
-  mask-position: -140px -20px;
-}
-
-.equip-group a.alarmbell::before {
-  -webkit-mask-position: -180px -20px;
-  mask-position: -180px -20px;
-}
-
-.equip-group a.invasion::before {
   -webkit-mask-position: -220px -20px;
   mask-position: -220px -20px;
 }
 
-.equip-group a.enter::before {
-  -webkit-mask-position: -260px -20px;
-  mask-position: -260px -20px;
+.equip-group a.elevator::before {
+  -webkit-mask-position: -770px -20px;
+  mask-position: -770px -20px;
 }
 
-.equip-group a.elevator::before {
-  -webkit-mask-position: -300px -20px;
-  mask-position: -300px -20px;
+.equip-group a.solar::before {
+  -webkit-mask-position: -870px -20px;
+  mask-position: -870px -20px;
+}
+
+.equip-group a.parking::before {
+  -webkit-mask-position: -20px -70px;
+  mask-position: -20px -70px;
+}
+
+.equip-group a.air::before {
+  -webkit-mask-position: -520px -20px;
+  mask-position: -520px -20px;
+}
+
+.equip-group a.obstacle::before {
+  -webkit-mask-position: -70px -70px;
+  mask-position: -70px -70px;
+}
+
+.equip-group a.leak::before {
+  -webkit-mask-position: -120px -70px;
+  mask-position: -120px -70px;
+}
+
+.equip-group a.access::before {
+  -webkit-mask-position: -620px -20px;
+  mask-position: -620px -20px;
+}
+
+.equip-group a.bell::before {
+  -webkit-mask-position: -570px -20px;
+  mask-position: -570px -20px;
+}
+
+.equip-group a.vav::before {
+  -webkit-mask-position: -170px -70px;
+  mask-position: -170px -70px;
+}
+
+.equip-group a.geo::before {
+  -webkit-mask-position: -220px -70px;
+  mask-position: -220px -70px;
+}
+
+.equip-group a.ac::before {
+  -webkit-mask-position: -270px -70px;
+  mask-position: -270px -70px;
 }
 
 .search-result {

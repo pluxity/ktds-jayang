@@ -32,7 +32,7 @@ html {
           transform: translate(-50%, -50%);
   width: 5rem;
   height: 5rem;
-  background: url("/dashboard/img/4k/icon80.svg") no-repeat -400px -40px;
+  background: url("/static/images/viewer/4k/icon80.svg") no-repeat -400px -40px;
 }
 
 .kiosk-layer {
@@ -117,7 +117,7 @@ html {
   right: -100px;
   top: 0;
   display: inline-block;
-  background: url("/dashboard/img/4k/icon_kiosk_close.svg") no-repeat;
+  background: url("/static/images/viewer/4k/icon_kiosk_close.svg") no-repeat;
   width: 6.25rem;
   height: 6.25rem;
 }
@@ -165,7 +165,7 @@ html {
   display: inline-block;
   width: 5rem;
   height: 5rem;
-  background: url("/dashboard/img/4k/icon80.svg") no-repeat;
+  background: url("/static/images/viewer/4k/icon80.svg") no-repeat;
 }
 
 .kiosk-3d__control button.home::after {
@@ -283,7 +283,7 @@ html {
 .kiosk-list__info .list__thumbnail {
   width: 18.75rem;
   height: 9.37rem;
-  background: url("/dashboard/img/img_kiosk_thumb.svg") no-repeat;
+  background: url("/static/images/viewer/img_kiosk_thumb.svg") no-repeat;
   background-position: center;
   background-size: contain;
 }
@@ -361,7 +361,7 @@ html {
   margin-top: -3px;
   width: 35px;
   height: 40px;
-  background: url("/dashboard/img/4k/icon_kiosk_location.svg") no-repeat;
+  background: url("/static/images/viewer/4k/icon_kiosk_location.svg") no-repeat;
 }
 
 .kiosk-list__info .list__footer li + li {
@@ -389,8 +389,8 @@ html {
   display: inline-block;
   width: 54px;
   height: 104px;
-  -webkit-mask-image: url("/dashboard/img/4k/icon_kiosk_arrow.svg");
-  mask-image: url("/dashboard/img/4k/icon_kiosk_arrow.svg");
+  -webkit-mask-image: url("/static/images/viewer/4k/icon_kiosk_arrow.svg");
+  mask-image: url("/static/images/viewer/4k/icon_kiosk_arrow.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
@@ -512,8 +512,8 @@ html {
   margin-left: auto;
   width: 5rem;
   height: 5rem;
-  -webkit-mask-image: url("/dashboard/img/4k/icon_kiosk_remove.svg");
-  mask-image: url("/dashboard/img/4k/icon_kiosk_remove.svg");
+  -webkit-mask-image: url("/static/images/viewer/4k/icon_kiosk_remove.svg");
+  mask-image: url("/static/images/viewer/4k/icon_kiosk_remove.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }

@@ -238,7 +238,7 @@ $base-img-path:"/static/images/viewer/";
                         content:'';
                         display:inline-block;
                         width:20px; height:20px; 
-                        -webkit-mask-image:url('/dashboard/img/icon_poi.svg'); mask-image:url('/dashboard/img/icon_poi.svg'); 
+                        -webkit-mask-image:url('#{$base-img-path}icon_poi.svg'); mask-image:url('#{$base-img-path}icon_poi.svg'); 
                         -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                         -webkit-mask-position:-20px -20px; mask-position:-20px -20px;
                         background-color:var(--color-grayscale03);
@@ -815,7 +815,7 @@ $base-img-path:"/static/images/viewer/";
             &--right::before, &--top::before, &--bottom::before{
                 content:'';
                 position:absolute; 
-                background:url('/dashboard/img/tooltip_arrow.svg') no-repeat;
+                background:url('#{$base-img-path}tooltip_arrow.svg') no-repeat;
                 width:5px; height:6px;
             }
             &--right{
@@ -1226,7 +1226,7 @@ $base-img-path:"/static/images/viewer/";
                     text-align:center;
                     &::before{
                         content:'';
-                        -webkit-mask-image:url('/dashboard/img/icon_poi_3d.svg'); mask-image:url('/dashboard/img/icon_poi_3d.svg'); 
+                        -webkit-mask-image:url('#{$base-img-path}icon_poi_3d.svg'); mask-image:url('#{$base-img-path}icon_poi_3d.svg'); 
                         -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                         -webkit-mask-position:-20px -20px; mask-position:-20px -20px;
                         background-color:var(--color-navy-dark); 
@@ -1262,7 +1262,7 @@ $base-img-path:"/static/images/viewer/";
                 width:35px; height:35px;
                 > a{
                     width:35px; height:35px; 
-                    -webkit-mask-image:url('/dashboard//img/icon_poi.svg'); mask-image:url('/dashboard//img/icon_poi.svg'); 
+                    -webkit-mask-image:url('#{$base-img-path}icon_poi.svg'); mask-image:url('#{$base-img-path}icon_poi.svg'); 
                     -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     -webkit-mask-position:-12px -12px; mask-position:-12px -12px;
                     background-color:var(--color-navy-dark);
@@ -1298,7 +1298,7 @@ $base-img-path:"/static/images/viewer/";
             &--map{
                 margin-top:3px; border-top-left-radius:0; border-top-right-radius:0;
                 li{
-                    > a{-webkit-mask-image:url('/dashboard/img/icon_poi_3d.svg'); mask-image:url('/dashboard/img/icon_poi_3d.svg');}
+                    > a{-webkit-mask-image:url('#{$base-img-path}icon_poi_3d.svg'); mask-image:url('#{$base-img-path}icon_poi_3d.svg');}
                     &.patrol a {-webkit-mask-position:-52px -12px; mask-position:-52px -12px;}
                     &.sop a {-webkit-mask-position:-92px -12px; mask-position:-92px -12px;}
                     &.shelter a {-webkit-mask-position:-132px -12px; mask-position:-132px -12px;}

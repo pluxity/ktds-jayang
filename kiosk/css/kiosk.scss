@@ -15,7 +15,7 @@ html {
                 content:''; 
                 position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
                 width:5rem; height:5rem; 
-                background:url('/dashboard/img/4k/icon80.svg') no-repeat -400px -40px; 
+                background:url('#{$base-img-path}4k/icon80.svg') no-repeat -400px -40px; 
             }
         }
     }
@@ -53,7 +53,7 @@ html {
         &__close {
             position:absolute; right:-100px; top:0;
             display:inline-block; 
-            background:url('/dashboard/img/4k/icon_kiosk_close.svg') no-repeat;
+            background:url('#{$base-img-path}4k/icon_kiosk_close.svg') no-repeat;
             width:6.25rem; height:6.25rem;
         }
         
@@ -83,7 +83,7 @@ html {
                     content:"";
                     display:inline-block;
                     width:5rem; height:5rem;
-                    background:url('/dashboard/img/4k/icon80.svg') no-repeat; 
+                    background:url('#{$base-img-path}4k/icon80.svg') no-repeat; 
                 }
                 &.home::after{background-position:-40px -40px;}
                 &.minus::after{background-position:-278px -40px;}
@@ -125,7 +125,7 @@ html {
                 }
                 &__thumbnail {
                     width:18.75rem; height:9.37rem;
-                    background:url('/dashboard/img/img_kiosk_thumb.svg') no-repeat;
+                    background:url('#{$base-img-path}img_kiosk_thumb.svg') no-repeat;
                     background-position:center; background-size:contain;
                 }
                 
@@ -165,7 +165,7 @@ html {
                                     display:inline-block;
                                     margin-top:-3px;
                                     width:35px; height:40px;
-                                    background:url('/dashboard/img/4k/icon_kiosk_location.svg') no-repeat;
+                                    background:url('#{$base-img-path}4k/icon_kiosk_location.svg') no-repeat;
                                 }
                             }
                         }
@@ -186,7 +186,7 @@ html {
             position:absolute; 
             display:inline-block; 
             width:54px; height:104px;
-            -webkit-mask-image:url('/dashboard/img/4k/icon_kiosk_arrow.svg'); mask-image:url('/dashboard/img/4k/icon_kiosk_arrow.svg'); 
+            -webkit-mask-image:url('#{$base-img-path}4k/icon_kiosk_arrow.svg'); mask-image:url('#{$base-img-path}4k/icon_kiosk_arrow.svg'); 
             -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
             
             &--left{
@@ -244,7 +244,7 @@ html {
                         display:inline-block;
                         margin-left:auto;
                         width:5rem; height:5rem;
-                        -webkit-mask-image:url('/dashboard/img/4k/icon_kiosk_remove.svg'); mask-image:url('/dashboard/img/4k/icon_kiosk_remove.svg'); 
+                        -webkit-mask-image:url('#{$base-img-path}4k/icon_kiosk_remove.svg'); mask-image:url('#{$base-img-path}4k/icon_kiosk_remove.svg'); 
                         -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     }
                 }

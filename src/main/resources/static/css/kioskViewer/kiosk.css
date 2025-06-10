@@ -595,9 +595,6 @@ html {
 
 /* 가로형 */
 @media (orientation: landscape) {
-  #kioskInfoSpan {
-    display: none;
-  }
   .kiosk-main {
     position: relative;
     height: calc(100vh - 15rem);
@@ -885,7 +882,6 @@ html {
     border-radius: 50px;
   }
   .kiosk-list {
-    padding: 20.5rem 12.5rem 0 12.5rem;
     height: calc(100% - 22.5rem);
   }
   .kiosk-list__info {
@@ -1008,7 +1004,11 @@ html {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
+    grid-gap: 15px;
     min-width: 95rem;
+  }
+  .kiosk-footer__contents .store__letters .number {
+    grid-column-gap: 15px;
   }
   .kiosk-footer__contents .store__buttons {
     grid-gap: 20px;
@@ -1029,15 +1029,5 @@ html {
     padding: 35px 0;
     font-size: 3.75rem;
   }
-
-  .store__letters .hangul-letters,
-  .store__letters .consonants,
-  .store__letters .number {
-    display: grid;
-    grid-template-columns: repeat(13, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
 }
 /*# sourceMappingURL=kiosk.css.map */

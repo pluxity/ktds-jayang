@@ -115,13 +115,21 @@
        <div class="equip-group">
            <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
            <a href="#none" class="cctv active">CCTV</a>
-           <a href="#none" class="shutter">셔터</a>
-           <a href="#none" class="fire">소방시설</a>
-           <a href="#none" class="air">공기질센터</a>
-           <a href="#none" class="alarmbell">비상벨</a>
-           <a href="#none" class="invasion">침입탐지</a>
-           <a href="#none" class="enter">출입탐지</a>
-           <a href="#none" class="elevator" >엘리베이터</a>
+           <a href="#none" class="facility">설비</a>
+           <a href="#none" class="power">전력</a>
+           <a href="#none" class="light">조명</a>
+           <a href="#none" class="fire">소방</a>
+           <a href="#none" class="elevator">승강기</a>
+           <a href="#none" class="solar">태양광</a>
+           <a href="#none" class="parking">주차관제</a>
+           <a href="#none" class="air">공기질</a>
+           <a href="#none" class="obstacle">항공장애</a>
+           <a href="#none" class="leak">누수</a>
+           <a href="#none" class="access">출입탐지</a>
+           <a href="#none" class="bell">비상벨</a>
+           <a href="#none" class="vav">VAV</a>
+           <a href="#none" class="geo">지열</a>
+           <a href="#none" class="ac">시스템에어컨</a>
        </div>
    </div> 
 
@@ -3169,13 +3177,21 @@
                 <div class="equip-group">
                     <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
                     <a href="#none" class="cctv active">CCTV</a>
-                    <a href="#none" class="shutter">셔터</a>
-                    <a href="#none" class="fire">소방시설</a>
-                    <a href="#none" class="air">공기질센터</a>
-                    <a href="#none" class="alarmbell">비상벨</a>
-                    <a href="#none" class="invasion">침입탐지</a>
-                    <a href="#none" class="enter">출입탐지</a>
-                    <a href="#none" class="elevator" >엘리베이터</a>
+                    <a href="#none" class="facility">설비</a>
+                    <a href="#none" class="power">전력</a>
+                    <a href="#none" class="light">조명</a>
+                    <a href="#none" class="fire">소방</a>
+                    <a href="#none" class="elevator">승강기</a>
+                    <a href="#none" class="solar">태양광</a>
+                    <a href="#none" class="parking">주차관제</a>
+                    <a href="#none" class="air">공기질</a>
+                    <a href="#none" class="obstacle">항공장애</a>
+                    <a href="#none" class="leak">누수</a>
+                    <a href="#none" class="access">출입탐지</a>
+                    <a href="#none" class="bell">비상벨</a>
+                    <a href="#none" class="vav">VAV</a>
+                    <a href="#none" class="geo">지열</a>
+                    <a href="#none" class="ac">시스템에어컨</a>
                 </div>
             </div> 
         </div>
@@ -3186,49 +3202,97 @@
             <li class="cctv active">
                 <a href="#none"><span class="hide">cctv</span></a>
                 <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">CCTV</span>
+                    <span class="tool-tip__text tool-tip__text--bottom">CCTV</span>
                 </div>
             </li>
-            <li class="shutter">
-                <a href="#none"><span class="hide">셔텨</span></a>
+            <li class="facility">
+                <a href="#none"><span class="hide">설비</span></a>
                 <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">셔터</span>
+                    <span class="tool-tip__text tool-tip__text--bottom">설비</span>
+                </div>
+            </li>
+            <li class="power">
+                <a href="#none"><span class="hide">전력</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">전력</span>
+                </div>
+            </li>
+            <li class="light">
+                <a href="#none"><span class="hide">조명</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">조명</span>
                 </div>
             </li>
             <li class="fire">
                 <a href="#none"><span class="hide">소방</span></a>
                 <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">소방</span>
-                </div>
-            </li>
-            <li class="alarmbell">
-                <a href="#none"><span class="hide">공기질센터</span></a>
-                <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">공기질센터</span>
-                </div>
-            </li>
-            <li class="air">
-                <a href="#none"><span class="hide">비상벨</span></a>
-                <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">비상벨</span>
-                </div>
-            </li>
-            <li class="invasion">
-                <a href="#none"><span class="hide">침입탐지</span></a>
-                <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">침입탐지</span>
-                </div>
-            </li>
-            <li class="enter">
-                <a href="#none"><span class="hide">출입관리</span></a>
-                <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">출입관리</span>
+                    <span class="tool-tip__text tool-tip__text--bottom">소방</span>
                 </div>
             </li>
             <li class="elevator">
-                <a href="#none"><span class="hide">엘리베이터</span></a>
+                <a href="#none"><span class="hide">승강기</span></a>
                 <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--right">엘리베이터</span>
+                    <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
+                </div>
+            </li>
+            <li class="solar">
+                <a href="#none"><span class="hide">태양광</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">태양광</span>
+                </div>
+            </li>
+            <li class="parking">
+                <a href="#none"><span class="hide">주차관제</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
+                </div>
+            </li>
+            <li class="air">
+                <a href="#none"><span class="hide">공기질</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">공기질</span>
+                </div>
+            </li>
+            <li class="obstacle">
+                <a href="#none"><span class="hide">항공장애</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">항공장애</span>
+                </div>
+            </li>
+            <li class="leak">
+                <a href="#none"><span class="hide">누수</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">누수</span>
+                </div>
+            </li>
+            <li class="access">
+                <a href="#none"><span class="hide">출입탐지</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">출입탐지</span>
+                </div>
+            </li>
+            <li class="bell">
+                <a href="#none"><span class="hide">비상벨</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">비상벨</span>
+                </div>
+            </li>
+            <li class="vav">
+                <a href="#none"><span class="hide">VAV</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">VAV</span>
+                </div>
+            </li>
+            <li class="geo">
+                <a href="#none"><span class="hide">지열</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">지열</span>
+                </div>
+            </li>
+            <li class="ac">
+                <a href="#none"><span class="hide">시스템에어컨</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">시스템에어컨</span>
                 </div>
             </li>
         </ul>

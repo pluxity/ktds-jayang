@@ -1477,390 +1477,781 @@
    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 엘리베이터</div>
-   <div class="popup-basic popup-basic--wide">
+   <div class="popup-basic popup-basic--xwide">
         <div class="popup-basic__head">
-            <h2 class="name">엘리베이터</h2>
+            <h2 class="name">승강</h2>
+            <ul class="tab" role="tablist">
+                <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+                <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">엘리베이터</a></li>
+                <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">에스컬레이터</a></li>
+            </ul>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
         <div class="search-result search-result--space">
-               <div class="search-result__space">
-                    <div class="section section--contents">
-                        <ul class="tab-list" role="tablist">
-                            <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                            <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">전체</a></li>
-                            <li role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">건물 A</a></li>
-                            <li role="tab" id="tab3" aria-controls="tabpanel3" aria-selected="false" tabindex="0"><a href="#tab3">건물 B</a></li>
-                        </ul>
-                        <div class="section__detail">
-                            <div class="facility-area facility-area--elevator">
-                                <ul class="facility-area__list facility-area__list--grid3">
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--standby">대기</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--stop">혼잡</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--standby">대기</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--stop">혼잡</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--standby">대기</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--stop">혼잡</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--standby">대기</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="head">
-                                            <div class="head__title">
-                                                <span>건물 A</span>
-                                                <span>E/L01호기</span>
-                                            </div>
-                                            <div class="head__state">
-                                                <span class="label label--stop">혼잡</span>
-                                                <button type="button" class="button-move">도면 이동</button>
-                                            </div>
-                                        </div>
-                                        <div class="detail">  
-                                            <div class="elevator-info">
-                                                <!-- CCTV 뷰어 들어갈 공간 -->
-                                                <div class="elevator-info__view">
-                                                    <div style="background-color:#000; height:100%;"></div>
-                                                </div>
-                                                <div class="elevator-info__detail">
-                                                    <div class="info info--floor">
-                                                        <dl>
-                                                            <dt class="info__title">운행층수</dt>
-                                                            <dd>
-                                                                <strong class="info__floor">B4F ~ 31F</strong>
-                                                                <br>
-                                                                <span class="info__text">전층운행</span>
-                                                            </dd>
-                                                        </dl>
-                                                    </div>
-                                                    <div class="info info--location">
-                                                        <dl>
-                                                            <dt class="info__title">현재 위치</dt>
-                                                            <dd class="info__floor">25F</dd>
-                                                        </dl>
-                                                        <!-- [D]
-                                                        여유: <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                                                        보통: <span class="text text--normal"><i class="text__icon"></i>보통(10/25)</span>
-                                                        혼잡: <span class="text text--crowd"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        만차: <span class="text text--full"><i class="text__icon"></i>혼잡(20/25)</span>
-                                                        -->
-                                                        <span class="text text--crowd"><i class="text__icon"></i>보통(10/25)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
+            <div class="search-result__space">
+                <div class="section section--contents">
+                    <div class="facility-area">
+                        <div class="facility-area__head">
+                            <div class="search">
+                                <div class="select-box" style="width:100px;">
+                                    <!-- [D] 
+                                        select-box 클릭 시 select-box__btn--active 클래스 추가 
+                                        select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                                        -->
+                                    <span class="select-box__btn -select-box__btn--active">전체동</span>
+                                    <div class="select-box__content">
+                                        <ul>
+                                            <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                            <li class="selected">전체동</li>
+                                            <li>전체동</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="select-box" style="width:100px;">
+                                    <span class="select-box__btn -select-box__btn--active">전체 층</span>
+                                    <div class="select-box__content">
+                                        <ul>
+                                            <li class="selected">전체 층</li>
+                                            <li>전체 층</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="select-box" style="width:100px;">
+                                    <span class="select-box__btn -select-box__btn--active">상태 전체</span>
+                                    <div class="select-box__content">
+                                        <ul>
+                                            <li class="selected">상태 전체</li>
+                                            <li>상테 전체</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button type="button" class="button button--solid-middle">검색</button>
                             </div>
+                            <span class="text">총 20대</span>
+                        </div>
+                        <div class="left-info">
+                            <!-- ul로 20개씩 묶어서 노출 -->
+                            <ul class="left-info__list left-info__list--grid5">
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 정상 운전/ 운전휴지 / 독립운전 -->
+                                            <span class="label">정상 운전</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- UP -->
+                                            <span class="state state--up"><span class="hide state__text">상행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 정상 운전/ 운전휴지 / 독립운전 -->
+                                            <span class="label">정상 운전</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- UP -->
+                                            <span class="state state--up"><span class="hide state__text">상행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 정상 운전/ 운전휴지 / 독립운전 -->
+                                            <span class="label">정상 운전</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- UP -->
+                                            <span class="state state--up"><span class="hide state__text">상행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 정상 운전/ 운전휴지 / 독립운전 -->
+                                            <span class="label">정상 운전</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- UP -->
+                                            <span class="state state--up"><span class="hide state__text">상행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 파킹 -->
+                                            <span class="label label--parking">파킹</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- DOWN -->
+                                            <span class="state state--down"><span class="hide state__text">하행</span></span>
+                                        </div>
+                                        <p class="detail__text">문열림</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="head">
+                                        <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                        <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                    </div>
+                                    <div class="detail">  
+                                        <div class="detail__state">
+                                            <!-- 고장 -->
+                                            <span class="label label--breakdown">고장</span>
+                                            <div class="floor">B<strong>3</strong></div>
+                                            <!-- Hold -->
+                                            <span class="state state--hold"><span class="hide state__text">멈춤</span></span>
+                                        </div>
+                                        <!-- 문 닫힐 때 detail__text--off 추가 -->
+                                        <p class="detail__text detail__text--off">문닫힘</p>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-               </div>
+                </div>
+            </div>
+            <div class="search-result__footer">
+                <div class="search-result__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
+                </div>
+            </div>
         </div>   
    </div>
+
+   <div class="popup-basic popup-basic--xwide">
+    <div class="popup-basic__head">
+        <h2 class="name">승강</h2>
+        <ul class="tab" role="tablist">
+            <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+            <li role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">엘리베이터</a></li>
+            <li class="active" role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">에스컬레이터</a></li>
+        </ul>
+        <button type="button" class="close"><span class="hide">close</span></button>
+    </div>
+    <div class="search-result search-result--space">
+        <div class="search-result__space">
+            <div class="section section--contents">
+                <div class="facility-area">
+                    <div class="facility-area__head">
+                        <div class="search">
+                            <div class="select-box" style="width:100px;">
+                                <!-- [D] 
+                                    select-box 클릭 시 select-box__btn--active 클래스 추가 
+                                    select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                                    -->
+                                <span class="select-box__btn -select-box__btn--active">전체동</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                        <li class="selected">전체동</li>
+                                        <li>전체동</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="select-box" style="width:100px;">
+                                <span class="select-box__btn -select-box__btn--active">전체 층</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <li class="selected">전체 층</li>
+                                        <li>전체 층</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="select-box" style="width:100px;">
+                                <span class="select-box__btn -select-box__btn--active">상태 전체</span>
+                                <div class="select-box__content">
+                                    <ul>
+                                        <li class="selected">상태 전체</li>
+                                        <li>상테 전체</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button type="button" class="button button--solid-middle">검색</button>
+                        </div>
+                        <span class="text">총 20대</span>
+                    </div>
+                    <div class="left-info left-info--escalator">
+                        <!-- ul로 20개씩 묶어서 노출 -->
+                        <ul class="left-info__list left-info__list--grid5">
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 자동 -->
+                                        <span class="label">자동</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 자동 -->
+                                        <span class="label">자동</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 자동 -->
+                                        <span class="label">자동</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 자동 -->
+                                        <span class="label">자동</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">   
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <!-- 전원 차단 시 detail __state--off 추가 -->
+                                    <div class="detail__state detail__state--off">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- UP -->
+                                        <span class="state state--up"><span class="state__text">상행</span></span>
+                                        <!-- 전원 차단 -->
+                                        <span class="label label--block">전원 차단</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="head">
+                                    <div class="head__title">[A동] [1F] 1그룹 1호기</div>
+                                    <a class="head__button" href="#none"><span class="hide">도면 이동</span></a>
+                                </div>
+                                <div class="detail">  
+                                    <div class="detail__state">
+                                        <span class="image"><span class="hide">에스컬레이터</span></span>
+                                        <!-- DOWN -->
+                                        <span class="state state--down"><span class="state__text">하행</span></span>
+                                        <!-- 고장 -->
+                                        <span class="label label--breakdown">고장</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="search-result__footer">
+            <div class="search-result__paging">
+                <button type="button" class="left"><span class="hide">left</span></button>
+                <div class="number"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                <button type="button" class="right"><span class="hide">right</span></button>
+            </div>
+        </div>
+    </div>   
+</div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 이벤트 팝업 - 공지사항</div>
    <div class="popup-event">

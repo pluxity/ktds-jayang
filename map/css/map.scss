@@ -132,110 +132,122 @@ $base-img-path:"/static/images/viewer/";
 .facility-area{
     height:100%;
 
-    // 설비 팝업에 사용되는 공통 라벨 클래스
-    // 추후 나머지 라벨 추가 예정.. 
-    .label{
-        display:flex; align-items:center; justify-content:center;
-        border:1px solid; border-radius:5px; 
-        width:40px; height:24px;
-        font-size:0.75rem;
-        &--standby{color:#03bd94;}
-        &--stop{color:#dd0046;}
-    }
-    // 설비 팝업에 사용되는 공통 텍스트 색상 클래스 
-    .text{
-        display:flex; align-items:center; grid-gap:4px;
-        &__icon{
-            width:14px; height:14px;
-            -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
-            -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
-            -webkit-mask-position:-554px -10px; mask-position:-554px -10px;
+    &__head{
+        display:flex;
+        .search{
+            display:flex; align-items:center; grid-gap:5px;
+            margin-bottom:20px;
         }
-        &--spare{
-            color:#03bd94;
-            .text__icon{background-color:#03bd94;}
-        }
-        &--normal{
-            color:#0561d8;
-            .text__icon{background-color:#0561d8;}
-        }
-        &--crowd{
-            color:#dd0046;
-            .text__icon{background-color:#dd0046;}
-        }
-        &--full{
-            color:var(--color-grayscale02);
-            .text__icon{background-color:var(--color-grayscale02);}
+        .button{height:30px; min-width:80px;}
+        .text{
+            margin-left:auto; 
+            font-size:1.25rem; color:var(--color-grayscale01);
         }
     }
-
-    &__list{
-        height:100%; max-height:100%; overflow-y:auto; overflow-x:hidden;
-                        
-        &::-webkit-scrollbar {width:6px;}
-        &::-webkit-scrollbar-thumb {
-            background-color:var(--color-grayscale03); 
-            border-radius:3px; 
-        }
-        &::-webkit-scrollbar-track {
-            background-color:var(--color-black-key); 
-            border-radius:3px;
-        }
-
-        li{
-            border:solid var(--color-black-key); border-width:0 1px 1px 0;
-        }
-
-        &--grid3{
-            display:grid; grid-template-columns:repeat(3, 19.25rem); grid-template-rows:repeat(2, 17.3125rem);
-            li:nth-child(3n){border-right:0;}
-        }
-
-        .head{
-            display:flex; justify-content:space-between; align-items:flex-start;
-            &__title{color:var(--color-grayscale-light); font-weight:700; font-size:0.875rem;}
-            &__state{display:flex; grid-gap:7px;}
-            .button-move{
-                margin-left:7px;
-                background-color:#494a53; color:var(--color-grayscale02);
-                &::after{background-color:var(--color-grayscale02);}
-            }
-        }
-    }
+ 
     
-    // 설비 - 엘리베이터 팝업
-    &--elevator{
-        li{padding:25px;}
-    }
     // 엘리베이터 정보 
     @at-root{
-        .elevator-info{
-            &__view{
-                margin:10px 0 14px;
-                width:256px; height:146px; border-radius:5px;
-                overflow:hidden;
-            }
-            &__detail{
-                display:flex; grid-gap:37px;
-                text-align:left;
-                .info{
-                    flex:1;
-                    font-size:0.75rem;
-                    dl{display:flex; grid-gap:5px; align-items:baseline;}
-                    &__title{font-weight:500; color:var(--color-grayscale01);}
-                    &__floor{font-weight:800; color:var(--color-grayscale-light);}
-                    &__text{
+        .left-info{
+            &__list{
+                height:100%; max-height:100%; 
+        
+                &--grid5{
+                    display:grid; grid-template-columns:repeat(5, 13.75rem); grid-template-rows:repeat(4, 8.125rem);
+                    grid-column-gap:15px; grid-row-gap:20px;
+                    li:nth-child(5n){border-right:0;}
+                }
+
+                li{
+                    border:1px solid var(--color-grayscale-dark); border-radius:5px; overflow:hidden;
+                }
+        
+                .head{
+                    display:flex; justify-content:space-between; align-items:center;
+                    padding:0 10px; background-color:var(--color-black-key);
+                    height:30px;
+                    &__title{color:#fff; font-size:0.875rem;}
+                    &__button{
                         display:inline-block;
-                        margin-top:4px; 
-                        color:var(--color-grayscale-light);
+                        width:14px; height:14px;
+                        -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
+                        -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                        -webkit-mask-position:-10px -10px; mask-position:-10px -10px;
+                        background-color:#fff;
                     }
-                    
-                    &--floor{
-                        dt,dd{flex-shrink:0;}
+                    .button-move{
+                        margin-left:7px;
+                        background-color:#494a53; color:var(--color-grayscale02);
+                        &::after{background-color:var(--color-grayscale02);}
                     }
-                    &--location{
-                        display:flex; flex-direction:column;
-                       .text{margin-top:4px;}
+                }
+                .detail{
+                    display:flex; align-items:center; justify-content:center; flex-direction:column; grid-gap:13px;
+                    background-color:var(--color-grayscale-dark);
+                    height:calc(100% - 30px);
+                    &__state{
+                        display:flex; align-items:center; grid-gap:21px;
+                        .floor{
+                            color:var(--color-grayscale01); font-size:2.5rem; font-weight:100;
+                        }
+                        .state{
+                            display:inline-block;
+                            width:19px; height:50px;
+                            background:url('/dashboard/img/icon_facility.svg') no-repeat; 
+                            &--up{background-position:-59px 0;}
+                            &--down{background-position:0 0;}
+                            &--hold{background-position:-118px 0;}
+                        }
+                        .label{
+                            display:flex; align-items:center; justify-content:center;
+                            background-color:#4681ff; border-radius:43px;
+                            width:60px; height:30px; 
+                            color:#fff; font-size:0.75rem; font-weight:700;
+                            &--parking{
+                                background-color:#2abfa1;
+                                color:var(--color-black-key);
+                            }
+                            &--breakdown{
+                                background-color:#d30004;
+                            }
+                            &--block{
+                                background-color:#676977;
+                                word-break:keep-all; text-align:center;  color:var(--color-black-key);
+                            }
+                        }
+                    }
+                    &__text{
+                        font-size:0.875rem; color:var(--color-grayscale01);
+                        &--off{color:var(--color-grayscale03);}
+                    }
+                }
+            }
+            &--escalator{
+                .detail{
+                    &__state{
+                        .label{
+                            width:45px; height:45px; border-radius:100%;
+                            padding:3px; box-sizing:border-box;
+                        }
+                        .image{
+                            background:url('#{$base-img-path}icon_facility.svg') no-repeat; background-position:-170px 0;
+                            width:50px; height:50px; 
+                        }
+                        .state{
+                            position:relative;
+                            display:flex; flex-direction:column; align-items:center; 
+                            &__text{
+                                position:absolute; top:-10px ; left:50%; transform:translateX(-50%);
+                                font-size:0.875rem; white-space:nowrap;
+                            }
+                            &--down{
+                                .state__text{color:#00DCF5;}
+                            }
+                            &--up{
+                                .state__text{color:#00F5BF}
+                            }
+                        }
+                        &--off{filter:grayscale(1);}
                     }
                 }
             }

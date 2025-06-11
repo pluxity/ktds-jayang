@@ -193,7 +193,7 @@ $base-img-path:"/static/images/viewer/";
                         .state{
                             display:inline-block;
                             width:19px; height:50px;
-                            background:url('/dashboard/img/icon_facility.svg') no-repeat; 
+                            background:url('#{$base-img-path}icon_facility.svg') no-repeat; 
                             &--up{background-position:-59px 0;}
                             &--down{background-position:0 0;}
                             &--hold{background-position:-118px 0;}

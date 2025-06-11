@@ -3113,7 +3113,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   display: inline-block;
   width: 19px;
   height: 50px;
-  background: url("/dashboard/img/icon_facility.svg") no-repeat;
+  background: url("/static/images/viewer/icon_facility.svg") no-repeat;
 }
 
 .left-info__list .detail__state .state--up {

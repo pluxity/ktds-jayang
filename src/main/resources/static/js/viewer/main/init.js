@@ -30,7 +30,7 @@
     // 관리자 여부
     const userRole = getCookie("USER_ROLE");
     const roles = userRole ? userRole.split(",") : [];
-    const adminButton = document.querySelector(".profile__layer .head img");
+    const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
         window.location.href = "/admin/system-setting";
     })
@@ -224,9 +224,13 @@ const Init = (function () {
                 elementText = element.textContent.trim().toLowerCase();
             }
 
-            const matchedCategory = categoryList.find(category =>
-                elementText === category.name.toLowerCase()
-            );
+            const matchedCategory = categoryList.find(category => {
+                const categoryName = category.name.toLowerCase();
+                if (categoryName === '출입통제') {
+                    return elementText.includes('출입');
+                }
+                return categoryName === elementText;
+            });
 
             if (matchedCategory) {
                 element.setAttribute('data-category-id', matchedCategory.id);

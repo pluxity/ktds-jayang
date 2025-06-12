@@ -287,6 +287,7 @@ function initBuilding() {
                 groupId: sbm.sbmFloorGroup,
             }))
         );
+        console.log("sbmDataArray : ", sbmDataArray);
 
         Px.Loader.LoadSbmUrlArray({
             urlDataList: sbmDataArray,
@@ -315,7 +316,7 @@ function initBuilding() {
 
                         const dropdownItemAllocateA = document.createElement('a');
                         dropdownItemAllocateA.classList.add('dropdown-item');
-                        dropdownItemAllocateA.textContent = 'POI 배치하기';
+                        dropdownItemAllocateA.textContent = 'POI 이동';
                         dropdownItemAllocateA.addEventListener(
                             'pointerup',
                             (event) => {

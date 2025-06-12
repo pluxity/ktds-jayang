@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class ElevatorTagManager {
 
-    private static Map<String,String> createFloorMap(int maxP, int maxF) {
+    private static Map<String,String> createFloorMap2(int maxP, int maxF) {
         Map<String,String> m = new LinkedHashMap<>();
         for(int p = maxP; p >= 1; p--) {
             m.put("P" + p, String.valueOf(-(p + 1)));
@@ -25,11 +25,34 @@ public class ElevatorTagManager {
         return Collections.unmodifiableMap(m);
     }
 
+    private static Map<String, String> createFloorMap(int maxP, int maxF) {
+        Map<String, String> m = new LinkedHashMap<>();
+
+        for (int p = maxP; p >= 1; p--) {
+            m.put("P" + p, String.valueOf(-(p + 1)));
+        }
+        m.put("B1", "-1");
+        m.put("0G", "0");
+        for (int f = 1; f <= maxF; f++) {
+            m.put(f + "F", String.valueOf(f));
+        }
+
+        return Collections.unmodifiableMap(m);
+    }
+
+    private static Map<String, String> reverse(Map<String, String> map) {
+        Map<String, String> reversed = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            reversed.put(entry.getValue(), entry.getKey()); // raw → 표현
+        }
+        return Collections.unmodifiableMap(reversed);
+    }
+
     @Getter
     @AllArgsConstructor
     public enum ElevatorABTag {
 
-        CurrentFloor("층위치", createFloorMap(10, 20)),
+        CurrentFloor("층위치", reverse(createFloorMap(10, 20))),
         Direction("방향", Map.of("0", "STOP", "1", "UP", "2", "DOWN")),
         Door("도어상태", Map.of("0", "Open", "1", "Close")),
         DrivingState("승강기상태", Map.of("0", "정상운전", "1", "운전휴지", "2", "독립운전", "3", "전용운전", "4", "보수운전", "5", "정전운전", "6", "화재운전", "7", "지진운전", "8", "고장"));
@@ -45,7 +68,7 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum ElevatorCTag {
-        CurrentFloor("CurrentFloor", createFloorMap(10, 20)),
+        CurrentFloor("CurrentFloor", reverse(createFloorMap(10, 20))),
         UpDir("UpDir", Map.of("0", "OFF", "1", "상향")),
         DownDir("DownDir", Map.of("0", "OFF", "1", "하향")),
         Driving("Driving", Map.of("0", "OFF", "1", "주행중")),

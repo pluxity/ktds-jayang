@@ -33,11 +33,22 @@ public class TagController {
     private final TagService tagService;
     @GetMapping("/elevator")
     public ResponseEntity<Map<Long, TagResponseDTO>> getElevatorTags(
-            @RequestParam("buildingId") Long buildingId,
-            @RequestParam("buildingName") String buildingName,
+            @RequestParam(value = "buildingId", required = false) Long buildingId,
+            @RequestParam(value = "buildingName", required = false) String buildingName,
             @RequestParam("type") String type
     ) throws JsonProcessingException {
-        Map<Long, TagResponseDTO> poiTagResponseMap = tagService.processTagDataByPoi(type, buildingId, buildingName);
+        Map<Long, TagResponseDTO> poiTagResponseMap = tagService.processElevTagDataByPoi(type, buildingId, buildingName);
+
+        return ResponseEntity.ok(poiTagResponseMap);
+    }
+
+    @GetMapping("/escalator")
+    public ResponseEntity<Map<Long, TagResponseDTO>> getEscalatorTags(
+            @RequestParam(value = "buildingId", required = false) Long buildingId,
+            @RequestParam(value = "buildingName", required = false) String buildingName,
+            @RequestParam("type") String type
+    ) throws JsonProcessingException {
+        Map<Long, TagResponseDTO> poiTagResponseMap = tagService.processEsclTagDataByPoi(type, buildingId, buildingName);
 
         return ResponseEntity.ok(poiTagResponseMap);
     }

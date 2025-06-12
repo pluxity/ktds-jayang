@@ -118,20 +118,32 @@
 
     const viewEquipmentList = () => {
         equipmentList.addEventListener('click', (event) => {
+            const allContainer = equipmentList.closest('.all');
             if (equipmentListPop.style.display === 'none') {
                 equipmentListPop.style.display = 'inline-block';
+                if (allContainer && !allContainer.classList.contains('active')) {
+                    allContainer.classList.add('active');
+                }
                 categoryList = PoiCategoryManager.findAll();
                 equipGroupLinks.forEach(link => {
                     const linkClass = link.className.toLowerCase();
-                    const matchedCategory = categoryList.find(category =>
-                        category.name.toLowerCase() === linkClass);
 
+                    const matchedCategory = categoryList.find(category => {
+                        const categoryName = category.name.toLowerCase();
+                        if (categoryName === '출입통제') {
+                            return linkClass.includes('출입');
+                        }
+                        return categoryName === linkClass;
+                    });
                     if (matchedCategory) {
                         link.setAttribute('data-category-id', matchedCategory.id);
                     }
                 });
             } else {
                 equipmentListPop.style.display = 'none';
+                if (allContainer && allContainer.classList.contains('active')) {
+                    allContainer.classList.remove('active');
+                }
             }
         })
     }
@@ -174,6 +186,11 @@
             });
             layerPopup.closePlayers()
         };
+
+        const toggleMenu = document.querySelector('#toggle-menu').closest('.all');
+        if (toggleMenu.classList.contains('active')) {
+            toggleMenu.classList.remove('active');
+        }
 
         const currentPopup = document.getElementById('systemPopup');
         document.querySelectorAll(".popup-basic").forEach(element => {
@@ -219,7 +236,7 @@
                     firstTab: elevatorTab,
                     secondTab: escalatorTab,
                     firstContent: elevatorContent,
-                    secondContent: escalatorContent
+                    secondContent: escalatorContent,
                 });
 
             },
@@ -237,6 +254,19 @@
                     firstContent: guideContent,
                     secondContent: monitorContent
                 });
+                api.get('/parking/search', {
+                    params: {
+                        // startTime: '2025-06-02 03:00:00.000',
+                        // endTime: '2025-06-02 10:00:00.000',
+                        // deviceId: 'DEV001'
+                    }
+                }).then(res => {
+                    console.log("2 : ", 2);
+                    const {result} = res.data;
+                    console.log("result : ", result);
+                }).catch((err) => {
+                    console.error(err);
+                })
             },
             airTab: () => {
                 layerPopup.setAirTab();
@@ -269,18 +299,27 @@
             secondContent
         } = option;
 
+        const clearActiveBtns = (container) => {
+            container.querySelectorAll('.select-box__btn--active')
+                .forEach(btn => btn.classList.remove('select-box__btn--active'));
+        }
+
         firstTab.addEventListener('click', () => {
             switchTab(firstTab, secondTab, firstContent, secondContent);
+            clearActiveBtns(secondContent);
+            layerPopup.setElevator();
         });
 
         secondTab.addEventListener('click', () => {
             switchTab(secondTab, firstTab, secondContent, firstContent);
+            clearActiveBtns(firstContent);
+            layerPopup.setEscalator();
         });
 
         // 초기 상태 설정
         switchTab(firstTab, secondTab, firstContent, secondContent);
+        // layerPopup.setElevator();
     };
-
 
     const initPopup = (popup, clickedItem) => {
         popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
@@ -392,7 +431,7 @@
         const mapPopup = document.getElementById('mapLayerPopup');
         mapPopup.style.display = 'inline-block';
         mapPopup.style.position = 'absolute';
-        mapPopup.style.transform = 'translate(80px, 5%)';
+        mapPopup.style.transform = 'translate(100px, 10%)';
         // mapPopup.style.zIndex = '50';
 
         titleElement.textContent = title;

@@ -25,7 +25,6 @@ const layerPopup = (function () {
         displayElements.forEach((element) => { document.querySelector(element).closest('tr').style.display = ''; });
         document.querySelector('.popup-table.event').style.height = ``;
 
-
         const styleReturn = (state) => {
             switch (state) {
                 case '경고':
@@ -794,7 +793,7 @@ const layerPopup = (function () {
             popup.style.display = popup.style.display === 'none' ? 'inline-block' : 'none';
         }
         popup.style.position = 'absolute';
-        popup.style.transform = 'translate(20%, 5%)';
+        popup.style.transform = 'translate(25%, 10%)';
         // popup.style.zIndex = '50';
         // total count
         // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
@@ -1198,32 +1197,24 @@ const layerPopup = (function () {
     // set building, floor tab
     const setTab = (type, { onBuildingChange = () => {}, onFloorChange = () => {} } = {}) => {
         const buildingBox = document.getElementById(`${type}Building`);
-        const floorBox = document.getElementById(`${type}Floor`);
         const buildingBtn = buildingBox.querySelector('.select-box__btn');
-        const statusBox = document.getElementById('elevatorStatus');
-        const floorBtn = floorBox.querySelector('.select-box__btn');
+        const statusBox   = document.getElementById(`${type}Status`);
         let buildingList = BuildingManager.findAll();
         const sysPopup = document.getElementById(`${type}Pop`);
         const buildingUl = document.getElementById(`${type}BuildingUl`);
-        const floorUl = document.getElementById(`${type}FloorUl`);
 
         let currentBuilding = null;
-        let currentFloor = null;
 
         const toggleBtnActive = (btn, ...others) => {
             if (!btn.classList.contains('select-box__disabled')) {
                 btn.classList.toggle('select-box__btn--active');
                 others.forEach(o => o?.classList.remove('select-box__btn--active'));
-                // others.classList.remove('select-box__btn--active');
             }
         };
 
-        const statusBtn = statusBox?.querySelector('.select-box__btn');
-        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn, statusBtn);
-        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn, statusBtn)
+        buildingBtn.onclick = () => toggleBtnActive(buildingBtn);
         console.log("type : ", type);
-        if (type == 'elevator') {
-            sysPopup.querySelector('#elevatorContent')
+        if (type === 'elevator') {
             const statusBtn = statusBox.querySelector('.select-box__btn');
             const statusContent = statusBox.querySelector('.select-box__content');
             if (!statusContent.querySelector('ul')) {
@@ -1240,51 +1231,73 @@ const layerPopup = (function () {
                 });
                 statusContent.appendChild(statusUl);
             }
-
-            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn, floorBtn);
+            buildingBtn.onclick = () => toggleBtnActive(buildingBtn, statusBtn);
+            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn);
         }
-        buildingUl.innerHTML = '';
-        floorUl.innerHTML = '';
 
-        const defaultBuilding = buildingList.find(building => building.name == 'A');
-        if (defaultBuilding) {
-            currentBuilding = defaultBuilding;
-            buildingBtn.textContent = defaultBuilding.name;
-            // const firstFloor = defaultBuilding.floors[0];
-            const firstFloor = (type==='light' && ['A','B'].includes(defaultBuilding.name))
-                ? defaultBuilding.floors.find(f=>f.name==='1F') || defaultBuilding.floors[0]
-                : defaultBuilding.floors[0];
-            if (firstFloor) {
-                currentFloor = firstFloor;
-                floorBtn.textContent = firstFloor.name;
-                if (type == 'light') {
-                    sysPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
-                }
-                // Px.Model.Visible.HideAll();
-                // Px.Model.Visible.Show(Number(currentFloor.id));
-                onBuildingChange(currentBuilding, currentFloor);
+        if (type === 'escalator') {
+            const statusBtn = statusBox.querySelector('.select-box__btn');
+            const statusContent = statusBox.querySelector('.select-box__content');
+            // 상태
+            if (!statusContent.querySelector('ul')) {
+                const statusUl = document.createElement('ul');
+                ['자동', '통신이상', '전원차단', '고장'].forEach(text => {
+                    const li = document.createElement('li');
+                    li.dataset.id  = text;
+                    li.textContent = text;
+                    li.onclick = () => {
+                        statusBtn.textContent = text;
+                        statusBtn.classList.remove('select-box__btn--active');
+                    };
+                    statusUl.appendChild(li);
+                });
+                statusContent.appendChild(statusUl);
             }
-            floorUl.innerText = '';
-            defaultBuilding.floors.forEach(floor => {
-                const floorLi = document.createElement('li');
-                floorLi.dataset.id = floor.id;
-                floorLi.textContent = floor.name;
-                floorLi.onclick = () => {
-                    currentFloor = floor;
-                    floorBtn.textContent = floor.name;
-                    floorBtn.classList.remove('select-box__btn--active');
-                    if (type == 'light') {
-                        sysPopup.querySelector('.section__head h3')
-                            .textContent = `${defaultBuilding.name} ${floor.name}`;
-                    }
-                    // Px.Model.Visible.HideAll();
-                    // Px.Model.Visible.Show(Number(currentFloor.id));
-                    onFloorChange(defaultBuilding, currentFloor);
-                };
+            // 운행
+            const driveBox = document.getElementById('escalatorDrive');
+            const driveBtn = driveBox.querySelector('.select-box__btn');
+            const driveContent = driveBox.querySelector('.select-box__content');
 
-                floorUl.appendChild(floorLi);
-            })
+            if (!driveContent.querySelector('ul')) {
+                const driveUl = document.createElement('ul');
+                ['운행 전체', '상행', '하행'].forEach(text => {
+                    const li = document.createElement('li');
+                    li.dataset.id  = text;
+                    li.textContent = text;
+                    li.onclick = () => {
+                        driveBtn.textContent = text;
+                        driveBtn.classList.remove('select-box__btn--active');
+                    }
+                    driveUl.appendChild(li);
+                });
+                driveContent.appendChild(driveUl);
+            }
+
+            // statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn, floorBtn);
+            buildingBtn.onclick = () => toggleBtnActive(buildingBtn, statusBtn, driveBtn);
+            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn, driveBtn);
+            driveBtn.onclick = () => toggleBtnActive(driveBtn, buildingBtn, statusBtn);
         }
+
+        buildingUl.innerHTML = '';
+
+        // const defaultBuilding = buildingList.find(building => building.name == 'A');
+        // if (defaultBuilding) {
+        //     currentBuilding = defaultBuilding;
+        //     buildingBtn.textContent = defaultBuilding.name;
+        //     onBuildingChange(currentBuilding);
+        // }
+
+        const allBuildingsLi = document.createElement('li');
+        allBuildingsLi.dataset.id = 'all';
+        allBuildingsLi.textContent = '건물 전체';
+        allBuildingsLi.onclick = () => {
+            currentBuilding = null;
+            buildingBtn.textContent = '건물 전체';
+            buildingBtn.classList.remove('select-box__btn--active');
+            onBuildingChange(null);
+        };
+        buildingUl.appendChild(allBuildingsLi);
 
         buildingList.forEach(building => {
             const buildingLi = document.createElement('li');
@@ -1296,43 +1309,9 @@ const layerPopup = (function () {
                 buildingBtn.textContent = building.name;
                 buildingBtn.classList.remove('select-box__btn--active');
 
-                floorUl.innerHTML = '';
-
-                building.floors.forEach(floor => {
-                    const floorLi = document.createElement('li');
-                    floorLi.dataset.id = floor.id
-                    floorLi.textContent = floor.name;
-
-                    floorLi.onclick = () => {
-                        currentFloor = floor;
-                        floorBtn.textContent = floor.name;
-                        if (type == 'light') {
-                            sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${floor.name}`;
-                        }
-                        floorBtn.classList.remove('select-box__btn--active');
-                        // Px.Model.Visible.HideAll();
-                        // Px.Model.Visible.Show(Number(currentFloor.id));
-                        onFloorChange(building, currentFloor);
-                    }
-
-                    floorUl.appendChild(floorLi);
-                });
-
-                if (building.floors.length > 0) {
-                    // currentFloor = building.floors[0];
-                    currentFloor = (type==='light' && ['A','B'].includes(building.name))
-                        ? building.floors.find(f=>f.name==='1F') || building.floors[0]
-                        : building.floors[0];
-                    floorBtn.textContent = currentFloor.name;
-                    if (type == 'light') {
-                        sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${building.floors[0].name}`;
-                    }
-                    // onChange(currentBuilding, currentFloor);
-                    // Px.Model.Visible.Show(currentFloor.id);
-                }
                 // Px.Model.Visible.HideAll();
                 // Px.Model.Visible.Show(Number(currentFloor.id));
-                onBuildingChange(building, currentFloor);
+                onBuildingChange(building);
             }
 
 
@@ -1444,142 +1423,348 @@ const layerPopup = (function () {
         });
     }
 
-    // elevator
+    // 페이징
+    const pageSize = 20;
+    const paged = {
+        elevator: { entries: [], currentPage: 1, mode: 'AB' },
+        escalator: { entries: [], currentPage: 1 }
+    }
+
+    function initPagedList(type, dataById, mode = null) {
+        const p = paged[type];
+        p.entries = Object.entries(dataById);
+        p.currentPage = 1;
+        p.mode = mode;
+        renderPagedPage(type);
+        renderPagedPagination(type);
+    }
+
+    function renderPagedPage(type) {
+        const { entries, currentPage, mode } = paged[type];
+        const slice = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        const pageData = Object.fromEntries(slice);
+
+        if (type === 'elevator') {
+            renderElevatorList(pageData, mode);
+        } else {
+            renderEscalatorList(pageData);
+        }
+    }
+
+    function renderPagedPagination(type) {
+        const { entries, currentPage } = paged[type];
+        const totalPages = Math.ceil(entries.length / pageSize);
+
+        const content = document.getElementById(`${type}Content`);
+        const paging = content.querySelector('.search-result__paging');
+        const numberDiv = paging.querySelector('.number');
+        const prevBtn = paging.querySelector('button.left');
+        const nextBtn = paging.querySelector('button.right');
+
+        numberDiv.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const span = document.createElement('span');
+            span.textContent = i;
+            if (i === currentPage) span.classList.add('active');
+            span.onclick = () => {
+                paged[type].currentPage = i;
+                renderPagedPage(type);
+                renderPagedPagination(type);
+            };
+            numberDiv.appendChild(span);
+        }
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        prevBtn.onclick = () => {
+            if (paged[type].currentPage > 1) {
+                paged[type].currentPage--;
+                renderPagedPage(type);
+                renderPagedPagination(type);
+            }
+        };
+        nextBtn.onclick = () => {
+            if (paged[type].currentPage < totalPages) {
+                paged[type].currentPage++;
+                renderPagedPage(type);
+                renderPagedPagination(type);
+            }
+        };
+    }
+
+    const renderElevatorList = (dataById, mode = null) => {
+        const elevatorUl = document.getElementById('elevatorList');
+        elevatorUl.innerHTML = '';
+
+        const totalCount = Object.keys(dataById).length;
+        document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
+        console.log("mode : ", mode);
+        Object.entries(dataById).forEach(([idStr, dto]) => {
+            const poiInfo = PoiManager.findById(Number(idStr));
+            const tags = dto.TAGs;
+            let effectiveMode = mode;
+            if (!effectiveMode) {
+                const firstTag = tags[0].tagName;
+                const letter = firstTag.charAt(0);
+                effectiveMode = (letter === 'A' || letter === 'B') ? 'AB' : 'C';
+            }
+            console.log("effectiveMode : ", effectiveMode);
+            const tagMap = tags.reduce((map, t) => {
+                const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                map[key] = t.currentValue;
+                return map;
+            }, {});
+
+            const currentFloor = tagMap['CurrentFloor'];
+
+            // 공통 floor 처리
+            let floorHtml = '';
+            if (/^[PB]\d+$/i.test(currentFloor)) {
+                floorHtml = currentFloor[0] + '<strong>' + currentFloor.slice(1) + '</strong>';
+            } else if (/^0?G$/i.test(currentFloor)) {
+                floorHtml = 'G';
+            } else if (/^\d+[A-Z]+$/i.test(currentFloor)) {
+                const idx = currentFloor.search(/[A-Z]/i);
+                floorHtml = '<strong>' + currentFloor.slice(0, idx) + '</strong>' + currentFloor.slice(idx);
+            } else {
+                floorHtml = currentFloor;
+            }
+
+            // 문 상태 처리
+            const doorRaw = tagMap[mode === 'AB' ? 'Door' : 'Door opened'];
+            const doorState = doorRaw === 'CLOSE' || doorRaw === 'OFF' ? '문닫힘' : '문열림';
+            const doorClass = doorState === '문닫힘' ? 'detail__text detail__text--off' : 'detail__text';
+
+            // 방향 처리
+            let directionText = '';
+            let directionState = '';
+            if (mode === 'AB') {
+                switch ((tagMap['Direction'] || '').toUpperCase()) {
+                    case 'UP':
+                        directionText = '상행';
+                        directionState = 'state--up';
+                        break;
+                    case 'DOWN':
+                        directionText = '하향';
+                        directionState = 'state--down';
+                        break;
+                    case 'STOP':
+                        directionText = '멈춤';
+                        directionState = 'state--hold';
+                        break;
+                }
+            } else {
+                const directionKeys = ['UpDir', 'DownDir', 'Parking'];
+                const directionLabels = { UpDir: '상향', DownDir: '하향', Parking: '파킹' };
+                const dirKey = directionKeys.find(k => tagMap[k] && tagMap[k] !== 'OFF');
+                if (dirKey) {
+                    directionText = directionLabels[dirKey];
+                    directionState = {
+                        '상향': 'state--up',
+                        '하향': 'state--down',
+                        '파킹': 'state--hold'
+                    }[directionText];
+                }
+            }
+
+            // 상태 텍스트 및 라벨 처리
+            let stateText = '';
+            let labelClass = '';
+
+            if (mode === 'AB') {
+                const status = tagMap['DrivingState'];
+                stateText = status;
+                if (["보수운전", "정전운전", "화재운전", "지진운전"].includes(status)) {
+                    labelClass = 'label--parking';
+                } else if (status === '고장') {
+                    labelClass = 'label--breakdown';
+                }
+            } else {
+                const extraStates = [
+                    'Driving', 'AUTO', 'EMCB', 'EMCF', 'Fault', 'Checking',
+                    'Parking', 'Independent driving', 'Overweight',
+                    '1st fire driving', 'Second fire driving'
+                ];
+                const activeStatesArr = extraStates
+                    .filter(key => tagMap[key] && tagMap[key] !== 'OFF')
+                    .map(key => tagMap[key]);
+                stateText = activeStatesArr.join(', ');
+
+                if (activeStatesArr.includes('파킹')) {
+                    labelClass = 'label--parking';
+                } else if (activeStatesArr.length === 1 && activeStatesArr[0] === '고장') {
+                    labelClass = 'label--breakdown';
+                }
+            }
+
+            // DOM 렌더링
+            const elevatorLi = document.createElement('li');
+            const buildingLabel = `[${poiInfo.property.buildingName}]`;
+
+            elevatorLi.innerHTML = `
+                    <div class="head">
+                        <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
+                        <a class="head__button" href="javascript:void(0);"><span class="hide">도면 이동</span></a>
+                    </div>
+                    <div class="detail">
+                        <div class="detail__state">
+                            <span class="label ${labelClass}">${stateText}</span>
+                            <div class="floor">${floorHtml}</div>
+                            <span class="state ${directionState}"><span class="hide state__text">${directionText}</span></span>
+                        </div>
+                        <p class="${doorClass}">${doorState}</p>
+                    </div>
+                `;
+            elevatorUl.appendChild(elevatorLi);
+        });
+    };
+
+    const addABElevatorList = (building) => {
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'ELEV',
+                buildingId: building.id,
+                buildingName: building.name,
+            }
+        }).then(res => {
+            initPagedList('elevator', res.data, 'AB');
+        });
+    };
+
+    const addCElevatorList = (building) => {
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'ELEV',
+                buildingId: building.id,
+                buildingName: building.name,
+            }
+        }).then(res => {
+            initPagedList('elevator', res.data, 'C');
+        });
+    };
+
+    const addAllElevatorList = (building) => {
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'ELEV',
+            }
+        }).then(res => {
+            initPagedList('elevator', res.data);
+        });
+    };
+
     const setElevator = () => {
         setTab('elevator', {
-            onBuildingChange: (building, floor) => {
-                console.log("building", building);
-                if (['A', 'B'].includes(building.name)) {
-                    addABElevatorList(building, floor);
-                } else {
-                    addCElevatorList(building, floor);
+            onBuildingChange: (building) => {
+
+                if (building === null) {
+                    // 1) 건물 전체: addAllElevatorList 호출
+                    addAllElevatorList();
                 }
-            },
-            onFloorChange: (building, floor) => {
-                console.log("floor", floor);
+                else if (['A', 'B'].includes(building.name)) {
+                    addABElevatorList(building);
+                } else {
+                    addCElevatorList(building);
+                }
             }
         });
     }
 
-    // A, B
-    const addABElevatorList = (building, floor) => {
-
-        const buildingName = building.name;
-        const buildingId = building.id;
-
-        let dataById = null;
-        api.get(`/api/tags/elevator`, {
+    const addEscalatorList = (building, floor) => {
+        api.get(`/api/tags/escalator`, {
             params: {
-                type: 'EV',
-                buildingId,
-                buildingName,
+                type: 'ESCL',
+                buildingId: building.id,
+                buildingName: building.name,
             }
         }).then(res => {
-            dataById = res.data;
-            const elevatorUl = document.getElementById('elevatorList');
-            elevatorUl.innerHTML = '';
-            // 여기서 세팅하면 될듯?
-            Object.entries(dataById).forEach(([idStr, dto]) => {
-                const poiInfo = Px.Poi.GetData(Number(idStr));
+            initPagedList('escalator', res.data);
+        });
+    };
 
-                const tagMap = dto.TAGs.reduce((map, t) => {
-                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
-                    map[key] = t.currentValue;
-                    return map;
-                }, {})
+    const renderEscalatorList = (dataById) => {
+        const escalatorUl = document.getElementById('escalatorList');
+        escalatorUl.innerHTML = '';
 
-                console.log("poiInfo : ", poiInfo);
-                console.log("tagMap : ", tagMap);
-                const elevatorLi = document.createElement('li');
-                // A, B동일때만
-                elevatorLi.innerHTML = `
-                        <div class="head">
-                            <div class="head__title">
-                                <span>${tagMap['DrivingState']}</span>
-                            </div>
-                            <div class="head__title">
-                                <span>[${poiInfo?.property.buildingName}] [${poiInfo?.property.floorNo}] [${poiInfo?.property.name}]</span>
-                            </div>
-                        </div>
-                        <div class="detail">
-                            <div class="elevator-info">
-                                <div class="elevator-info__detail">
-                                    <div class="info info--location">
-                                        <dl>
-                                            <dt class="info__floor">${tagMap['CurrentFloor']}</dt>
-                                        </dl>
-                                        <dl>
-                                            <dt class="info__floor">${tagMap['Direction']}</dt>
-                                        </dl>
-                                        <dl>
-                                            <dt class="info__floor">${tagMap['Door']}</dt>
-                                        </dl>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                elevatorUl.appendChild(elevatorLi);
-            })
-        })
-    }
-    // C
-    const addCElevatorList = (building, floor) => {
+        const totalCount = Object.keys(dataById).length;
+        document.getElementById('totalEscalatorCnt').textContent = `총 ${totalCount}대`;
 
-        const buildingName = building.name;
-        const buildingId = building.id;
+        Object.entries(dataById).forEach(([idStr, dto]) => {
+            const poiInfo = PoiManager.findById(Number(idStr));
+            const tagMap = dto.TAGs.reduce((map, t) => {
+                const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                map[key] = {
+                    value: t.currentValue
+                }
+                return map;
+            }, {});
 
-        let dataById = null;
-        api.get(`/api/tags/elevator`, {
-            params: {
-                type: 'EV',
-                buildingId,
-                buildingName,
+            const rawTag = dto.TAGs[0].tagName;
+            const eqCode = rawTag.substring(
+                rawTag.indexOf('ESCL'),
+                rawTag.lastIndexOf('-')
+            );
+            console.log("eqCode : ", eqCode);
+            console.log("tagMap : ", tagMap);
+            // DOM 렌더링
+            const escalatorLi = document.createElement('li');
+            const buildingLabel = `[${poiInfo.property.buildingName}]`;
+
+            // direction
+            const isUp = tagMap['UpDir'].value !== 'OFF';
+            const directionClass = isUp ? 'state--up' : 'state--down';
+            const directionText  = isUp ? '상행' : '하행';
+            // state
+            const activeKey = ['Stop','Run','Fault'].find(key => tagMap[key].value !== 'OFF')
+            let stateLabel = '';
+            let stateText  = '';
+            let detailState = '';
+            switch (activeKey) {
+                case 'Stop':
+                    stateText = '정지';
+                    stateLabel = 'label--block';
+                    detailState = 'detail__state--off';
+                    break;
+                case 'Run':
+                    stateText = '자동';
+                    break;
+                case 'Fault':
+                    stateText = '고장';
+                    stateLabel = 'label--breakdown';
+                    break;
+                default:
+                    stateText = '';
+                    stateLabel = '';
             }
-        }).then(res => {
-            dataById = res.data;
-            const elevatorUl = document.getElementById('elevatorList');
-            elevatorUl.innerHTML = '';
-            // 여기서 세팅하면 될듯?
-            Object.entries(dataById).forEach(([idStr, dto]) => {
-                const poiInfo = Px.Poi.GetData(Number(idStr));
 
-                const tagMap = dto.TAGs.reduce((map, t) => {
-                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
-                    map[key] = t.currentValue;
-                    return map;
-                }, {})
-
-                console.log("poiInfo : ", poiInfo);
-                console.log("tagMap : ", tagMap);
-                const elevatorLi = document.createElement('li');
-
-            })
-        })
-    }
+            escalatorLi.innerHTML = `
+                    <div class="head">
+                        <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
+                        <a class="head__button" href="javascript:void(0);"><span class="hide">도면 이동</span></a>
+                    </div>
+                    <div class="detail">  
+                        <div class="detail__state ${detailState}">
+                            <span class="image"><span class="hide">에스컬레이터</span></span>
+                            <!-- UP -->
+                            <span class="state ${directionClass}"><span class="state__text">${directionText}</span></span>
+                            <!-- 자동 -->
+                            <span class="label ${stateLabel}">${stateText}</span>
+                        </div>
+                    </div>
+                `;
+            escalatorUl.appendChild(escalatorLi);
+        });
+    };
 
     const setEscalator = () => {
         setTab('escalator', {
             onBuildingChange: (building, floor) => {
-                console.log("building", building);
+                addEscalatorList(building, floor);
             },
             onFloorChange: (building, floor) => {
                 console.log("floor", floor);
             }
         });
-        const param = new URLSearchParams(window.location.search);
-        const buildingId = param.get("buildingId");
-        const building = BuildingManager.findById(buildingId);
-        const buildingName = building.name;
-
-        api.get(`/api/tags/elevator`, {
-            params: {
-                buildingId,
-                buildingName
-            }
-        }).then(res => {
-            console.log(res);
-        })
     }
 
     const elevatorPopup = document.getElementById('elevatorPop');
@@ -2744,8 +2929,10 @@ const layerPopup = (function () {
         createEventPopup,
         pagingNotice,
         addClosePopup,
+        setTab,
         setLight,
-        setAirTab
+        setAirTab,
+        setEscalator
     }
 })();
 

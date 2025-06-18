@@ -30,9 +30,9 @@ html {
   left: 50%;
   -webkit-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
-  width: 5rem;
-  height: 5rem;
-  background: url("/static/img/4k/icon80.svg") no-repeat -400px -40px;
+  width: 5rem;  /* 50px */
+  height: 5rem; /* 50px */
+  background: url("/static/img/4k/icon_kiosk_home.svg") no-repeat -400px -40px;
 }
 
 .kiosk-layer {
@@ -53,7 +53,7 @@ html {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  grid-gap: 30px;
+  grid-gap: 1.875rem; /* 18.75px */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -71,18 +71,18 @@ html {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  padding: 50px 20;
-  border-bottom: 1px solid #444C53;
+  padding: 3.125rem 1.25rem; /* 31.25px 12.5px */
+  border-bottom: 0.0625rem solid #444C53; /* 0.625px */
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  height: 9.375rem;
-  font-size: 2.5rem;
+  height: 9.375rem; /* 93.75px */
+  font-size: 2.5rem; /* 25px */
   color: #232527;
   font-weight: 700;
 }
 
 .kiosk-layer__info {
-  padding: 40px 40px 140px 40px;
+  padding: 2.5rem 2.5rem 8.75rem 2.5rem;
 }
 
 .kiosk-layer__info dl {
@@ -92,8 +92,8 @@ html {
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  padding: 30px 20px;
-  border-bottom: 1px solid #CFD4D8;
+  padding: 1.875rem 1.25rem;
+  border-bottom: 0.0625rem solid #CFD4D8;
   font-size: 2.5rem;
   line-height: 1.2;
 }
@@ -114,19 +114,21 @@ html {
 
 .kiosk-layer__close {
   position: absolute;
-  right: -100px;
+  right: -6.25rem;
   top: 0;
   display: inline-block;
   background: url("/static/img/4k/icon_kiosk_close.svg") no-repeat;
   width: 6.25rem;
   height: 6.25rem;
+  background-size: 100% 100%;
+  background-position: center;
 }
 
 .kiosk-layer__image {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  grid-gap: 30px;
+  grid-gap: 1.875rem;
 }
 
 .kiosk-layer__image .image {
@@ -150,7 +152,7 @@ html {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  grid-gap: 40px;
+  grid-gap: 2.5rem;
 }
 
 .kiosk-3d__control button {
@@ -165,19 +167,22 @@ html {
   display: inline-block;
   width: 5rem;
   height: 5rem;
-  background: url("/static/img/4k/icon80.svg") no-repeat;
+  
+  background-size: 17rem
 }
-
 .kiosk-3d__control button.home::after {
-  background-position: -40px -40px;
+  background: url("/static/img/4k/icon_kiosk_home.svg") no-repeat;
+  background-position: 100% 100%;
 }
 
 .kiosk-3d__control button.minus::after {
-  background-position: -278px -40px;
+  background: url("/static/img/4k/icon_kiosk_minus.svg") no-repeat;
+  background-position: 100% 100%;
 }
 
 .kiosk-3d__control button.plus::after {
-  background-position: -160px -40px;
+  background: url("/static/img/4k/icon_kiosk_plus.svg") no-repeat;
+  background-position: 100% 100%;
 }
 
 .kiosk-list {
@@ -211,22 +216,22 @@ html {
   -webkit-box-flex: 2;
       -ms-flex: 2;
           flex: 2;
-  padding: 10px;
+  padding: 0.625rem;
   background-color: #fff;
   border: solid #CFD4D8;
-  border-width: 2px 0 2px 2px;
+  border-width: 0.125rem 0 0.125rem 0.125rem;
   height: 12.5rem;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
 
 .kiosk-list__tab li:last-child {
-  border-right-width: 2px;
+  border-right-width: 0.125rem;
 }
 
 .kiosk-list__tab li.active {
   border-color: #232527;
-  border-width: 5px;
+  border-width: 0.3125rem;
 }
 
 .kiosk-list__tab li.active button {
@@ -257,8 +262,8 @@ html {
   display: grid;
   -ms-grid-rows: (1fr)[2];
       grid-template-rows: repeat(2, 1fr);
-  grid-column-gap: 110px;
-  grid-row-gap: 80px;
+  grid-column-gap: 6.875rem;
+  grid-row-gap: 5rem;
 }
 
 .kiosk-list__info .list__header {
@@ -272,12 +277,12 @@ html {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  padding: 60px 0 30px;
+  padding: 3.75rem 0 1.875rem;
   background-color: #fff;
 }
 
 .kiosk-list__info .list__header:not(:has(.list__thumbnail)) {
-  padding: 60px 0 68px;
+  padding: 3.75rem 0 4.25rem;
 }
 
 .kiosk-list__info .list__thumbnail {
@@ -350,7 +355,7 @@ html {
 
 .kiosk-list__info .list__footer li .button--location {
   position: relative;
-  padding-left: 45px;
+  padding-left: 2.8125rem;
 }
 
 .kiosk-list__info .list__footer li .button--location::before {
@@ -358,14 +363,16 @@ html {
   position: absolute;
   left: 0;
   display: inline-block;
-  margin-top: -3px;
-  width: 35px;
-  height: 40px;
+  margin-top: -0.1875rem;
+  width: 2.1875rem;
+  height: 2.5rem;
   background: url("/static/img/4k/icon_kiosk_location.svg") no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
 }
 
 .kiosk-list__info .list__footer li + li {
-  border-left: 1px solid #b8c0c7;
+  border-left: 0.0625rem solid #b8c0c7;
 }
 
 .kiosk-list__info--empty .empty {
@@ -387,42 +394,46 @@ html {
 .kiosk-list__button {
   position: absolute;
   display: inline-block;
-  width: 54px;
-  height: 104px;
+  width: 3.375rem;
+  height: 6.5rem;
   -webkit-mask-image: url("/static/img/4k/icon_kiosk_arrow.svg");
   mask-image: url("/static/img/4k/icon_kiosk_arrow.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;  /* background-size 대신 mask-size 사용 */
+  mask-size: 100% 100%;
+  -webkit-mask-position: center;  /* background-position 대신 mask-position 사용 */
+  mask-position: center;
 }
 
 .kiosk-list__button--left {
-  left: -140px;
+  left: -8.75rem;
   -webkit-transform: rotate(180deg);
           transform: rotate(180deg);
   background-color: #999C9F;
 }
 
 .kiosk-list__button--right {
-  right: -140px;
+  right: -8.75rem;
   background-color: #444C53;
 }
 
 .kiosk-list__paging {
   position: absolute;
-  bottom: -150px;
+  bottom: -9.375rem;
   left: 50%;
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  grid-gap: 40px;
+  grid-gap: 2.5rem;
 }
 
 .kiosk-list__paging .button {
   border-radius: 50%;
   background-color: #bbc0c7;
-  border: 2px solid transparent;
+  border: 0.125rem solid transparent;
   width: 2.5rem;
   height: 2.5rem;
 }
@@ -433,7 +444,7 @@ html {
 }
 
 .kiosk-footer__contents .floor {
-  grid-gap: 30px;
+  grid-gap: 1.875rem;
   background-color: #232527;
   font-size: 5rem;
   font-weight: 300;
@@ -441,8 +452,8 @@ html {
 
 .kiosk-footer__contents .floor button {
   position: relative;
-  -webkit-backdrop-filter: blur(10px);
-          backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(0.625rem);
+          backdrop-filter: blur(0.625rem);
   color: #fff;
 }
 
@@ -466,9 +477,9 @@ html {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  grid-gap: 20px;
-  border: 2px solid;
-  padding: 49px;
+  grid-gap: 1.25rem;
+  border: 0.125rem solid;
+  padding: 3.0625rem;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   height: 100%;
@@ -484,27 +495,27 @@ html {
 
 .kiosk-footer__contents .store__search input::-webkit-input-placeholder {
   font-size: 2.6rem;
-  letter-spacing: -0.48px;
+  letter-spacing: -0.03rem;
 }
 
 .kiosk-footer__contents .store__search input:-ms-input-placeholder {
   font-size: 2.6rem;
-  letter-spacing: -0.48px;
+  letter-spacing: -0.03rem;
 }
 
 .kiosk-footer__contents .store__search input::-ms-input-placeholder {
   font-size: 2.6rem;
-  letter-spacing: -0.48px;
+  letter-spacing: -0.03rem;
 }
 
 .kiosk-footer__contents .store__search input::placeholder {
   font-size: 2.6rem;
-  letter-spacing: -0.48px;
+  letter-spacing: -0.03rem;
 }
 
 .kiosk-footer__contents .store__search input::-webkit-input-placeholder {
   font-size: 2.6rem;
-  letter-spacing: -0.48px;
+  letter-spacing: -0.03rem;
 }
 
 .kiosk-footer__contents .store__search .remove {
@@ -516,6 +527,10 @@ html {
   mask-image: url("/static/img/4k/icon_kiosk_remove.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;  /* 마스크 크기 추가 */
+  mask-size: 100% 100%;
+  -webkit-mask-position: center;  /* 마스크 위치 추가 */
+  mask-position: center;
 }
 
 .kiosk-footer__contents .store__letters {
@@ -615,8 +630,8 @@ html {
   }
   .kiosk-info {
     position: absolute;
-    left: 40px;
-    top: 40px;
+    left: 2.5rem;
+    top: 2.5rem;
     z-index: 1;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -629,17 +644,17 @@ html {
             justify-content: center;
     width: 15rem;
     height: 15rem;
-    border: 1px solid #F2F1F7;
+    border: 0.0625rem solid #F2F1F7;
     background: rgba(242, 241, 247, 0.3);
-    -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(0.625rem);
+            backdrop-filter: blur(0.625rem);
     color: #232527;
     font-size: 7.5rem;
     font-weight: 800;
   }
   .kiosk-3d__control {
-    bottom: 80px;
-    right: 80px;
+    bottom: 5rem;
+    right: 5rem;
   }
   .kiosk-3d__control button {
     border-radius: 50%;
@@ -685,7 +700,7 @@ html {
     -webkit-box-flex: 1;
         -ms-flex: 1;
             flex: 1;
-    padding: 0 76.5px;
+    padding: 0 4.78125rem;
     color: #fff;
     font-size: 2.5rem;
   }
@@ -696,18 +711,18 @@ html {
     font-weight: 700;
   }
   .kiosk-footer__buttons button:first-child {
-    border-width: 2px 0 0 0;
+    border-width: 0.125rem 0 0 0;
   }
   .kiosk-footer__buttons button:last-child {
-    border-width: 0 0 2px 0;
+    border-width: 0 0 0.125rem 0;
   }
   .kiosk-footer__contents {
     -webkit-box-flex: 1;
         -ms-flex: 1;
             flex: 1;
-    padding: 0 30px;
+    padding: 0 1.875rem;
     border: solid #444C53;
-    border-width: 0 1px;
+    border-width: 0 0.0625rem;
     height: 100%;
   }
   .kiosk-footer__contents .store, .kiosk-footer__contents .floor {
@@ -727,11 +742,11 @@ html {
   }
   .kiosk-footer__contents .floor button.active::before {
     right: 0;
-    height: 16px;
+    height: 1rem;
   }
   .kiosk-footer__contents .store {
-    grid-gap: 40px;
-    padding: 40px 0;
+    grid-gap: 2.5rem;
+    padding: 2.5rem 0;
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
   }
@@ -794,37 +809,37 @@ html {
     bottom: 0;
     right: 0;
     left: 0;
-    height: 4px;
+    height: 0.25rem;
     background-color: #26FFCC;
   }
   .kiosk-footer__contents .store__letters .consonants {
-    grid-row-gap: 20px;
-    grid-column-gap: 10px;
+    grid-row-gap: 1.25rem;
+    grid-column-gap: 0.625rem;
     max-width: 106.25rem;
   }
   .kiosk-footer__contents .store__letters .number {
-    grid-column-gap: 5px;
+    grid-column-gap: 0.3125rem;
     margin-left: auto;
-    margin-right: 80px;
+    margin-right: 5rem;
   }
   .kiosk-footer__contents .store__buttons {
-    grid-gap: 10px;
+    grid-gap: 0.625rem;
     margin-left: auto;
   }
   .kiosk-footer__contents .store__buttons button {
     line-height: 5.625rem;
   }
   .kiosk-footer__contents .store__buttons button::before {
-    border-width: 2px;
-    border-radius: 50px;
+    border-width: 0.125rem;
+    border-radius: 3.125rem;
   }
   .kiosk-footer__contents .store__buttons button.active::before {
-    border-width: 5px;
+    border-width: 0.3125rem;
   }
   .kiosk-footer__date {
     -ms-flex-negative: 0;
         flex-shrink: 0;
-    padding: 0 80px;
+    padding: 0 5rem;
     color: #fff;
     font-size: 2.5rem;
   }
@@ -833,7 +848,7 @@ html {
 /* 세로형 portrait */
 @media (orientation: portrait) {
   .kiosk-main {
-    height: calc(100vh - 25rem);
+    height: calc(100vh - 12.5rem);
   }
   .kiosk-main__close {
     bottom: 0;
@@ -858,7 +873,7 @@ html {
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;
-    padding: 55px 0px 55px 100px;
+    padding: 3.4375rem 0 3.4375rem 6.25rem;
     background-color: #fff;
     width: 100vw;
     height: 22.5rem;
@@ -871,18 +886,18 @@ html {
     top: 22.5rem;
     bottom: 25rem;
     background-position: center center;
-    height: calc(100% - 22.5rem - 25rem);
+    height: calc(100% - 22.5rem - 12.5rem);
   }
   .kiosk-3d__control {
     bottom: 65rem;
-    right: 20px;
+    right: 1.25rem;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
         -ms-flex-direction: column;
             flex-direction: column;
   }
   .kiosk-3d__control button {
-    border-radius: 50px;
+    border-radius: 3.125rem;
   }
   .kiosk-list {
     padding: 20.5rem 12.5rem 0 12.5rem;
@@ -899,7 +914,6 @@ html {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 12.5rem;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -910,14 +924,14 @@ html {
     -webkit-box-flex: 1;
         -ms-flex: 1;
             flex: 1;
-    padding: 0 36.5px;
-    border-bottom: 10px solid transparent;
+    padding: 0 2.28125rem;
+    border-bottom: 0.625rem solid transparent;
     height: 100%;
     color: #fff;
     font-size: 5rem;
   }
   .kiosk-footer__buttons button ~ button {
-    border-left: 1px solid #F2F1F7;
+    border-left: 0.0625rem solid #F2F1F7;
   }
   .kiosk-footer__buttons button.active {
     border-color: #26ffcc;
@@ -949,7 +963,7 @@ html {
   }
   .kiosk-footer__contents .floor button.active::before {
     top: 0;
-    width: 16px;
+    width: 1rem;
   }
   .kiosk-footer__contents .store {
     position: absolute;
@@ -962,8 +976,8 @@ html {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    grid-gap: 50px;
-    margin-top: 75px;
+    grid-gap: 3.125rem;
+    margin-top: 4.6875rem;
   }
   .kiosk-footer__contents .store__search {
     border-color: #899096;
@@ -1001,8 +1015,8 @@ html {
   .kiosk-footer__contents .store__letters button {
     width: 6.875rem;
     height: 7.5rem;
-    padding: 0 10px;
-    border-radius: 10px;
+    padding: 0 0.625rem;
+    border-radius: 0.625rem;
   }
   .kiosk-footer__contents .store__letters .consonants {
     -webkit-box-pack: center;
@@ -1011,22 +1025,22 @@ html {
     min-width: 95rem;
   }
   .kiosk-footer__contents .store__buttons {
-    grid-gap: 20px;
+    grid-gap: 1.25rem;
   }
   .kiosk-footer__contents .store__buttons button {
-    border-radius: 10px;
+    border-radius: 0.625rem;
     height: 7.5rem;
   }
   .kiosk-footer__contents .store__buttons button::before {
-    border-width: 5px;
-    border-radius: 10px;
+    border-width: 0.3125rem;
+    border-radius: 0.625rem;
   }
   .kiosk-footer__date {
     position: absolute;
-    top: 60px;
-    right: 100px;
+    top: 3.75rem;
+    right: 6.25rem;
     z-index: 1;
-    padding: 35px 0;
+    padding: 2.1875rem 0;
     font-size: 3.75rem;
   }
 
@@ -1035,9 +1049,7 @@ html {
   .store__letters .number {
     display: grid;
     grid-template-columns: repeat(13, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
   }
-
 }
-/*# sourceMappingURL=kiosk.css.map */

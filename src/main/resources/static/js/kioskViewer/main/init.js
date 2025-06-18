@@ -1,5 +1,10 @@
 'use strict';
 (async function () {
+
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.kiosk-footer .kiosk-footer__date');
         const now = new Date();

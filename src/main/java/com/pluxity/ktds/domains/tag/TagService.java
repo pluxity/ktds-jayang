@@ -63,7 +63,7 @@ public class TagService {
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
             TagResponseDTO all = restTemplate.getForObject(
-                    "http://localhost:9999/api/tags/data",
+                    "http://192.168.4.149:9999/api/tags/data",
                     TagResponseDTO.class,
                     tagNamesParam
             );
@@ -140,7 +140,7 @@ public class TagService {
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
             TagResponseDTO all = restTemplate.getForObject(
-                    "http://localhost:9999/api/tags/data",
+                    "http://192.168.4.149:9999/api/tags/data",
                     TagResponseDTO.class,
                     tagNamesParam
             );

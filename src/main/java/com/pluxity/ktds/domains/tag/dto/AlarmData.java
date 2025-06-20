@@ -2,23 +2,23 @@ package com.pluxity.ktds.domains.tag.dto;
 
 import com.fasterxml.jackson.annotation.*;
 import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
+import lombok.Builder;
 
-import java.util.List;
-import java.util.Map;
+@Builder
 public record AlarmData(
-        @JsonProperty("T")
+        @JsonAlias("T")
         String occurrenceDate,
-        @JsonProperty("N")
+        @JsonAlias("N")
         String tagName,
-        @JsonProperty("V")
+        @JsonAlias("V")
         String tagValue,
-        @JsonProperty("S")
+        @JsonAlias("S")
         AlarmStatus alarmStatus,
-        @JsonProperty("Y")
+        @JsonAlias("Y")
         AlarmStatus alarmType,
-        @JsonProperty("A")
+        @JsonAlias("A")
         int confirmStatus,
-        @JsonProperty("E")
+        @JsonAlias("E")
         String confirmTime
 ) {
 }

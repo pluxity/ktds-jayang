@@ -1,5 +1,7 @@
 package com.pluxity.ktds.domains.tag.constant;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,6 +21,7 @@ public enum TagStatus {
     private final int code;
     private final String status;
 
+    @JsonCreator
     public static TagStatus fromCode(int code) {
         return Arrays.stream(TagStatus.values())
                 .filter(status -> status.getCode() == code)
@@ -28,6 +31,11 @@ public enum TagStatus {
 
     @Override
     public String toString() {
+        return status;
+    }
+
+    @JsonValue
+    public String getStatus() {
         return status;
     }
 }

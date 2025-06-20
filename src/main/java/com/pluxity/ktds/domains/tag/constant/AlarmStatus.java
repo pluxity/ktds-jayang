@@ -52,4 +52,16 @@ public enum AlarmStatus {
         }
         return null;
     }
+
+    public static String normalizeLabel(String label) {
+        if (label == null || label.isBlank()) return null;
+
+        for (AlarmStatus s : values()) {
+            if (s.name().equalsIgnoreCase(label)
+                    || s.getStatus().equalsIgnoreCase(label)) {
+                return s.name();
+            }
+        }
+        return label;
+    }
 }

@@ -145,6 +145,11 @@ public class PoiController {
         return tagClientService.readTags(tags);
     }
 
+    @PostMapping("/test-status")
+    public ResponseEntity<String> getTestPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
+        return tagClientService.testReadTags(tags);
+    }
+
     private Map<String, Object> getPoiTagData(List<String> tags) {
         String tagDataStr = tagClientService.readTags(tags).getBody();
         try {

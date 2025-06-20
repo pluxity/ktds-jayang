@@ -113,13 +113,13 @@ public class TagService {
         return poiTagResponseMap;
     }
 
-    public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type, Long buildingId, String buildingName) {
+    public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type) {
 
         String prefix = "C-null-EV-ESCL-";
-        List<Poi> pois = poiRepository.findPoisByBuildingId(buildingId);
+//        List<Poi> pois = poiRepository.findPoisByBuildingId(buildingId);
 
-        List<Poi> elevatorPois = poiRepository.findByCategoryName("승강기");
-        System.out.println("elevatorPois : " + elevatorPois);
+        List<Poi> pois = poiRepository.findByMiddleCategoryName("에스컬레이터");
+
         Map<Long, TagResponseDTO> poiTagResponseMap = new HashMap<>();
         List<String> allTagNamesToFetch = new ArrayList<>();
         Map<String, Long> tagNamePoiIdMap = new HashMap<>();

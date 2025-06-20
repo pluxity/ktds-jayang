@@ -184,6 +184,7 @@
             systemTabs.forEach(tab => {
                 tab.classList.remove('active')
             });
+            layerPopup.clearAllIntervals();
             layerPopup.closePlayers()
         };
 

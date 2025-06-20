@@ -68,7 +68,7 @@ class KioskPoi {
             id: this.id,
             displayText: this.name,
             group: this.isKiosk ? 'Kiosk' : 'Store',
-            lineHeight: SystemSettingManager.find().poiLineLength ?? 10,
+            lineHeight: SystemSettingManager.find().poiLineLength ?? 40,
             position: this.position ? this.position : {x:0,y:0,z:0},
             iconUrl: this.isKiosk ? this.kioskIconUrl : this.storeIconUrl,
             property: this.property,

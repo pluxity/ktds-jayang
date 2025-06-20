@@ -516,7 +516,6 @@ const Init = (function () {
                             }
                         });
                         if (poiInfo.property.isLight) {
-                            console.log("poiInfo.property : ", poiInfo.property);
 
                             if (selectedGroup === poiInfo.property.lightGroup) {
                                 if (selectedId === poiInfo.id) {
@@ -533,9 +532,7 @@ const Init = (function () {
                                 selectedGroup = poiInfo.property.lightGroup;
                                 selectedId = poiInfo.id;
                             }
-                            console.log("selectedGroup",selectedGroup);
                         }
-                        console.log("selectedId : ", selectedId);
                         if (samePopupOpen) return;
                         renderPoiInfo(poiInfo);
 
@@ -672,7 +669,7 @@ const Init = (function () {
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
-        if (poiInfo.group === "cctv") {
+        if (poiInfo.group.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
             const popupInfo = document.createElement('div');
 
@@ -760,36 +757,170 @@ const Init = (function () {
             // poi 상태 가져오기
             const updateTagData = async () => {
                 try {
-                    const response = await fetch(`/poi/test-status`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(poiProperty.tagNames)
-                    });
-                    
-                    const data = await response.json();
 
+                    const response = await api.post('/poi/test-status', poiProperty.tagNames);
+                    // const response = await fetch(`/poi/test-status`, {
+                    //     method: 'POST',
+                    //     headers: {
+                    //         'Content-Type': 'application/json'
+                    //     },
+                    //     body: JSON.stringify(poiProperty)
+                    // });
+                    // const data = await response.json();
+
+                    const data = response.data;
                     const tbody = popupInfo.querySelector('tbody');
                     if (data.TAGCNT > 0) {
                         if (poiProperty.poiMiddleCategoryName == '에스컬레이터') {
-                            const dirTag = data.TAGs.find(t =>
-                                t.value === '1' && (t.label === '상향' || t.label === '하향')
-                            );
-                            const runTag = data.TAGs.find(t =>
-                                t.value === '1' && (t.label === '운행' || t.label === '정지')
-                            );
+                            const esclNumMatch = data.TAGs[0].tagName.match(/ESCL-(\d+)/);
+                            const esclNum = esclNumMatch ? parseInt(esclNumMatch[1], 10) : null;
+                            const esclBaseMap = {
+                                1: 'B2F-B1F',
+                                3: 'B1F-1F',
+                                5: '1F-2F',
+                                7: 'B4F-B3F',
+                                9: 'B3F-B2F',
+                                11: 'B7F-B6F',
+                                13: 'B6F-B5F',
+                                15: 'B5F-B4F',
+                                17: 'B4F-B3F',
+                                19: 'B3F-B2F',
+                                21: 'B2F-B1F',
+                                23: 'B1F-1F',
+                                25: '1F-2F',
+                                27: 'B4F-B3F',
+                                29: 'B3F-B2F',
+                                31: 'B2F-B1F',
+                                33: 'B1F-1F',
+                                35: '1F-2F',
+                                37: '2F-3F',
+                                39: '3F-4F',
+                                41: 'B1F-1F',
+                                43: 'B1F-1F',
+                            };
+
+                            let section = '-';
+                            if (esclNum && esclBaseMap[esclNum % 2 === 0 ? esclNum - 1 : esclNum]) {
+                                const base = esclBaseMap[esclNum % 2 === 0 ? esclNum - 1 : esclNum];
+                                section = (esclNum % 2 === 0) ? `${base.split('-')[0]}->${base.split('-')[1]}`
+                                    : `${base.split('-')[1]}<-${base.split('-')[0]}`;
+                            }
+
+                            const tagMap = Object.fromEntries(data.TAGs.map(t => [t.tagName.split('-').pop(), t.currentValue]));
+                            const direction = (tagMap['UpDir'] === 'OFF') ? '하향'
+                                : (tagMap['UpDir'] ? '상향' : '-');
+
+                            let runState = '-';
+                            if (tagMap['Run'] && tagMap['Run'] !== '0' && tagMap['Run'] !== 'OFF') {
+                                runState = '운행';
+                            } else if (tagMap['Stop'] && tagMap['Stop'] !== '0' && tagMap['Stop'] !== 'OFF') {
+                                runState = '정지';
+                            } else if (tagMap['Fault'] && tagMap['Fault'] !== '0' && tagMap['Fault'] !== 'OFF') {
+                                runState = tagMap['Fault'];
+                            }
 
                             tbody.innerHTML = `
                                   <tr>
-                                    <td>운행방향</td>
-                                    <td>${dirTag ? dirTag.desc : '-'}</td>
+                                    <td>운행 구간</td>
+                                    <td>${section}</td>
                                   </tr>
                                   <tr>
-                                    <td>운행상태</td>
-                                    <td>${runTag ? runTag.desc : '-'}</td>
+                                    <td>운행 상태</td>
+                                    <td>${runState}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>운행 방향</td>
+                                    <td>${direction}</td>
                                   </tr>
                                 `;
+                        } else if (poiProperty.poiMiddleCategoryName === '엘리베이터') {
+                            let addedGroup1 = false;
+                            let addedGroup2 = false;
+                            tbody.innerHTML = data.TAGs
+                                .map(tag => {
+                                    const prefix = tag.tagName.charAt(0);
+                                    const suffix = tag.tagName.substring(tag.tagName.lastIndexOf('-') + 1);
+                                    let label = '';
+                                    let displayValue = tag.currentValue;
+                                    if (prefix === 'A' || prefix === 'B') {
+                                        // A, B 건물
+                                        switch (suffix) {
+                                            case 'CurrentFloor':
+                                                if (tag.currentValue == '0G') {
+                                                    displayValue = 'G';
+                                                }
+                                                label = '현재 층';
+                                                break;
+                                            case 'DrivingState':
+                                                label = '운행 상태';
+                                                break;
+                                            case 'Door':
+                                                label = '도어';
+                                                break;
+                                            case 'Direction':
+                                                label = '운행 방향';
+                                                break;
+                                            default:
+                                                label = suffix;
+                                                break;
+                                        }
+                                    } else {
+
+                                        if (suffix === 'UpDir') {
+                                            label = '운행 방향';
+                                            displayValue = (tag.currentValue === '상향') ? '상향' : '하향';
+                                        }
+                                        else if (suffix === 'Door opened') {
+                                            label = '도어';
+                                            displayValue = (tag.currentValue === 'OFF') ? '문닫힘' : '문열림';
+                                        }
+                                        else if (suffix === 'CurrentFloor') {
+                                            label = '현재 층';
+                                        }
+                                        else if ([
+                                            'AUTO', 'Fault', 'Checking', 'Parking', 'Independent driving',
+                                            'Overweight', '1st fire driving', 'Second fire driving',
+                                            'Fire control driving', 'Fire control driving results'
+                                        ].includes(suffix)) {
+                                            if (tag.currentValue === 'OFF' || tag.currentValue === '0') {
+                                                return '';
+                                            }
+
+                                            if (['1st fire driving', 'Fire control driving results'].includes(suffix)) {
+                                                if (addedGroup1) {
+                                                    return '';
+                                                } else {
+                                                    addedGroup1 = true;
+                                                    label = '운행 상태';
+                                                }
+                                            }
+                                            else if (['Second fire driving', 'Fire control driving'].includes(suffix)) {
+                                                if (addedGroup2) {
+                                                    return '';
+                                                } else {
+                                                    addedGroup2 = true;
+                                                    label = '운행 상태';
+                                                }
+                                            }
+                                            else {
+                                                label = '운행 상태';
+                                            }
+                                        }
+                                        else {
+                                            return '';
+                                        }
+                                    }
+
+                                    return `
+                                        <tr>
+                                            <td>${label}</td>
+                                            <td>${displayValue}</td>
+                                            ${statusCell}
+                                        </tr>
+                                    `;
+                                })
+                                .filter(row => row.trim() !== '')
+                                .join('');
                         } else {
                             tbody.innerHTML = data.TAGs.map(tag => {
                                 const statusCell = poiProperty.poiCategoryName !== '승강기'
@@ -1008,7 +1139,6 @@ const Init = (function () {
                 const building = BuildingManager.findById(buildingId);
                 let option = '';
                 const camera2dStr = building?.camera2d;
-                console.log("option : ", option);
                 if (camera2dStr === null || camera2dStr === "" || camera2dStr === undefined) {
                     option = {
                         position: {x: -134.91073489593867, y: 4048.653041121009, z: -418.59942425930194},
@@ -1041,7 +1171,6 @@ const Init = (function () {
     }
 
     const buildingDblclick = async (buildingInfo) => {
-        console.log("buildingInfo : ", buildingInfo);
         const {area_no} = buildingInfo.property;
         const building = BuildingManager.findAll().find(building => building.code != null && building.code.split("-")[1] === area_no);
 

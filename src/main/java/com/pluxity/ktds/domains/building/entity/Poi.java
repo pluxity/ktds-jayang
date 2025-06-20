@@ -83,16 +83,20 @@ public class Poi {
     @Column(name = "light_group")
     private String lightGroup;
 
+    @Column(name = "camera_ip")
+    private String cameraIp;
+
     @Builder
-    public Poi(String name, String code, List<String> tagNames, Boolean isLight, String lightGroup) {
+    public Poi(String name, String code, List<String> tagNames, Boolean isLight, String lightGroup, String cameraIp) {
         this.name = name;
         this.code = code;
         this.tagNames = tagNames != null ? new ArrayList<>(tagNames) : new ArrayList<>();
         this.isLight = isLight;
         this.lightGroup = lightGroup;
+        this.cameraIp = cameraIp;
     }
 
-    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup) {
+    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup, String cameraIp) {
         if (StringUtils.hasText(name)) {
             this.name = name;
         }
@@ -112,6 +116,9 @@ public class Poi {
         }
         if (lightGroup != null) {
             this.lightGroup = lightGroup;
+        }
+        if (cameraIp != null) {
+            this.cameraIp = cameraIp;
         }
     }
 
@@ -183,6 +190,7 @@ public class Poi {
                         .toList())
                 .isLight(this.getIsLight())
                 .lightGroup(this.getLightGroup())
+                .cameraIp(this.getCameraIp())
                 .build();
     }
 
@@ -193,6 +201,7 @@ public class Poi {
                 .code(this.code)
                 .isLight(isLight)
                 .lightGroup(this.lightGroup)
+                .cameraIp(this.cameraIp)
                 .build();
     }
 }

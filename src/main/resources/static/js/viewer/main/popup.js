@@ -1212,25 +1212,42 @@ const layerPopup = (function () {
             }
         };
 
+        const updateStatusList = (buildingName) => {
+            const statusBtn = statusBox.querySelector('.select-box__btn');
+            const statusContent = statusBox.querySelector('.select-box__content');
+            const statusUl = statusContent.querySelector('ul');
+            if (statusUl) {
+                statusContent.removeChild(statusUl);
+            }
+
+            const newStatusUl = document.createElement('ul');
+            const statusItems = ['A', 'B'].includes(buildingName)
+                ? ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장']
+                : ['자동운전', '고장', '점검중', '파킹', '독립운전', '중량초과', '1차소방운전' ,'2차소방운전' ,'화재관제운전' ,'화재관제운전 귀착'];
+
+            statusBtn.textContent = '상태 전체';
+
+            statusItems.forEach(text => {
+                const li = document.createElement('li');
+                li.dataset.id = text;
+                li.textContent = text;
+                li.onclick = () => {
+                    statusBtn.textContent = text;
+                    statusBtn.classList.remove('select-box__btn--active');
+                };
+                newStatusUl.appendChild(li);
+            });
+
+            statusContent.appendChild(newStatusUl);
+        }
+
         buildingBtn.onclick = () => toggleBtnActive(buildingBtn);
-        console.log("type : ", type);
+
         if (type === 'elevator') {
             const statusBtn = statusBox.querySelector('.select-box__btn');
             const statusContent = statusBox.querySelector('.select-box__content');
-            if (!statusContent.querySelector('ul')) {
-                const statusUl = document.createElement('ul');
-                ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장'].forEach(text => {
-                    const li = document.createElement('li');
-                    li.dataset.id  = text;
-                    li.textContent = text;
-                    li.onclick = () => {
-                        statusBtn.textContent = text;
-                        statusBtn.classList.remove('select-box__btn--active');
-                    };
-                    statusUl.appendChild(li);
-                });
-                statusContent.appendChild(statusUl);
-            }
+            buildingBtn.onclick = () => toggleBtnActive(buildingBtn, statusBtn);
+            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn);
             buildingBtn.onclick = () => toggleBtnActive(buildingBtn, statusBtn);
             statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn);
         }
@@ -1281,23 +1298,16 @@ const layerPopup = (function () {
 
         buildingUl.innerHTML = '';
 
-        // const defaultBuilding = buildingList.find(building => building.name == 'A');
-        // if (defaultBuilding) {
-        //     currentBuilding = defaultBuilding;
-        //     buildingBtn.textContent = defaultBuilding.name;
-        //     onBuildingChange(currentBuilding);
-        // }
+        const defaultBuilding = buildingList.find(building => building.name == 'A');
+        if (defaultBuilding) {
+            currentBuilding = defaultBuilding;
+            buildingBtn.textContent = defaultBuilding.name;
+            onBuildingChange(currentBuilding);
 
-        const allBuildingsLi = document.createElement('li');
-        allBuildingsLi.dataset.id = 'all';
-        allBuildingsLi.textContent = '건물 전체';
-        allBuildingsLi.onclick = () => {
-            currentBuilding = null;
-            buildingBtn.textContent = '건물 전체';
-            buildingBtn.classList.remove('select-box__btn--active');
-            onBuildingChange(null);
-        };
-        buildingUl.appendChild(allBuildingsLi);
+            if (type === 'elevator') {
+                updateStatusList(defaultBuilding.name);
+            }
+        }
 
         buildingList.forEach(building => {
             const buildingLi = document.createElement('li');
@@ -1312,8 +1322,11 @@ const layerPopup = (function () {
                 // Px.Model.Visible.HideAll();
                 // Px.Model.Visible.Show(Number(currentFloor.id));
                 onBuildingChange(building);
-            }
 
+                if (type === 'elevator') {
+                    updateStatusList(building.name);
+                }
+            }
 
             buildingUl.appendChild(buildingLi);
         });
@@ -1498,17 +1511,16 @@ const layerPopup = (function () {
 
         const totalCount = Object.keys(dataById).length;
         document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
-        console.log("mode : ", mode);
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
             const tags = dto.TAGs;
             let effectiveMode = mode;
+            console.log("tags : ", tags);
             if (!effectiveMode) {
                 const firstTag = tags[0].tagName;
                 const letter = firstTag.charAt(0);
                 effectiveMode = (letter === 'A' || letter === 'B') ? 'AB' : 'C';
             }
-            console.log("effectiveMode : ", effectiveMode);
             const tagMap = tags.reduce((map, t) => {
                 const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
                 map[key] = t.currentValue;
@@ -1532,38 +1544,41 @@ const layerPopup = (function () {
 
             // 문 상태 처리
             const doorRaw = tagMap[mode === 'AB' ? 'Door' : 'Door opened'];
-            const doorState = doorRaw === 'CLOSE' || doorRaw === 'OFF' ? '문닫힘' : '문열림';
+            const doorState = doorRaw.toUpperCase() === '문닫힘' || doorRaw.toUpperCase() === 'OFF' ? '문닫힘' : '문열림';
             const doorClass = doorState === '문닫힘' ? 'detail__text detail__text--off' : 'detail__text';
-
             // 방향 처리
             let directionText = '';
             let directionState = '';
             if (mode === 'AB') {
                 switch ((tagMap['Direction'] || '').toUpperCase()) {
-                    case 'UP':
+                    case '상행':
                         directionText = '상행';
                         directionState = 'state--up';
                         break;
-                    case 'DOWN':
-                        directionText = '하향';
+                    case '하행':
+                        directionText = '하행';
                         directionState = 'state--down';
                         break;
-                    case 'STOP':
+                    case '멈춤':
                         directionText = '멈춤';
                         directionState = 'state--hold';
                         break;
                 }
             } else {
-                const directionKeys = ['UpDir', 'DownDir', 'Parking'];
-                const directionLabels = { UpDir: '상향', DownDir: '하향', Parking: '파킹' };
+                const directionKeys = ['UpDir', 'DownDir'];
+                const directionLabels = { UpDir: '상향', DownDir: '하향' };
+                const directionStateMap = {
+                    '상향': 'state--up',
+                    '하향': 'state--down',
+                    '멈춤': 'state--hold'
+                };
                 const dirKey = directionKeys.find(k => tagMap[k] && tagMap[k] !== 'OFF');
                 if (dirKey) {
                     directionText = directionLabels[dirKey];
-                    directionState = {
-                        '상향': 'state--up',
-                        '하향': 'state--down',
-                        '파킹': 'state--hold'
-                    }[directionText];
+                    directionState = directionStateMap[directionText];
+                } else if (tagMap['Driving'] === 'OFF') {
+                    directionText = '멈춤';
+                    directionState = directionStateMap[directionText];
                 }
             }
 
@@ -1580,14 +1595,40 @@ const layerPopup = (function () {
                     labelClass = 'label--breakdown';
                 }
             } else {
+                // 'EMCB', 'EMCF'는 일단 제외
                 const extraStates = [
-                    'Driving', 'AUTO', 'EMCB', 'EMCF', 'Fault', 'Checking',
+                    'AUTO', 'Fault', 'Checking',
                     'Parking', 'Independent driving', 'Overweight',
-                    '1st fire driving', 'Second fire driving'
+                    '1st fire driving', 'Second fire driving',
+                    'Fire control driving', 'Fire control driving results'
                 ];
-                const activeStatesArr = extraStates
-                    .filter(key => tagMap[key] && tagMap[key] !== 'OFF')
-                    .map(key => tagMap[key]);
+                const fireGroup1 = ['1st fire driving', 'Fire control driving results'];
+                const fireGroup2 = ['Second fire driving', 'Fire control driving'];
+
+                let activeStatesArr = [];
+                let addedFireGroup1 = false;
+                let addedFireGroup2 = false;
+
+                for (const key of extraStates) {
+                    const value = tagMap[key];
+                    if (!value || value === 'OFF') continue;
+
+                    if (fireGroup1.includes(key)) {
+                        if (!addedFireGroup1) {
+                            activeStatesArr.push(value);
+                            addedFireGroup1 = true;
+                        }
+                    } else if (fireGroup2.includes(key)) {
+                        if (!addedFireGroup2) {
+                            activeStatesArr.push(value);
+                            addedFireGroup2 = true;
+                        }
+                    } else {
+                        activeStatesArr.push(value);
+                    }
+
+                    if (activeStatesArr.length > 0) break;
+                }
                 stateText = activeStatesArr.join(', ');
 
                 if (activeStatesArr.includes('파킹')) {
@@ -1601,6 +1642,8 @@ const layerPopup = (function () {
             const elevatorLi = document.createElement('li');
             const buildingLabel = `[${poiInfo.property.buildingName}]`;
 
+            const formattedStateText = stateText.match(/.{1,4}/g).join('<br>');
+
             elevatorLi.innerHTML = `
                     <div class="head">
                         <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
@@ -1608,7 +1651,7 @@ const layerPopup = (function () {
                     </div>
                     <div class="detail">
                         <div class="detail__state">
-                            <span class="label ${labelClass}">${stateText}</span>
+                            <span style="text-align: center; " class="label ${labelClass}">${formattedStateText}</span>
                             <div class="floor">${floorHtml}</div>
                             <span class="state ${directionState}"><span class="hide state__text">${directionText}</span></span>
                         </div>
@@ -1643,7 +1686,7 @@ const layerPopup = (function () {
         });
     };
 
-    const addAllElevatorList = (building) => {
+    const addAllElevatorList = () => {
         api.get(`/api/tags/elevator`, {
             params: {
                 type: 'ELEV',
@@ -1652,20 +1695,49 @@ const layerPopup = (function () {
             initPagedList('elevator', res.data);
         });
     };
+    let elevatorIntervalId = null;
+    let escalatorIntervalId = null;
+
+    function clearElevatorInterval() {
+        if (elevatorIntervalId !== null) {
+            clearInterval(elevatorIntervalId);
+            elevatorIntervalId = null;
+        }
+    }
+
+    function clearEscalatorInterval() {
+        if (escalatorIntervalId !== null) {
+            clearInterval(escalatorIntervalId);
+            escalatorIntervalId = null;
+        }
+    }
+
+    function clearAllIntervals() {
+        clearElevatorInterval();
+        clearEscalatorInterval();
+    }
 
     const setElevator = () => {
+        clearEscalatorInterval();
         setTab('elevator', {
             onBuildingChange: (building) => {
 
-                if (building === null) {
-                    // 1) 건물 전체: addAllElevatorList 호출
-                    addAllElevatorList();
+                clearElevatorInterval();
+
+                const fetchElevatorData = () => {
+                    if (building === null) {
+                        // 1) 건물 전체: addAllElevatorList 호출
+                        addAllElevatorList();
+                    }
+                    else if (['A', 'B'].includes(building.name)) {
+                        addABElevatorList(building);
+                    } else {
+                        addCElevatorList(building);
+                    }
                 }
-                else if (['A', 'B'].includes(building.name)) {
-                    addABElevatorList(building);
-                } else {
-                    addCElevatorList(building);
-                }
+                fetchElevatorData();
+
+                elevatorIntervalId = setInterval(fetchElevatorData, 5000);
             }
         });
     }
@@ -1674,8 +1746,6 @@ const layerPopup = (function () {
         api.get(`/api/tags/escalator`, {
             params: {
                 type: 'ESCL',
-                buildingId: building.id,
-                buildingName: building.name,
             }
         }).then(res => {
             initPagedList('escalator', res.data);
@@ -1757,9 +1827,15 @@ const layerPopup = (function () {
     };
 
     const setEscalator = () => {
+        clearElevatorInterval();
         setTab('escalator', {
             onBuildingChange: (building, floor) => {
-                addEscalatorList(building, floor);
+                clearEscalatorInterval();
+                const fetchEscalatorData = () => {
+                    addEscalatorList(building, floor);
+                }
+                fetchEscalatorData();
+                escalatorIntervalId = setInterval(fetchEscalatorData, 5000);
             },
             onFloorChange: (building, floor) => {
                 console.log("floor", floor);
@@ -2807,6 +2883,7 @@ const layerPopup = (function () {
                     });
                 }
                 closePopup(target);
+                clearAllIntervals();
             });
         });
     }
@@ -2932,7 +3009,8 @@ const layerPopup = (function () {
         setTab,
         setLight,
         setAirTab,
-        setEscalator
+        setEscalator,
+        clearAllIntervals
     }
 })();
 

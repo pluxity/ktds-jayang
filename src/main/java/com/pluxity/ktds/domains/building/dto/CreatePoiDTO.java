@@ -43,6 +43,7 @@ public record CreatePoiDTO(
         List<String> tagNames,
         List<PoiCctvDTO> cctvList,
         Boolean isLight,
-        String lightGroup
+        String lightGroup,
+        String cameraIp
 ) {
 }

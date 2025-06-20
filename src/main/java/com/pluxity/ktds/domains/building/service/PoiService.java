@@ -27,15 +27,18 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.transform.Source;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -126,6 +129,7 @@ public class PoiService {
                             .cctvList(cctvDtoList)
                             .isLight(base.isLight())
                             .lightGroup(base.lightGroup())
+                            .cameraIp(base.cameraIp())
                             .build();
                 })
                 .toList();
@@ -151,6 +155,7 @@ public class PoiService {
                 .tagNames(dto.tagNames() != null ? new ArrayList<>(dto.tagNames()) : new ArrayList<>())
                 .isLight(dto.isLight())
                 .lightGroup(dto.lightGroup())
+                .cameraIp(dto.cameraIp())
                 .build();
 
         validateAssociation(dto);
@@ -174,8 +179,15 @@ public class PoiService {
                     .toList();
             poi.getPoiCctvs().addAll(cctvEntities);
         }
+        PoiCategory category = poiCategoryRepository.findById(dto.poiCategoryId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY));
+        if (category.getName().equalsIgnoreCase("cctv")) {
+            // cctv entity에도 추가
+        }
+
         Poi savedPoi = poiRepository.save(poi);
-        if (!dto.tagNames().isEmpty()) {
+
+        if (!ObjectUtils.isEmpty(dto.tagNames())) {
             tagClientService.addTags(dto.tagNames());
         }
 
@@ -243,7 +255,7 @@ public class PoiService {
                             .isMain(c.isMain())
                             .build())
                     .toList();
-            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup());
+            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp());
         }
 //        List<PoiCctv> newCctvs = dto.cctvList().stream()
 //                .map(c -> PoiCctv.builder()
@@ -252,8 +264,8 @@ public class PoiService {
 //                        .isMain(c.isMain())
 //                        .build())
 //                .toList();
-        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup());
-        if (dto.tagNames() != null) {
+        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp());
+        if (!dto.tagNames().isEmpty()) {
             tagClientService.addTags(dto.tagNames());
         }
 
@@ -266,7 +278,6 @@ public class PoiService {
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
         updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
     }
-
 
     private void validateUpdateCode(UpdatePoiDTO dto, Poi poi) {
         if (!poi.getCode().equals(dto.code()) && poiRepository.existsByCode(dto.code())) {
@@ -369,13 +380,6 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiCategory Name: " + poiMap.get(POI_CATEGORY_NAME.value)));
 
-//                IconSet iconSet = iconSetList.stream()
-//                        .filter(c -> c.getName().equalsIgnoreCase(poiMap.get(POI_ICONSET_NAME.value)))
-//                        .limit(1)
-//                        .findFirst()
-//                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ICON_SET, "NotFound Iconset Name: " + poiMap.get(POI_ICONSET_NAME.value)));
-
-
                 PoiMiddleCategory poiMiddleCategory = poiMiddleCategoryList.stream()
                         .filter(m -> m.getPoiCategory().getId().equals(poiCategory.getId()))
                         .filter(m -> m.getName().equalsIgnoreCase(poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)))
@@ -383,13 +387,7 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiMiddleCategory Name: " + poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)));
 
-//                if(poiMiddleCategory.getIconSets().get(0).getId() != iconSet.getId()) {
-//                    throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
-//                            "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
-//                                    + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));
-//                }
-
-                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split(","))
+                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split("[,\\n]"))
                         .map(String::trim)
                         .filter(StringUtils::hasText)
                         .toList();
@@ -462,7 +460,14 @@ public class PoiService {
             }
 
             try {
+                List<String> allTagNames = result.stream()
+                        .flatMap(poi -> poi.getTagNames().stream())
+                        .toList();
                 poiRepository.saveAll(result);
+                if (!allTagNames.isEmpty()) {
+                    System.out.println("allTagNames : " + allTagNames);
+//                    tagClientService.addTags(allTagNames);
+                }
 
             } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
                 if(e.getRootCause().getMessage().contains("Data too long for column")) {

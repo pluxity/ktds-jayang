@@ -52,9 +52,9 @@ public class ElevatorTagManager {
     @AllArgsConstructor
     public enum ElevatorABTag {
 
-        CurrentFloor("층위치", reverse(createFloorMap(10, 20))),
-        Direction("방향", Map.of("0", "STOP", "1", "UP", "2", "DOWN")),
-        Door("도어상태", Map.of("0", "Open", "1", "Close")),
+        CurrentFloor("층위치", reverse(createFloorMap(10, 40))),
+        Direction("방향", Map.of("0", "멈춤", "1", "상행", "2", "하행")),
+        Door("도어상태", Map.of("0", "문열림", "1", "문닫힘")),
         DrivingState("승강기상태", Map.of("0", "정상운전", "1", "운전휴지", "2", "독립운전", "3", "전용운전", "4", "보수운전", "5", "정전운전", "6", "화재운전", "7", "지진운전", "8", "고장"));
 
         private final String tagName;
@@ -68,7 +68,7 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum ElevatorCTag {
-        CurrentFloor("CurrentFloor", reverse(createFloorMap(10, 20))),
+        CurrentFloor("CurrentFloor", reverse(createFloorMap(10, 40))),
         UpDir("UpDir", Map.of("0", "OFF", "1", "상향")),
         DownDir("DownDir", Map.of("0", "OFF", "1", "하향")),
         Driving("Driving", Map.of("0", "OFF", "1", "주행중")),
@@ -119,6 +119,10 @@ public class ElevatorTagManager {
         private static final Map<String, EscalatorTag> BY_TAG_NAME =
                 Arrays.stream(values())
                         .collect(Collectors.toMap(EscalatorTag::getTagName, e -> e));
+
+        public static EscalatorTag fromEnumName(String enumName) {
+            return EscalatorTag.valueOf(enumName);
+        }
 
         public static EscalatorTag fromTagName(String tagName) {
             EscalatorTag e = BY_TAG_NAME.get(tagName);

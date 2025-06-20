@@ -836,8 +836,9 @@ function resetModifyStoreForm() {
         fileInput.removeAttribute('data-file-id');
     });
 
-    form.querySelectorAll("input[type='date']").forEach(fileInput => {
-        fileInput.value = '';
+    form.querySelectorAll("input[type='date']").forEach(dateInput => {
+        dateInput.value = '';
+        dateInput.disabled = false;
     });
 
     form.querySelectorAll(".file-name, .selected-file").forEach(el => {
@@ -850,6 +851,8 @@ function resetModifyStoreForm() {
     form.querySelectorAll("#modifyBannerTbody tr").forEach(row => {
         delete row.dataset.bannerId;
     });
+
+
 }
 
 const handlePoiModifyBtnClick = async (kioskPoi) => {

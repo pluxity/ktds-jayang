@@ -22,6 +22,7 @@ public record PoiDetailResponseDTO(
         List<String> tagNames,
         List<PoiCctvDTO> cctvList,
         Boolean isLight,
-        String lightGroup
+        String lightGroup,
+        String cameraIp
 ) {
 }

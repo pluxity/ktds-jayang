@@ -140,10 +140,10 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum VavTag {
-        CoolHeap("COOL_HEAP", Map.of("0", "냉방", "1", "난방")),
-        ManualDmpOpen("MANUAL_DMP_OPEN", Map.of("0", "자동", "1", "100%개방")),
-        Fan("FAN", Map.of("0", "정지", "1", "기동")),
-        Vlv24vOnOff("VLV_24V_ON_OFF", Map.of("0", "닫힘", "1", "열림"));
+        COOL_HEAT("COOL_HEAT", Map.of("0", "냉방", "1", "난방")),
+        MANUAL_DMP_OPEN("MANUAL_DMP_OPEN", Map.of("0", "자동", "1", "100%개방")),
+        FAN("FAN", Map.of("0", "정지", "1", "기동")),
+        VLV_24V_ON_OFF("VLV_24V_ON_OFF", Map.of("0", "닫힘", "1", "열림"));
 
         private final String tagName;
         private final Map<String, String> valueMap;

@@ -1146,7 +1146,174 @@ const Init = (function () {
                                 }
                             });
 
-                        } else {
+                        }  else if (poiProperty.poiMiddleCategoryName === '무정전전원장치') {
+
+                            const { lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns } = processUPSData(data.TAGs);
+                            const tableHTML = generateUPSTables(lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns);
+
+                            // 기존 테이블과 버튼들을 제거하고 새로운 테이블들을 추가 (이벤트 리스너 보존)
+                            const contentDiv = popupInfo.querySelector('.popup-info__content');
+                            const existingTables = contentDiv.querySelectorAll('table');
+                            const existingButtons = contentDiv.querySelectorAll('.alert-buttons');
+                            existingTables.forEach(table => table.remove());
+                            existingButtons.forEach(buttons => buttons.remove());
+
+                            // 새로운 테이블들을 contentDiv에 직접 추가
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = tableHTML;
+                            while (tempDiv.firstChild) {
+                                contentDiv.appendChild(tempDiv.firstChild);
+                            }
+
+                        }else if (poiProperty.poiMiddleCategoryName === 'FPU') {
+                            tbody.innerHTML  = data.TAGs.map(tag => {
+                                // "A-4-VAV-FPU-104105-4F_FPU_104105_PRI_ACTUAL_FLOW" -> "PRI_ACTUAL_FLOW"
+                                const parts = tag.tagName.split('_');
+                                const suffix = parts.slice(3).join('_'); // 처음 3개 부분 제거 후 나머지 조인
+                                let label = '';
+                                let unit = '';
+                                switch (suffix) {
+                                    case 'SPACE_TEMP':
+                                        label = '현재온도';
+                                        unit = '℃';
+                                        break;
+                                    case 'PRI_FLOW_STPT':
+                                        label = '요구풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'PRI_ACTUAL_FLOW':
+                                        label = '현재풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'ACT_ROOM_STPT':
+                                        label = '설정온도';
+                                        unit = '℃';
+                                        break;
+                                    case 'MIN_VOLUME':
+                                        label = '최소풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'MAX_VOLUME':
+                                        label = '최대풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'POSITION':
+                                        label = '댐퍼개도';
+                                        unit = '%';
+                                        break;
+                                    case 'COOL_HEAT':
+                                        label = '냉/난방';
+                                        break;
+                                    case 'MANUAL_DMP_OPEN':
+                                        label = '운전모드';
+                                        break;
+                                    case 'FAN':
+                                        label = '팬운전';
+                                        break;
+                                    case 'VLV_24V_ON_OFF':
+                                        label = '밸브운전';
+                                        break;
+                                    default:
+                                        label = suffix;
+                                        break;
+                                }
+
+                                return `
+                                       <tr>
+                                           <td>${label}</td>
+                                           <td>${tag.currentValue || '-'}${unit}</td>
+                                       </tr>
+                                   `;
+                            }).join('');
+                        }else if(poiProperty.poiMiddleCategoryName === 'VAV'){
+                            tbody.innerHTML = data.TAGs.map(tag => {
+                                // "A-8-VAV-VAV-108121-8F_VAV_108121_SPACE_TEMP" -> "SPACE_TEMP"
+                                const parts = tag.tagName.split('_');
+                                const suffix = parts.slice(3).join('_'); // 처음 3개 부분 제거 후 나머지 조인
+                                let label = '';
+                                let unit = '';
+
+                                switch (suffix) {
+                                    case 'SPACE_TEMP':
+                                        label = '현재온도';
+                                        unit = '℃';
+                                        break;
+                                    case 'PRI_FLOW_STPT':
+                                        label = '요구풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'PRI_ACTUAL_FLOW':
+                                        label = '현재풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'ACT_ROOM_STPT':
+                                        label = '설정온도';
+                                        unit = '℃';
+                                        break;
+                                    case 'MIN_VOLUME':
+                                        label = '최소풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'MAX_VOLUME':
+                                        label = '최대풍량';
+                                        unit = 'm²/s';
+                                        break;
+                                    case 'POSITION':
+                                        label = '댐퍼개도';
+                                        unit = '%';
+                                        break;
+                                    case 'COOL_HEAT':
+                                        label = '냉/난방';
+                                        break;
+                                    case 'MANUAL_DMP_OPEN':
+                                        label = '운전모드';
+                                        break;
+                                    default:
+                                        label = suffix;
+                                        break;
+                                }
+
+                                return `
+                                          <tr>
+                                              <td>${label}</td>
+                                              <td>${tag.currentValue || '-'}${unit}</td>
+                                          </tr>
+                                      `;
+                            }).join('');
+                        } else if(poiProperty.poiMiddleCategoryName === 'PV') {
+                            tbody.innerHTML = data.TAGs.map(tag => {
+                                // "C-RF-SU-PV-null-현재발전량" -> "현재발전량"
+                                const label = tag.tagName.substring(tag.tagName.lastIndexOf('-') + 1);
+
+                                return `
+                                          <tr>
+                                              <td>${label || '-'}</td>
+                                              <td>${tag.currentValue || '-'}</td>
+                                          </tr>
+                                      `;
+                            }).join('');
+                        }else if(poiProperty.poiMiddleCategoryName === 'BIPV'){
+                            // 태그를 두 그룹으로 분리
+                            const regularTags = data.TAGs.filter(tag => !tag.tagName.includes('-G-'));
+                            const comprehensiveTags = data.TAGs.filter(tag => tag.tagName.includes('-G-'));
+
+                            const tableHTML = generateBIPVTable(regularTags);
+                            const comprehensiveTableHTML = generateBIPVTable(comprehensiveTags);
+                            console.log("comprehensiveTableHTML", comprehensiveTableHTML);
+
+                            const contentDiv = popupInfo.querySelector('.popup-info__content');
+                            const existingTables = contentDiv.querySelectorAll('table');
+                            existingTables.forEach(table => table.remove());
+
+                            // 새로운 테이블들을 contentDiv에 직접 추가
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = tableHTML;
+                            tempDiv.innerHTML += comprehensiveTableHTML;
+                            contentDiv.appendChild(tempDiv.firstChild);
+                            contentDiv.appendChild(tempDiv.firstChild);
+                        }
+
+                        else {
                             tbody.innerHTML = data.TAGs.map(tag => {
                                 const statusCell = poiProperty.poiCategoryName === '공기질센서'
                                     ? `<td>${getStatusText(tag.S)}</td>`
@@ -1219,6 +1386,237 @@ const Init = (function () {
             activePopups.set(poiInfo.id, { dom: popupInfo });
             updatePosition();
         }
+    }
+    function processUPSData(apiData) {
+        const lineVoltageData = { input: {}, output: {} };  // 선간전압
+        const phaseVoltageData = { input: {}, output: {} }; // 상간전압
+        const currentData = { input: {}, output: {} };      // 전류
+        const batteryData = {}; // 축전지 및 기타 단일 데이터
+        const statusBtns = {};
+
+
+        apiData.forEach(item => {
+            const { tagName, currentValue } = item;
+            const type = tagName.includes('입력') ? 'input' : 'output';
+
+            if (tagName.includes('선간전압')) {
+                // 선간전압: L1_L2, L2_L3, L3_L1
+                const phase = tagName.split('_').slice(-2).join('_');
+                lineVoltageData[type][phase] = currentValue;
+            } else if (tagName.includes('상간전압')) {
+                // 상간전압: L1_N, L2_N, L3_N
+                const phase = tagName.split('_').slice(-2).join('_');
+                phaseVoltageData[type][phase] = currentValue;
+            } else if (tagName.includes('전류') && (tagName.includes('입력전류') || tagName.includes('출력전류'))) {
+                // 전류: L1, L2, L3
+                const phase = tagName.split('_').pop();
+                currentData[type][phase] = currentValue;
+            } else if (tagName.includes('축전지전압')) {
+                batteryData.voltage = currentValue;
+            } else if (tagName.includes('축전지전류')) {
+                batteryData.current = currentValue;
+            } else if (tagName.includes('출력주파수')) {
+                batteryData.frequency = currentValue;
+            } else if(tagName.includes('BYPASSMODE_OFF')) {
+                statusBtns.BYPASSMODE_OFF = currentValue;
+            } else if(tagName.includes('배터리방전')) {
+                statusBtns.배터리방전 = currentValue;
+            } else if(tagName.includes('정류부불량')) {
+                statusBtns.정류부불량 = currentValue;
+            } else if(tagName.includes('인버터이상')) {
+                statusBtns.인버터이상 = currentValue;
+            } else if(tagName.includes('온도이상')) {
+                statusBtns.온도이상 = currentValue;
+            }
+        });
+
+        return { lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns };
+    }
+
+    function generateUPSTables(lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns) {
+        // 표1: 선간전압
+        const lineVoltageTable = `
+            
+                <table style="width: 100%; margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>PHASE</th>
+                            <th>입력선간전압</th>
+                            <th>출력선간전압</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${['L1_L2', 'L2_L3', 'L3_L1'].map(phase => `
+                            <tr>
+                                <td>V ${phase}</td>
+                                <td>${lineVoltageData.input[phase] || '-'}V</td>
+                                <td>${lineVoltageData.output[phase] || '-'}V</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+          
+        `;
+
+        // 표2: 상간전압
+        const phaseVoltageTable = `
+           
+                <table style="width: 100%; margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>PHASE</th>
+                            <th>입력상간전압</th>
+                            <th>출력상간전압</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${['L1_N', 'L2_N', 'L3_N'].map(phase => `
+                            <tr>
+                                <td>V ${phase}</td>
+                                <td>${phaseVoltageData.input[phase] || '-'}V</td>
+                                <td>${phaseVoltageData.output[phase] || '-'}V</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+           
+        `;
+
+        // 표3: 전류
+        const currentTable = `
+           
+                <table style="width: 100%;margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>PHASE</th>
+                            <th>입력전류</th>
+                            <th>출력전류</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${['L1', 'L2', 'L3'].map(phase => `
+                            <tr>
+                                <td>A ${phase}</td>
+                                <td>${currentData.input[phase] || '-'}A</td> 
+                                <td>${currentData.output[phase] || '-'}A</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            
+        `;
+
+        // 표4: 축전지 및 주파수
+        const batteryTable = `
+           
+                <table style="width: 100%; margin-bottom: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>축전지전압</th>
+                            <th>축전지전류</th>
+                            <th>출력주파수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${batteryData.voltage || '-'}V</td>
+                            <td>${batteryData.current || '-'}A</td>
+                            <td>${batteryData.frequency || '-'}Hz</td>
+                        </tr>
+                    </tbody>
+                </table>
+          
+        `;
+
+        // UPS 상태 버튼들
+        const statusButtons = `
+            <div class="alert-buttons" style="margin-top: 12px; display: flex; flex-direction: column; align-items: center;">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    ${statusBtns.BYPASSMODE_OFF !== undefined ? `
+                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.BYPASSMODE_OFF === '1' ? 'background-color: red; color: white;' : ''}">
+                            인버터
+                        </button>
+                    ` : ''}
+                    ${statusBtns.배터리방전 !== undefined ? `
+                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.배터리방전 === '1' ? 'background-color: red; color: white;' : ''}">
+                            배터리방전
+                        </button>
+                    ` : ''}
+                    ${statusBtns.정류부불량 !== undefined ? `
+                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.정류부불량 === '1' ? 'background-color: red; color: white;' : ''}">
+                            정류부불량
+                        </button>
+                    ` : ''}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    ${statusBtns.인버터이상 !== undefined ? `
+                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.인버터이상 === '1' ? 'background-color: red; color: white;' : ''}">
+                            인버터이상
+                        </button>
+                    ` : ''}
+                    ${statusBtns.온도이상 !== undefined ? `
+                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.온도이상 === '1' ? 'background-color: red; color: white;' : ''}">
+                            온도이상
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        return lineVoltageTable + phaseVoltageTable + currentTable + batteryTable + statusButtons;
+    }
+
+    function generateBIPVTable(data) {
+        const tbody = data.map(tag => {
+            const tagName = tag.tagName.substring(tag.tagName.lastIndexOf('-') + 1);
+            let label = '';
+
+            switch (tagName) {
+                case 'KW':
+                    label = '현재 발전량';
+                    break;
+                case 'Today_GEN':
+                    label = '금일 발전량';
+                    break;
+                case 'Total_GEN':
+                    label = '누적 발전량';
+                    break;
+                case '현재발전량':
+                    label = '종합 현재발전량';
+                    break;
+                case '금일발전량':
+                    label = '종합 금일발전량';
+                    break;
+                case '급일발전량':
+                    label = '종합 급일발전량';
+                    break;
+                case '누적발전량':
+                    label = '종합 누적발전량';
+                    break;
+                default:
+                    label = tagName;
+                    break;
+            }
+
+            return `
+                <tr>
+                    <td>${label}</td>
+                    <td>${tag.currentValue || '-'}</td>
+                </tr>
+            `;
+        }).join('');
+
+        return `<table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>수집정보</th>
+                            <th>측정값</th>
+                        </tr>
+                    </thead>
+                <tbody>
+                    ${tbody}
+                </tbody>
+        </table>`;
     }
 
     // poi 상태

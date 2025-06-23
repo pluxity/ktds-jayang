@@ -246,19 +246,25 @@ public class TagClientService {
                 String[] parts = tagName.split("-");
                 String rawValue = td.currentValue();
                 String enumName = parts[parts.length - 1];
-                String desc;
+                String desc = null;
                 String prefix = parts[0];
+                String category = parts[2];
                 String evMiddleCategory = parts[3];
 
                 try {
-                    if ("ELEV".equals(evMiddleCategory)) {
-                        if ("A".equals(prefix) || "B".equals(prefix)) {
-                            desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(rawValue);
-                        } else {
-                            desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(rawValue);
+                    if("EV".equals(category)) {
+                        if ("ELEV".equals(evMiddleCategory)) {
+                            if ("A".equals(prefix) || "B".equals(prefix)) {
+                                desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(rawValue);
+                            } else {
+                                desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(rawValue);
+                            }
+                        } else if ("ESCL".equals(evMiddleCategory)) {
+                            desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(rawValue);
                         }
-                    } else if ("ESCL".equals(evMiddleCategory)) {
-                        desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(rawValue);
+                    } else if ("VAV".equals(category)) {
+                        String s = parseSuffix(enumName);
+                        desc = ElevatorTagManager.VavTag.valueOf(s).getValueDescription(rawValue);
                     } else {
                         desc = rawValue;
                     }
@@ -289,5 +295,22 @@ public class TagClientService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("JSON Processing Error : " + e.getMessage());
         }
+    }
+
+    private String parseSuffix(String suffix) {
+        // 4F_FPU_104105_PRI_FLOW_STPT -> PRI_FLOW_STPT
+        String[] parts = suffix.split("_");
+        if (parts.length > 3) {
+            // 앞의 3개 부분(4F_FPU_104105_) 제거하고 나머지 부분들을 _로 연결
+            StringBuilder result = new StringBuilder();
+            for (int i = 3; i < parts.length; i++) {
+                if (i > 3) {
+                    result.append("_");
+                }
+                result.append(parts[i]);
+            }
+            return result.toString();
+        }
+        return suffix; // 3개 이하면 원본 반환
     }
 }

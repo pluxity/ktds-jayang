@@ -716,6 +716,7 @@ const Init = (function () {
             closeBtn.addEventListener('click', () => {
                 // 팝업 제거
                 popupInfo.remove();
+                layerPopup.closePlayers();
             });
             return popupInfo;
         } else {

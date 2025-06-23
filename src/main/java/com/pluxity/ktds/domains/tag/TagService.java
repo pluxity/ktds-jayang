@@ -5,6 +5,7 @@ import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.tag.dto.TagData;
 import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,6 +21,8 @@ public class TagService {
 
     private final PoiRepository poiRepository;
     private final RestTemplate restTemplate;
+    @Value("${event.server.base-url}")
+    private String baseUrl;
 
     public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
 
@@ -28,13 +31,8 @@ public class TagService {
 //        String prefix = type.equals("ELEV")
 //                ? String.format("%s-null-EV-ELEV-", mappedBuilding)
 //                : String.format("%s-null-EV-ESCL-", mappedBuilding);
-        List<Poi> pois;
         boolean isAllBuilding = (buildingId == null || buildingName == null);
-        if (isAllBuilding) {
-            pois = poiRepository.findByCategoryName("승강기");
-        } else {
-            pois = poiRepository.findPoisByBuildingId(buildingId);
-        }
+        List<Poi> pois = poiRepository.findByBuildingIdAndMiddleCategoryName(buildingId, "승강기");
 
         Map<Long, TagResponseDTO> poiTagResponseMap = new HashMap<>();
         List<String> allTagNamesToFetch = new ArrayList<>();
@@ -62,10 +60,12 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
-            TagResponseDTO all = restTemplate.getForObject(
-                    "http://192.168.4.149:9999/api/tags/data",
-                    TagResponseDTO.class,
-                    tagNamesParam
+
+            TagResponseDTO all = restTemplate.postForObject(
+                    baseUrl + "/?ReadTags",
+//                    "http://192.168.4.149:9999/api/tags/data/filter",
+                    allTagNamesToFetch,
+                    TagResponseDTO.class
             );
 
             if (all != null && all.tags() != null) {
@@ -109,7 +109,6 @@ public class TagService {
                 }
             }
         }
-        System.out.println("poiTagResponseMap : " + poiTagResponseMap);
         return poiTagResponseMap;
     }
 
@@ -139,10 +138,11 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
-            TagResponseDTO all = restTemplate.getForObject(
-                    "http://192.168.4.149:9999/api/tags/data",
-                    TagResponseDTO.class,
-                    tagNamesParam
+            TagResponseDTO all = restTemplate.postForObject(
+                    baseUrl + "/?ReadTags",
+//                    "http://192.168.4.149:9999/api/tags/data/filter",
+                    allTagNamesToFetch,
+                    TagResponseDTO.class
             );
 
             if (all != null && all.tags() != null) {

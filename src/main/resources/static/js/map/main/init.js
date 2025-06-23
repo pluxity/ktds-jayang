@@ -723,8 +723,8 @@ const Init = (function () {
             const popupInfo = document.createElement('div');
 
             popupInfo.className = 'popup-info';
-            const statusCell = poiProperty.poiCategoryName !== '승강기'
-                ? `<th>상태</th>`
+            const statusCell = poiProperty.poiCategoryName === '공기질센서'
+                ? `<th>단계</th>`
                 : '';
             popupInfo.innerHTML =
                 `<div class="popup-info__head">
@@ -833,7 +833,7 @@ const Init = (function () {
                                     <td>${direction}</td>
                                   </tr>
                                 `;
-                        } else if (poiProperty.poiMiddleCategoryName === '엘리베이터') {
+                        } else if (poiProperty.poiMiddleCategoryName === '승강기') {
                             let addedGroup1 = false;
                             let addedGroup2 = false;
                             tbody.innerHTML = data.TAGs
@@ -921,9 +921,234 @@ const Init = (function () {
                                 })
                                 .filter(row => row.trim() !== '')
                                 .join('');
+                        } else if (['소방', '출입통제', '누수', '비상벨'].includes(poiProperty.poiCategoryName)) {
+                            tbody.innerHTML = data.TAGs.map(tag => {
+                                const statusText = { 0: '정상', 1: '경보' }[tag.currentValue];
+                                return `
+                                    <tr>
+                                        <td>상태</td>
+                                        <td>${statusText}</td>
+                                    </tr>
+                                `;
+                            }).join('');
+                        } else if (['비상발전기', '저압 배전반', '특고압 배전반', '특고압 변압기'].includes(poiProperty.poiMiddleCategoryName)) {
+
+                            const TAG_LABEL_MAP = {
+                                "R상_전압": "R상 전압",
+                                "S상_전압": "S상 전압",
+                                "T상_전압": "T상 전압",
+                                "R_S_선간전압": "R-S 선간전압",
+                                "S_T_선간전압": "S-T 선간전압",
+                                "T_R_선간전압": "T-R 선간전압",
+                                "R상_전류": "R상 전류",
+                                "S상_전류": "S상 전류",
+                                "T상_전류": "T상 전류",
+                                "3상_유효전력": "유효전력",
+                                "3상_무효전력": "무효전력",
+                                "유효전력량": "유효 전력량",
+                                "무효전력량": "무효 전력량"
+                            };
+
+                            const unmatchedTags = [];
+                            const unmatchedGroups = {
+                                OCR: [],
+                                OCGR: [],
+                                UVR: [],
+                                CB_ON: [],
+                                ATS: [],
+                                NVR: [],
+                                ELD: [],
+                                ETC: []
+                            };
+
+                            const rowList = data.TAGs.map(tag => {
+                                const tagNamePart = tag.tagName.split('-').pop();
+                                const parts = tagNamePart.split('_');
+                                let key = '';
+                                if (parts.length >= 3 && ['R', 'S', 'T', '3상'].includes(parts[parts.length - 3])) {
+                                    key = parts.slice(-3).join('_');
+                                }
+                                else if (parts.length >= 2 && TAG_LABEL_MAP[parts.slice(-2).join('_')]) {
+                                    key = parts.slice(-2).join('_');
+                                }
+                                else if (TAG_LABEL_MAP[parts.slice(-1)[0]]) {
+                                    key = parts.slice(-1)[0];
+                                }
+                                else {
+                                    key = '';
+                                }
+
+                                if (TAG_LABEL_MAP[key]) {
+                                    let unit = '';
+                                    switch (true) {
+                                        case key.includes('전력량'):
+                                            unit = 'kWH';
+                                            break;
+                                        case key.includes('전류'):
+                                            unit = 'A';
+                                            break;
+                                        case key.includes('전압'):
+                                            unit = 'KV';
+                                            break;
+                                        case key.includes('전력'):
+                                            unit = 'kW';
+                                            break;
+                                        default:
+                                            unit = '';
+                                    }
+
+                                    return {
+                                        label: TAG_LABEL_MAP[key],
+                                        value: `${tag.currentValue}${unit}`
+                                    };
+                                } else {
+                                    unmatchedTags.push({
+                                        tagName: tag.tagName,
+                                        currentValue: tag.currentValue
+                                    });
+
+                                    if (tag.tagName.includes('OCGR')) {
+                                        unmatchedGroups.OCGR.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('OCR')) {
+                                        unmatchedGroups.OCR.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('UVR')) {
+                                        unmatchedGroups.UVR.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('ATS')) {
+                                        unmatchedGroups.ATS.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('NVR')) {
+                                        unmatchedGroups.NVR.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('ELD')) {
+                                        unmatchedGroups.ELD.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('ACB_ON') || tag.tagName.includes('VCB_ON')) {
+                                        unmatchedGroups.CB_ON.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else {
+                                        unmatchedGroups.ETC.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    }
+
+                                    return null;
+                                }
+                            }).filter(Boolean);
+
+                            if (rowList.length <= 10) {
+                                tbody.innerHTML = rowList.map(row => `
+                                    <tr>
+                                        <td>${row.label}</td>
+                                        <td>${row.value}</td>
+                                    </tr>
+                                `).join('');
+                            } else {
+                                const thead = popupInfo.querySelector('table thead');
+                                thead.innerHTML = `
+                                    <tr>
+                                        <th>수집정보</th>
+                                        <th>측정값</th>
+                                        <th style="border-left: 1px solid;">수집정보</th>
+                                        <th>측정값</th>
+                                    </tr>
+                                `;
+
+                                let html = '';
+                                for (let i = 0; i < 10; i++) {
+                                    const left = rowList[i]
+                                        ? `<td>${rowList[i].label}</td><td>${rowList[i].value}</td>`
+                                        : `<td>-</td><td>-</td>`;
+                                    const right = rowList[i + 10]
+                                        ? `<td style="border-left: 1px solid;">${rowList[i + 10].label}</td><td>${rowList[i + 10].value}</td>`
+                                        : `<td style="border-left: 1px solid;">-</td><td>-</td>`;
+
+                                    html += `<tr>${left}${right}</tr>`;
+                                }
+
+                                tbody.innerHTML = html;
+
+                            }
+
+                            const content = popupInfo.querySelector('.popup-info__content');
+                            const oldButtons = content.querySelector('.alert-buttons');
+                            if (oldButtons) oldButtons.remove();
+
+                            const buttonWrapper = document.createElement('div');
+                            buttonWrapper.className = 'alert-buttons';
+                            buttonWrapper.style.marginTop = '12px';
+                            buttonWrapper.style.display = 'flex';
+                            buttonWrapper.style.flexDirection = 'column';
+                            buttonWrapper.style.alignItems = 'center';
+
+                            const row1 = document.createElement('div');
+                            row1.style.display = 'flex';
+                            row1.style.gap = '8px';
+                            row1.style.marginBottom = '8px';
+
+                            const row2 = document.createElement('div');
+                            row2.style.display = 'flex';
+                            row2.style.gap = '8px';
+
+                            const alertGroups = ['CB_ON', 'OCR', 'OCGR', 'UVR', 'NVR', 'ELD', 'ATS'];
+                            alertGroups.forEach((group, i) => {
+                                // tag에 있는거만 버튼만듬
+                                const groupData = unmatchedGroups[group];
+                                const filtered = groupData.filter(tag => tag.tagName.includes(group));
+                                if (filtered.length === 0) return;
+
+                                const isActive = unmatchedGroups[group]?.some(tag => tag.currentValue === '1');
+
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.textContent = group;
+                                btn.style.width = '5rem';
+                                btn.style.height = '1.8rem';
+                                btn.className = 'button button--solid-middle';
+                                if (isActive) {
+                                    btn.style.backgroundColor = 'red';
+                                    btn.style.color = 'white';
+                                }
+
+                                if (i < 4) {
+                                    row1.appendChild(btn);
+                                } else {
+                                    row2.appendChild(btn);
+                                }
+                            });
+
+                            buttonWrapper.appendChild(row1);
+                            buttonWrapper.appendChild(row2);
+                            content.appendChild(buttonWrapper);
+
+                            // label 색깔 처리 테스트중
+                            ['OCR', 'OCGR', 'UVR', 'CB_ON', 'ATS', 'NVR', 'ELD'].forEach(group => {
+                                const found = unmatchedGroups[group].find(tag => tag.currentValue == '1');
+                                if (found) {
+                                    console.log(`${group} group has active tag:`, found);
+                                }
+                            });
+
                         } else {
                             tbody.innerHTML = data.TAGs.map(tag => {
-                                const statusCell = poiProperty.poiCategoryName !== '승강기'
+                                const statusCell = poiProperty.poiCategoryName === '공기질센서'
                                     ? `<td>${getStatusText(tag.S)}</td>`
                                     : '';
                                 return `

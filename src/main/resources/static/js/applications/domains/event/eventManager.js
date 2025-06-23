@@ -277,7 +277,7 @@ const EventManager = (() => {
     }
 
     // CCTV 스트리밍 초기화 함수
-    function initializeCCTVStream(canvasId, cctvCode) {
+    function initializeCCTVStream(canvasId, cctvCode, cameraIp) {
         const canvasElement = document.getElementById(canvasId);
         if (!canvasElement) return;
 
@@ -296,8 +296,19 @@ const EventManager = (() => {
                 LG_playback_port: cctvConfig.lgPlaybackPort,
                 canvasDom: canvasElement
             });
-            livePlayer.livePlay(cctvCode);
+
+            livePlayer.getDeviceInfo((cameraList) => {
+
+                const matchedCamera = cameraList.find(camera =>
+                    camera["ns1:strIPAddress"] === cameraIp
+                );
+
+                const deviceId = matchedCamera["ns1:strCameraID"];
+                livePlayer.livePlay(deviceId);
+            })
+
             return livePlayer;
+
         })
     }
 

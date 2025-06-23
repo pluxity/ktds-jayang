@@ -710,7 +710,7 @@ const Init = (function () {
             activePopups.set(poiInfo.id, { dom: popupInfo });
             updatePosition();
 
-            EventManager.initializeCCTVStream(canvasId, poiInfo.property.code);
+            EventManager.initializeCCTVStream(canvasId, poiInfo.property.code, poiInfo.property.cameraIp);
 
             const closeBtn = popupInfo.querySelector('.cctv-close');
             closeBtn.addEventListener('click', () => {

@@ -13,6 +13,7 @@ class Poi {
     #cctvList;
     #isLight;
     #lightGroup;
+    #cameraIp;
 
     constructor(
         id,
@@ -30,7 +31,8 @@ class Poi {
         tagNames,
         cctvList,
         isLight,
-        lightGroup
+        lightGroup,
+        cameraIp
     ) {
         this.#id = id;
         this.#name = name;
@@ -39,7 +41,7 @@ class Poi {
         // this.#poiMiddleCategory = PoiMiddleCategoryManager.findById(poiMiddleCategoryId);
         this.#poiMiddleCategory = poiMiddleCategoryId ? PoiMiddleCategoryManager.findById(poiMiddleCategoryId) : null;
         this.#iconSet = IconSetManager.findById(iconSetId);
-        this.#iconUrl = this.getIcon2DUrl();
+        this.#iconUrl = this.#iconSet.iconFile2D !== null ? this.getIcon2DUrl() : this.getIcon3DUrl();
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
@@ -56,6 +58,7 @@ class Poi {
         this.#cctvList = cctvList;
         this.#isLight = isLight;
         this.#lightGroup = lightGroup;
+        this.#cameraIp = cameraIp;
     }
 
     get id() {
@@ -110,6 +113,9 @@ class Poi {
     }
     get lightGroup() {
         return this.#lightGroup;
+    }
+    get cameraIp() {
+        return this.#cameraIp;
     }
     // Px.Poi.Add 용
     get poiOptions() {

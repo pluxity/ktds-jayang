@@ -106,17 +106,14 @@
                             Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
 
                         Px.Poi.GetDataAll().forEach(poi => {
-                           Px.Poi.SetIconSize(poi.id, 70);
-                           Px.Poi.SetTextSize(poi.id, 70);
+                            Px.Poi.SetIconSize(poi.id, 70);
+                            
+                            const findPoi = KioskPoiManager.findById(poi.id);
+                            const isOtherKiosk = findPoi.isKiosk && findPoi.id !==  kioskPoi.id;
+                            
+                            const textSize = isOtherKiosk ? 1 : 70;
+                            Px.Poi.SetTextSize(poi.id, textSize);
                         });
-
-
-                        KioskPoiManager.findAll()
-                            .forEach(poi => {
-                                if (poi.isKiosk && poi.id !== kioskPoi.id) {
-                                    Px.Poi.SetTextSize(poi.id, 1);
-                                }
-                            });
                     }
                 });
             });
@@ -249,7 +246,8 @@ const Init = (function () {
             id: kioskPoi.id,
             isAnimation: true,
             duration: 500,
-            distanceOffset: 500
+            distanceOffset: 500,
+            heightOffset:200
         });
     }
 

@@ -105,6 +105,12 @@
                         if(storeBuilding?.camera3d)
                             Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
 
+                        Px.Poi.GetDataAll().forEach(poi => {
+                           Px.Poi.SetIconSize(poi.id, 70);
+                           Px.Poi.SetTextSize(poi.id, 70);
+                        });
+
+
                         KioskPoiManager.findAll()
                             .forEach(poi => {
                                 if (poi.isKiosk && poi.id !== kioskPoi.id) {

@@ -299,11 +299,11 @@ const EventManager = (() => {
 
             livePlayer.getDeviceInfo((cameraList) => {
 
-                const matchedCamera = cameraList.find(camera =>
+                const matchedCamera = cameraList.filter(camera =>
                     camera["ns1:strIPAddress"] === cameraIp
                 );
 
-                const deviceId = matchedCamera["ns1:strCameraID"];
+                const deviceId = matchedCamera[0]["ns1:strCameraID"];
                 livePlayer.livePlay(deviceId);
             })
 

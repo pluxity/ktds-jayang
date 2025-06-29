@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.building.dto;
 
+import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
 import jakarta.validation.constraints.Digits;
@@ -42,7 +43,8 @@ public record UpdatePoiDTO(
         List<PoiCctvDTO> cctvList,
         Boolean isLight,
         String lightGroup,
-        String cameraIp
+        String cameraIp,
+        Spatial position
 
 ) {
 }

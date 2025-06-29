@@ -134,7 +134,7 @@ public class PoiController {
     @PostMapping("/batch-register")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseBody postBatchPoi(@RequestParam(value = "buildingId") Long buildingId,
-                                     @RequestParam(value = "floorNo") Integer floorNo,
+                                     @RequestParam(value = "floorNo", required = false) Integer floorNo,
                                      @RequestBody MultipartFile file) {
         service.batchRegisterPoi(buildingId, floorNo, file);
         return ResponseBody.of(SuccessCode.SUCCESS_CREATE);

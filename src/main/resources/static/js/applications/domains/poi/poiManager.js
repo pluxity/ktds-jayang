@@ -145,12 +145,55 @@ const PoiManager = (() => {
         });
     };
 
+    const updatePoiWithPositionAndFloorNo = (id, position, floorNo) => {
+        const poi = findById(id);
+        if (!poi) {
+            console.error('POI not found:', id);
+            return Promise.reject('POI not found');
+        }
+
+        const updateData = {
+            code: poi.code,
+            name: poi.name,
+            buildingId: poi.property.buildingId,
+            floorNo: floorNo,
+            poiCategoryId: poi.poiCategory,
+            poiMiddleCategoryId: poi.poiMiddleCategory,
+            iconSetId: poi.iconSetId,
+            position: position, // position 정보 포함
+            rotation: poi.rotation,
+            scale: poi.scale,
+            tagNames: poi.tagNames || [],
+            isLight: poi.property.isLight,
+            lightGroup: poi.property.lightGroup,
+            cameraIp: poi.property.cameraIp,
+            cctvList: poi.property.cctvList || []
+        };
+
+        return new Promise((resolve, reject) => {
+            api.put(`/poi/${id}`, updateData)
+                .then((response) => {
+                    // 로컬 데이터 업데이트
+                    poi.floorNo = floorNo;
+                    poi.property.floorNo = floorNo;
+                    poi.position = position;
+                    console.log(`POI ${id} position and floorNo updated`);
+                    resolve(response);
+                })
+                .catch((error) => {
+                    console.error('POI update failed:', error);
+                    reject(error);
+                });
+        });
+    };
+
     const deletePoi = (id) => {
         return new Promise((resolve, reject) => {
             api.delete(`/poi/${id}`)
                 .then(() => {
                     poiList = poiList.filter((poi) => poi.id !== id);
                     resolve(id);
+                    getPoiRenderingAndList();;
                 })
                 .catch((error) => {
                     console.error(error);
@@ -230,8 +273,29 @@ const PoiManager = (() => {
         const poiDataEngine = PoiManager.findById(id).poiOptions;
         poiDataEngine.onComplete = (poiId) => {
             const poiData = Px.Poi.GetData(poiId);
+            const currentFloorNo = document.querySelector('#floorNo')?.value;
 
-            PoiManager.patchPoiPosition(poiId, poiData.position);
+            if (currentFloorNo && currentFloorNo !== '') {
+                const floorNumber = Number(currentFloorNo);
+                console.log(`POI ${poiId} 배치 완료, position과 floorNo를 함께 업데이트: ${floorNumber}`);
+                console.log('position = {}',poiData.position);
+                
+                // position과 floorNo를 한 번에 업데이트
+                PoiManager.updatePoiWithPositionAndFloorNo(poiId, poiData.position, floorNumber)
+                    .then(() => {
+                        console.log(`POI ${poiId} position과 floorNo 업데이트 완료`);
+                        // POI 리스트 새로고침
+                        if (typeof getPoiRenderingAndList === 'function') {
+                            getPoiRenderingAndList();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(`POI ${poiId} 업데이트 실패:`, error);
+                    });
+            } else {
+                // 층이 선택되지 않은 경우 위치만 업데이트
+                PoiManager.patchPoiPosition(poiId, poiData.position);
+            }
         };
 
         console.log("poiDataEngine : ", poiDataEngine);
@@ -249,6 +313,7 @@ const PoiManager = (() => {
         patchPoiPosition,
         patchPoiRotation,
         patchPoiScale,
+        updatePoiWithPositionAndFloorNo,
         deletePoi,
         findAll,
         findById,

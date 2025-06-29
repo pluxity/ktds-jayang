@@ -187,9 +187,9 @@ public class PoiService {
 
         Poi savedPoi = poiRepository.save(poi);
 
-        if (!ObjectUtils.isEmpty(dto.tagNames())) {
-            tagClientService.addTags(dto.tagNames());
-        }
+        // if (!ObjectUtils.isEmpty(dto.tagNames())) {
+        //     tagClientService.addTags(dto.tagNames());
+        // }
 
         return savedPoi.getId();
     }
@@ -213,10 +213,13 @@ public class PoiService {
 
         List<FloorHistory> floorHistories = floorHistoryRepository.findByBuildingFileHistoryId(history.getId());
 
-        boolean isNoneMatchFloorId = floorHistories.stream()
-                .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
-        if (isNoneMatchFloorId) {
-            throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
+        // floorNo가 null이 아닐 때만 층 검증 수행
+        if (dto.floorNo() != null) {
+            boolean isNoneMatchFloorId = floorHistories.stream()
+                    .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
+            if (isNoneMatchFloorId) {
+                throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
+            }
         }
 
 //        boolean isNoneMatchInPoiSet = building.getPoiSet().getPoiCategories().stream()
@@ -271,6 +274,10 @@ public class PoiService {
 
         if (dto.floorNo() != null) {
             poi.changeFloorNo(dto.floorNo());
+        }
+
+        if(dto.position() != null){
+            poi.changePosition(dto.position());
         }
 
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);

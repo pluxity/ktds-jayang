@@ -181,11 +181,15 @@ const getPoiRenderingAndList = async () => {
             );
         }
 
-        const floorSelectBoxId = Number(document.querySelector('#floorNo').value);
-        if (floorSelectBoxId !== 0) {
-            filteredList = filteredList.filter(
-                (poi) => poi.property.floorNo === floorSelectBoxId
-            );
+        if (document.querySelector('#poiAllocate').classList.contains('active')) {  //배치
+
+            const floorSelectBoxId = Number(
+                document.querySelector('#floorNo').value);
+            if (floorSelectBoxId !== 0) {
+                filteredList = filteredList.filter(
+                    (poi) => poi.property.floorNo === floorSelectBoxId
+                );
+            }
         }
 
         const poiCategoryCheckbox = [

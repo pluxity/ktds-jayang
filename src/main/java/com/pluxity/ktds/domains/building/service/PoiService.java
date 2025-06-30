@@ -409,20 +409,30 @@ public class PoiService {
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUILDING));
 
             List<PoiCategory> poiCategoryList = poiCategoryRepository.findAll();
-            List<IconSet> iconSetList = iconSetRepository.findAll();
             List<PoiMiddleCategory> poiMiddleCategoryList = poiMiddleCategoryRepository.findAll();
+
+            Map<String, Poi> poiMapByName = new LinkedHashMap<>();
+
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
                 existValidCheck(poiMap);
 
-//                poiRepository.findByName(poiMap.get(POI_NAME.value))
-//                        .ifPresent(found -> {
-//                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + poiMap.get(POI_NAME.value));
-//                        });
-                Optional<Poi> currentPoi = poiRepository.findByName(poiMap.get(POI_NAME.value));
-                if (currentPoi.isPresent()) {
+                String code = poiMap.get(POI_CODE.value);
+                String name = poiMap.get(POI_NAME.value);
+                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split("[,\\n]"))
+                        .map(String::trim)
+                        .filter(StringUtils::hasText)
+                        .toList();
+
+                if (poiMapByName.containsKey(name)) {
+                    poiMapByName.get(name).getTagNames().addAll(tags);
                     continue;
                 }
+
+//                Optional<Poi> currentPoi = poiRepository.findByName(poiMap.get(POI_NAME.value));
+//                if (currentPoi.isPresent()) {
+//                    continue;
+//                }
                 if (poiRepository.existsByCode(poiMap.get(POI_CODE.value))) {
                     throw new CustomException(ErrorCode.DUPLICATED_POI_CODE, "Duplcate Poi Code: " + poiMap.get(POI_CODE.value));
                 }
@@ -439,11 +449,6 @@ public class PoiService {
                         .limit(1)
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiMiddleCategory Name: " + poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)));
-
-                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split("[,\\n]"))
-                        .map(String::trim)
-                        .filter(StringUtils::hasText)
-                        .toList();
 
                 CreatePoiDTO.CreatePoiDTOBuilder poiDTOBuilder = CreatePoiDTO.builder()
                         .code(poiMap.get(POI_CODE.value))
@@ -508,7 +513,7 @@ public class PoiService {
                 }
 
                 changeField(poiDto, poi);
-
+                poiMapByName.put(name, poi);
                 result.add(poi);
             }
 

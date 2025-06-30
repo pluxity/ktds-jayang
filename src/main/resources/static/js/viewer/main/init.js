@@ -88,7 +88,7 @@
         });
     }
 
-    await PoiManager.getPoiList();
+    await PoiManager.getFilteredPoiList();
     await PatrolManager.getPatrolList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.header__info .date');
@@ -578,8 +578,14 @@ const Init = (function () {
         const poiData = Px.Poi.GetData(poiId);
 
         if (poiData) {
-            // Px.Model.Visible.HideAll();
-            Px.Model.Visible.Show(Number(poiData.property.floorId));
+            const floor = BuildingManager.findFloorsByHistory().find(
+                (floor) => Number(floor.no) === Number(poiData.property.floorNo),
+            );
+            Px.Model.Visible.HideAll();
+            // Px.Model.Visible.Show(Number(poiData.property.floorId));
+            Px.Model.Visible.Show(Number(floor.id));
+            Px.Poi.HideAll();
+            Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
             Px.Camera.MoveToPoi({
                 id: poiId,
                 isAnimation: true,

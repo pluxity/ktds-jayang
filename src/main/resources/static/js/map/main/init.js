@@ -3,6 +3,7 @@
 (async function () {
     const cookieMatch = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)');
     const USER_ID = cookieMatch ? cookieMatch[2] : null;
+
     if (!USER_ID) {
         window.location.href = '/login';
     }
@@ -285,7 +286,7 @@
         })
     });
 
-    await PoiManager.getPoiList();
+    await PoiManager.getFilteredPoiList();
     await PatrolManager.getPatrolList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.header__info .date');
@@ -437,7 +438,7 @@ const Init = (function () {
     };
 
     const getPoiRenderingAndList = async (buildingId) => {
-        await PoiManager.getPoiList().then(() => {
+        await PoiManager.getFilteredPoiList().then(() => {
             let filteredList = PoiManager.findByBuilding(buildingId)
 
             if (filteredList === undefined || filteredList.length < 1) {
@@ -558,9 +559,10 @@ const Init = (function () {
                         // 세션에 저장된 POI 데이터와 CCTV 정보 확인
                         const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
                         const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
-                        if (selectedPoiId) {
-                            renderPoiInfo(Px.Poi.GetData(selectedPoiId));
-                        }
+                        // 임시 제거
+                        // if (selectedPoiId) {
+                        //     renderPoiInfo(Px.Poi.GetData(selectedPoiId));
+                        // }
 
                         if (mainCctv) {
                             const mainCCTVTemplate = EventManager.createMainCCTVPopup(mainCctv);
@@ -621,8 +623,16 @@ const Init = (function () {
         const poiData = Px.Poi.GetData(poiId);
 
         if (poiData) {
-            // Px.Model.Visible.HideAll();
-            Px.Model.Visible.Show(Number(poiData.property.floorNo));
+
+            const floor = BuildingManager.findFloorsByHistory().find(
+                (floor) => Number(floor.no) === Number(poiData.property.floorNo),
+            );
+
+            Px.Model.Visible.HideAll();
+            // Px.Model.Visible.Show(Number(poiData.property.floorNo));
+            Px.Model.Visible.Show(Number(floor.id));
+            Px.Poi.HideAll();
+            Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
             Px.Camera.MoveToPoi({
                 id: poiId,
                 isAnimation: true,
@@ -669,6 +679,7 @@ const Init = (function () {
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
+        console.log("renderPoiInfo poiInfo : ", poiInfo);
         if (poiInfo.group.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
             const popupInfo = document.createElement('div');
@@ -934,6 +945,7 @@ const Init = (function () {
                             }).join('');
                         } else if (['비상발전기', '저압 배전반', '특고압 배전반', '특고압 변압기'].includes(poiProperty.poiMiddleCategoryName)) {
 
+                            console.log("poiProperty.poiMiddleCategoryName : ", poiProperty.poiMiddleCategoryName);
                             const TAG_LABEL_MAP = {
                                 "R상_전압": "R상 전압",
                                 "S상_전압": "S상 전압",
@@ -1007,8 +1019,16 @@ const Init = (function () {
                                         tagName: tag.tagName,
                                         currentValue: tag.currentValue
                                     });
-
-                                    if (tag.tagName.includes('OCGR')) {
+                                    if (tag.tagName.includes('OCR_OCGR')) {
+                                        unmatchedGroups.OCR.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                        unmatchedGroups.OCGR.push({
+                                            tagName: tag.tagName,
+                                            currentValue: tag.currentValue
+                                        });
+                                    } else if (tag.tagName.includes('OCGR')) {
                                         unmatchedGroups.OCGR.push({
                                             tagName: tag.tagName,
                                             currentValue: tag.currentValue
@@ -1114,7 +1134,6 @@ const Init = (function () {
                                 const groupData = unmatchedGroups[group];
                                 const filtered = groupData.filter(tag => tag.tagName.includes(group));
                                 if (filtered.length === 0) return;
-
                                 const isActive = unmatchedGroups[group]?.some(tag => tag.currentValue === '1');
 
                                 const btn = document.createElement('button');

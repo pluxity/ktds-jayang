@@ -130,6 +130,44 @@ public class PoiService {
                             .isLight(base.isLight())
                             .lightGroup(base.lightGroup())
                             .cameraIp(base.cameraIp())
+                            .cameraId(base.cameraId())
+                            .build();
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PoiDetailResponseDTO> findFilteredAllDetail() {
+        List<Poi> poiList = poiRepository.findAllWithPositionPresent();
+
+        return poiList.stream()
+                .map(poi -> {
+                    List<PoiCctv> cctvs = poiCctvRepository.findAllByPoi(poi);
+
+                    List<PoiCctvDTO> cctvDtoList = cctvs.stream()
+                            .map(PoiCctvDTO::from)
+                            .toList();
+
+                    PoiDetailResponseDTO base = poi.toDetailResponseDTO();
+
+                    return PoiDetailResponseDTO.builder()
+                            .id(base.id())
+                            .buildingId(base.buildingId())
+                            .floorNo(base.floorNo())
+                            .poiCategoryId(base.poiCategoryId())
+                            .poiMiddleCategoryId(base.poiMiddleCategoryId())
+                            .iconSetId(base.iconSetId())
+                            .position(base.position())
+                            .rotation(base.rotation())
+                            .scale(base.scale())
+                            .name(base.name())
+                            .code(base.code())
+                            .tagNames(base.tagNames())
+                            .cctvList(cctvDtoList)
+                            .isLight(base.isLight())
+                            .lightGroup(base.lightGroup())
+                            .cameraIp(base.cameraIp())
+                            .cameraId(base.cameraId())
                             .build();
                 })
                 .toList();
@@ -156,6 +194,7 @@ public class PoiService {
                 .isLight(dto.isLight())
                 .lightGroup(dto.lightGroup())
                 .cameraIp(dto.cameraIp())
+                .cameraId(dto.cameraId())
                 .build();
 
         validateAssociation(dto);
@@ -187,9 +226,9 @@ public class PoiService {
 
         Poi savedPoi = poiRepository.save(poi);
 
-        // if (!ObjectUtils.isEmpty(dto.tagNames())) {
-        //     tagClientService.addTags(dto.tagNames());
-        // }
+         if (!ObjectUtils.isEmpty(dto.tagNames())) {
+             tagClientService.addTags(dto.tagNames());
+         }
 
         return savedPoi.getId();
     }
@@ -258,7 +297,7 @@ public class PoiService {
                             .isMain(c.isMain())
                             .build())
                     .toList();
-            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp());
+            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
         }
 //        List<PoiCctv> newCctvs = dto.cctvList().stream()
 //                .map(c -> PoiCctv.builder()
@@ -267,10 +306,10 @@ public class PoiService {
 //                        .isMain(c.isMain())
 //                        .build())
 //                .toList();
-        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp());
-//        if (!dto.tagNames().isEmpty()) {
-//            tagClientService.addTags(dto.tagNames());
-//        }
+        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
+        if (!dto.tagNames().isEmpty()) {
+            tagClientService.addTags(dto.tagNames());
+        }
 
         if (dto.floorNo() != null) {
             poi.changeFloorNo(dto.floorNo());
@@ -319,6 +358,13 @@ public class PoiService {
     private void updateSpatial(Long id, Consumer<Poi> updateMethod) {
         Poi poi = getPoi(id);
         updateMethod.accept(poi);
+    }
+
+    @Transactional
+    public void updateCameraId(Long id, String cameraId) {
+        poiRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
+                .updateCameraId(cameraId);
     }
 
     @Transactional

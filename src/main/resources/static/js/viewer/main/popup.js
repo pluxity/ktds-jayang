@@ -1549,6 +1549,9 @@ const layerPopup = (function () {
         // document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
+            console.log("idStr : ", idStr);
+            console.log("poiInfo : ", poiInfo);
+            if (!poiInfo) return;
             const tags = dto.TAGs;
             let effectiveMode = mode;
 
@@ -1682,6 +1685,7 @@ const layerPopup = (function () {
 
             // DOM 렌더링
             const elevatorLi = document.createElement('li');
+            console.log("poiInfo : ", poiInfo);
             const buildingLabel = `[${poiInfo.property.buildingName}]`;
 
             const formattedStateText = stateText.match(/.{1,4}/g).join('<br>');
@@ -1928,7 +1932,7 @@ const layerPopup = (function () {
         allTabLi.addEventListener('click', (event) => {
             handleTabClick(event);
             const poiList = PoiManager.findAll();
-            PoiManager.getPoiList().then(poiList => {
+            PoiManager.getFilteredPoiList().then(poiList => {
                 // cctv중에 중분류가 엘리베이터인거(?)
                 const filteredPoiList = poiList.filter(poi =>
                     poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
@@ -2361,11 +2365,14 @@ const layerPopup = (function () {
         const floor = BuildingManager.findFloorsByHistory().find(
             (floor) => Number(floor.no) === Number(poiData.property.floorNo),
         );
-        console.log("floor",floor);
     
         // 같은 building 내에서의 이동
         Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(Number(floor.id));
+        Px.Poi.HideAll();
+        console.log("poiData : ", poiData);
+        Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
+
         Px.Camera.MoveToPoi({
             id: poiId,
             isAnimation: true,
@@ -2376,7 +2383,9 @@ const layerPopup = (function () {
     const closePlayers = () => {
         console.log("livePlayers : ", livePlayers);
         livePlayers.forEach(({player}) => {
-            // player.cctvClose();
+            if (player) {
+                player.cctvClose();
+            }
         })
         livePlayers.length = 0;
     }
@@ -2461,7 +2470,7 @@ const layerPopup = (function () {
                 const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
                 updatePoiSelectBox(filteredPois);
             } else {
-                PoiManager.getPoiList().then((pois) => {
+                PoiManager.getFilteredPoiList().then((pois) => {
                     updatePoiSelectBox(pois);
                 })
             }
@@ -2487,7 +2496,7 @@ const layerPopup = (function () {
         if (floorList.length > 0) {
             // floorBtn.textContent = floorList[0].name;
             floorBtn.textContent = "전체";
-            PoiManager.getPoiList().then((pois) => {
+            PoiManager.getFilteredPoiList().then((pois) => {
                 updatePoiSelectBox(pois);
             })
             // PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
@@ -2660,7 +2669,7 @@ const layerPopup = (function () {
         if (reinitializeSelectBoxes) {
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
-            const poiListData = await PoiManager.getPoiList();
+            const poiListData = await PoiManager.getFilteredPoiList();
             updatePoiSelectBox(poiListData);
             setDatePicker();
             const alarmTypes = [
@@ -2687,7 +2696,7 @@ const layerPopup = (function () {
         const selectedDeviceType = poiBtn.textContent.trim();
         const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
 
-        poiList = await PoiManager.getPoiList();
+        poiList = await PoiManager.getFilteredPoiList();
         const tableBody = document.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";

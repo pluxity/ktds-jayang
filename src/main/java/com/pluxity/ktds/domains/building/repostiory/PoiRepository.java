@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.building.repostiory;
 
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
+import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,4 +43,7 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     List<Poi> findByMiddleCategoryName(@Param("name") String middleCategoryName);
     @Query("SELECT p FROM Poi p JOIN p.poiMiddleCategory c WHERE c.name = :name AND p.building.id = :buildingId")
     List<Poi> findByBuildingIdAndMiddleCategoryName(@Param("buildingId") Long buildingId, @Param("name") String middleCategoryName);
+
+    @Query("SELECT p FROM Poi p WHERE p.position.x IS NOT NULL AND p.position.y IS NOT NULL AND p.position.z IS NOT NULL")
+    List<Poi> findAllWithPositionPresent();
 }

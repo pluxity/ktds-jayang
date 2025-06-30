@@ -50,6 +50,19 @@ public class PoiController {
         return DataResponseBody.of(service.findAllDetail());
     }
 
+    @GetMapping("/filter")
+    public DataResponseBody<List<PoiDetailResponseDTO>> getFilteredPoiAllDetail() {
+        return DataResponseBody.of(service.findFilteredAllDetail());
+    }
+
+    @PatchMapping("/{id}/cameraId")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchBuildingCamera2d(@PathVariable Long id,
+                                              @RequestBody String cameraId) {
+        service.updateCameraId(id, cameraId);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
     @GetMapping("/poi-category/{id}")
     public DataResponseBody<List<PoiDetailResponseDTO>> getPoiByCategoryId(@PathVariable Long id) {
         return DataResponseBody.of(service.findByCategoryId(id));

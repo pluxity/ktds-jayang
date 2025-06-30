@@ -32,6 +32,17 @@ const PoiManager = (() => {
         });
     };
 
+    const getFilteredPoiList = () => {
+        return new Promise((resolve) => {
+            api.get(`/poi/filter`).then((result) => {
+                const { result: data } = result.data;
+
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+
     const getPoiByCategoryId = (id) => {
         return new Promise((resolve) => {
             api.get(`/poi/poi-category/${id}`).then((result) => {
@@ -269,10 +280,22 @@ const PoiManager = (() => {
 
     const renderPoiByIdAddByMouse = (id) => {
         const poiDataEngine = PoiManager.findById(id).poiOptions;
+        PoiManager.findById(id)
         poiDataEngine.onComplete = (poiId) => {
             const poiData = Px.Poi.GetData(poiId);
             const currentFloorNo = document.querySelector('#floorNo')?.value;
 
+            if (!poiData.property.cameraId && poiData.property.cameraIp) {
+                initPlayer(poiData.property.cameraIp).then(player => {
+                    player.getDeviceInfo(cameraList => {
+                        const cam = cameraList.find(c => c["ns1:strIPAddress"] === poiData.property.cameraIp);
+                        const cameraId = cam ? cam["ns1:strCameraID"] : null;
+
+                        PoiManager.patchPoiCameraId(poiId, cameraId);
+                        console.log("cameraId: ", cameraId);
+                    });
+                });
+            }
             if (currentFloorNo && currentFloorNo !== '') {
                 const floorNumber = Number(currentFloorNo);
 
@@ -287,6 +310,33 @@ const PoiManager = (() => {
         console.log("poiDataEngine : ", poiDataEngine);
         Px.Poi.AddByMouseSync(poiDataEngine);
     };
+
+    const patchPoiCameraId = (id, params) => {
+        return new Promise((resolve, reject) => {
+            api.patch(`/poi/${id}/cameraId`, params).then(res => {
+                console.log("res :", res);
+            })
+        });
+    };
+
+    const initPlayer = (cameraIp) => {
+        return api.get("/cctv/config").then(res => {
+            const cctvConfig = res.data.result;
+            return new PluxPlayer({
+                wsRelayUrl: cctvConfig.wsRelayUrl,
+                wsRelayPort: cctvConfig.wsRelayPort,
+                httpRelayUrl: cctvConfig.httpRelayUrl,
+                httpRelayPort: cctvConfig.httpRelayPort,
+
+                LG_server_ip: cctvConfig.lgServerIp,
+                LG_server_port: cctvConfig.lgServerPort,
+
+                LG_live_port: cctvConfig.lgLivePort,
+                LG_playback_port: cctvConfig.lgPlaybackPort,
+                canvasDom: document.createElement('canvas')
+            });
+        })
+    }
 
     return {
         getPoiList,
@@ -309,6 +359,9 @@ const PoiManager = (() => {
         findByPoiCategory,
         renderAllPoiToEngineByBuildingId,
         renderPoiByIdAddByMouse,
-        getPoisByFloorNo
+        getPoisByFloorNo,
+        getFilteredPoiList,
+        initPlayer,
+        patchPoiCameraId
     };
 })();

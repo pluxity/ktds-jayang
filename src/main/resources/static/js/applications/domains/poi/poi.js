@@ -14,6 +14,7 @@ class Poi {
     #isLight;
     #lightGroup;
     #cameraIp;
+    #cameraId;
 
     constructor(
         id,
@@ -32,7 +33,8 @@ class Poi {
         cctvList,
         isLight,
         lightGroup,
-        cameraIp
+        cameraIp,
+        cameraId
     ) {
         this.#id = id;
         this.#name = name;
@@ -59,6 +61,7 @@ class Poi {
         this.#isLight = isLight;
         this.#lightGroup = lightGroup;
         this.#cameraIp = cameraIp;
+        this.#cameraId = cameraId;
     }
 
     get id() {
@@ -116,6 +119,9 @@ class Poi {
     }
     get cameraIp() {
         return this.#cameraIp;
+    }
+    get cameraId() {
+        return this.#cameraId;
     }
     // Px.Poi.Add 용
     get poiOptions() {

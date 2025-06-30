@@ -43,7 +43,8 @@ public record UpdatePoiDTO(
         Boolean isLight,
         String lightGroup,
         String cameraIp,
-        Spatial position
+        Spatial position,
+        String cameraId
 
 ) {
 }

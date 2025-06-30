@@ -60,7 +60,7 @@ body {
     overflow-y: auto;
 }
 
-#btnLodSetForm {
+.btnLodSetForm {
     width: 32.4%;
     height: 3rem;
 }
@@ -553,6 +553,12 @@ div.input_autocomplete ul.input_autocomplete li:hover {
     flex-direction: column;
     align-items: center;
 }
+
+.poi-setting{
+    display: flex;
+    gap: 10px;
+}
+
 
 .poi-register-buttons {
     display: flex;

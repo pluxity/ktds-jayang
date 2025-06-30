@@ -180,27 +180,27 @@ public class PoiService {
             poi.getPoiCctvs().addAll(cctvEntities);
         }
         PoiCategory category = poiCategoryRepository.findById(dto.poiCategoryId())
-                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY));
         if (category.getName().equalsIgnoreCase("cctv")) {
             // cctv entity에도 추가
         }
 
         Poi savedPoi = poiRepository.save(poi);
 
-        if (!ObjectUtils.isEmpty(dto.tagNames())) {
-            tagClientService.addTags(dto.tagNames());
-        }
+        // if (!ObjectUtils.isEmpty(dto.tagNames())) {
+        //     tagClientService.addTags(dto.tagNames());
+        // }
 
         return savedPoi.getId();
     }
 
     private void validateAssociation(CreatePoiDTO dto) {
         this.validateAssociation(UpdatePoiDTO.builder()
-                        .buildingId(dto.buildingId())
-                        .floorNo(dto.floorNo())
-                        .poiCategoryId(dto.poiCategoryId())
-                        .iconSetId(dto.iconSetId())
-                        .build());
+                .buildingId(dto.buildingId())
+                .floorNo(dto.floorNo())
+                .poiCategoryId(dto.poiCategoryId())
+                .iconSetId(dto.iconSetId())
+                .build());
     }
 
     private void validateAssociation(UpdatePoiDTO dto) {
@@ -213,10 +213,13 @@ public class PoiService {
 
         List<FloorHistory> floorHistories = floorHistoryRepository.findByBuildingFileHistoryId(history.getId());
 
-        boolean isNoneMatchFloorId = floorHistories.stream()
-                .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
-        if (isNoneMatchFloorId) {
-            throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
+        // floorNo가 null이 아닐 때만 층 검증 수행
+        if (dto.floorNo() != null) {
+            boolean isNoneMatchFloorId = floorHistories.stream()
+                    .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
+            if (isNoneMatchFloorId) {
+                throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
+            }
         }
 
 //        boolean isNoneMatchInPoiSet = building.getPoiSet().getPoiCategories().stream()
@@ -265,12 +268,16 @@ public class PoiService {
 //                        .build())
 //                .toList();
         poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp());
-        if (!dto.tagNames().isEmpty()) {
-            tagClientService.addTags(dto.tagNames());
-        }
+//        if (!dto.tagNames().isEmpty()) {
+//            tagClientService.addTags(dto.tagNames());
+//        }
 
         if (dto.floorNo() != null) {
             poi.changeFloorNo(dto.floorNo());
+        }
+
+        if(dto.position() != null){
+            poi.changePosition(dto.position());
         }
 
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);

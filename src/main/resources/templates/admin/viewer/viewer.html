@@ -82,9 +82,13 @@
                     </div>
                 </div>
                 <hr class="hr-margin">
-                <div class="txt-center">
-                    <button type="button" class="btn btn-secondary btn-md" id="btnLodSetForm" lodSetModal>LOD 설정
+                <div class="poi-setting">
+                    <button type="button" class="btn btn-secondary btn-md btnLodSetForm"  lodSetModal>LOD 설정
                     </button>
+                    <button type="button" class="btn btn-primary btn-md btnLodSetForm" id="btnRegisterPoi" data-bs-toggle="modal" data-bs-target="#poiRegisterModal">
+                        POI 등록
+                    </button>
+                    <button type="button" class="btn btn-success btnLodSetForm" id="btnBatchRegister" data-bs-toggle="modal" data-bs-target="#poiBatchRegisterModal">일괄 등록</button>
                 </div>
             </div>
             <div class="tab-pane fade" id="textTab" name="fire-tab"></div>
@@ -481,6 +485,170 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="poiRegisterModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">POI 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiRegisterForm" id="poiRegisterForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>층 선택</th>
+                                <td colspan="3">
+                                    <select name="floorId" id="selectFloorIdRegister" class="form-select" title="층 선택" data-tagname="층">
+                                        <option class="selected" value="">층 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>POI 카테고리 선택</th>
+                                <td colspan="3">
+                                    <select name="poiCategoryId" id="selectPoiCategoryIdRegister" class="form-select" title="POI 카테고리 선택" required data-rules="required" data-tagname="POI 카테고리">
+                                        <option class="selected" value="">POI 카테고리 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>중분류</th>
+                                <td colspan="3">
+                                    <select name="poiMiddleCategoryId" id="selectPoiMiddleCategoryIdRegister" class="form-select" title="중분류" required data-rules="required" data-tagname="중분류">
+                                        <option class="selected" value="">중분류</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>POI 이름</th>
+                                <td colspan="3">
+                                    <input type="text" name="poiName" id="poiNameRegister" class="form-control" placeholder="POI 이름을 입력해주세요." required data-rules="required" data-tagname="POI 이름">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>POI 코드</th>
+                                <td colspan="3">
+                                    <input type="text" name="code" id="poiCodeRegister" class="form-control" placeholder="POI 코드를 입력해주세요." required data-rules="required" data-tagname="POI 코드">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>조명 여부</th>
+                                <td>
+                                    <input type="checkbox" name="isLight" id="isLightPoiRegister" class="form-check-input" data-tagname="조명 여부">
+                                </td>
+                                <th>그룹</th>
+                                <td>
+                                    <input type="text" name="lightGroup" id="lightGroupRegister" class="form-control input-sm" data-tagname="그룹" disabled>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>태그</th>
+                                <td colspan="3">
+                                    <textarea name="tagName" id="tagRegister" class="form-control input-sm" placeholder="태그를 입력해주세요." style="height:200px;" title="태그 이름" data-tagname="태그 이름"></textarea>
+                                </td>
+                            </tr>
+
+                            <tr class="cameraIp hidden">
+                                <th>카메라 IP</th>
+                                <td colspan="3">
+                                    <input type="text" name="cameraIp" id="cameraIpRegister" class="form-control" placeholder="" data-tagname="카메라 IP">
+                                </td>
+                            </tr>
+
+                            <tr class="selectCctv hidden">
+                                <th>지정카메라</th>
+                                <td colspan="3">
+                                    <input type="text" name="mainCctv" id="mainCctvRegister" class="form-control" placeholder="지정카메라를 입력해주세요." data-tagname="지정카메라">
+                                </td>
+                            </tr>
+                            <tr class="selectCctv hidden">
+                                <th>주변카메라</th>
+                                <td colspan="3">
+                                    <input type="text" name="subCctv1" id="subCctv1Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 1"
+                                           data-tagname="주변카메라 1">
+                                    <br>
+                                    <input type="text" name="subCctv2" id="subCctv2Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 2"
+                                           data-tagname="주변카메라 2">
+                                    <br>
+                                    <input type="text" name="subCctv3" id="subCctv3Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 3"
+                                           data-tagname="주변카메라 3">
+                                    <br>
+                                    <input type="text" name="subCctv4" id="subCctv4Register" class="form-control sub-cctv"
+                                           placeholder="주변카메라 4"
+                                           data-tagname="주변카메라 4">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnPoiRegister">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="poiBatchRegisterModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">POI 일괄등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiBatchRegisterForm" id="poiBatchRegisterForm" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:15%">
+                                <col style="width:40%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>층 선택</th>
+                                <td colspan="3">
+                                    <select name="floorId" id="selectFloorIdBatchRegister" class="form-select" title="층 선택" data-tagname="층">
+                                        <option class="selected" value="">층 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>일괄등록 파일</th>
+                                <td colspan="3">
+                                    <input type="file" name="batchRegisterFile" id="batchRegisterFile" class="form-control input-sm" title="POI 일괄등록 파일" required data-rules="required,excelFile" data-tagname="POI 일괄등록 파일" data-ext="xlsx,xls,csv" accept=".xlsx,.xls,.csv">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-success" id="btnDownloadSampleFile">샘플파일 다운로드</button>
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnPoiBatchRegister">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <th:block th:replace="~{admin/fragments/script :: script }"></th:block>
 <script th:inline="javascript">

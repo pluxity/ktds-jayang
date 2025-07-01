@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.FAILED_DELETE_FILE;
 import static com.pluxity.ktds.global.constant.ErrorCode.FAILED_SAVE_FILE;
@@ -23,16 +24,41 @@ import static com.pluxity.ktds.global.constant.ErrorCode.FAILED_SAVE_FILE;
 public class SaveZipFile implements SaveStrategy {
     @Override
     public FileInfo fileSave(MultipartFile file, Path directoryPath) throws IOException {
+        String zipUuid = UUID.randomUUID().toString();  // ZIP과 GLB가 공유할 UUID
+        
         try {
             FileUtil.checkExtractable(file);
             Files.createDirectories(directoryPath);
-            ZipUtil.extractFiles(file.getInputStream(), directoryPath);
+            
+            // ICON3D 타입인 경우 GLB 파일명을 ZIP과 같은 UUID로 변경
+            String glbUuid = directoryPath.toString().contains("3D") ? zipUuid : null;
+            ZipUtil.extractFiles(file.getInputStream(), directoryPath, glbUuid);
+            
         } catch (IOException e) {
             rollback(directoryPath);
             log.error(FAILED_SAVE_FILE.getMessage());
             throw new CustomException(FAILED_SAVE_FILE);
         }
-        return saveFileInfo(file, directoryPath);
+        
+        return createFileInfo(file, directoryPath, zipUuid);
+    }
+    
+    /**
+     * ZIP과 GLB가 같은 UUID를 사용하도록 FileInfo 생성
+     */
+    private FileInfo createFileInfo(MultipartFile file, Path directoryPath, String zipUuid) throws IOException {
+        String extension = FileUtil.getExtension(file.getOriginalFilename());
+        String directoryName = directoryPath.getParent().relativize(directoryPath).toString();
+        
+        // ZIP 파일을 지정된 UUID로 저장
+        Files.copy(file.getInputStream(), directoryPath.resolve(zipUuid + "." + extension));
+        
+        return FileInfo.builder()
+                .originName(file.getOriginalFilename())
+                .extension(extension)
+                .storedName(zipUuid)  // ZIP과 GLB가 같은 UUID 사용
+                .directoryName(directoryName)
+                .build();
     }
 
     @Override

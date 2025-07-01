@@ -18,7 +18,7 @@ const dataManufacturer = (rowData) =>
                 gridjs.html('') :
                 gridjs.html(
                     `<a href="/3D/${iconFile3D.directory}/${iconFile3D.storedName}.${iconFile3D.extension}">
-                        <img src="/3D/${iconFile3D.directory}/${iconFile3D.storedName}.${iconFile3D.extension}" style="width: 32px; height: 32px"/>
+                        <img src="/3D/${iconFile3D.directory}/thumbnail.jpg" style="width: 32px; height: 32px"/>
                     </a>`,
                 ),
             gridjs.html(`

@@ -24,26 +24,47 @@ public class ZipUtil {
     private ZipUtil() {
     }
 
-    public static void extractFiles(InputStream inputStream, Path targetDirectory) throws IOException, IllegalArgumentException {
+    public static void extractFiles(InputStream inputStream, Path targetDirectory, String glbUuid) throws IOException, IllegalArgumentException {
         List<Path> extractedFilePaths = new ArrayList<>();
-
-//        try (ZipInputStream zis = new ZipInputStream(inputStream, Charset.forName("euc-kr"))) {
-//        try (ZipInputStream zis = new ZipInputStream(inputStream, Charset.defaultCharset())) {
 
         try (ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8)) {
             ZipEntry zipEntry = zis.getNextEntry();
             while (zipEntry != null) {
-                Path targetFilePath = targetDirectory.resolve(zipEntry.getName());
                 if (!zipEntry.isDirectory()) {
+                    String fileName = zipEntry.getName();
+                    Path targetFilePath;
+                    
+                    // GLB 파일이고 UUID가 제공된 경우 파일명 변경
+                    if (glbUuid != null && fileName.toLowerCase().endsWith(".glb")) {
+                        String extension = getFileExtension(fileName);
+                        String newFileName = glbUuid + "." + extension;
+                        targetFilePath = targetDirectory.resolve(newFileName);
+                        
+                        log.info("GLB 파일명 변경: {} -> {}", fileName, newFileName);
+                    } else {
+                        targetFilePath = targetDirectory.resolve(fileName);
+                    }
+                    
                     Files.createDirectories(targetFilePath.getParent());
                     Files.copy(zis, targetFilePath);
                     extractedFilePaths.add(targetFilePath);
                 } else {
-                    Files.createDirectories(targetFilePath);
+                    Files.createDirectories(targetDirectory.resolve(zipEntry.getName()));
                 }
                 zipEntry = zis.getNextEntry();
             }
         }
+    }
+    
+    /**
+     * 파일명에서 확장자를 추출하는 헬퍼 메서드
+     */
+    private static String getFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
+            return fileName.substring(lastDotIndex + 1);
+        }
+        return "";
     }
 
     public static void zip(MultipartFile file, Path bp) {

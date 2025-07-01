@@ -45,7 +45,7 @@ public class SaveImage implements SaveStrategy {
             log.error(FAILED_SAVE_FILE.getMessage());
         }
 
-        return saveFileInfo(file, directoryPath);
+        return saveFileInfo(file, directoryPath, null);
     }
 
     @Override

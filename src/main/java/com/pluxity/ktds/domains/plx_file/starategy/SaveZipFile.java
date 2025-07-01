@@ -25,13 +25,12 @@ public class SaveZipFile implements SaveStrategy {
     @Override
     public FileInfo fileSave(MultipartFile file, Path directoryPath) throws IOException {
         String zipUuid = UUID.randomUUID().toString();  // ZIP과 GLB가 공유할 UUID
-        
+        String glbUuid = directoryPath.toString().contains("3D") ? zipUuid : null;  // GLB 파일명을 변경할 UUID
         try {
             FileUtil.checkExtractable(file);
             Files.createDirectories(directoryPath);
             
             // ICON3D 타입인 경우 GLB 파일명을 ZIP과 같은 UUID로 변경
-            String glbUuid = directoryPath.toString().contains("3D") ? zipUuid : null;
             ZipUtil.extractFiles(file.getInputStream(), directoryPath, glbUuid);
             
         } catch (IOException e) {
@@ -39,27 +38,9 @@ public class SaveZipFile implements SaveStrategy {
             log.error(FAILED_SAVE_FILE.getMessage());
             throw new CustomException(FAILED_SAVE_FILE);
         }
-        
-        return createFileInfo(file, directoryPath, zipUuid);
+        return saveFileInfo(file, directoryPath, glbUuid);
     }
-    
-    /**
-     * ZIP과 GLB가 같은 UUID를 사용하도록 FileInfo 생성
-     */
-    private FileInfo createFileInfo(MultipartFile file, Path directoryPath, String zipUuid) throws IOException {
-        String extension = FileUtil.getExtension(file.getOriginalFilename());
-        String directoryName = directoryPath.getParent().relativize(directoryPath).toString();
-        
-        // ZIP 파일을 지정된 UUID로 저장
-        Files.copy(file.getInputStream(), directoryPath.resolve(zipUuid + "." + extension));
-        
-        return FileInfo.builder()
-                .originName(file.getOriginalFilename())
-                .extension(extension)
-                .storedName(zipUuid)  // ZIP과 GLB가 같은 UUID 사용
-                .directoryName(directoryName)
-                .build();
-    }
+
 
     @Override
     public FileInfo fileSave(File file, Path directoryPath) throws IOException {

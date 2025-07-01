@@ -39,8 +39,6 @@ public class ZipUtil {
                         String extension = getFileExtension(fileName);
                         String newFileName = glbUuid + "." + extension;
                         targetFilePath = targetDirectory.resolve(newFileName);
-                        
-                        log.info("GLB 파일명 변경: {} -> {}", fileName, newFileName);
                     } else {
                         targetFilePath = targetDirectory.resolve(fileName);
                     }

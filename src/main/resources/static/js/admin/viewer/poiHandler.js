@@ -84,6 +84,7 @@ const leftPoiListInit = async () => {
                             Px.Edit.On();
                             target.classList.add('on');
                             document.querySelector('.btnPoiTool[data-btn-type=translate]').classList.add('on');
+                            Px.Edit.SetMode('translate');
                             Px.Edit.SetMouseUpCallback((poiInfo) => {
                                 const { id } = Px.Poi.GetData(poiInfo.id);
                                 const {btnType: editType} = document.querySelector('.btnPoiTool.on:not([data-btn-type=edit])').dataset;

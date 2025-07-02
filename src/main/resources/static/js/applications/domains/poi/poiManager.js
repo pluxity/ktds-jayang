@@ -261,7 +261,7 @@ const PoiManager = (() => {
             poiData.push(poi.poiOptions);
         });
 
-        Px.Poi.AddFromDataArraySync(poiData, () => {
+        Px.Poi.AddFromDataArray(poiData, () => {
             Px.Poi.GetDataAll().forEach((poi) => {
                 Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
                 Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
@@ -280,35 +280,41 @@ const PoiManager = (() => {
 
     const renderPoiByIdAddByMouse = (id) => {
         const poiDataEngine = PoiManager.findById(id).poiOptions;
-        PoiManager.findById(id)
-        poiDataEngine.onComplete = (poiId) => {
-            const poiData = Px.Poi.GetData(poiId);
-            const currentFloorNo = document.querySelector('#floorNo')?.value;
 
-            if (!poiData.property.cameraId && poiData.property.cameraIp) {
-                initPlayer(poiData.property.cameraIp).then(player => {
-                    player.getDeviceInfo(cameraList => {
-                        const cam = cameraList.find(c => c["ns1:strIPAddress"] === poiData.property.cameraIp);
-                        const cameraId = cam ? cam["ns1:strCameraID"] : null;
+        // 2D icon 없을 경우 예외
+        if (!poiDataEngine.iconUrl || poiDataEngine.iconUrl.trim() === '') {
+            alertSwal('아이콘 이미지가 없습니다. POI를 추가할 수 없습니다.');
+            return;
+        }
 
-                        PoiManager.patchPoiCameraId(poiId, cameraId);
-                        console.log("cameraId: ", cameraId);
+        Px.Poi.AddByMouse({
+           ...poiDataEngine,
+            onComplete: function (poiId) {
+                const poiData = Px.Poi.GetData(poiId);
+                const currentFloorNo = document.querySelector('#floorNo')?.value;
+
+                if (!poiData.property.cameraId && poiData.property.cameraIp) {
+                    initPlayer(poiData.property.cameraIp).then(player => {
+                        player.getDeviceInfo(cameraList => {
+                            const cam = cameraList.find(c => c["ns1:strIPAddress"] === poiData.property.cameraIp);
+                            const cameraId = cam ? cam["ns1:strCameraID"] : null;
+
+                            PoiManager.patchPoiCameraId(poiId, cameraId);
+                            console.log("cameraId: ", cameraId);
+                        });
                     });
-                });
-            }
-            if (currentFloorNo && currentFloorNo !== '') {
-                const floorNumber = Number(currentFloorNo);
+                }
+                if (currentFloorNo && currentFloorNo !== '') {
+                    const floorNumber = Number(currentFloorNo);
 
-                // position과 floorNo를 한 번에 업데이트
-                PoiManager.updatePoiWithPositionAndFloorNo(poiId, poiData.position, floorNumber)
-                    .then(() => {
+                    // position과 floorNo를 한 번에 업데이트
+                    PoiManager.updatePoiWithPositionAndFloorNo(poiId, poiData.position, floorNumber)
+                        .then(() => {
                             getPoiRenderingAndList();
-                    });
+                        });
+                }
             }
-        };
-
-        console.log("poiDataEngine : ", poiDataEngine);
-        Px.Poi.AddByMouseSync(poiDataEngine);
+        });
     };
 
     const patchPoiCameraId = (id, params) => {

@@ -20,7 +20,7 @@
             </li>
 
         </ul>
-        <div class="tab-content" style="padding:5px; display: flex; width: 100%;height: 100%;padding-bottom: 50px;position: relative;">
+        <div class="tab-content" style="padding:5px; width: 100%; height: 100%; padding-bottom: 50px; position: relative">
             <input type="hidden" name="mapNo" id="buildingId" th:value="${param.buildingId}">
             <input type="hidden" name="poiListTabType" id="poiListTabType" value="0">
             <div class="tab-pane fade show active" name="poi-tab" id="" style="width: 100%">
@@ -83,7 +83,7 @@
                 </div>
                 <hr class="hr-margin">
                 <div class="poi-setting">
-                    <button type="button" class="btn btn-secondary btn-md btnLodSetForm"  lodSetModal>LOD 설정
+                    <button type="button" class="btn btn-secondary btn-md btnLodSetForm" id="btnLodSetForm" lodSetModal>LOD 설정
                     </button>
                     <button type="button" class="btn btn-primary btn-md btnLodSetForm" id="btnRegisterPoi" data-bs-toggle="modal" data-bs-target="#poiRegisterModal">
                         POI 등록
@@ -267,18 +267,20 @@
                                 <a class="nav-link" data-toggle="tab" name="lodTab2">LOD 설정</a>
                             </li>
                         </ul>
-                        <div class="tab-content" style="padding:5px; display: flex; width: 100%; height: 100%; padding-bottom: 50px; position: relative">
+                        <div class="tab-content" style="padding:5px; width: 100%; height: 100%; padding-bottom: 50px; position: relative">
                             <div id="lodTab1" class="tab-pane fade show active" style="overflow-y:auto;max-height:500px;">
                                 <table class="table table-bordered lodtable">
                                     <colgroup>
-                                        <col style="width:17%">
+                                        <col style="width:8rem">
+                                        <col style="width:8rem">
                                         <th:block th:each="x : ${#numbers.sequence(1,10)}">
                                             <col th:class="'lod_'+${x}">
                                         </th:block>
                                     </colgroup>
                                     <tbody>
                                     <tr>
-                                        <th>분류</th>
+                                        <th>대분류</th>
+                                        <th>중분류</th>
                                         <th:block th:each="x : ${#numbers.sequence(1,10)}">
                                             <th th:class="'lod_'+${x}">
                                                 [[${x}]]단계
@@ -299,14 +301,16 @@
                             <div id="lodTab2" class="tab-pane fade" style="overflow-y:auto;max-height:500px;">
                                 <table class="table table-bordered lodtable">
                                     <colgroup>
-                                        <col style="width:17%">
+                                        <col style="width:8rem">
+                                        <col style="width:8rem">
                                         <th:block th:each="x : ${#numbers.sequence(1,10)}">
                                             <col th:class="'lod_'+${x}">
                                         </th:block>
                                     </colgroup>
                                     <tbody>
                                     <tr>
-                                        <th>분류</th>
+                                        <th>대분류</th>
+                                        <th>중분류</th>
                                         <th:block th:each="x : ${#numbers.sequence(1,10)}">
                                             <th th:class="'lod_'+${x}">
                                                 [[${x}]]단계

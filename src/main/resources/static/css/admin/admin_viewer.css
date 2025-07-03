@@ -675,7 +675,6 @@ div.input_autocomplete ul.input_autocomplete li:hover {
 
 #wrapper > div.viewer-sidebar > div.tab-content {
     padding: 5px;
-    display: flex;
     width: 100%;
     height: 100%;
     padding-bottom: 50px;

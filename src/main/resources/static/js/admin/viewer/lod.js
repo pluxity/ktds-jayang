@@ -6,28 +6,28 @@ document.getElementById('btnLodSetForm').onclick = () => {
         tbody.querySelectorAll(i === 0 ? '.poiSize' : '.lodType').forEach(e => e.remove());
 
         PoiCategoryManager.findAll().forEach((category) => {
-            // 중분류 목록을 category에서 직접 꺼내거나, 별도 매니저에서 조회
             const middleCategories = PoiMiddleCategoryManager.findByCategoryId(category.id); // 예시
-
-            middleCategories.forEach((middle) => {
+        
+            middleCategories.forEach((middle, idx) => {
                 const tr = document.createElement('tr');
                 tr.classList.add(i === 0 ? 'poiSize' : 'lodType');
 
-                // 대분류
-                const tdCategory = document.createElement('td');
-                tdCategory.classList.add('category1No');
-                tdCategory.innerHTML = category.name;
-                tr.appendChild(tdCategory);
-
+                if (idx === 0) {
+                    const tdCategory = document.createElement('td');
+                    tdCategory.classList.add('category1No');
+                    tdCategory.innerHTML = category.name;
+                    tdCategory.rowSpan = middleCategories.length;
+                    tr.appendChild(tdCategory);
+                }
                 // 중분류
                 const tdMiddle = document.createElement('td');
                 tdMiddle.classList.add('middleCategory');
                 tdMiddle.innerHTML = middle.name;
                 tr.appendChild(tdMiddle);
-
+        
                 // 나머지 lodFormTable1Add(tr) 등 옵션 칸 추가
                 i === 0 ? lodFormTable1Add(tr) : lodFormTable2Add(tr);
-
+        
                 tbody.appendChild(tr);
             });
         });

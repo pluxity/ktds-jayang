@@ -24,9 +24,14 @@ const PoiMiddleCategoryManager = (function () {
         return poiMiddleCategoryList.find((poiMiddleCategory) => poiMiddleCategory.id === id);
     };
 
+    const findByCategoryId = (categoryId) => {
+        return poiMiddleCategoryList.filter((poiMiddleCategory) => poiMiddleCategory.poiCategory.id === categoryId);
+    }
+
     return {
         getPoiMiddleCategoryList,
         findAll,
         findById,
+        findByCategoryId,
     };
 })();

@@ -44,7 +44,7 @@ class Poi {
         // this.#poiMiddleCategory = PoiMiddleCategoryManager.findById(poiMiddleCategoryId);
         this.#poiMiddleCategory = poiMiddleCategoryId ? PoiMiddleCategoryManager.findById(poiMiddleCategoryId) : null;
         this.#iconSet = IconSetManager.findById(iconSetId);
-        this.#icon2DUrl = this.#iconSet.iconFile2D !== null ? this.getIcon2DUrl() : '';
+        this.#icon2DUrl = this.#iconSet.iconFile2D !== null ? this.getIcon2DUrl() : '/static/img/icon_2d_default.svg';
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;

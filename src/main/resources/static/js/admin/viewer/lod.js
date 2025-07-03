@@ -4,22 +4,32 @@ document.getElementById('btnLodSetForm').onclick = () => {
     ['#lodTab1 > table > tbody', '#lodTab2 > table > tbody'].forEach((selector, i) => {
         const tbody = document.querySelector(selector);
         tbody.querySelectorAll(i === 0 ? '.poiSize' : '.lodType').forEach(e => e.remove());
+
         PoiCategoryManager.findAll().forEach((category) => {
-            const tr = document.createElement('tr');
-            tr.classList.add(i === 0 ? 'poiSize' : 'lodType');
+            // 중분류 목록을 category에서 직접 꺼내거나, 별도 매니저에서 조회
+            const middleCategories = PoiMiddleCategoryManager.findByCategoryId(category.id); // 예시
 
-            const td = document.createElement('td');
-            td.classList.add('category1No');
+            middleCategories.forEach((middle) => {
+                const tr = document.createElement('tr');
+                tr.classList.add(i === 0 ? 'poiSize' : 'lodType');
 
-            const div = document.createElement('div');
-            div.innerHTML = category.name;
-            div.id = category.id;
+                // 대분류
+                const tdCategory = document.createElement('td');
+                tdCategory.classList.add('category1No');
+                tdCategory.innerHTML = category.name;
+                tr.appendChild(tdCategory);
 
-            td.appendChild(div);
-            tr.appendChild(td);
+                // 중분류
+                const tdMiddle = document.createElement('td');
+                tdMiddle.classList.add('middleCategory');
+                tdMiddle.innerHTML = middle.name;
+                tr.appendChild(tdMiddle);
 
-            i === 0 ? lodFormTable1Add(tr) : lodFormTable2Add(tr);
-            tbody.appendChild(tr);
+                // 나머지 lodFormTable1Add(tr) 등 옵션 칸 추가
+                i === 0 ? lodFormTable1Add(tr) : lodFormTable2Add(tr);
+
+                tbody.appendChild(tr);
+            });
         });
     });
 
@@ -42,7 +52,9 @@ document.getElementById('btnLodSetForm').onclick = () => {
         levelCnt.dispatchEvent(new Event('change'));
 
         lodSetFrm.querySelectorAll('tr.poiSize, tr.lodType').forEach((tr) => {
-            const category1No = tr.querySelector('.category1No div').id;
+            const div = tr.querySelector('.category1No div');
+            if (!div) return;
+            const category1No = div.id;
             const relevantLodData = data.filter(row => row.category1No === category1No)[0];
 
             for (const id in relevantLodData) {

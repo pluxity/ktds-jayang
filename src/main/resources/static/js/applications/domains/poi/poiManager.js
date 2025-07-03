@@ -281,12 +281,6 @@ const PoiManager = (() => {
     const renderPoiByIdAddByMouse = (id) => {
         const poiDataEngine = PoiManager.findById(id).poiOptions;
 
-        // 2D icon 없을 경우 예외
-        if (!poiDataEngine.iconUrl || poiDataEngine.iconUrl.trim() === '') {
-            alertSwal('아이콘 이미지가 없습니다. POI를 추가할 수 없습니다.');
-            return;
-        }
-
         Px.Poi.AddByMouse({
            ...poiDataEngine,
             onComplete: function (poiId) {

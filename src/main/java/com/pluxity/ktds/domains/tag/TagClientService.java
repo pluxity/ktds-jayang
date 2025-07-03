@@ -229,7 +229,7 @@ public class TagClientService {
             String requestStr = objectMapper.writeValueAsString(tags);
             HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
             ResponseEntity<String> response = restTemplate.exchange(
-                    "http://192.168.4.149:9999/api/tags/data/filter",
+                    baseUrl + "/?ReadTags",
                     HttpMethod.POST,
                     request,
                     String.class
@@ -265,6 +265,8 @@ public class TagClientService {
                     } else if ("VAV".equals(category)) {
                         String s = parseSuffix(enumName);
                         desc = ElevatorTagManager.VavTag.valueOf(s).getValueDescription(rawValue);
+                    } else if ("FU".equals(category)) {
+                        desc = ElevatorTagManager.CellTag.valueOf(enumName).getValueDescription(rawValue);
                     } else {
                         desc = rawValue;
                     }

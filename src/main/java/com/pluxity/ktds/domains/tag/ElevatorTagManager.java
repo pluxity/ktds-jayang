@@ -3,10 +3,7 @@ package com.pluxity.ktds.domains.tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ElevatorTagManager {
@@ -176,6 +173,25 @@ public class ElevatorTagManager {
             }
             return e;
         }
+
+        public String getValueDescription(String value) {
+            return valueMap.get(value);
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum CellTag {
+        DEVSTAT("장비상태", Map.of(
+                "0", "운전대기",
+                "1", "운전대기",
+                "2", "정격운전(발전)",
+                "3", "정지중(Shut down)",
+                "4", "발전모드 변경중"
+        ));
+
+        private final String tagName;
+        private final Map<String, String> valueMap;
 
         public String getValueDescription(String value) {
             return valueMap.get(value);

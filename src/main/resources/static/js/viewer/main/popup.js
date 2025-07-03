@@ -1549,8 +1549,6 @@ const layerPopup = (function () {
         // document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
-            console.log("idStr : ", idStr);
-            console.log("poiInfo : ", poiInfo);
             if (!poiInfo) return;
             const tags = dto.TAGs;
             let effectiveMode = mode;
@@ -1816,6 +1814,7 @@ const layerPopup = (function () {
 
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
+            if (!poiInfo) return;
             const tagMap = dto.TAGs.reduce((map, t) => {
                 const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
                 map[key] = {

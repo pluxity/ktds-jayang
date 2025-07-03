@@ -946,7 +946,26 @@ const Init = (function () {
                         } else if (['비상발전기', '저압 배전반', '특고압 배전반', '특고압 변압기'].includes(poiProperty.poiMiddleCategoryName)) {
 
                             console.log("poiProperty.poiMiddleCategoryName : ", poiProperty.poiMiddleCategoryName);
+
+                            // GEN일 때도 따로 처리해야됨.
+                            // 충전기 전압, 배터리 전압, 주파수, 역률 등등 추가 정보
+                            if (poiProperty.poiMiddleCategoryName === '특고압 변압기') {
+                                tbody.innerHTML = data.TAGs.map(tag => {
+                                    const statusText = { 0: '정상', 1: '경보' }[tag.currentValue];
+                                    return `
+                                    <tr>
+                                        <td>상태</td>
+                                        <td>${statusText}</td>
+                                    </tr>
+                                `;
+                                }).join('');
+                                return;
+                            }
                             const TAG_LABEL_MAP = {
+                                "충전기_전압": "충전기 전압",
+                                "배터리_전압": "배터리 전압",
+                                "주파수": "주파수",
+                                "역률": "역률",
                                 "R상_전압": "R상 전압",
                                 "S상_전압": "S상 전압",
                                 "T상_전압": "T상 전압",
@@ -1185,7 +1204,7 @@ const Init = (function () {
                                 contentDiv.appendChild(tempDiv.firstChild);
                             }
 
-                        }else if (poiProperty.poiMiddleCategoryName === 'FPU') {
+                        } else if (poiProperty.poiMiddleCategoryName === 'FPU') {
                             tbody.innerHTML  = data.TAGs.map(tag => {
                                 // "A-4-VAV-FPU-104105-4F_FPU_104105_PRI_ACTUAL_FLOW" -> "PRI_ACTUAL_FLOW"
                                 const parts = tag.tagName.split('_');
@@ -1331,6 +1350,38 @@ const Init = (function () {
                             tempDiv.innerHTML += comprehensiveTableHTML;
                             contentDiv.appendChild(tempDiv.firstChild);
                             contentDiv.appendChild(tempDiv.firstChild);
+                        } else if(poiProperty.poiMiddleCategoryName == "연료전지") {
+                            tbody.innerHTML = data.TAGs.map(tag => {
+                                const parts = tag.tagName.split('-');
+                                const suffix = parts[parts.length - 1];
+                                let label = '';
+                                let unit = '';
+
+                                switch (suffix) {
+                                    case 'LNGConsum':
+                                        label = 'LNG소비량';
+                                        unit = 'Nm³';
+                                        break;
+                                    case 'GenKwh':
+                                        label = '발전량';
+                                        unit = 'kWh';
+                                        break;
+                                    case 'GenKCal':
+                                        label = '생산열량';
+                                        unit = 'Kcal';
+                                        break;
+                                    default:
+                                        label = suffix;
+                                        break;
+                                }
+
+                                return `
+                                          <tr>
+                                              <td>${label}</td>
+                                              <td>${tag.currentValue || '-'}${unit}</td>
+                                          </tr>
+                                      `;
+                            }).join('');
                         }
 
                         else {

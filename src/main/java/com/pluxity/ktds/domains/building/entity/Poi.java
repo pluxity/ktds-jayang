@@ -64,10 +64,10 @@ public class Poi {
     @AttributeOverride(name = "z", column = @Column(name = "scale_z"))
     private Spatial scale;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "code", nullable = false, length = 20)
+    @Column(name = "code", nullable = false)
     private String code;
 
     @ElementCollection

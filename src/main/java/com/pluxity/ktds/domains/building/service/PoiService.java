@@ -112,7 +112,6 @@ public class PoiService {
                             .toList();
 
                     PoiDetailResponseDTO base = poi.toDetailResponseDTO();
-
                     return PoiDetailResponseDTO.builder()
                             .id(base.id())
                             .buildingId(base.buildingId())
@@ -227,7 +226,7 @@ public class PoiService {
         Poi savedPoi = poiRepository.save(poi);
 
          if (!ObjectUtils.isEmpty(dto.tagNames())) {
-             tagClientService.addTags(dto.tagNames());
+//             tagClientService.addTags(dto.tagNames());
          }
 
         return savedPoi.getId();
@@ -308,7 +307,7 @@ public class PoiService {
 //                .toList();
         poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
         if (!dto.tagNames().isEmpty()) {
-            tagClientService.addTags(dto.tagNames());
+//            tagClientService.addTags(dto.tagNames());
         }
 
         if (dto.floorNo() != null) {

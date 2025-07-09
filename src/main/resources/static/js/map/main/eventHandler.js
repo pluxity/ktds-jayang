@@ -249,12 +249,12 @@
                 const monitorContent = document.getElementById('parkingMonitorContent');
 
                 initPopup(parkingPop, clickedItem);
-                registerTabHandlers({
-                    firstTab: guideTab,
-                    secondTab: monitorTab,
-                    firstContent: guideContent,
-                    secondContent: monitorContent
-                });
+                // registerTabHandlers({
+                //     firstTab: guideTab,
+                //     secondTab: monitorTab,
+                //     firstContent: guideContent,
+                //     secondContent: monitorContent
+                // });
                 api.get('/parking/search', {
                     params: {
                         // startTime: '2025-06-02 03:00:00.000',
@@ -262,9 +262,33 @@
                         // deviceId: 'DEV001'
                     }
                 }).then(res => {
-                    console.log("2 : ", 2);
                     const {result} = res.data;
                     console.log("result : ", result);
+                    // 이거 layerPopup.setParking에서 해야함
+                    const tbody = document.querySelector('#parkingList tbody');
+                    tbody.innerHTML = '';
+                    document.getElementById('parkingTotalCnt').textContent = result.length;
+                    result.forEach((item, index) => {
+                        const tr = document.createElement('tr');
+                        const formatDateTime = (dt) => {
+                            if (!dt) return '';
+                            const date = new Date(dt);
+                            return date.toLocaleDateString('ko-KR', {hour12: false});
+                        };
+                        tr.innerHTML = `
+                          <td>${index + 1}</td>
+                          <td>${item.deviceId || ''}</td>
+                          <td>${item.deviceName || ''}</td>
+                          <td>${item.inoutType === 0 ? '입차' : '출차'}</td>
+                          <td>${item.gateDatetime}</td>
+                          <td>${item.carNo || ''}</td>
+                          <td>${item.inoutCarId || ''}</td>
+                          <td>${item.parkingFee ?? 0}</td>
+                          <td>${item.regularType === 'T' ? '정기' : '일반'}</td>
+                        `;
+
+                        tbody.appendChild(tr);
+                    })
                 }).catch((err) => {
                     console.error(err);
                 })
@@ -388,7 +412,8 @@
             systemPopup.style.display = 'none';
             eventLayerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
+            // 이거 왜?
+            // Px.Poi.ShowAll();
             const sopPopup = document.querySelector("#sopLayerPopup");
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
@@ -1239,7 +1264,7 @@
 
     // test중
     const getPoiRenderingAndList = async (buildingId) => {
-        await PoiManager.getPoiList().then(() => {
+        await PoiManager.getFilteredPoiList().then(() => {
             let filteredList = PoiManager.findByBuilding(buildingId)
 
             if (filteredList === undefined || filteredList.length < 1) {

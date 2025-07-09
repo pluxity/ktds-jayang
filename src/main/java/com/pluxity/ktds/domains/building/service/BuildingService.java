@@ -581,8 +581,6 @@ public class BuildingService {
 
         for (Floor floor : floors) {
 
-            floor.changeBuilding(building); 
-
             boolean found = building.getFloors().stream()
             .filter(f -> f.getName().equals(floor.getName()))
             .findFirst()
@@ -591,18 +589,18 @@ public class BuildingService {
                 return true;
             })
             .orElse(false);
-    
 
             if (!found) {
                 maxFloorNo++;
                 floor.changeFloorNo(maxFloorNo);
             }
 
-
             FloorHistory floorHistory = FloorHistory.builder()
                     .floor(floor)
                     .buildingFileHistory(history)
                     .build();
+
+            floor.changeBuilding(building);
 
             floorHistoryRepository.save(floorHistory);
             floorRepository.save(floor);

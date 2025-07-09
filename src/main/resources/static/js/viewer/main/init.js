@@ -346,6 +346,7 @@ const Init = (function () {
                             displayName: sbm.sbmFileName,
                             baseFloor: sbm.sbmFloorBase,
                             groupId: sbm.sbmFloorGroup,
+                            property: 'sbm'
                         }))
                     );
 
@@ -365,6 +366,23 @@ const Init = (function () {
                     onLoad: function() {
                         initPoi(buildingId);
                         initPatrol();
+                        Px.Camera.SetState({
+                            position: {
+                                x: -1583.4784782983606,
+                                y: 2080.5211006735,
+                                z: -1567.1665244322335
+                            },
+                            rotation: {
+                                x: -2.204705910626318,
+                                y: -0.4727504332541018,
+                                z: -2.587026956765043
+                            },
+                            target: {
+                                x: -698.124967435856,
+                                y: 685.7181604055714,
+                                z: -541.8192260742188
+                            }
+                        });
                         Px.Model.Visible.ShowAll();
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);

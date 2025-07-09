@@ -173,7 +173,7 @@ function poiPaging(records) {
             const poiTd = document.createElement('td');
             poiTd.setAttribute('poiId', records[index].id);
             poiTd.addEventListener('pointerup', moveToPoi);
-            poiTd.textContent = `${records[index].name} - ${records[index].code}`;
+            poiTd.textContent = `${records[index].name}`;
 
             const buttonTd = document.createElement('td');
             const dropdownDiv = document.createElement('DIV');

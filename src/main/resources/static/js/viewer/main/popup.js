@@ -2380,14 +2380,27 @@ const layerPopup = (function () {
     };
 
     const closePlayers = () => {
-        console.log("livePlayers : ", livePlayers);
-        livePlayers.forEach(({player}) => {
-            if (player) {
-                player.cctvClose();
+        console.log("livePlayers :", window.livePlayers);
+        window.livePlayers.forEach(({ player }) => {
+            if (!player) return;
+            player.cancelDraw && player.cancelDraw();
+            player.hls && player.hls.destroy();
+            if (player.videoEl) {
+                player.videoEl.pause();
+                player.videoEl.src = '';
+                document.body.contains(player.videoEl) &&
+                document.body.removeChild(player.videoEl);
+                player.videoEl = null;
             }
-        })
-        livePlayers.length = 0;
-    }
+            fetch(`${player.httpRelayUrl}:${player.httpRelayPort}/stop_stream`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cameraIp: player.cameraIp })
+            }).catch(console.error);
+            player.ws && player.ws.close();
+        });
+        window.livePlayers.length = 0;
+    };
 
     // date picker default setting
     const setDatePicker = () => {

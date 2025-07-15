@@ -32,9 +32,13 @@ function doLogin() {
 
     api.post('/auth/sign-in', param)
         .then((res) => {
-            window.location.href = '/viewer';
+            if (res.data?.result.username.toLowerCase() === 'admin') {
+                window.location.href = '/admin/building/indoor';
+            } else {
+                window.location.href = '/viewer';
+            }
         })
-        .catch(() => {
+        .catch((err) => {
             loginFailCnt++;
             failMessage.style.display = 'block';
             failMessage.innerHTML = `

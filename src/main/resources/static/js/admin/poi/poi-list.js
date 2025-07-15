@@ -416,7 +416,10 @@ function getTagNames(type) {
 function getCameraId(cameraIp) {
     return new Promise(resolve => {
         pluxPlayer.getDeviceInfo(cameraList => {
-            const cam = cameraList.find(c => c["ns1:strIPAddress"] === cameraIp);
+            const list = Array.isArray(cameraList)
+                ? cameraList
+                : [cameraList];
+            const cam = list.find(c => c["ns1:strIPAddress"] === cameraIp);
             resolve(cam ? cam["ns1:strCameraID"] : null);
         });
     });

@@ -215,6 +215,7 @@
                         const poiInfo = Px.Poi.GetData(popupPoiId);
                         if (poiInfo.property.floorNo !== Number(floorNo)) {
                             popup.remove();
+                            layerPopup.closePlayers();
                         }
                     })
                 }
@@ -449,6 +450,7 @@ const Init = (function () {
             Px.Poi.HideAll();
             filteredList
                 .filter(poiInfo => poiInfo.poiCategoryDetail?.name?.toLowerCase() === 'cctv').forEach((poiInfo) => {
+                console.log("poiInfo : ", poiInfo);
                 Px.Poi.Show(poiInfo.id);
             });
 
@@ -511,8 +513,10 @@ const Init = (function () {
 
                             if (popupPoiId === clickedPoiId) {
                                 popup.remove();
+                                layerPopup.closePlayers();
                                 samePopupOpen = true;
                             } else {
+                                layerPopup.closePlayers();
                                 popup.remove();
                             }
                         });
@@ -690,11 +694,13 @@ const Init = (function () {
             popupInfo.innerHTML =
                 `<div class="main-cctv-item" data-cctv-id="${poiInfo.id}">
                     <div class="cctv-header">
+                        <span class="cctv-title">${poiInfo.displayText}</span>
                         <button type="button" class="cctv-close">×</button>
                     </div>
                     <div class="cctv-content">
                         <input type="hidden" class="poi-id" value="${poiInfo.id}">
                         <canvas id="cctv-${poiInfo.id}" width="800" height="450"></canvas>
+<!--                        <video id="cctv-${poiInfo.id}" width="100%" height="100%"></video>-->
 <!--                        <div class="cctv-controls">-->
 <!--                            <button type="button" class="btn-play">▶</button>-->
 <!--                            <button type="button" class="btn-rotate">↻</button>-->

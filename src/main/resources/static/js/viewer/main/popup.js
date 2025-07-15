@@ -2383,22 +2383,45 @@ const layerPopup = (function () {
         console.log("livePlayers :", window.livePlayers);
         window.livePlayers.forEach(({ player }) => {
             if (!player) return;
+
+            // 공통 처리
             player.cancelDraw && player.cancelDraw();
-            player.hls && player.hls.destroy();
+
+            if (player.hls) {
+                try {
+                    player.hls.destroy();
+                } catch (e) {
+                    console.error("HLS destroy error", e);
+                }
+            }
+
             if (player.videoEl) {
                 player.videoEl.pause();
                 player.videoEl.src = '';
-                document.body.contains(player.videoEl) &&
-                document.body.removeChild(player.videoEl);
+                if (document.body.contains(player.videoEl)) {
+                    document.body.removeChild(player.videoEl);
+                }
                 player.videoEl = null;
             }
-            fetch(`${player.httpRelayUrl}:${player.httpRelayPort}/stop_stream`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cameraIp: player.cameraIp })
-            }).catch(console.error);
-            player.ws && player.ws.close();
+
+            if (player.ws) {
+                try {
+                    player.ws.close();
+                } catch (e) {
+                    console.error("WebSocket close error", e);
+                }
+            }
+
+            if (player.type === 'hls' && player.httpRelayUrl && player.cameraIp) {
+                const stopPort = 4012;
+                fetch(`${player.httpRelayUrl}:${stopPort}/stop_stream`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cameraIp: player.cameraIp })
+                }).catch(console.error);
+            }
         });
+
         window.livePlayers.length = 0;
     };
 

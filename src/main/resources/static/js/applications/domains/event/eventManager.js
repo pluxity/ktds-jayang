@@ -306,9 +306,11 @@ const EventManager = (() => {
             // get cctv direct uri
             // live
             livePlayer
-                .getStreamUri(cameraIp, username, password)
+                // .getStreamUri(cameraIp, username, password)
+                .getLiveStreamUri(cameraIp, username, password)
                 .then(hlsUrl => {
-                    playVideoInCanvas(hlsUrl, canvasElement, livePlayer);
+                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, livePlayer);
+                    // playVideoInCanvas(hlsUrl, canvasElement, livePlayer);
                     // playVideoInVideo(hlsUrl, canvasElement, livePlayer);
                     window.livePlayers.push({ player: livePlayer });
                     livePlayer.cameraIp = cameraIp;
@@ -333,6 +335,7 @@ const EventManager = (() => {
         let rafId;
         player.cancelled = false;
         let hls;
+        player.type = 'hls';
 
         if (Hls.isSupported()) {
             hls = new Hls({
@@ -363,6 +366,30 @@ const EventManager = (() => {
         };
         player.hls = hls;
     }
+
+    function playLiveJsmpegInCanvas(wsUrl, canvas, player) {
+        const playerInstance = new JSMpeg.Player(wsUrl, {
+            canvas: canvas,
+            autoplay: true,
+            audio: false,
+            loop: false,
+            videoBufferSize: 1024 * 1024,
+            preserveDrawingBuffer: false,
+            disableGl: true
+        });
+
+        player.cancelDraw = () => {
+            if (playerInstance.source && playerInstance.source.socket) {
+                playerInstance.source.socket.close();
+            }
+            playerInstance.destroy();
+        };
+
+        player.livePlayer = playerInstance;
+        player.type = 'ws';
+    }
+
+
 
     // video
     // video 태그로 직접 재생 할때

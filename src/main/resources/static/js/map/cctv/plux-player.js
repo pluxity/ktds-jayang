@@ -199,6 +199,44 @@ class PluxPlayer {
         return hlsUrl;
     }
 
+    async getLiveStreamUri(cameraIp, username, password) {
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password);
+
+        const operationBody = `
+            <GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">
+              <StreamSetup>
+                <Stream xmlns="http://www.onvif.org/ver10/schema">RTP-Unicast</Stream>
+                <Transport xmlns="http://www.onvif.org/ver10/schema">
+                  <Protocol>UDP</Protocol>
+                </Transport>
+              </StreamSetup>
+              <ProfileToken>DefaultProfile-03</ProfileToken>
+            </GetStreamUri>`.trim();
+
+        const soapBody = this.createDirectCamSoapBody(
+            operationBody,
+            username,
+            passwordDigest,
+            nonce,
+            created
+        );
+
+        const response = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`,
+            `http://${cameraIp}:80/onvif/media_service`,
+            soapBody
+        );
+
+        const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
+
+        const liveWsPort = this.wsRelayUrl.startsWith('https') ? 4013 : 4003;
+
+        const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
+        console.log("Live RTSP URI:", uri);
+        console.log("Live WS URL:", liveUrl);
+        return liveUrl;
+    }
+
     async GetUser() {
         const soapBody = this.createSoapBody("<ns1:GetUser />")
         const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody);

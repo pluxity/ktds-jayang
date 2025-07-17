@@ -2862,26 +2862,56 @@ canvas {
   display: block;
 }
 
-.cctv-controls {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
+.cctv-bottom {
+  height: 3rem;
   display: flex;
-  gap: 5px;
+  background-color: #333;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+.cctv-mode-switch {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.cctv-controls button {
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
+.cctv-controls .play{
+  -webkit-mask-position: -95px -5px;
+  mask-position: -95px -5px;
+}
+
+.cctv-controls .pause{
+  -webkit-mask-position: -5px -5px;
+  mask-position: -5px -5px;
+}
+
+.cctv-controls .stop{
+  -webkit-mask-position: -45px -5px;
+  mask-position: -45px -5px;
+}
+
+.cctv-controls-btn {
+  width: 32px;
+  height: 32px;
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon_play.svg");
+  mask-image: url("/static/images/viewer/icon24/icon_play.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background-color: var(--color-grayscale03);
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
+
+.cctv-controls-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+
 
 .cctv-controls button:hover {
   background: rgba(0,0,0,0.7);
@@ -2914,25 +2944,11 @@ canvas {
 }
 
 .main-cctv-item .cctv-controls {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
   display: flex;
   gap: 8px;
-}
-
-.main-cctv-item .cctv-controls button {
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .popup-warning {
@@ -2947,13 +2963,13 @@ canvas {
 .main-cctv-container {
   display: block;
   position: fixed;
-  z-index: 9999;
+  z-index: 999;
 }
 
 .cctv-container {
   display: block;
   position: fixed;
-  z-index: 9999;
+  z-index: 999;
 }
 
 .system-pop-header{

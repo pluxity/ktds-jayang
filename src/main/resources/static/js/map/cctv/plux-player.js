@@ -15,17 +15,35 @@ class PluxPlayer {
         this.canvasDom = options.canvasDom;
         this.ctx = this.canvasDom.getContext('2d');
         this.decodeWorker = null
-        this.streamServerIP = null
-        this.recordServerIp = null
+        this.streamServerIP = null;
+        this.recordServerIP = null;
     }
 
-    playBack(deviceId, startDate, endTime) {
+    async playBack(deviceId, startDate, endTime) {
         if (this.decodeWorker) {
             this.decodeWorker.terminate()
         }
-        deviceId = deviceId.slice(0, -2) + "02";
+        await this.recordServerSetting();
+
+        deviceId = deviceId.slice(0, -2) + "10";
+
+        const destinationIp = this.recordServerIP[deviceId];
+        if (!destinationIp) {
+            console.error("해당 deviceId의 녹화 서버를 찾을 수 없습니다:", deviceId);
+            console.error("사용 가능한 카메라 목록:", Object.keys(this.recordServerIP));
+            return;
+        }
+
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-playback-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.recordServerIp?.[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
+        this.decodeWorker.postMessage({
+            relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort,
+            destinationIp: destinationIp,
+            destinationPort: this.LG_playback_port,
+            deviceId,
+            startDate,
+            endTime
+        });
+
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -52,7 +70,26 @@ class PluxPlayer {
                 frame.close();
             }
         };
+    }
 
+    // 재생 제어 메서드들
+    pausePlayback() {
+        if (this.decodeWorker) {
+            this.decodeWorker.postMessage({ command: 'pause' });
+        }
+    }
+
+    resumePlayback() {
+        if (this.decodeWorker) {
+            this.decodeWorker.postMessage({ command: 'resume' });
+        }
+    }
+
+    stopPlayback() {
+        if (this.decodeWorker) {
+            this.decodeWorker.postMessage({ command: 'stop' });
+
+        }
     }
 
     async ptzControl(deviceUrl, devicePort, x, y, id, password) {
@@ -315,6 +352,7 @@ class PluxPlayer {
 
         let streamServerIP = {}
 
+
         if (typeof streamServerList == "object" && streamServerList && streamServerList.hasOwnProperty("ns1:strStrServerName")) {
             streamServerIP[streamServerList["ns1:strStrServerName"]] = streamServerList["ns1:strStrServerIP"]
         }
@@ -342,19 +380,95 @@ class PluxPlayer {
         return streamServerIPFromCamId
     }
 
+    async recordServerSetting() {
+        const getRecordServerListBody = this.createSoapBody("<ns1:GetRecordServerList />");
+        let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort,
+            "http://" + this.LG_server_ip + ":" + this.LG_server_port, getRecordServerListBody);
+        let parsedResponse = this.parseResponse(response);
+        let recordServerList = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordServerListResponse"]
+            ["ns1:GetRecordServerListResult"]["ns1:RECORD_SERVER"];
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        let recordServerMap  = {}; // 서버 Name → 서버 IP 매핑
+        let camServerMap  = {}; // 카메라ID → 서버IP 매핑
+
+        // recordServerList 단일 객체인지 배열인지 확인하여 처리
+        if (Array.isArray(recordServerList)) {
+            // 배열인 경우
+            recordServerList.forEach(item => {
+                recordServerMap[item["ns1:strRecServerName"]] = item["ns1:strRecServerIP"];
+            });
+        } else if (recordServerList && typeof recordServerList === 'object') {
+            // 단일 객체인 경우
+            recordServerMap[recordServerList["ns1:strRecServerName"]] = recordServerList["ns1:strRecServerIP"];
+        }
+
+        // console.log("recordServerMap:", recordServerMap);
+        /* recordServerMap 예시:
+           {
+               "serverName: serverIP,
+               "serverName: serverIP,
+               "serverName: serverIP
+           }
+        */
+
+        for (const serverName in recordServerMap) {
+
+            // SOAP 요청 생성 및 전송
+            const getRecordCamBody = this.createSoapBody("<ns1:GetRecordCam>" +
+                "<ns1:ServerID>" + this.LG_server_ip + ":" + this.LG_server_port + "</ns1:ServerID>"
+                + " </ns1:GetRecordCam>");
+
+            let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort,
+                "http://" + this.LG_server_ip + ":" + this.LG_server_port, getRecordCamBody);
+
+            let parsedResponse = this.parseResponse(response);
+            let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordCamResponse"]
+                ["ns1:GetRecordCamResult"]["ns1:RECORDCAMASSIGN"];
+
+            // camAssign 단일 객체인지 배열인지 확인하여 처리
+            if (Array.isArray(camAssign)) {
+                // 배열인 경우 - 각 카메라ID를 키로, 서버IP를 값으로 저장
+                camAssign.forEach(item => {
+                   if(item["ns1:strRecServerName"] === serverName) {
+                       camServerMap[item["ns1:strCameraID"]] = recordServerMap[serverName]; // 카메라ID -> 서버IP
+                   }
+                });
+            } else if (camAssign && typeof camAssign === 'object') {
+                // 단일 객체인 경우 - 카메라ID를 키로, 서버IP를 값으로 저장
+                if(camAssign["ns1:strRecServerName"] === serverName) {
+                    camServerMap[camAssign["ns1:strCameraID"]] = recordServerMap[serverName]; // 카메라ID -> 서버IP
+                }
+            }
+        }
+
+        // console.log("camServerMap:", camServerMap);
+        /*
+           camServerMap  예시:
+           {
+               camID : serverIp,
+               camID : serverIp,
+               camID : serverIp
+           }
+        */
+        this.recordServerIP = camServerMap;
+        return camServerMap;
+    }
+
     async getStrNameFromCamId(callback) {
-        const serverId = "192.168.4.149:9100";
+        const serverId = "192.168.4.106";
         const soapBody  = this.createSoapBody(
-            `<ns1:GetRecordCam>
-                        <ns1:ServerID>${serverId}</ns1:ServerID>
-                    </ns1:GetRecordCam> `
+            `<tns:GetRecordCam>
+                <tns:ServerID>${serverId}</tns:ServerID>
+            </tns:GetRecordCam> `
         )
         const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody)
-        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordCamResponse"]["ns1:GetRecordCamResult"]["ns1:RECORDCAMASSIGN"]
-        const camAssignList = Array.isArray(camassign) ? camassign : [camassign];
+        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"]
+
         let strnamefromcamid = {}
-        camAssignList.map(item => {
-            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
+        camassign.map(item => {
+            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strStrServerName"]
         })
         callback(strnamefromcamid)
     } 
@@ -541,6 +655,7 @@ class PluxPlayer {
         var now = new Date();
         return now.toISOString().split('.')[0] + ".000Z";
     }
+
     getRandomBytes(length = 20) {
         // 무작위 바이트 16개 생성
         const nonceBytes = new Uint8Array(length);

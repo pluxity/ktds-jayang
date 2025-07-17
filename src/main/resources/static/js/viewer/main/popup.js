@@ -2068,7 +2068,7 @@ const layerPopup = (function () {
 
     }
 
-    const livePlayers = [];
+
     const addElevators = (filteredPoiList) => {
         const facilityList = document.querySelector('.facility-area__list');
         facilityList.innerHTML = '';
@@ -2380,14 +2380,17 @@ const layerPopup = (function () {
     };
 
     const closePlayers = () => {
-        console.log("livePlayers :", window.livePlayers);
-        window.livePlayers.forEach(({ player }) => {
+
+        Object.values(window.livePlayers).forEach(player => {
+
             if (!player) return;
+
+            player.stopPlayback();
 
             // 공통 처리
             player.cancelDraw && player.cancelDraw();
 
-            if (player.hls) {
+            if (player.type === 'hls') {
                 try {
                     player.hls.destroy();
                 } catch (e) {
@@ -2404,13 +2407,6 @@ const layerPopup = (function () {
                 player.videoEl = null;
             }
 
-            if (player.ws) {
-                try {
-                    player.ws.close();
-                } catch (e) {
-                    console.error("WebSocket close error", e);
-                }
-            }
 
             if (player.type === 'hls' && player.httpRelayUrl && player.cameraIp) {
                 const stopPort = 4012;
@@ -2421,9 +2417,27 @@ const layerPopup = (function () {
                 }).catch(console.error);
             }
         });
-
-        window.livePlayers.length = 0;
     };
+
+    const closePlayer = (canvasId) => {
+        const player = window.livePlayers[canvasId];
+
+        if (!player) {
+            console.warn(`Player for canvasId ${canvasId} not found!`);
+            return;
+        }
+
+        // playback 중인지 live 중인지 확인
+        if(player.isLive){
+            console.log("Stopping live player for canvasId:", canvasId);
+            player.cancelDraw && player.cancelDraw();
+        }else{
+            console.log("Stopping playback player for canvasId:", canvasId);
+            player.stopPlayback();
+        }
+
+        delete window.livePlayers[canvasId];
+    }
 
     // date picker default setting
     const setDatePicker = () => {
@@ -3082,6 +3096,7 @@ const layerPopup = (function () {
 
     return {
         closePlayers,
+        closePlayer,
         setElevator,
         setEquipmentTab,
         createRecentPopup,

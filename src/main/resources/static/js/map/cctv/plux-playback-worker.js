@@ -376,6 +376,7 @@
 
     let bufferQueue = new Uint8Array();
     let lastTime = performance.now();
+    let pauseStartTime = null;
     function sendFrameInterval(currentTime) {
 
         if (fps) {
@@ -393,6 +394,35 @@
         }
         requestAnimationFrame(sendFrameInterval);
     }
+
+
+    function pausePlayback() {
+            relaySocket.send(stopPacket);
+    }
+
+    function resumePlayback() {
+        if (pauseStartTime) {
+            sendDate = pauseStartTime;
+            startDate = sendDate;
+
+            startPacket = createPlayPacket();
+            bePacket = createPlayPacket(true);
+        }
+
+        // 서버에 재시작 요청
+        relaySocket.send(startPacket);
+
+        pauseStartTime = null;
+    }
+
+    function stopPlayback() {
+        console.log("CCTV 재생 워커 정지 요청")
+        if (relaySocket) {
+            relaySocket.send(stopPacket);
+            relaySocket.close();
+        }
+    }
+
     requestAnimationFrame(sendFrameInterval);
 
     function connectionRelay() {
@@ -406,11 +436,11 @@
             socketOnMessage(e)
         })
         relaySocket.addEventListener("close", (event) => {
-            console.log('socket closed', event.code, event.reason);
+            console.log('WebSocket 연결 종료 - 코드:', event.code);
         });
 
         relaySocket.addEventListener("error", (e) => {
-            console.log('socket err', e)
+            console.error('WebSocket 에러 발생:', e)
         });
     }
 
@@ -458,19 +488,21 @@
         bufferQueue = bufferQueue.slice(HEADER_SIZE + dwBodySize);
 
         if (wReqType == 105 || wReqType == 102) {
+            console.log("재생 packet");
             parsePlaybackBuffer(bufferByteReader)
         } else if (wReqType == 304) {
             // relaySocket.send(bePacket)
         } else if (wReqType == 108) {
+            console.log("재생 중지 packet");
             startPacket = createPlayPacket()
             bePacket = createPlayPacket(true)
             stopPacket = createStopPacket()
-
-            relaySocket.send(startPacket)
-
-            console.log("stop")
+        } else if (wReqType == 303) {
+            console.log("해당 시간에 재생할 수 있는 데이터가 없음");
+        } else if (wReqType == 1111) {
+            console.log("네트워크가 불안정하여 재생이 중단됨");
         } else {
-            console.log("unknown request type: ", wReqType)
+            console.log("unknown request type:", wReqType, "- 예상하지 못한 패킷 타입");
         }
         // 남은 데이터 처리
 
@@ -737,17 +769,19 @@
         let frameData = byteReader.readToLasted()
 
         if (type == 105) {
-            if (bufferDate > startDate) {
-                console.log(bufferDate, startDate)
+            if (bufferDate > new Date(startDate.getTime() + 1000)) {
+                console.warn("서버에서 받은 영상 프레임의 시간이 요청한 재생 시작 시간보다 늦음. 재생 중지.");
+                console.warn("bufferDate:", bufferDate, "startDate:", startDate)
                 relaySocket.send(stopPacket)
-
                 sendDate.setSeconds(sendDate.getSeconds() - 5)
-
                 return
             }
         }
 
         if (bufferDate <= endDate) {
+            // 현재 프레임의 timestamp를 저장 (일시정지용)
+            pauseStartTime = bufferDate;
+            console.log("time : ",pauseStartTime);
 
             let spsParser = new SPSParser(frameData.slice(3, 27))
             // console.log(spsParser.fps)
@@ -809,6 +843,25 @@
     onmessage = function (event) {
         var eventData = event.data
 
+        // 재생 제어 명령 처리
+        if (eventData.command) {
+            switch (eventData.command) {
+                case 'pause':
+                    pausePlayback();
+                    break;
+                case 'resume':
+                    resumePlayback();
+                    break;
+                case 'stop':
+                    stopPlayback();
+                    break;
+
+                default:
+                    console.log("알 수 없는 명령:", eventData.command);
+            }
+            return; // 초기화 로직 건너뛰기
+        }
+
         relayServerUrl = eventData.relayServerUrl
         destinationIp = eventData.destinationIp
         destinationPort = eventData.destinationPort
@@ -825,10 +878,7 @@
         bePacket = createPlayPacket(true)
         stopPacket = createStopPacket()
 
-
-        console.log(startPacket)
         let sp = Array.from(new Uint8Array(startPacket)).map(byte => byte.toString(16).padStart(2, "0")).join('')
-        console.log(sp)
         connectionRelay()
     };
 

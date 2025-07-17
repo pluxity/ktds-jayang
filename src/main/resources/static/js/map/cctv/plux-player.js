@@ -43,7 +43,6 @@ class PluxPlayer {
         }
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-live-worker.js");
         deviceId = deviceId.slice(0, -2) + "02";
-        console.log(this.streamServerIP?.[deviceId])
         this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.streamServerIP?.[deviceId], destinationPort: this.LG_live_port, deviceId });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
@@ -207,10 +206,10 @@ class PluxPlayer {
               <StreamSetup>
                 <Stream xmlns="http://www.onvif.org/ver10/schema">RTP-Unicast</Stream>
                 <Transport xmlns="http://www.onvif.org/ver10/schema">
-                  <Protocol>UDP</Protocol>
+                  <Protocol>TCP</Protocol>
                 </Transport>
               </StreamSetup>
-              <ProfileToken>DefaultProfile-03</ProfileToken>
+              <ProfileToken>DefaultProfile-02</ProfileToken>
             </GetStreamUri>`.trim();
 
         const soapBody = this.createDirectCamSoapBody(
@@ -221,6 +220,8 @@ class PluxPlayer {
             created
         );
 
+        console.log("soapBody : ", soapBody);
+
         const response = await this.sendSoapRequest(
             `${this.httpRelayUrl}:${this.httpRelayPort}`,
             `http://${cameraIp}:80/onvif/media_service`,
@@ -229,7 +230,7 @@ class PluxPlayer {
 
         const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
 
-        const liveWsPort = this.wsRelayUrl.startsWith('https') ? 4013 : 4003;
+        const liveWsPort = this.wsRelayUrl.startsWith('wss') ? 4013 : 4003;
 
         const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
         console.log("Live RTSP URI:", uri);
@@ -282,14 +283,12 @@ class PluxPlayer {
         }
 
         const camAssignList = Array.isArray(camAssign) ? camAssign : [camAssign];
-        console.log("camAssignList : ", camAssignList);
         let recordServerIPFromCamId = {}
 
         camAssignList.map(item => {
             recordServerIPFromCamId[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
         })
 
-        console.log("recordServerIPFromCamId : ", recordServerIPFromCamId);
         this.recordServerIP = recordServerIPFromCamId
         this.recordServerIP = Object.fromEntries(
             Object.entries(this.recordServerIP).map(([id, addr]) => [
@@ -304,7 +303,6 @@ class PluxPlayer {
         let getstreamcambody = this.createSoapBody("<ns1:GetStreamCam/>");
         let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, getstreamcambody);
 
-        console.log("streamRecServerSetting response : ", response);
         let parsedResponse = this.parseResponse(response);
         let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"];
 
@@ -329,13 +327,11 @@ class PluxPlayer {
         }
 
         const camAssignList = Array.isArray(camAssign) ? camAssign : [camAssign];
-        console.log("camAssignList : ", camAssignList);
         let streamServerIPFromCamId = {}
         camAssignList.map(item => {
             streamServerIPFromCamId[item["ns1:strCameraID"]] = streamServerIP[item["ns1:strStrServerName"]]
         })
 
-        console.log("streamServerIPFromCamId : ", streamServerIPFromCamId);
         this.streamServerIP = streamServerIPFromCamId
         this.streamServerIP = Object.fromEntries(
             Object.entries(this.streamServerIP).map(([id, addr]) => [
@@ -360,7 +356,6 @@ class PluxPlayer {
         camAssignList.map(item => {
             strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
         })
-        console.log("strnamefromcamid : ", strnamefromcamid);
         callback(strnamefromcamid)
     } 
 
@@ -420,6 +415,29 @@ class PluxPlayer {
 
         const hashBuffer = await crypto.subtle.digest("SHA-1", digestSource);
         // Step 3: 결과를 Base64로 인코딩
+        const sha1Digest = new Uint8Array(hashBuffer);
+        const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
+
+        return { nonce, created, passwordDigest };
+    }
+
+    async generatePasswordDigest2(password, created) {
+
+        const nonceBytes = this.getRandomBytes();
+
+        // base64로 인코딩
+        let base64String = '';
+        for (let i = 0; i < nonceBytes.length; i++) {
+            base64String += String.fromCharCode(nonceBytes[i]);
+        }
+        const nonce = btoa(base64String);
+
+        const encoder = new TextEncoder();
+        const createdBytes = encoder.encode(created);
+        const passwordBytes = encoder.encode(password);
+        const digestSource = new Uint8Array([...nonceBytes, ...createdBytes, ...passwordBytes]);
+
+        const hashBuffer = await crypto.subtle.digest("SHA-1", digestSource);
         const sha1Digest = new Uint8Array(hashBuffer);
         const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
 
@@ -523,7 +541,6 @@ class PluxPlayer {
         var now = new Date();
         return now.toISOString().split('.')[0] + ".000Z";
     }
-
     getRandomBytes(length = 20) {
         // 무작위 바이트 16개 생성
         const nonceBytes = new Uint8Array(length);

@@ -280,7 +280,7 @@ const EventManager = (() => {
     function initializeCCTVStream(canvasId, cctvCode, cameraIp) {
         const canvasElement = document.getElementById(canvasId);
         const dummyCanvas = document.createElement('canvas');
-        dummyCanvas.width  = 1;
+        dummyCanvas.width = 1;
         dummyCanvas.height = 1;
         const canvasDom = canvasElement.tagName.toLowerCase() === 'video' ? dummyCanvas : canvasElement;
         if (!canvasElement) return;
@@ -306,18 +306,11 @@ const EventManager = (() => {
             // get cctv direct uri
             // live
             livePlayer
-                // .getStreamUri(cameraIp, username, password)
                 .getLiveStreamUri(cameraIp, username, password)
                 .then(hlsUrl => {
-                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, livePlayer);
-                    // playVideoInCanvas(hlsUrl, canvasElement, livePlayer);
-                    // playVideoInVideo(hlsUrl, canvasElement, livePlayer);
                     window.livePlayers.push({ player: livePlayer });
-                    livePlayer.cameraIp = cameraIp;
-                    livePlayer.httpRelayUrl = cctvConfig.httpRelayUrl;
-                    livePlayer.httpRelayPort = cctvConfig.httpRelayPort;
+                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, livePlayer);
                 })
-
             return livePlayer;
         })
     }
@@ -339,13 +332,19 @@ const EventManager = (() => {
 
         if (Hls.isSupported()) {
             hls = new Hls({
-                liveSyncDuration: 1.5,
-                liveMaxLatencyDuration: 3,
+                liveSyncDuration: 0.1,
+                liveMaxLatencyDuration: 0.3,
                 enableWorker: true,
-                lowLatencyMode: true
+                lowLatencyMode: true,
+                maxBufferLength: 0.5
             });
             hls.loadSource(url);
             hls.attachMedia(video);
+
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error('HLS error:', data);
+            });
+
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 video.play().catch(e => console.error('Play failed:', e));
                 rafId = requestAnimationFrame(drawFrame);
@@ -360,14 +359,26 @@ const EventManager = (() => {
 
         player.videoEl = video;
         player.rafId = () => rafId;
+        player.hls = hls;
+
         player.cancelDraw = () => {
             player.cancelled = true;
             cancelAnimationFrame(rafId);
+            if (hls) {
+                hls.stopLoad();
+                hls.detachMedia();
+                hls.destroy();
+            }
+            video.pause();
+            video.src = '';
+            document.body.removeChild(video);
         };
-        player.hls = hls;
     }
 
     function playLiveJsmpegInCanvas(wsUrl, canvas, player) {
+        if (player.livePlayer) {
+            player.cancelDraw();
+        }
         const playerInstance = new JSMpeg.Player(wsUrl, {
             canvas: canvas,
             autoplay: true,
@@ -388,8 +399,6 @@ const EventManager = (() => {
         player.livePlayer = playerInstance;
         player.type = 'ws';
     }
-
-
 
     // video
     // video 태그로 직접 재생 할때

@@ -539,7 +539,14 @@ const Init = (function () {
                             }
                         }
                         if (samePopupOpen) return;
-                        renderPoiInfo(poiInfo);
+                        if (poiInfo.group.toLowerCase() === 'cctv') {
+                            setTimeout(() => {
+                                renderPoiInfo(poiInfo);
+                            }, 100)
+                        } else {
+                            renderPoiInfo(poiInfo);
+                        }
+
 
                     });
                     Px.Event.AddEventListener('pointerup', 'sbm', (event) => {

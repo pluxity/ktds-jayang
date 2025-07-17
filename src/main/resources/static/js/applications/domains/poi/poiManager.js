@@ -164,6 +164,9 @@ const PoiManager = (() => {
             return Promise.reject('POI not found');
         }
 
+        const extractedTagNames = poi.tagNames ? 
+            poi.tagNames.map(tag => typeof tag === 'string' ? tag : tag.tagName) : [];
+
         const updateData = {
             code: poi.code,
             name: poi.name,
@@ -173,7 +176,7 @@ const PoiManager = (() => {
             poiMiddleCategoryId: poi.poiMiddleCategory,
             iconSetId: poi.iconSetId,
             position: position,
-            tagNames: poi.tagNames || [],
+            tagNames: extractedTagNames,
             isLight: poi.property.isLight,
             lightGroup: poi.property.lightGroup,
             cameraIp: poi.property.cameraIp,

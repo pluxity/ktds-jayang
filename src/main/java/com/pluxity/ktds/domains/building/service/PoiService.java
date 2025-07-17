@@ -57,7 +57,7 @@ public class PoiService {
     private final PoiCctvRepository poiCctvRepository;
     private final BuildingFileHistoryRepository buildingFileHistoryRepository;
     private final FloorHistoryRepository floorHistoryRepository;
-    private final TagClientService tagClientService;
+    private final PoiTagSyncService poiTagSyncService;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -189,7 +189,6 @@ public class PoiService {
         Poi poi = Poi.builder()
                 .code(dto.code())
                 .name(dto.name())
-                .tagNames(dto.tagNames() != null ? new ArrayList<>(dto.tagNames()) : new ArrayList<>())
                 .isLight(dto.isLight())
                 .lightGroup(dto.lightGroup())
                 .cameraIp(dto.cameraIp())
@@ -225,9 +224,14 @@ public class PoiService {
 
         Poi savedPoi = poiRepository.save(poi);
 
-         if (!ObjectUtils.isEmpty(dto.tagNames())) {
-//             tagClientService.addTags(dto.tagNames());
-         }
+
+        if (!ObjectUtils.isEmpty(dto.tagNames())) {
+            for (String tagName : dto.tagNames()) {
+                PoiTag poiTag = new PoiTag(tagName);
+                poiTag.changePoi(savedPoi);
+            }
+            poiTagSyncService.syncPoiUnregisteredTags(savedPoi);
+        }
 
         return savedPoi.getId();
     }
@@ -288,6 +292,7 @@ public class PoiService {
         validateUpdateCode(dto, poi);
         validateAssociation(dto);
 
+        // CCTV 업데이트
         if (dto.cctvList() != null && !dto.cctvList().isEmpty()) {
             List<PoiCctv> newCctvs = dto.cctvList().stream()
                     .map(c -> PoiCctv.builder()
@@ -296,18 +301,15 @@ public class PoiService {
                             .isMain(c.isMain())
                             .build())
                     .toList();
-            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
+            poi.update(dto.name(), dto.code(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
         }
-//        List<PoiCctv> newCctvs = dto.cctvList().stream()
-//                .map(c -> PoiCctv.builder()
-//                        .poi(poi)
-//                        .code(c.code())
-//                        .isMain(c.isMain())
-//                        .build())
-//                .toList();
-        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
-        if (!dto.tagNames().isEmpty()) {
-//            tagClientService.addTags(dto.tagNames());
+
+        // 태그 업데이트
+        if (!ObjectUtils.isEmpty(dto.tagNames())) {
+            poi.updatePoiTags(dto.tagNames());
+
+            // 외부 서버 동기화
+            poiTagSyncService.syncPoiUnregisteredTags(poi);
         }
 
         if (dto.floorNo() != null) {
@@ -424,7 +426,11 @@ public class PoiService {
                         .toList();
 
                 if (poiMapByName.containsKey(name)) {
-                    poiMapByName.get(name).getTagNames().addAll(tags);
+                    Poi existingPoi = poiMapByName.get(name);
+                    for (String tagName : tags) {
+                        PoiTag poiTag = new PoiTag(tagName);
+                        poiTag.changePoi(existingPoi);
+                    }
                     continue;
                 }
 
@@ -461,8 +467,7 @@ public class PoiService {
 
                 Poi.PoiBuilder poiBuilder = Poi.builder()
                         .code(poiMap.get(POI_CODE.value))
-                        .name(poiMap.get(POI_NAME.value))
-                        .tagNames(tags);
+                        .name(poiMap.get(POI_NAME.value));
 
                 String lightGroup = poiMap.get(LIGHT_GROUP.value);
                 boolean isLight = lightGroup != null && !lightGroup.isBlank();
@@ -517,13 +522,10 @@ public class PoiService {
             }
 
             try {
-                List<String> allTagNames = result.stream()
-                        .flatMap(poi -> poi.getTagNames().stream())
-                        .toList();
                 poiRepository.saveAll(result);
-                if (!allTagNames.isEmpty()) {
-                    System.out.println("allTagNames : " + allTagNames);
-//                    tagClientService.addTags(allTagNames);
+
+                for(Poi poi : result) {
+                    poiTagSyncService.syncPoiUnregisteredTags(poi);
                 }
 
             } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
@@ -573,6 +575,12 @@ public class PoiService {
     }
 
     private void changeField(CreatePoiDTO dto, Poi poi) {
+
+        dto.tagNames().forEach(tagName -> {
+            PoiTag poiTag = new PoiTag(tagName);
+            poiTag.changePoi(poi);
+        });
+
 
         if (dto.floorNo() != null) {
             poi.changeFloorNo(dto.floorNo());

@@ -26,14 +26,14 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     Optional<Poi> findByFloorNo(@Param(value = "floorNo") Integer floorNo);
     List<Poi> findPoisByPoiCategoryId(@Param(value = "id") Long id);
     List<Poi> findPoisByFloorNo(@Param(value = "floorNo") Integer floorNo);
-    @Query("SELECT p FROM Poi p JOIN p.tagNames t WHERE t = :tagName")
+    @Query("SELECT p FROM Poi p JOIN p.poiTags pt WHERE pt.tagName = :tagName")
     Poi findPoiByTagName(@Param("tagName") String tagName);
 
     boolean existsByName(String name);
 
     boolean existsByPoiMiddleCategoryId(Long id);
 
-    @Query("SELECT p FROM Poi p JOIN p.tagNames t WHERE t IN :tagNames")
+    @Query("SELECT DISTINCT p FROM Poi p JOIN p.poiTags pt WHERE pt.tagName IN :tagNames")
     List<Poi> findByTagNamesIn(@Param("tagNames") List<String> tagNames);
 
     List<Poi> findByPoiMiddleCategoryId(Long id);

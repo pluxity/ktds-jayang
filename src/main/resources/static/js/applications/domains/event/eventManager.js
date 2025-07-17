@@ -430,6 +430,7 @@ const EventManager = (() => {
     function playLiveJsmpegInCanvas(wsUrl, canvas, player) {
         if (player.livePlayer) {
             player.cancelDraw();
+            player.livePlayer = null;
         }
         const playerInstance = new JSMpeg.Player(wsUrl, {
             canvas: canvas,
@@ -442,11 +443,18 @@ const EventManager = (() => {
         });
 
         player.cancelDraw = () => {
-            if (playerInstance.source && playerInstance.source.socket) {
-                console.log('Closing WebSocket connection');
-                playerInstance.source.socket.close();
+            try {
+                if (player.livePlayer === playerInstance) {
+                    if (playerInstance.source && playerInstance.source.socket) {
+                        console.log('Closing WebSocket connection');
+                        playerInstance.source.socket.close();
+                    }
+                    playerInstance.destroy();
+                    player.livePlayer = null;
+                }
+            } catch (e) {
+                console.warn("destroy error", e);
             }
-            playerInstance.destroy();
         };
 
         player.livePlayer = playerInstance;

@@ -1,43 +1,6 @@
 const data = {};
 const RECORD_SIZE = 10;
-initCctv();
-function initCctv() {
-    const dummyCanvas = document.createElement("canvas");
-    dummyCanvas.width = 640;
-    dummyCanvas.height = 480;
-    let pluxPlayer = null;
-    let cctvConfig = {};
-    api.get("/cctv/config").then(res => {
-        cctvConfig = res.data.result;
-        pluxPlayer = new PluxPlayer({
-            wsRelayUrl: cctvConfig.wsRelayUrl,
-            wsRelayPort: cctvConfig.wsRelayPort,
-            httpRelayUrl: cctvConfig.httpRelayUrl,
-            httpRelayPort: cctvConfig.httpRelayPort,
 
-            LG_server_ip: cctvConfig.lgServerIp,
-            LG_server_port: cctvConfig.lgServerPort,
-
-            LG_live_port: cctvConfig.lgLivePort,
-            LG_playback_port: cctvConfig.lgPlaybackPort,
-            canvasDom: dummyCanvas
-        });
-        pluxPlayer.getDeviceInfo(function(cameraList) {
-            const params = {
-                cameraList: cameraList.map(camera => ({
-                    url: camera["ns1:strIPAddress"],
-                    code: camera["ns1:strCameraID"],
-                    name: camera["ns1:strName"]
-                }))
-            }
-            console.log("params : ", params);
-
-            // api.post('/cctv', params).then((res) => {
-            //     console.log("parma : ", params)
-            // });
-        });
-    })
-}
 const dataManufacturer = (rowData) =>
     rowData.map((poi) => {
         const { id, name, code, buildingId, floorNo, poiCategoryId, poiMiddleCategoryId, position } = poi;
@@ -346,8 +309,13 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
 
     initializeSelectTag(building.floors,
         [modifyModal.querySelector('#selectFloorIdModify'),]);
-    modifyModal.querySelector('#selectFloorIdModify').value =
-        building.floors.find(floor => floor.id === modifyPoiData.floorId).id;
+
+    if (modifyPoiData.floorNo) {
+        modifyModal.querySelector('#selectFloorIdModify').value =
+            building.floors.find(floor => floor.no === modifyPoiData.floorNo)?.no ?? '';
+    } else {
+        modifyModal.querySelector('#selectFloorIdModify').value = '';
+    }
 
     modifyModal.querySelector('#selectPoiCategoryIdModify').value = modifyPoiData.poiCategoryId;
     const poiCategory = data.poiCategory.find((category) => category.id === modifyPoiData.poiCategoryId);
@@ -365,7 +333,12 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
     }
 
     const cctvRows = form.querySelectorAll('.selectCctv');
+    const cameraIpRow = modifyModal.querySelector('.cameraIp');
     if (poiCategory.name.toLowerCase() !== 'cctv') {
+
+        if (!cameraIpRow.classList.contains('hidden')) {
+            cameraIpRow.classList.add('hidden');
+        }
 
         cctvRows.forEach(row => {
             row.classList.remove('hidden');
@@ -384,13 +357,19 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
             input.value = subCctvs[index] ? subCctvs[index].code : "";
         });
     } else {
+        if (cameraIpRow.classList.contains('hidden')) {
+            cameraIpRow.classList.remove('hidden');
+        }
         cctvRows.forEach(row => {
-            row.classList.add('hidden');
-            row.querySelectorAll('input, select, textarea').forEach(field => {
-                field.disabled = true;
-                field.value = "";
-            });
+            if (row !== cameraIpRow) {
+                row.classList.add('hidden');
+                row.querySelectorAll('input, select, textarea').forEach(field => {
+                    field.disabled = true;
+                    field.value = "";
+                });
+            }
         });
+        modifyModal.querySelector('#cameraIpModify').value = modifyPoiData.cameraIp;
     }
     const poiCategorySelect = modifyModal.querySelector('#selectPoiCategoryIdModify');
     poiCategorySelect.addEventListener('change', (e) => {
@@ -408,12 +387,21 @@ function toggleCctvSectionByCategory(categoryName, type) {
     const form = document.querySelector(`#poi${type}Form`);
     const cctvRows = form.querySelectorAll('.selectCctv');
 
+    const cameraIpRow = form.querySelector('.cameraIp');
+
     cctvRows.forEach(row => {
         row.classList.toggle('hidden', isCctv);
         row.querySelectorAll('input, select, textarea').forEach(field => {
             field.disabled = isCctv;
         });
     });
+
+    if (cameraIpRow) {
+        cameraIpRow.classList.toggle('hidden', !isCctv);
+        cameraIpRow.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = !isCctv;
+        });
+    }
 }
 
 function getTagNames(type) {
@@ -425,12 +413,24 @@ function getTagNames(type) {
         .filter(tag => tag.length > 0);
 }
 
+function getCameraId(cameraIp) {
+    return new Promise(resolve => {
+        pluxPlayer.getDeviceInfo(cameraList => {
+            const list = Array.isArray(cameraList)
+                ? cameraList
+                : [cameraList];
+            const cam = list.find(c => c["ns1:strIPAddress"] === cameraIp);
+            resolve(cam ? cam["ns1:strCameraID"] : null);
+        });
+    });
+}
+
 // POST and modify
 [
     document.querySelector('#btnPoiRegister'),
     document.querySelector('#btnPoiModify'),
 ].forEach((button) => {
-    button.addEventListener('pointerup', (event) => {
+    button.addEventListener('pointerup', async (event) => {
         let type;
         if (event.currentTarget.id === 'btnPoiRegister') {
             type = 'Register';
@@ -445,7 +445,9 @@ function getTagNames(type) {
         const params = {};
 
         params.buildingId = Number(document.querySelector(`#selectBuildingId${type}`).value);
-        params.floorNo = Number(document.querySelector(`#selectFloorId${type}`).value);
+        const floorValue = document.querySelector(`#selectFloorId${type}`).value;
+        params.floorNo = floorValue ? Number(floorValue) : null;
+
         params.poiCategoryId = Number(document.querySelector(`#selectPoiCategoryId${type}`).value);
         const poiCategory = data.poiCategory.find((poiCategory) =>
             poiCategory.id === params.poiCategoryId);
@@ -480,6 +482,10 @@ function getTagNames(type) {
                     });
                 }
             });
+        } else {
+            const cameraIp = document.querySelector(`#cameraIp${type}`).value;
+            params.cameraIp = cameraIp;
+            params.cameraId = await getCameraId(params.cameraIp);
         }
 
         if(poiCategory.name.includes('센서')) {
@@ -487,7 +493,7 @@ function getTagNames(type) {
         }
 
         if (type === 'Register') {
-            api.post('/poi', params, {
+            await api.post('/poi', params, {
                 headers: {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -507,7 +513,7 @@ function getTagNames(type) {
             const id = Number(
                 document.querySelector('#poiModifyForm').dataset.id,
             );
-            api.put(`/poi/${id}`, params, {
+            await api.put(`/poi/${id}`, params, {
                 headers: {
                     'Content-Type': 'application/json',
                     accept: 'application/json',

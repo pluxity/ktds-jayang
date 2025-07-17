@@ -1,17 +1,20 @@
 package com.pluxity.ktds.domains.tag.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
 import com.pluxity.ktds.domains.tag.constant.TagStatus;
 
 public record TagData(
-        @JsonProperty("T")
+        @JsonAlias("T")
         String tagName,
-        @JsonProperty("V")
+        @JsonAlias("V")
         String currentValue,
-        @JsonProperty("S")
+        // 태그 상태
+        @JsonAlias("S")
         TagStatus tagStatus,
-        @JsonProperty("A")
+        // 알람 종류
+        @JsonAlias("A")
         AlarmStatus alarmStatus
 ) {
 }

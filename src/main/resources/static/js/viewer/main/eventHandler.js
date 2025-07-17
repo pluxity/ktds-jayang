@@ -561,17 +561,26 @@
     const equipmentList = document.querySelector('#toggle-menu')
     equipmentList.addEventListener('click', (event) => {
         event.preventDefault();
+        const allContainer = equipmentList.closest('.all');
         const equipmentListPop = document.getElementById('equipmentListPop');
         const equipGroupLinks = document.querySelectorAll('#equipmentListPop .equip-group a');
 
         if (equipmentListPop.style.display === 'none') {
             equipmentListPop.style.display = 'inline-block';
+            if (allContainer && !allContainer.classList.contains('active')) {
+                allContainer.classList.add('active');
+            }
             categoryList = PoiCategoryManager.findAll();
 
             equipGroupLinks.forEach(link => {
                 const linkClass = link.className.toLowerCase();
-                const matchedCategory = categoryList.find(category =>
-                    category.name.toLowerCase() === linkClass);
+                const matchedCategory = categoryList.find(category => {
+                    const categoryName = category.name.toLowerCase();
+                    if (categoryName === '출입통제') {
+                        return linkClass.includes('출입');
+                    }
+                    return categoryName === linkClass;
+                });
 
                 if (matchedCategory) {
                     link.setAttribute('data-category-id', matchedCategory.id);
@@ -579,6 +588,9 @@
             });
         } else {
             equipmentListPop.style.display = 'none';
+            if (allContainer && allContainer.classList.contains('active')) {
+                allContainer.classList.remove('active');
+            }
         }
     });
 

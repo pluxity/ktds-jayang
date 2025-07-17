@@ -11,6 +11,8 @@ public record PoiResponseDTO(
         String name,
         List<String> tagNames,
         Boolean isLight,
-        String lightGroup
+        String lightGroup,
+        String cameraIp,
+        String cameraId
 ) {
 }

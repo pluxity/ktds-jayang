@@ -32,6 +32,17 @@ const PoiManager = (() => {
         });
     };
 
+    const getFilteredPoiList = () => {
+        return new Promise((resolve) => {
+            api.get(`/poi/filter`).then((result) => {
+                const { result: data } = result.data;
+
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+
     const getPoiByCategoryId = (id) => {
         return new Promise((resolve) => {
             api.get(`/poi/poi-category/${id}`).then((result) => {
@@ -145,12 +156,53 @@ const PoiManager = (() => {
         });
     };
 
+
+    const updatePoiWithPositionAndFloorNo = (id, position, floorNo) => {
+        const poi = findById(id);
+        if (!poi) {
+            console.error('POI not found:', id);
+            return Promise.reject('POI not found');
+        }
+
+        const updateData = {
+            code: poi.code,
+            name: poi.name,
+            buildingId: poi.property.buildingId,
+            floorNo: floorNo,
+            poiCategoryId: poi.poiCategory,
+            poiMiddleCategoryId: poi.poiMiddleCategory,
+            iconSetId: poi.iconSetId,
+            position: position,
+            tagNames: poi.tagNames || [],
+            isLight: poi.property.isLight,
+            lightGroup: poi.property.lightGroup,
+            cameraIp: poi.property.cameraIp,
+            cctvList: poi.property.cctvList || []
+        };
+
+        return new Promise((resolve, reject) => {
+            api.put(`/poi/${id}`, updateData)
+                .then((response) => {
+                    // 로컬 데이터 업데이트
+                    poi.floorNo = floorNo;
+                    poi.property.floorNo = floorNo;
+                    poi.position = position;
+                    resolve(response);
+                })
+                .catch((error) => {
+                    console.error('POI update failed:', error);
+                    reject(error);
+                });
+        });
+    };
+
     const deletePoi = (id) => {
         return new Promise((resolve, reject) => {
             api.delete(`/poi/${id}`)
                 .then(() => {
                     poiList = poiList.filter((poi) => poi.id !== id);
                     resolve(id);
+                    getPoiRenderingAndList();
                 })
                 .catch((error) => {
                     console.error(error);
@@ -209,7 +261,7 @@ const PoiManager = (() => {
             poiData.push(poi.poiOptions);
         });
 
-        Px.Poi.AddFromDataArraySync(poiData, () => {
+        Px.Poi.AddFromDataArray(poiData, () => {
             Px.Poi.GetDataAll().forEach((poi) => {
                 Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
                 Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
@@ -228,15 +280,63 @@ const PoiManager = (() => {
 
     const renderPoiByIdAddByMouse = (id) => {
         const poiDataEngine = PoiManager.findById(id).poiOptions;
-        poiDataEngine.onComplete = (poiId) => {
-            const poiData = Px.Poi.GetData(poiId);
 
-            PoiManager.patchPoiPosition(poiId, poiData.position);
-        };
+        Px.Poi.AddByMouse({
+           ...poiDataEngine,
+            onComplete: function (poiId) {
+                const poiData = Px.Poi.GetData(poiId);
+                const currentFloorNo = document.querySelector('#floorNo')?.value;
 
-        console.log("poiDataEngine : ", poiDataEngine);
-        Px.Poi.AddByMouseSync(poiDataEngine);
+                if (!poiData.property.cameraId && poiData.property.cameraIp) {
+                    initPlayer(poiData.property.cameraIp).then(player => {
+                        player.getDeviceInfo(cameraList => {
+                            const cam = cameraList.find(c => c["ns1:strIPAddress"] === poiData.property.cameraIp);
+                            const cameraId = cam ? cam["ns1:strCameraID"] : null;
+
+                            PoiManager.patchPoiCameraId(poiId, cameraId);
+                            console.log("cameraId: ", cameraId);
+                        });
+                    });
+                }
+                if (currentFloorNo && currentFloorNo !== '') {
+                    const floorNumber = Number(currentFloorNo);
+
+                    // position과 floorNo를 한 번에 업데이트
+                    PoiManager.updatePoiWithPositionAndFloorNo(poiId, poiData.position, floorNumber)
+                        .then(() => {
+                            getPoiRenderingAndList();
+                        });
+                }
+            }
+        });
     };
+
+    const patchPoiCameraId = (id, params) => {
+        return new Promise((resolve, reject) => {
+            api.patch(`/poi/${id}/cameraId`, params).then(res => {
+                console.log("res :", res);
+            })
+        });
+    };
+
+    const initPlayer = (cameraIp) => {
+        return api.get("/cctv/config").then(res => {
+            const cctvConfig = res.data.result;
+            return new PluxPlayer({
+                wsRelayUrl: cctvConfig.wsRelayUrl,
+                wsRelayPort: cctvConfig.wsRelayPort,
+                httpRelayUrl: cctvConfig.httpRelayUrl,
+                httpRelayPort: cctvConfig.httpRelayPort,
+
+                LG_server_ip: cctvConfig.lgServerIp,
+                LG_server_port: cctvConfig.lgServerPort,
+
+                LG_live_port: cctvConfig.lgLivePort,
+                LG_playback_port: cctvConfig.lgPlaybackPort,
+                canvasDom: document.createElement('canvas')
+            });
+        })
+    }
 
     return {
         getPoiList,
@@ -249,6 +349,7 @@ const PoiManager = (() => {
         patchPoiPosition,
         patchPoiRotation,
         patchPoiScale,
+        updatePoiWithPositionAndFloorNo,
         deletePoi,
         findAll,
         findById,
@@ -258,6 +359,9 @@ const PoiManager = (() => {
         findByPoiCategory,
         renderAllPoiToEngineByBuildingId,
         renderPoiByIdAddByMouse,
-        getPoisByFloorNo
+        getPoisByFloorNo,
+        getFilteredPoiList,
+        initPlayer,
+        patchPoiCameraId
     };
 })();

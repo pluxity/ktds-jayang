@@ -287,6 +287,7 @@ function initBuilding() {
                 groupId: sbm.sbmFloorGroup,
             }))
         );
+        console.log("sbmDataArray : ", sbmDataArray);
 
         Px.Loader.LoadSbmUrlArray({
             urlDataList: sbmDataArray,
@@ -299,6 +300,10 @@ function initBuilding() {
                 Px.Camera.EnableScreenPanning()
                 if(camera3d)
                     Px.Camera.SetState(JSON.parse(camera3d));
+
+                // POI 등록 모달 초기화 (floors 정보가 로드된 후)
+                initializeViewerPoiData();
+
                 Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                     const activeTab = document.querySelector('.viewer-sidebar .nav li a.active').id;
                     if(activeTab === 'poi-tab') {
@@ -315,7 +320,7 @@ function initBuilding() {
 
                         const dropdownItemAllocateA = document.createElement('a');
                         dropdownItemAllocateA.classList.add('dropdown-item');
-                        dropdownItemAllocateA.textContent = 'POI 배치하기';
+                        dropdownItemAllocateA.textContent = 'POI 이동';
                         dropdownItemAllocateA.addEventListener(
                             'pointerup',
                             (event) => {
@@ -468,3 +473,298 @@ document.addEventListener('keyup', (event) => {
         }
     }
 })
+
+// POI 등록 모달 관련 기능들 추가
+const viewerPoiData = {};
+
+// URL에서 buildingId 가져오기
+const getUrlBuildingId = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return Number(urlParams.get('buildingId')) || BUILDING_ID;
+};
+
+
+const getViewerFloorSelectTags = () => [
+    document.querySelector('#selectFloorIdRegister'),
+    document.querySelector('#selectFloorIdBatchRegister'),
+];
+
+const getViewerCategorySelectTags = () => [
+    document.querySelector('#selectPoiCategoryIdRegister'),
+];
+
+const getViewerMiddleCategorySelectTags = () => [
+    document.querySelector('#selectPoiMiddleCategoryIdRegister'),
+];
+
+const initializeViewerFloorSelect = (floors, selectTag) => {
+    selectTag.forEach((select) => {
+        // 기존 옵션 제거 (첫 번째 옵션은 유지)
+        while (select.childElementCount > 1) {
+            select.removeChild(select.lastChild);
+        }
+
+        // 새로운 층 옵션 추가
+        floors.forEach((floor) => {
+            select.appendChild(new Option(floor.name, floor.no));
+        });
+    });
+};
+
+const initializeViewerCategorySelect = (categories, selectTag) => {
+    selectTag.forEach((select) => {
+        // 기존 옵션 제거 (첫 번째 옵션은 유지)
+        while (select.childElementCount > 1) {
+            select.removeChild(select.lastChild);
+        }
+
+        // 새로운 카테고리 옵션 추가
+        categories.forEach((category) => {
+            select.appendChild(new Option(category.name, category.id));
+        });
+    });
+};
+
+// 뷰어용 POI 카테고리 초기화
+const initViewerPoiCategory = () => {
+    const poiCategories = PoiCategoryManager.findAll();
+    viewerPoiData.poiCategory = poiCategories;
+
+    initializeViewerCategorySelect(poiCategories, getViewerCategorySelectTags());
+};
+
+// 뷰어용 POI 중분류 초기화
+const initViewerPoiMiddleCategory = () => {
+    const poiMiddleCategories = PoiMiddleCategoryManager.findAll();
+    viewerPoiData.poiMiddleCategory = poiMiddleCategories;
+};
+
+// 뷰어용 건물 초기화 (이미 로드된 데이터 사용)
+const initializeViewerBuildings = () => {
+    const buildings = BuildingManager.findAll();
+    viewerPoiData.building = buildings;
+
+    // initBuilding()에서 이미 floors 정보를 로드했으므로 그것을 사용
+    const floors = BuildingManager.findFloorsByHistory();
+    if (floors && floors.length > 0) {
+        initializeViewerFloorSelect(floors, getViewerFloorSelectTags());
+    }
+};
+
+// POI 등록 모달 초기화 함수
+function initializeViewerPoiModal() {
+    // POI 카테고리 변경 이벤트
+    const categorySelect = document.getElementById('selectPoiCategoryIdRegister');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const selectedCategoryId = this.value;
+            const filteredMiddleCategories = viewerPoiData.poiMiddleCategory.filter(middle =>
+                middle.poiCategory && middle.poiCategory.id == selectedCategoryId
+            );
+            initializeViewerCategorySelect(filteredMiddleCategories, getViewerMiddleCategorySelectTags());
+        });
+    }
+
+    // 조명 여부 체크박스 처리
+    const isLightCheck = document.getElementById('isLightPoiRegister');
+    const lightGroup = document.getElementById('lightGroupRegister');
+    if (isLightCheck && lightGroup) {
+        lightGroup.disabled = !isLightCheck.checked;
+        isLightCheck.addEventListener('change', (e) => {
+            lightGroup.disabled = !isLightCheck.checked;
+        });
+    }
+
+    // POI 등록 모달 show 이벤트
+    const registerModal = document.querySelector('#poiRegisterModal');
+    if (registerModal) {
+        registerModal.addEventListener('show.bs.modal', () => {
+            registerModal.querySelector('form').reset();
+            document.querySelectorAll('.selectCctv').forEach(row => {
+                row.classList.add('hidden');
+                row.querySelectorAll('input, select, textarea').forEach(field => {
+                    field.disabled = true;
+                });
+            });
+
+            const form = document.querySelector('#poiRegisterForm');
+            const poiCategorySelect = form.querySelector('#selectPoiCategoryIdRegister');
+
+            poiCategorySelect.addEventListener('change', function(event) {
+                const selectedText = poiCategorySelect.options[poiCategorySelect.selectedIndex].text.trim().toLowerCase();
+                const selectedValue = poiCategorySelect.options[poiCategorySelect.selectedIndex].value;
+                if (!selectedValue) {
+                    return;
+                }
+                toggleViewerCctvSectionByCategory(selectedText, "Register");
+            });
+        });
+    }
+
+    // POI 등록 버튼 이벤트
+    const btnPoiRegister = document.querySelector('#btnPoiRegister');
+    if (btnPoiRegister) {
+        btnPoiRegister.addEventListener('pointerup', (event) => {
+            const form = document.getElementById('poiRegisterForm');
+            if (!validationForm(form)) return;
+
+            const params = {};
+
+            params.buildingId = getUrlBuildingId();
+            const floorValue = document.querySelector('#selectFloorIdRegister').value;
+            params.floorNo = floorValue === '' ? null : Number(floorValue);
+            params.poiCategoryId = Number(document.querySelector('#selectPoiCategoryIdRegister').value);
+
+            const poiCategory = viewerPoiData.poiCategory.find((poiCategory) =>
+                poiCategory.id === params.poiCategoryId);
+
+            params.poiMiddleCategoryId = Number(document.querySelector('#selectPoiMiddleCategoryIdRegister').value);
+            const poiMiddleCategory = viewerPoiData.poiMiddleCategory.find((poiMiddleCategory) =>
+                poiMiddleCategory.id === params.poiMiddleCategoryId);
+            params.iconSetId = poiMiddleCategory.imageFile.id;
+
+            params.code = document.querySelector('#poiCodeRegister').value;
+            params.name = document.querySelector('#poiNameRegister').value;
+            params.tagNames = getViewerTagNames('Register');
+            params.isLight = document.getElementById('isLightPoiRegister').checked;
+            params.lightGroup = document.getElementById('lightGroupRegister').value;
+
+            if (!poiCategory.name.toLowerCase().includes('cctv')) {
+                params.cctvList = [];
+                const mainCctvValue = document.querySelector('#mainCctvRegister').value;
+                if (mainCctvValue.trim() !== "") {
+                    params.cctvList.push({
+                        code: mainCctvValue,
+                        isMain: "Y"
+                    });
+                }
+                const subCctvFields = document.querySelectorAll('.sub-cctv');
+                subCctvFields.forEach(field => {
+                    const val = field.value;
+                    if (val.trim() !== "") {
+                        params.cctvList.push({
+                            code: val,
+                            isMain: "N"
+                        });
+                    }
+                });
+            } else {
+                params.cameraIp = document.querySelector('#cameraIpRegister').value;
+            }
+
+            api.post('/poi', params, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                },
+            }).then(() => {
+                alertSwal('등록이 완료 되었습니다.').then(() => {
+                    document.querySelector('#poiRegisterModal > div > div > div.modal-header > button').click();
+                    // POI 리스트 새로고침 (기존 viewer 함수 활용)
+                        getPoiRenderingAndList();
+                });
+            });
+        });
+    }
+
+    // POI 일괄등록 모달 초기화 이벤트
+    const btnBatchRegister = document.querySelector('#btnBatchRegister');
+    if (btnBatchRegister) {
+        btnBatchRegister.addEventListener('pointerup', () => {
+            const batchForm = document.getElementById('poiBatchRegisterForm');
+            if (batchForm) {
+                batchForm.reset();
+                // 현재 선택된 층으로 초기화
+                const currentFloorNo = document.querySelector('#floorNo')?.value;
+                if (currentFloorNo && currentFloorNo !== '') {
+                    const floorSelect = document.querySelector('#selectFloorIdBatchRegister');
+                    if (floorSelect) {
+                        floorSelect.value = currentFloorNo;
+                    }
+                }
+            }
+        });
+    }
+
+    // POI 일괄등록 실행 버튼 이벤트
+    const btnPoiBatchRegister = document.querySelector('#btnPoiBatchRegister');
+    if (btnPoiBatchRegister) {
+        btnPoiBatchRegister.addEventListener('pointerup', () => {
+            const form = document.getElementById('poiBatchRegisterForm');
+            if (!validationForm(form)) return;
+
+            const formData = new FormData();
+            formData.set('buildingId', getUrlBuildingId()); // URL에서 buildingId 가져오기
+
+            // 층이 선택된 경우에만 floorNo 파라미터 추가
+            const floorValue = document.getElementById('selectFloorIdBatchRegister').value;
+            if (floorValue && floorValue !== '') {
+                formData.set('floorNo', Number(floorValue));
+            }
+
+            formData.set('file', document.querySelector('#batchRegisterFile').files[0]);
+
+            api.post('/poi/batch-register', formData).then((res) => {
+                alertSwal('일괄등록이 완료 되었습니다.').then(() => {
+                    document.querySelector('#poiBatchRegisterModal > div > div > div.modal-header > button').click();
+                    // POI 리스트 새로고침
+                        getPoiRenderingAndList();
+                });
+            }).catch(() => {
+                document.querySelector('#batchRegisterFile').value = '';
+            });
+        });
+    }
+
+    // 샘플파일 다운로드 버튼 이벤트
+    const btnDownloadSampleFile = document.querySelector('#btnDownloadSampleFile');
+    if (btnDownloadSampleFile) {
+        btnDownloadSampleFile.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = '/static/sample/poi-sample.xlsx';
+            link.download = 'poi-sample.xlsx';
+            link.click();
+        });
+    }
+}
+
+// CCTV 섹션 토글 함수
+function toggleViewerCctvSectionByCategory(categoryName, type) {
+    const isCctv = categoryName.toLowerCase() === 'cctv';
+    const form = document.querySelector(`#poi${type}Form`);
+    const cctvRows = form.querySelectorAll('.selectCctv');
+    const cameraIpRow = form.querySelector('.cameraIp');
+
+    cctvRows.forEach(row => {
+        row.classList.toggle('hidden', isCctv);
+        row.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = isCctv;
+        });
+    });
+
+    if (cameraIpRow) {
+        cameraIpRow.classList.toggle('hidden', !isCctv);
+        cameraIpRow.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = !isCctv;
+        });
+    }
+}
+
+// 태그 이름 가져오기 함수
+function getViewerTagNames(type) {
+    const tagInput = document.querySelector(`#tag${type}`);
+    if (!tagInput) return [];
+    return tagInput.value
+        .split(/[\n,]/)
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+}
+
+// 뷰어용 POI 데이터 초기화 함수
+function initializeViewerPoiData() {
+    initializeViewerBuildings();
+    initViewerPoiCategory();
+    initViewerPoiMiddleCategory();
+    initializeViewerPoiModal();
+
+}

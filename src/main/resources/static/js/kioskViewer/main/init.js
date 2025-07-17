@@ -1,5 +1,10 @@
 'use strict';
 (async function () {
+
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.kiosk-footer .kiosk-footer__date');
         const now = new Date();
@@ -100,12 +105,15 @@
                         if(storeBuilding?.camera3d)
                             Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
 
-                        KioskPoiManager.findAll()
-                            .forEach(poi => {
-                                if (poi.isKiosk && poi.id !== kioskPoi.id) {
-                                    Px.Poi.SetTextSize(poi.id, 1);
-                                }
-                            });
+                        Px.Poi.GetDataAll().forEach(poi => {
+                            Px.Poi.SetIconSize(poi.id, 70);
+                            
+                            const findPoi = KioskPoiManager.findById(poi.id);
+                            const isOtherKiosk = findPoi.isKiosk && findPoi.id !==  kioskPoi.id;
+                            
+                            const textSize = isOtherKiosk ? 1 : 70;
+                            Px.Poi.SetTextSize(poi.id, textSize);
+                        });
                     }
                 });
             });
@@ -238,7 +246,8 @@ const Init = (function () {
             id: kioskPoi.id,
             isAnimation: true,
             duration: 500,
-            distanceOffset: 500
+            distanceOffset: 500,
+            heightOffset:200
         });
     }
 

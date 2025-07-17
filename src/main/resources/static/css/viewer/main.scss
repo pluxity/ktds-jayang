@@ -1,4 +1,5 @@
-@import "../components/components";
+@import "../../publishing/css/components";
+
 @include button;
 @include badge;
 @include table;
@@ -16,6 +17,7 @@
 @include popup_warning;
 @include popup_event;
 @include popup_basic;
+@include popup_info;
 
 // input
 @include input_checkbox;
@@ -36,42 +38,10 @@ $base-img-path:"/static/images/viewer/";
 
 
 /* Main */ 
-.tool-box--active{right:430px;}
-
-.event-state {
-    &__pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-top: 10px;
-        padding: 10px 0;
-
-        button {
-            padding: 5px 10px;
-            border: 1px solid rgba(0, 245, 191, 0.2);
-            border-radius: 4px;
-            background: #25252B;
-            color: #00F5BF;
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover:not(:disabled) {
-                background: rgba(0, 245, 191, 0.1);
-            }
-
-            &:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-        }
-
-        .current-page {
-            min-width: 20px;
-            text-align: center;
-            color: #00F5BF;
-        }
-    }
+.tool-box{
+    right:40px;
+    transition:right 0.3s ease;
+    &--active{right:430px;}
 }
 
 

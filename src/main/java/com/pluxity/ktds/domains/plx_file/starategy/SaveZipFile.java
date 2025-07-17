@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.FAILED_DELETE_FILE;
 import static com.pluxity.ktds.global.constant.ErrorCode.FAILED_SAVE_FILE;
@@ -23,17 +24,23 @@ import static com.pluxity.ktds.global.constant.ErrorCode.FAILED_SAVE_FILE;
 public class SaveZipFile implements SaveStrategy {
     @Override
     public FileInfo fileSave(MultipartFile file, Path directoryPath) throws IOException {
+        String zipUuid = UUID.randomUUID().toString();  // ZIP과 GLB가 공유할 UUID
+        String glbUuid = directoryPath.toString().contains("3D") ? zipUuid : null;  // GLB 파일명을 변경할 UUID
         try {
             FileUtil.checkExtractable(file);
             Files.createDirectories(directoryPath);
-            ZipUtil.extractFiles(file.getInputStream(), directoryPath);
+            
+            // ICON3D 타입인 경우 GLB 파일명을 ZIP과 같은 UUID로 변경
+            ZipUtil.extractFiles(file.getInputStream(), directoryPath, glbUuid);
+            
         } catch (IOException e) {
             rollback(directoryPath);
             log.error(FAILED_SAVE_FILE.getMessage());
             throw new CustomException(FAILED_SAVE_FILE);
         }
-        return saveFileInfo(file, directoryPath);
+        return saveFileInfo(file, directoryPath, glbUuid);
     }
+
 
     @Override
     public FileInfo fileSave(File file, Path directoryPath) throws IOException {

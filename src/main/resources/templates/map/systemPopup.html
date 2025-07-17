@@ -12,7 +12,7 @@
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <!-- 조명 -->
+        <!-- 설비 -->
         <div class="search-result search-result--space" style="display: block">
             <div class="search-result__space">
                 <div class="section section--select">
@@ -77,72 +77,76 @@
         </div>
     </div>
     <!-- 승강 -->
-    <div id="elevatorPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem ;height: 780px;;z-index: 50">
-        <div class="popup-basic__head system-pop-header">
+    <div id="elevatorPop" class="popup-basic popup-basic--xwide"  style="display: none;z-index: 50">
+        <div class="popup-basic__head">
             <h2 class="name"></h2>
-            <ul class="header__tab system-pop-header-tab">
+<!--            <ul class="header__tab system-pop-header-tab">-->
+<!--                &lt;!&ndash; [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 &ndash;&gt;-->
+<!--                <li class="elevator-tab">엘레베이터</li>-->
+<!--                <li class="escalator-tab">에스컬레이터</li>-->
+<!--            </ul>-->
+            <ul class="tab" role="tablist">
                 <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                <li class="elevator-tab">엘레베이터</li>
-                <li class="escalator-tab">에스컬레이터</li>
+                <li class="elevator-tab" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="javascript:void(0);">엘리베이터</a></li>
+                <li class="escalator-tab" role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="javascript:void(0);">에스컬레이터</a></li>
             </ul>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
         <div id="elevatorContent" class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">
-                    <div class="search-result__filter" style="justify-content: space-between;margin-bottom: 10px">
-                        <div class="filter-left" style="display: flex;align-items: center;grid-gap: 5px ">
+                    <div class="facility-area">
+                        <div class="facility-area__head">
                             <!-- select-box -->
                             <!-- [D] width값 지정 -->
-                            <div id="elevatorBuilding" class="select-box" style="width:100px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">건물 전체</span>
-                                <div class="select-box__content">
-                                    <ul id="elevatorBuildingUl">
+                            <div class="search">
+                                <div id="elevatorBuilding" class="select-box" style="width: 100px;">
+                                    <!-- [D]
+                                     select-box 클릭 시 select-box__btn--active 클래스 추가
+                                     select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                     -->
+                                    <span class="select-box__btn">건물 전체</span>
+                                    <div class="select-box__content">
+                                        <ul id="elevatorBuildingUl">
 
-                                    </ul>
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div>
-                            <div id="elevatorFloor" class="select-box" style="width:80px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">층 전체</span>
-                                <div class="select-box__content">
-                                    <ul id="elevatorFloorUl">
+<!--                                <div id="elevatorFloor" class="select-box" style="width: 100px;">-->
+<!--                                    &lt;!&ndash; [D]-->
+<!--                                     select-box 클릭 시 select-box__btn&#45;&#45;active 클래스 추가-->
+<!--                                     select-box 비활성화 시 select__btn&#45;&#45;disabled 클래스 추가-->
+<!--                                     &ndash;&gt;-->
+<!--                                    <span class="select-box__btn">층 전체</span>-->
+<!--                                    <div class="select-box__content">-->
+<!--                                        <ul id="elevatorFloorUl">-->
 
-                                    </ul>
+<!--                                        </ul>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+                                <div id="elevatorStatus" class="select-box" style="width: 100px;">
+                                    <!-- [D]
+                                     select-box 클릭 시 select-box__btn--active 클래스 추가
+                                     select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                     -->
+                                    <span class="select-box__btn">상태 전체</span>
+                                    <div class="select-box__content">
+                                    </div>
                                 </div>
+                                <button id="elevatorSearchBtn" type="button" class="button button--solid-middle">검색</button>
                             </div>
-                            <div id="elevatorStatus" class="select-box" style="width:80px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">상태 전체</span>
-                                <div class="select-box__content">
-                                </div>
-                            </div>
-                            <button id="elevatorSearchBtn" type="button" style="width: 80px" class="button button--solid-middle">검색</button>
-                        </div>
-                        <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
-                            총 <span id="totalElevatorCnt">0</span>대
+                            <span id="totalElevatorCnt" class="text">총 0대</span>
                         </div>
                     </div>
-                    <div class="section__detail" style="height: 580px; background-color: transparent">
-                        <div class="facility-area facility-area--elevator">
-                            <ul id="elevatorList" class="facility-area__list facility-area__list--grid3 card-list">
-                            </ul>
-                        </div>
+                    <div class="left-info">
+                        <ul id="elevatorList" class="left-info__list left-info__list--grid5">
+
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="search-result__footer" style="margin-top: 10px;">
-                <div class="search-result__paging">
+            <div class="search-result__footer">
+                <div id="elevatorPaging" class="search-result__paging" data-type="elevator">
                     <button type="button" class="left"><span class="hide">left</span></button>
                     <div class="number"></div>
                     <button type="button" class="right"><span class="hide">right</span></button>
@@ -152,68 +156,43 @@
         <div id="escalatorContent" class="search-result search-result--space">
             <div class="search-result__space">
                 <div class="section section--contents">
-                    <div class="search-result__filter" style="justify-content: space-between;margin-bottom: 10px">
-                        <div class="filter-left" style="display: flex;align-items: center;grid-gap: 5px ">
+                    <div class="facility-area">
+                        <div class="facility-area__head">
                             <!-- select-box -->
                             <!-- [D] width값 지정 -->
-                            <div id="escalatorBuilding" class="select-box" style="width:100px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">건물 전체</span>
-                                <div class="select-box__content">
-                                    <ul id="escalatorBuildingUl">
-
-                                    </ul>
+                            <div class="search">
+                                <div id="escalatorDrive" class="select-box" style="width:80px;">
+                                    <!-- [D]
+                                     select-box 클릭 시 select-box__btn--active 클래스 추가
+                                     select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                     -->
+                                    <span class="select-box__btn">운행 전체</span>
+                                    <div class="select-box__content">
+                                    </div>
                                 </div>
-                            </div>
-                            <div id="escalatorFloor" class="select-box" style="width:80px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">층 전체</span>
-                                <div class="select-box__content">
-                                    <ul id="escalatorFloorUl">
-
-                                    </ul>
+                                <div id="escalatorStatus" class="select-box" style="width:80px;">
+                                    <!-- [D]
+                                     select-box 클릭 시 select-box__btn--active 클래스 추가
+                                     select-box 비활성화 시 select__btn--disabled 클래스 추가
+                                     -->
+                                    <span class="select-box__btn">상태 전체</span>
+                                    <div class="select-box__content">
+                                    </div>
                                 </div>
+                                <button id="escalatorSearchBtn" type="button" style="width: 80px" class="button button--solid-middle">검색</button>
                             </div>
-                            <div id="escalatorDrive" class="select-box" style="width:80px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">운행 전체</span>
-                                <div class="select-box__content">
-                                </div>
-                            </div>
-                            <div id="escalatorStatus" class="select-box" style="width:80px;">
-                                <!-- [D]
-                                 select-box 클릭 시 select-box__btn--active 클래스 추가
-                                 select-box 비활성화 시 select__btn--disabled 클래스 추가
-                                 -->
-                                <span class="select-box__btn">상태 전체</span>
-                                <div class="select-box__content">
-                                </div>
-                            </div>
-                            <button id="escalatorSearchBtn" type="button" style="width: 80px" class="button button--solid-middle">검색</button>
-                        </div>
-                        <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
-                            총 <span id="totalEscalatorCnt">0</span>대
+                            <span id="totalEscalatorCnt" class="text">총 0대</span>
                         </div>
                     </div>
-                    <div class="section__detail" style="height: 580px; background-color: transparent">
-                        <div class="facility-area facility-area--elevator">
-                            <ul id="escalatorList" class="facility-area__list facility-area__list--grid3 card-list">
-                            </ul>
-                        </div>
+                    <div class="left-info left-info--escalator">
+                        <ul id="escalatorList" class="left-info__list left-info__list--grid5">
+
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="search-result__footer" style="margin-top: 10px;">
-                <div class="search-result__paging">
+            <div class="search-result__footer">
+                <div id="escalatorPaging" class="search-result__paging" data-type="escalator">
                     <button type="button" class="left"><span class="hide">left</span></button>
                     <div class="number"></div>
                     <button type="button" class="right"><span class="hide">right</span></button>

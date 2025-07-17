@@ -50,6 +50,19 @@ public class PoiController {
         return DataResponseBody.of(service.findAllDetail());
     }
 
+    @GetMapping("/filter")
+    public DataResponseBody<List<PoiDetailResponseDTO>> getFilteredPoiAllDetail() {
+        return DataResponseBody.of(service.findFilteredAllDetail());
+    }
+
+    @PatchMapping("/{id}/cameraId")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchBuildingCamera2d(@PathVariable Long id,
+                                              @RequestBody String cameraId) {
+        service.updateCameraId(id, cameraId);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
     @GetMapping("/poi-category/{id}")
     public DataResponseBody<List<PoiDetailResponseDTO>> getPoiByCategoryId(@PathVariable Long id) {
         return DataResponseBody.of(service.findByCategoryId(id));
@@ -134,7 +147,7 @@ public class PoiController {
     @PostMapping("/batch-register")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseBody postBatchPoi(@RequestParam(value = "buildingId") Long buildingId,
-                                     @RequestParam(value = "floorNo") Integer floorNo,
+                                     @RequestParam(value = "floorNo", required = false) Integer floorNo,
                                      @RequestBody MultipartFile file) {
         service.batchRegisterPoi(buildingId, floorNo, file);
         return ResponseBody.of(SuccessCode.SUCCESS_CREATE);
@@ -143,6 +156,11 @@ public class PoiController {
     @PostMapping("/status")
     public ResponseEntity<String> getPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
         return tagClientService.readTags(tags);
+    }
+
+    @PostMapping("/test-status")
+    public ResponseEntity<String> getTestPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
+        return tagClientService.testReadTags(tags);
     }
 
     private Map<String, Object> getPoiTagData(List<String> tags) {

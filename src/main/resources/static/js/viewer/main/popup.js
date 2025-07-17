@@ -25,7 +25,6 @@ const layerPopup = (function () {
         displayElements.forEach((element) => { document.querySelector(element).closest('tr').style.display = ''; });
         document.querySelector('.popup-table.event').style.height = ``;
 
-
         const styleReturn = (state) => {
             switch (state) {
                 case '경고':
@@ -794,7 +793,7 @@ const layerPopup = (function () {
             popup.style.display = popup.style.display === 'none' ? 'inline-block' : 'none';
         }
         popup.style.position = 'absolute';
-        popup.style.transform = 'translate(20%, 5%)';
+        popup.style.transform = 'translate(25%, 10%)';
         // popup.style.zIndex = '50';
         // total count
         // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
@@ -1195,149 +1194,176 @@ const layerPopup = (function () {
         }
     })
 
+    let escalatorFilterDirection = '방향 전체';
+    let escalatorFilterState = '상태 전체';
+
     // set building, floor tab
-    const setTab = (type, { onBuildingChange = () => {}, onFloorChange = () => {} } = {}) => {
+    const setTab = (type, { onBuildingChange = () => {}, onFloorChange = () => {}, onStatusChange = () => {} } = {}) => {
         const buildingBox = document.getElementById(`${type}Building`);
-        const floorBox = document.getElementById(`${type}Floor`);
-        const buildingBtn = buildingBox.querySelector('.select-box__btn');
-        const statusBox = document.getElementById('elevatorStatus');
-        const floorBtn = floorBox.querySelector('.select-box__btn');
+        const buildingBtn = buildingBox?.querySelector('.select-box__btn');
+        const statusBox   = document.getElementById(`${type}Status`);
         let buildingList = BuildingManager.findAll();
         const sysPopup = document.getElementById(`${type}Pop`);
         const buildingUl = document.getElementById(`${type}BuildingUl`);
-        const floorUl = document.getElementById(`${type}FloorUl`);
 
         let currentBuilding = null;
-        let currentFloor = null;
 
         const toggleBtnActive = (btn, ...others) => {
             if (!btn.classList.contains('select-box__disabled')) {
                 btn.classList.toggle('select-box__btn--active');
                 others.forEach(o => o?.classList.remove('select-box__btn--active'));
-                // others.classList.remove('select-box__btn--active');
             }
         };
 
-        const statusBtn = statusBox?.querySelector('.select-box__btn');
-        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn, statusBtn);
-        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn, statusBtn)
-        console.log("type : ", type);
-        if (type == 'elevator') {
-            sysPopup.querySelector('#elevatorContent')
+        const updateStatusList = (buildingName) => {
+            if (!statusBox) return;
             const statusBtn = statusBox.querySelector('.select-box__btn');
             const statusContent = statusBox.querySelector('.select-box__content');
+            const oldUl = statusContent.querySelector('ul');
+            if (oldUl) statusContent.removeChild(oldUl);
+
+            const newUl = document.createElement('ul');
+
+            const allLi = document.createElement('li');
+            allLi.dataset.id = '상태 전체';
+            allLi.textContent = '상태 전체';
+            allLi.onclick = () => {
+                statusBtn.textContent = '상태 전체';
+                statusBtn.classList.remove('select-box__btn--active');
+                filterElevatorByStatus('상태 전체');
+            };
+            newUl.appendChild(allLi);
+
+            const statusItems = ['A', 'B'].includes(buildingName)
+                ? ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장']
+                : ['자동운전', '고장', '점검중', '파킹', '독립운전', '중량초과', '1차소방운전', '2차소방운전', '화재관제운전', '화재관제운전 귀착'];
+
+            statusBtn.textContent = '상태 전체';
+            filterElevatorByStatus('상태 전체');
+
+            statusItems.forEach(text => {
+                const li = document.createElement('li');
+                li.dataset.id = text;
+                li.textContent = text;
+                li.onclick = () => {
+                    statusBtn.textContent = text;
+                    statusBtn.classList.remove('select-box__btn--active');
+                    filterElevatorByStatus(text);
+                };
+                newUl.appendChild(li);
+            });
+
+            statusContent.appendChild(newUl);
+        }
+
+        if (buildingBtn) {
+            buildingBtn.onclick = () => toggleBtnActive(buildingBtn);
+        }
+
+        if (type === 'elevator') {
+            const statusBtn = statusBox.querySelector('.select-box__btn');
+            const statusContent = statusBox.querySelector('.select-box__content');
+            buildingBtn.onclick = () => toggleBtnActive(buildingBtn, statusBtn);
+            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn);
+        }
+
+        if (type === 'escalator') {
+            const statusBtn = statusBox.querySelector('.select-box__btn');
+            const statusContent = statusBox.querySelector('.select-box__content');
+            const driveBox = document.getElementById('escalatorDrive');
+            const driveBtn = driveBox.querySelector('.select-box__btn');
+            const driveContent = driveBox.querySelector('.select-box__content');
+            // 상태
             if (!statusContent.querySelector('ul')) {
                 const statusUl = document.createElement('ul');
-                ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장'].forEach(text => {
+                const allLi = document.createElement('li');
+                allLi.dataset.id = '상태 전체';
+                allLi.textContent = '상태 전체';
+                allLi.onclick = () => {
+                    statusBtn.textContent = '상태 전체';
+                    statusBtn.classList.remove('select-box__btn--active');
+                    escalatorFilterState = '상태 전체';
+                    filterEscalator(escalatorFilterDirection, escalatorFilterState);
+                };
+                statusUl.appendChild(allLi);
+
+                ['자동', '통신이상', '전원차단', '고장'].forEach(text => {
                     const li = document.createElement('li');
                     li.dataset.id  = text;
                     li.textContent = text;
                     li.onclick = () => {
                         statusBtn.textContent = text;
                         statusBtn.classList.remove('select-box__btn--active');
+                        escalatorFilterState = text;
+                        filterEscalator(escalatorFilterDirection, escalatorFilterState);
                     };
                     statusUl.appendChild(li);
                 });
                 statusContent.appendChild(statusUl);
             }
 
-            statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn, floorBtn);
-        }
-        buildingUl.innerHTML = '';
-        floorUl.innerHTML = '';
-
-        const defaultBuilding = buildingList.find(building => building.name == 'A');
-        if (defaultBuilding) {
-            currentBuilding = defaultBuilding;
-            buildingBtn.textContent = defaultBuilding.name;
-            // const firstFloor = defaultBuilding.floors[0];
-            const firstFloor = (type==='light' && ['A','B'].includes(defaultBuilding.name))
-                ? defaultBuilding.floors.find(f=>f.name==='1F') || defaultBuilding.floors[0]
-                : defaultBuilding.floors[0];
-            if (firstFloor) {
-                currentFloor = firstFloor;
-                floorBtn.textContent = firstFloor.name;
-                if (type == 'light') {
-                    sysPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
-                }
-                // Px.Model.Visible.HideAll();
-                // Px.Model.Visible.Show(Number(currentFloor.id));
-                onBuildingChange(currentBuilding, currentFloor);
-            }
-            floorUl.innerText = '';
-            defaultBuilding.floors.forEach(floor => {
-                const floorLi = document.createElement('li');
-                floorLi.dataset.id = floor.id;
-                floorLi.textContent = floor.name;
-                floorLi.onclick = () => {
-                    currentFloor = floor;
-                    floorBtn.textContent = floor.name;
-                    floorBtn.classList.remove('select-box__btn--active');
-                    if (type == 'light') {
-                        sysPopup.querySelector('.section__head h3')
-                            .textContent = `${defaultBuilding.name} ${floor.name}`;
-                    }
-                    // Px.Model.Visible.HideAll();
-                    // Px.Model.Visible.Show(Number(currentFloor.id));
-                    onFloorChange(defaultBuilding, currentFloor);
+            if (!driveContent.querySelector('ul')) {
+                const driveUl = document.createElement('ul');
+                const allLi = document.createElement('li');
+                allLi.dataset.id = '방향 전체';
+                allLi.textContent = '방향 전체';
+                allLi.onclick = () => {
+                    driveBtn.textContent = '방향 전체';
+                    driveBtn.classList.remove('select-box__btn--active');
+                    escalatorFilterDirection = '방향 전체';
+                    filterEscalator(escalatorFilterDirection, escalatorFilterState);
                 };
-
-                floorUl.appendChild(floorLi);
-            })
-        }
-
-        buildingList.forEach(building => {
-            const buildingLi = document.createElement('li');
-            buildingLi.dataset.id = building.id;
-            buildingLi.textContent = building.name;
-
-            buildingLi.onclick = () => {
-                currentBuilding = building;
-                buildingBtn.textContent = building.name;
-                buildingBtn.classList.remove('select-box__btn--active');
-
-                floorUl.innerHTML = '';
-
-                building.floors.forEach(floor => {
-                    const floorLi = document.createElement('li');
-                    floorLi.dataset.id = floor.id
-                    floorLi.textContent = floor.name;
-
-                    floorLi.onclick = () => {
-                        currentFloor = floor;
-                        floorBtn.textContent = floor.name;
-                        if (type == 'light') {
-                            sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${floor.name}`;
-                        }
-                        floorBtn.classList.remove('select-box__btn--active');
-                        // Px.Model.Visible.HideAll();
-                        // Px.Model.Visible.Show(Number(currentFloor.id));
-                        onFloorChange(building, currentFloor);
+                driveUl.appendChild(allLi);
+                ['상행', '하행'].forEach(text => {
+                    const li = document.createElement('li');
+                    li.dataset.id  = text;
+                    li.textContent = text;
+                    li.onclick = () => {
+                        driveBtn.textContent = text;
+                        driveBtn.classList.remove('select-box__btn--active');
+                        escalatorFilterDirection = text;
+                        filterEscalator(escalatorFilterDirection, escalatorFilterState);
                     }
-
-                    floorUl.appendChild(floorLi);
+                    driveUl.appendChild(li);
                 });
-
-                if (building.floors.length > 0) {
-                    // currentFloor = building.floors[0];
-                    currentFloor = (type==='light' && ['A','B'].includes(building.name))
-                        ? building.floors.find(f=>f.name==='1F') || building.floors[0]
-                        : building.floors[0];
-                    floorBtn.textContent = currentFloor.name;
-                    if (type == 'light') {
-                        sysPopup.querySelector('.section__head h3').textContent = `${building.name} ${building.floors[0].name}`;
-                    }
-                    // onChange(currentBuilding, currentFloor);
-                    // Px.Model.Visible.Show(currentFloor.id);
-                }
-                // Px.Model.Visible.HideAll();
-                // Px.Model.Visible.Show(Number(currentFloor.id));
-                onBuildingChange(building, currentFloor);
+                driveContent.appendChild(driveUl);
             }
 
+            // statusBtn.onclick = () => toggleBtnActive(statusBtn, buildingBtn, floorBtn);
+            statusBtn.onclick = () => toggleBtnActive(statusBtn, driveBtn);
+            driveBtn.onclick = () => toggleBtnActive(driveBtn, statusBtn);
+        }
 
-            buildingUl.appendChild(buildingLi);
-        });
+        if (type === 'elevator') {
+            const defaultBuilding = buildingList.find(b => b.name === 'A');
+            if (defaultBuilding) {
+                currentBuilding = defaultBuilding;
+                if (buildingBtn) {
+                    buildingBtn.textContent = defaultBuilding.name;
+                }
+                onBuildingChange(currentBuilding);
+                updateStatusList(defaultBuilding.name);
+            }
+
+            if (buildingUl) {
+                buildingUl.innerHTML = '';
+                buildingList.forEach(building => {
+                    const li = document.createElement('li');
+                    li.dataset.id = building.id;
+                    li.textContent = building.name;
+                    li.onclick = () => {
+                        currentBuilding = building;
+                        if (buildingBtn) {
+                            buildingBtn.textContent = building.name;
+                            buildingBtn.classList.remove('select-box__btn--active');
+                        }
+                        onBuildingChange(building);
+                        updateStatusList(building.name);
+                    };
+                    buildingUl.appendChild(li);
+                });
+            }
+        }
     }
 
     function getLightData(building, floor) {
@@ -1444,142 +1470,427 @@ const layerPopup = (function () {
         });
     }
 
-    // elevator
+    // 페이징
+    const pageSize = 20;
+    const paged = {
+        elevator: { entries: [], currentPage: 1, mode: 'AB' },
+        escalator: { entries: [], currentPage: 1 }
+    }
+
+    function initPagedList(type, dataById, mode = null) {
+        const p = paged[type];
+        p.entries = Object.entries(dataById);
+        p.currentPage = 1;
+        p.mode = mode;
+        renderPagedPage(type);
+        renderPagedPagination(type);
+    }
+
+    function renderPagedPage(type) {
+        const { entries, currentPage, mode } = paged[type];
+        const slice = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        const pageData = Object.fromEntries(slice);
+
+        if (type === 'elevator') {
+            renderElevatorList(pageData, mode, currentFilterStatus);
+        } else {
+            renderEscalatorList(pageData, escalatorFilterDirection, escalatorFilterState);
+        }
+    }
+
+    function renderPagedPagination(type) {
+        const { entries, currentPage } = paged[type];
+        const totalPages = Math.ceil(entries.length / pageSize);
+
+        const content = document.getElementById(`${type}Content`);
+        const paging = content.querySelector('.search-result__paging');
+        const numberDiv = paging.querySelector('.number');
+        const prevBtn = paging.querySelector('button.left');
+        const nextBtn = paging.querySelector('button.right');
+
+        numberDiv.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const span = document.createElement('span');
+            span.textContent = i;
+            if (i === currentPage) span.classList.add('active');
+            span.onclick = () => {
+                paged[type].currentPage = i;
+                renderPagedPage(type);
+                renderPagedPagination(type);
+            };
+            numberDiv.appendChild(span);
+        }
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        prevBtn.onclick = () => {
+            if (paged[type].currentPage > 1) {
+                paged[type].currentPage--;
+                renderPagedPage(type);
+                renderPagedPagination(type);
+            }
+        };
+        nextBtn.onclick = () => {
+            if (paged[type].currentPage < totalPages) {
+                paged[type].currentPage++;
+                renderPagedPage(type);
+                renderPagedPagination(type);
+            }
+        };
+    }
+
+    const renderElevatorList = (dataById, mode = null, filterStatus = '상태 전체') => {
+        const elevatorUl = document.getElementById('elevatorList');
+        elevatorUl.innerHTML = '';
+
+        let renderCount = 0;
+
+        // const totalCount = Object.keys(dataById).length;
+        // document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
+        Object.entries(dataById).forEach(([idStr, dto]) => {
+            const poiInfo = PoiManager.findById(Number(idStr));
+            if (!poiInfo) return;
+            const tags = dto.TAGs;
+            let effectiveMode = mode;
+
+            if (!effectiveMode) {
+                const firstTag = tags[0].tagName;
+                const letter = firstTag.charAt(0);
+                effectiveMode = (letter === 'A' || letter === 'B') ? 'AB' : 'C';
+            }
+            const tagMap = tags.reduce((map, t) => {
+                const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                map[key] = t.currentValue;
+                return map;
+            }, {});
+
+            const currentFloor = tagMap['CurrentFloor'];
+
+            // 공통 floor 처리
+            let floorHtml = '';
+            if (/^[PB]\d+$/i.test(currentFloor)) {
+                floorHtml = currentFloor[0] + '<strong>' + currentFloor.slice(1) + '</strong>';
+            } else if (/^0?G$/i.test(currentFloor)) {
+                floorHtml = 'G';
+            } else if (/^\d+[A-Z]+$/i.test(currentFloor)) {
+                const idx = currentFloor.search(/[A-Z]/i);
+                floorHtml = '<strong>' + currentFloor.slice(0, idx) + '</strong>' + currentFloor.slice(idx);
+            } else {
+                floorHtml = currentFloor;
+            }
+
+            // 문 상태 처리
+            const doorRaw = tagMap[mode === 'AB' ? 'Door' : 'Door opened'];
+            const doorState = doorRaw.toUpperCase() === '문닫힘' || doorRaw.toUpperCase() === 'OFF' ? '문닫힘' : '문열림';
+            const doorClass = doorState === '문닫힘' ? 'detail__text detail__text--off' : 'detail__text';
+            // 방향 처리
+            let directionText = '';
+            let directionState = '';
+            if (mode === 'AB') {
+                switch ((tagMap['Direction'] || '').toUpperCase()) {
+                    case '상행':
+                        directionText = '상행';
+                        directionState = 'state--up';
+                        break;
+                    case '하행':
+                        directionText = '하행';
+                        directionState = 'state--down';
+                        break;
+                    case '멈춤':
+                        directionText = '멈춤';
+                        directionState = 'state--hold';
+                        break;
+                }
+            } else {
+                const directionKeys = ['UpDir', 'DownDir'];
+                const directionLabels = { UpDir: '상향', DownDir: '하향' };
+                const directionStateMap = {
+                    '상향': 'state--up',
+                    '하향': 'state--down',
+                    '멈춤': 'state--hold'
+                };
+                const dirKey = directionKeys.find(k => tagMap[k] && tagMap[k] !== 'OFF');
+                if (dirKey) {
+                    directionText = directionLabels[dirKey];
+                    directionState = directionStateMap[directionText];
+                } else if (tagMap['Driving'] === 'OFF') {
+                    directionText = '멈춤';
+                    directionState = directionStateMap[directionText];
+                }
+            }
+
+            // 상태 텍스트 및 라벨 처리
+            let stateText = '';
+            let labelClass = '';
+
+            if (mode === 'AB') {
+                const status = tagMap['DrivingState'];
+                stateText = status;
+                if (["보수운전", "정전운전", "화재운전", "지진운전"].includes(status)) {
+                    labelClass = 'label--parking';
+                } else if (status === '고장') {
+                    labelClass = 'label--breakdown';
+                }
+            } else {
+                // 'EMCB', 'EMCF'는 일단 제외
+                const extraStates = [
+                    'AUTO', 'Fault', 'Checking',
+                    'Parking', 'Independent driving', 'Overweight',
+                    '1st fire driving', 'Second fire driving',
+                    'Fire control driving', 'Fire control driving results'
+                ];
+                const fireGroup1 = ['1st fire driving', 'Fire control driving results'];
+                const fireGroup2 = ['Second fire driving', 'Fire control driving'];
+
+                let activeStatesArr = [];
+                let addedFireGroup1 = false;
+                let addedFireGroup2 = false;
+
+                for (const key of extraStates) {
+                    const value = tagMap[key];
+                    if (!value || value === 'OFF') continue;
+
+                    if (fireGroup1.includes(key)) {
+                        if (!addedFireGroup1) {
+                            activeStatesArr.push(value);
+                            addedFireGroup1 = true;
+                        }
+                    } else if (fireGroup2.includes(key)) {
+                        if (!addedFireGroup2) {
+                            activeStatesArr.push(value);
+                            addedFireGroup2 = true;
+                        }
+                    } else {
+                        activeStatesArr.push(value);
+                    }
+
+                    if (activeStatesArr.length > 0) break;
+                }
+                stateText = activeStatesArr.join(', ');
+
+                if (activeStatesArr.includes('파킹')) {
+                    labelClass = 'label--parking';
+                } else if (activeStatesArr.length === 1 && activeStatesArr[0] === '고장') {
+                    labelClass = 'label--breakdown';
+                }
+            }
+
+            console.log("filterStatus : ", filterStatus);
+            console.log("stateText : ", stateText);
+            if (filterStatus !== '상태 전체' && stateText !== filterStatus) {
+                return;
+            }
+
+            // DOM 렌더링
+            const elevatorLi = document.createElement('li');
+            console.log("poiInfo : ", poiInfo);
+            const buildingLabel = `[${poiInfo.property.buildingName}]`;
+
+            const formattedStateText = stateText.match(/.{1,4}/g).join('<br>');
+
+            elevatorLi.innerHTML = `
+                    <div class="head">
+                        <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
+                        <a class="head__button" href="javascript:void(0);"><span class="hide">도면 이동</span></a>
+                    </div>
+                    <div class="detail">
+                        <div class="detail__state">
+                            <span style="text-align: center; " class="label ${labelClass}">${formattedStateText}</span>
+                            <div class="floor">${floorHtml}</div>
+                            <span class="state ${directionState}"><span class="hide state__text">${directionText}</span></span>
+                        </div>
+                        <p class="${doorClass}">${doorState}</p>
+                    </div>
+                `;
+            elevatorUl.appendChild(elevatorLi);
+            renderCount++;
+        });
+        document.getElementById('totalElevatorCnt').textContent = `총 ${renderCount}대`;
+    };
+
+    let elevatorData = {};
+    let currentFilterStatus = '상태 전체';
+
+    const addABElevatorList = (building) => {
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'ELEV',
+                buildingId: building.id,
+                buildingName: building.name,
+            }
+        }).then(res => {
+            elevatorData = res.data
+            initPagedList('elevator', elevatorData, 'AB');
+        });
+    };
+
+    const addCElevatorList = (building) => {
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'ELEV',
+                buildingId: building.id,
+                buildingName: building.name,
+            }
+        }).then(res => {
+            elevatorData = res.data
+            initPagedList('elevator', elevatorData, 'C');
+        });
+    };
+
+    const filterElevatorByStatus = (status) => {
+        currentFilterStatus = status;
+        renderPagedPage('elevator');
+    };
+    const filterEscalator = (direction, state) => {
+        console.log('[DEBUG] filterEscalator called', { direction, state });
+        escalatorFilterDirection = direction;
+        escalatorFilterState = state;
+        renderPagedPage('escalator');
+    };
+
+    const addAllElevatorList = () => {
+        api.get(`/api/tags/elevator`, {
+            params: {
+                type: 'ELEV',
+            }
+        }).then(res => {
+            initPagedList('elevator', res.data);
+        });
+    };
+    let elevatorIntervalId = null;
+    let escalatorIntervalId = null;
+
+    function clearElevatorInterval() {
+        if (elevatorIntervalId !== null) {
+            clearInterval(elevatorIntervalId);
+            elevatorIntervalId = null;
+        }
+    }
+
+    function clearEscalatorInterval() {
+        if (escalatorIntervalId !== null) {
+            clearInterval(escalatorIntervalId);
+            escalatorIntervalId = null;
+        }
+    }
+
+    function clearAllIntervals() {
+        clearElevatorInterval();
+        clearEscalatorInterval();
+    }
+
     const setElevator = () => {
         setTab('elevator', {
-            onBuildingChange: (building, floor) => {
-                console.log("building", building);
-                if (['A', 'B'].includes(building.name)) {
-                    addABElevatorList(building, floor);
-                } else {
-                    addCElevatorList(building, floor);
-                }
-            },
-            onFloorChange: (building, floor) => {
-                console.log("floor", floor);
+            onBuildingChange: (building) => {
+                const fetchElevatorData = () => {
+                    if (['A', 'B'].includes(building.name)) {
+                        addABElevatorList(building);
+                    } else {
+                        addCElevatorList(building);
+                    }
+                };
+
+                fetchElevatorData();
             }
         });
     }
 
-    // A, B
-    const addABElevatorList = (building, floor) => {
-
-        const buildingName = building.name;
-        const buildingId = building.id;
-
-        let dataById = null;
-        api.get(`/api/tags/elevator`, {
+    const addEscalatorList = () => {
+        api.get(`/api/tags/escalator`, {
             params: {
-                type: 'EV',
-                buildingId,
-                buildingName,
+                type: 'ESCL',
             }
         }).then(res => {
-            dataById = res.data;
-            const elevatorUl = document.getElementById('elevatorList');
-            elevatorUl.innerHTML = '';
-            // 여기서 세팅하면 될듯?
-            Object.entries(dataById).forEach(([idStr, dto]) => {
-                const poiInfo = Px.Poi.GetData(Number(idStr));
+            initPagedList('escalator', res.data);
+        });
+    };
 
-                const tagMap = dto.TAGs.reduce((map, t) => {
-                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
-                    map[key] = t.currentValue;
-                    return map;
-                }, {})
+    const renderEscalatorList = (dataById, filterDirection = '방향 전체', filterState = '상태 전체') => {
+        const escalatorUl = document.getElementById('escalatorList');
+        escalatorUl.innerHTML = '';
+        let renderCount = 0;
+        // const totalCount = Object.keys(dataById).length;
+        // document.getElementById('totalEscalatorCnt').textContent = `총 ${totalCount}대`;
 
-                console.log("poiInfo : ", poiInfo);
-                console.log("tagMap : ", tagMap);
-                const elevatorLi = document.createElement('li');
-                // A, B동일때만
-                elevatorLi.innerHTML = `
-                        <div class="head">
-                            <div class="head__title">
-                                <span>${tagMap['DrivingState']}</span>
-                            </div>
-                            <div class="head__title">
-                                <span>[${poiInfo?.property.buildingName}] [${poiInfo?.property.floorNo}] [${poiInfo?.property.name}]</span>
-                            </div>
-                        </div>
-                        <div class="detail">
-                            <div class="elevator-info">
-                                <div class="elevator-info__detail">
-                                    <div class="info info--location">
-                                        <dl>
-                                            <dt class="info__floor">${tagMap['CurrentFloor']}</dt>
-                                        </dl>
-                                        <dl>
-                                            <dt class="info__floor">${tagMap['Direction']}</dt>
-                                        </dl>
-                                        <dl>
-                                            <dt class="info__floor">${tagMap['Door']}</dt>
-                                        </dl>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                elevatorUl.appendChild(elevatorLi);
-            })
-        })
-    }
-    // C
-    const addCElevatorList = (building, floor) => {
+        Object.entries(dataById).forEach(([idStr, dto]) => {
+            const poiInfo = PoiManager.findById(Number(idStr));
+            if (!poiInfo) return;
+            const tagMap = dto.TAGs.reduce((map, t) => {
+                const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                map[key] = {
+                    value: t.currentValue
+                }
+                return map;
+            }, {});
 
-        const buildingName = building.name;
-        const buildingId = building.id;
+            const rawTag = dto.TAGs[0].tagName;
+            const eqCode = rawTag.substring(
+                rawTag.indexOf('ESCL'),
+                rawTag.lastIndexOf('-')
+            );
+            // DOM 렌더링
+            const escalatorLi = document.createElement('li');
+            const buildingLabel = `[${poiInfo.property.buildingName}]`;
 
-        let dataById = null;
-        api.get(`/api/tags/elevator`, {
-            params: {
-                type: 'EV',
-                buildingId,
-                buildingName,
+            // direction
+            const isUp = tagMap['UpDir'].value !== 'OFF';
+            const directionClass = isUp ? 'state--up' : 'state--down';
+            const directionText  = isUp ? '상행' : '하행';
+            // state
+            const activeKey = ['Stop','Run','Fault'].find(key => tagMap[key].value !== 'OFF')
+            let stateLabel = '';
+            let stateText  = '';
+            let detailState = '';
+            switch (activeKey) {
+                case 'Stop':
+                    stateText = '정지';
+                    stateLabel = 'label--block';
+                    detailState = 'detail__state--off';
+                    break;
+                case 'Run':
+                    stateText = '자동';
+                    break;
+                case 'Fault':
+                    stateText = '고장';
+                    stateLabel = 'label--breakdown';
+                    break;
+                default:
+                    stateText = '';
+                    stateLabel = '';
             }
-        }).then(res => {
-            dataById = res.data;
-            const elevatorUl = document.getElementById('elevatorList');
-            elevatorUl.innerHTML = '';
-            // 여기서 세팅하면 될듯?
-            Object.entries(dataById).forEach(([idStr, dto]) => {
-                const poiInfo = Px.Poi.GetData(Number(idStr));
 
-                const tagMap = dto.TAGs.reduce((map, t) => {
-                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
-                    map[key] = t.currentValue;
-                    return map;
-                }, {})
+            if (filterDirection !== '방향 전체' && directionText !== filterDirection) return;
+            if (filterState !== '상태 전체' && stateText !== filterState) return;
 
-                console.log("poiInfo : ", poiInfo);
-                console.log("tagMap : ", tagMap);
-                const elevatorLi = document.createElement('li');
-
-            })
-        })
-    }
+            escalatorLi.innerHTML = `
+                    <div class="head">
+                        <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
+                        <a class="head__button" href="javascript:void(0);"><span class="hide">도면 이동</span></a>
+                    </div>
+                    <div class="detail">  
+                        <div class="detail__state ${detailState}">
+                            <span class="image"><span class="hide">에스컬레이터</span></span>
+                            <!-- UP -->
+                            <span class="state ${directionClass}"><span class="state__text">${directionText}</span></span>
+                            <!-- 자동 -->
+                            <span class="label ${stateLabel}">${stateText}</span>
+                        </div>
+                    </div>
+                `;
+            escalatorUl.appendChild(escalatorLi);
+            renderCount++;
+        });
+        document.getElementById('totalEscalatorCnt').textContent = `총 ${renderCount}대`;
+    };
 
     const setEscalator = () => {
-        setTab('escalator', {
-            onBuildingChange: (building, floor) => {
-                console.log("building", building);
-            },
-            onFloorChange: (building, floor) => {
-                console.log("floor", floor);
-            }
-        });
-        const param = new URLSearchParams(window.location.search);
-        const buildingId = param.get("buildingId");
-        const building = BuildingManager.findById(buildingId);
-        const buildingName = building.name;
 
-        api.get(`/api/tags/elevator`, {
-            params: {
-                buildingId,
-                buildingName
-            }
-        }).then(res => {
-            console.log(res);
-        })
+        setTab('escalator');
+
+        const fetchEscalatorData = () => {
+            addEscalatorList();
+        }
+        fetchEscalatorData();
     }
 
     const elevatorPopup = document.getElementById('elevatorPop');
@@ -1620,11 +1931,11 @@ const layerPopup = (function () {
         allTabLi.addEventListener('click', (event) => {
             handleTabClick(event);
             const poiList = PoiManager.findAll();
-            PoiManager.getPoiList().then(poiList => {
+            PoiManager.getFilteredPoiList().then(poiList => {
                 // cctv중에 중분류가 엘리베이터인거(?)
                 const filteredPoiList = poiList.filter(poi =>
                     poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
-                    poi.property.poiMiddleCategoryName.toLowerCase() === '엘리베이터');
+                    poi.property.poiMiddleCategoryName.toLowerCase() === '승강기');
                 addElevators(filteredPoiList);
             })
         });
@@ -1650,7 +1961,7 @@ const layerPopup = (function () {
                     const filteredPoiList = allPois.filter(poi =>
                         poi.buildingId === Number(building.id) &&
                         poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
-                        poi.property.poiMiddleCategoryName.toLowerCase() === '엘리베이터'
+                        poi.property.poiMiddleCategoryName.toLowerCase() === '승강기'
                     );
                     console.log("filteredPoiList : ", filteredPoiList);
                     addElevators(filteredPoiList);
@@ -2053,11 +2364,14 @@ const layerPopup = (function () {
         const floor = BuildingManager.findFloorsByHistory().find(
             (floor) => Number(floor.no) === Number(poiData.property.floorNo),
         );
-        console.log("floor",floor);
     
         // 같은 building 내에서의 이동
         Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(Number(floor.id));
+        Px.Poi.HideAll();
+        console.log("poiData : ", poiData);
+        Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
+
         Px.Camera.MoveToPoi({
             id: poiId,
             isAnimation: true,
@@ -2066,12 +2380,50 @@ const layerPopup = (function () {
     };
 
     const closePlayers = () => {
-        console.log("livePlayers : ", livePlayers);
-        livePlayers.forEach(({player}) => {
-            // player.cctvClose();
-        })
-        livePlayers.length = 0;
-    }
+        console.log("livePlayers :", window.livePlayers);
+        window.livePlayers.forEach(({ player }) => {
+            if (!player) return;
+
+            // 공통 처리
+            player.cancelDraw && player.cancelDraw();
+
+            if (player.hls) {
+                try {
+                    player.hls.destroy();
+                } catch (e) {
+                    console.error("HLS destroy error", e);
+                }
+            }
+
+            if (player.videoEl) {
+                player.videoEl.pause();
+                player.videoEl.src = '';
+                if (document.body.contains(player.videoEl)) {
+                    document.body.removeChild(player.videoEl);
+                }
+                player.videoEl = null;
+            }
+
+            if (player.ws) {
+                try {
+                    player.ws.close();
+                } catch (e) {
+                    console.error("WebSocket close error", e);
+                }
+            }
+
+            if (player.type === 'hls' && player.httpRelayUrl && player.cameraIp) {
+                const stopPort = 4012;
+                fetch(`${player.httpRelayUrl}:${stopPort}/stop_stream`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cameraIp: player.cameraIp })
+                }).catch(console.error);
+            }
+        });
+
+        window.livePlayers.length = 0;
+    };
 
     // date picker default setting
     const setDatePicker = () => {
@@ -2153,7 +2505,7 @@ const layerPopup = (function () {
                 const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
                 updatePoiSelectBox(filteredPois);
             } else {
-                PoiManager.getPoiList().then((pois) => {
+                PoiManager.getFilteredPoiList().then((pois) => {
                     updatePoiSelectBox(pois);
                 })
             }
@@ -2179,7 +2531,7 @@ const layerPopup = (function () {
         if (floorList.length > 0) {
             // floorBtn.textContent = floorList[0].name;
             floorBtn.textContent = "전체";
-            PoiManager.getPoiList().then((pois) => {
+            PoiManager.getFilteredPoiList().then((pois) => {
                 updatePoiSelectBox(pois);
             })
             // PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
@@ -2352,7 +2704,7 @@ const layerPopup = (function () {
         if (reinitializeSelectBoxes) {
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
-            const poiListData = await PoiManager.getPoiList();
+            const poiListData = await PoiManager.getFilteredPoiList();
             updatePoiSelectBox(poiListData);
             setDatePicker();
             const alarmTypes = [
@@ -2379,7 +2731,7 @@ const layerPopup = (function () {
         const selectedDeviceType = poiBtn.textContent.trim();
         const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
 
-        poiList = await PoiManager.getPoiList();
+        poiList = await PoiManager.getFilteredPoiList();
         const tableBody = document.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";
@@ -2622,6 +2974,7 @@ const layerPopup = (function () {
                     });
                 }
                 closePopup(target);
+                // clearAllIntervals();
             });
         });
     }
@@ -2744,8 +3097,11 @@ const layerPopup = (function () {
         createEventPopup,
         pagingNotice,
         addClosePopup,
+        setTab,
         setLight,
-        setAirTab
+        setAirTab,
+        setEscalator,
+        clearAllIntervals
     }
 })();
 

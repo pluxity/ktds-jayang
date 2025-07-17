@@ -64,10 +64,10 @@ public class Poi {
     @AttributeOverride(name = "z", column = @Column(name = "scale_z"))
     private Spatial scale;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "code", nullable = false, length = 20)
+    @Column(name = "code", nullable = false)
     private String code;
 
     @ElementCollection
@@ -83,16 +83,24 @@ public class Poi {
     @Column(name = "light_group")
     private String lightGroup;
 
+    @Column(name = "camera_ip")
+    private String cameraIp;
+
+    @Column(name = "camera_id")
+    private String cameraId;
+
     @Builder
-    public Poi(String name, String code, List<String> tagNames, Boolean isLight, String lightGroup) {
+    public Poi(String name, String code, List<String> tagNames, Boolean isLight, String lightGroup, String cameraIp, String cameraId) {
         this.name = name;
         this.code = code;
         this.tagNames = tagNames != null ? new ArrayList<>(tagNames) : new ArrayList<>();
         this.isLight = isLight;
         this.lightGroup = lightGroup;
+        this.cameraIp = cameraIp;
+        this.cameraId = cameraId;
     }
 
-    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup) {
+    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup, String cameraIp, String cameraId) {
         if (StringUtils.hasText(name)) {
             this.name = name;
         }
@@ -113,6 +121,10 @@ public class Poi {
         if (lightGroup != null) {
             this.lightGroup = lightGroup;
         }
+        if (cameraIp != null) {
+            this.cameraIp = cameraIp;
+        }
+        this.cameraId = cameraId;
     }
 
     public void changeTags(List<String> tagNames) {
@@ -158,6 +170,10 @@ public class Poi {
         this.scale = scale;
     }
 
+    public void updateCameraId(String cameraId) {
+        this.cameraId = cameraId;
+    }
+
     public PoiDetailResponseDTO toDetailResponseDTO() {
         return PoiDetailResponseDTO.builder()
                 .id(this.getId())
@@ -183,6 +199,8 @@ public class Poi {
                         .toList())
                 .isLight(this.getIsLight())
                 .lightGroup(this.getLightGroup())
+                .cameraIp(this.getCameraIp())
+                .cameraId(this.getCameraId())
                 .build();
     }
 
@@ -193,6 +211,8 @@ public class Poi {
                 .code(this.code)
                 .isLight(isLight)
                 .lightGroup(this.lightGroup)
+                .cameraIp(this.cameraIp)
+                .cameraId(this.cameraId)
                 .build();
     }
 }

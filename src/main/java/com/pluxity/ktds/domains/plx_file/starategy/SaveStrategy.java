@@ -22,16 +22,21 @@ public interface SaveStrategy {
     FileInfo fileSave(MultipartFile file, Path directoryPath) throws IOException;
     FileInfo fileSave(File file, Path directoryPath) throws IOException;
 
-    default FileInfo saveFileInfo(MultipartFile file, Path directoryPath) throws IOException {
-        String storedName = UUID.randomUUID().toString();
+    default FileInfo saveFileInfo(MultipartFile file, Path directoryPath, String glbUuid) throws IOException {
         String extension = FileUtil.getExtension(file.getOriginalFilename());
 
-        // building인 경우와 아닌 경우 경로 처리 다르게
         String directoryName;
+        String storedName;
+
         if (directoryPath.toString().contains("Building")) {
             directoryName = directoryPath.getParent().getFileName().toString();  // version
-        } else {
-            directoryName = directoryPath.getParent().relativize(directoryPath).toString();  // uuid
+            storedName = UUID.randomUUID().toString();
+        } else if(directoryPath.toString().contains("3D") && glbUuid != null) {
+            storedName = glbUuid;  // zip uuid
+            directoryName = directoryPath.getParent().relativize(directoryPath).toString();
+        }else {
+            directoryName = directoryPath.getParent().relativize(directoryPath).toString();
+            storedName = UUID.randomUUID().toString();
         }
 
         Files.copy(file.getInputStream(), directoryPath.resolve(storedName + "." + extension));

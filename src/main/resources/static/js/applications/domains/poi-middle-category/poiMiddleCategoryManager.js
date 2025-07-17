@@ -7,7 +7,9 @@ const PoiMiddleCategoryManager = (function () {
         return new Promise((resolve) => {
             api.get(uri).then((result) => {
                 const { result: data } = result.data;
-                poiMiddleCategoryList = data.map((poiMiddleCategory) => new PoiMiddleCategory(poiMiddleCategory.id,poiMiddleCategory.name, poiMiddleCategory.iconFile));
+                poiMiddleCategoryList = data.map((poiMiddleCategory) =>
+                    new PoiMiddleCategory(poiMiddleCategory.id, poiMiddleCategory.name,
+                        poiMiddleCategory.poiCategory, poiMiddleCategory.imageFile));
 
                 resolve(poiMiddleCategoryList);
             });
@@ -22,9 +24,14 @@ const PoiMiddleCategoryManager = (function () {
         return poiMiddleCategoryList.find((poiMiddleCategory) => poiMiddleCategory.id === id);
     };
 
+    const findByCategoryId = (categoryId) => {
+        return poiMiddleCategoryList.filter((poiMiddleCategory) => poiMiddleCategory.poiCategory.id === categoryId);
+    }
+
     return {
         getPoiMiddleCategoryList,
         findAll,
         findById,
+        findByCategoryId,
     };
 })();

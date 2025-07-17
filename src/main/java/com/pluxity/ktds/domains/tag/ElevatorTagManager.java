@@ -3,15 +3,12 @@ package com.pluxity.ktds.domains.tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ElevatorTagManager {
 
-    private static Map<String,String> createFloorMap(int maxP, int maxF) {
+    private static Map<String,String> createFloorMap2(int maxP, int maxF) {
         Map<String,String> m = new LinkedHashMap<>();
         for(int p = maxP; p >= 1; p--) {
             m.put("P" + p, String.valueOf(-(p + 1)));
@@ -25,13 +22,36 @@ public class ElevatorTagManager {
         return Collections.unmodifiableMap(m);
     }
 
+    private static Map<String, String> createFloorMap(int maxP, int maxF) {
+        Map<String, String> m = new LinkedHashMap<>();
+
+        for (int p = maxP; p >= 1; p--) {
+            m.put("P" + p, String.valueOf(-(p + 1)));
+        }
+        m.put("B1", "-1");
+        m.put("0G", "0");
+        for (int f = 1; f <= maxF; f++) {
+            m.put(f + "F", String.valueOf(f));
+        }
+
+        return Collections.unmodifiableMap(m);
+    }
+
+    private static Map<String, String> reverse(Map<String, String> map) {
+        Map<String, String> reversed = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            reversed.put(entry.getValue(), entry.getKey()); // raw → 표현
+        }
+        return Collections.unmodifiableMap(reversed);
+    }
+
     @Getter
     @AllArgsConstructor
     public enum ElevatorABTag {
 
-        CurrentFloor("층위치", createFloorMap(10, 20)),
-        Direction("방향", Map.of("0", "STOP", "1", "UP", "2", "DOWN")),
-        Door("도어상태", Map.of("0", "Open", "1", "Close")),
+        CurrentFloor("층위치", reverse(createFloorMap(10, 40))),
+        Direction("방향", Map.of("0", "멈춤", "1", "상행", "2", "하행")),
+        Door("도어상태", Map.of("0", "문열림", "1", "문닫힘")),
         DrivingState("승강기상태", Map.of("0", "정상운전", "1", "운전휴지", "2", "독립운전", "3", "전용운전", "4", "보수운전", "5", "정전운전", "6", "화재운전", "7", "지진운전", "8", "고장"));
 
         private final String tagName;
@@ -45,7 +65,7 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum ElevatorCTag {
-        CurrentFloor("CurrentFloor", createFloorMap(10, 20)),
+        CurrentFloor("CurrentFloor", reverse(createFloorMap(10, 40))),
         UpDir("UpDir", Map.of("0", "OFF", "1", "상향")),
         DownDir("DownDir", Map.of("0", "OFF", "1", "하향")),
         Driving("Driving", Map.of("0", "OFF", "1", "주행중")),
@@ -97,6 +117,10 @@ public class ElevatorTagManager {
                 Arrays.stream(values())
                         .collect(Collectors.toMap(EscalatorTag::getTagName, e -> e));
 
+        public static EscalatorTag fromEnumName(String enumName) {
+            return EscalatorTag.valueOf(enumName);
+        }
+
         public static EscalatorTag fromTagName(String tagName) {
             EscalatorTag e = BY_TAG_NAME.get(tagName);
             if (e == null) {
@@ -113,10 +137,10 @@ public class ElevatorTagManager {
     @Getter
     @AllArgsConstructor
     public enum VavTag {
-        CoolHeap("COOL_HEAP", Map.of("0", "냉방", "1", "난방")),
-        ManualDmpOpen("MANUAL_DMP_OPEN", Map.of("0", "자동", "1", "100%개방")),
-        Fan("FAN", Map.of("0", "정지", "1", "기동")),
-        Vlv24vOnOff("VLV_24V_ON_OFF", Map.of("0", "닫힘", "1", "열림"));
+        COOL_HEAT("COOL_HEAT", Map.of("0", "냉방", "1", "난방")),
+        MANUAL_DMP_OPEN("MANUAL_DMP_OPEN", Map.of("0", "자동", "1", "100%개방")),
+        FAN("FAN", Map.of("0", "정지", "1", "기동")),
+        VLV_24V_ON_OFF("VLV_24V_ON_OFF", Map.of("0", "닫힘", "1", "열림"));
 
         private final String tagName;
         private final Map<String, String> valueMap;
@@ -149,6 +173,25 @@ public class ElevatorTagManager {
             }
             return e;
         }
+
+        public String getValueDescription(String value) {
+            return valueMap.get(value);
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum CellTag {
+        DEVSTAT("장비상태", Map.of(
+                "0", "운전대기",
+                "1", "운전대기",
+                "2", "정격운전(발전)",
+                "3", "정지중(Shut down)",
+                "4", "발전모드 변경중"
+        ));
+
+        private final String tagName;
+        private final Map<String, String> valueMap;
 
         public String getValueDescription(String value) {
             return valueMap.get(value);

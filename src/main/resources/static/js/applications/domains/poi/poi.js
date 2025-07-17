@@ -7,12 +7,15 @@ class Poi {
     #poiCategory;
     #poiMiddleCategory;
     #iconSet;
-    #iconUrl;
+    #icon2DUrl;
+    #icon3DUrl;
     #property;
     #tagNames;
     #cctvList;
     #isLight;
     #lightGroup;
+    #cameraIp;
+    #cameraId;
 
     constructor(
         id,
@@ -30,7 +33,9 @@ class Poi {
         tagNames,
         cctvList,
         isLight,
-        lightGroup
+        lightGroup,
+        cameraIp,
+        cameraId
     ) {
         this.#id = id;
         this.#name = name;
@@ -39,10 +44,11 @@ class Poi {
         // this.#poiMiddleCategory = PoiMiddleCategoryManager.findById(poiMiddleCategoryId);
         this.#poiMiddleCategory = poiMiddleCategoryId ? PoiMiddleCategoryManager.findById(poiMiddleCategoryId) : null;
         this.#iconSet = IconSetManager.findById(iconSetId);
-        this.#iconUrl = this.getIcon2DUrl();
+        this.#icon2DUrl = this.#iconSet.iconFile2D !== null ? this.getIcon2DUrl() : '/static/img/icon_2d_default.svg';
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
+        this.#icon3DUrl = this.#iconSet.iconFile3D !== null ? this.getIcon3DUrl() : '';
         property.floorNo = floorNo;
         property.floorName = BuildingManager.findById(buildingId).floors.find(floor => floor.no === floorNo)?.name;
         property.buildingName = BuildingManager.findById(buildingId)?.name
@@ -56,6 +62,8 @@ class Poi {
         this.#cctvList = cctvList;
         this.#isLight = isLight;
         this.#lightGroup = lightGroup;
+        this.#cameraIp = cameraIp;
+        this.#cameraId = cameraId;
     }
 
     get id() {
@@ -87,7 +95,7 @@ class Poi {
     }
 
     get iconUrl() {
-        return this.#iconUrl;
+        return this.#icon2DUrl;
     }
     get buildingId() {
         return this.#buildingId;
@@ -111,21 +119,26 @@ class Poi {
     get lightGroup() {
         return this.#lightGroup;
     }
+    get cameraIp() {
+        return this.#cameraIp;
+    }
+    get cameraId() {
+        return this.#cameraId;
+    }
     // Px.Poi.Add 용
     get poiOptions() {
         return {
+            type: this.#icon3DUrl ? 'gltf': '',  // type 없을 경우 기본 모델(빨간점) 로드
+            url: this.#icon3DUrl,
             id: this.id,
             displayText: this.name,
             group: this.#poiCategory.name,
             lineHeight: SystemSettingManager.find().poiLineLength ?? 10,
             iconUrl: this.iconUrl,
             position: this.position ? this.position : {x:0,y:0,z:0},
+            rotation: this.rotation ? this.rotation : {x:0,y:0,z:0},
+            scale: this.scale ? this.scale : {x:100,y:100,z:100},
             property: this.property,
-            rotation: {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
         };
     }
 
@@ -160,8 +173,8 @@ class Poi {
     }
 
     getIcon3DUrl() {
-        const { directory, storedName, extension } = this.#iconSet.iconFile3D;
-        return `${CONTEXT_PATH}3D/${directory}/${storedName}.${extension}`;
+        const { directory, storedName } = this.#iconSet.iconFile3D;
+        return `${CONTEXT_PATH}3D/${directory}/${storedName}.glb`;
     }
 
 }

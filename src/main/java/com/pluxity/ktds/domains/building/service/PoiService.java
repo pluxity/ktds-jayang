@@ -27,15 +27,18 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.transform.Source;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -109,6 +112,42 @@ public class PoiService {
                             .toList();
 
                     PoiDetailResponseDTO base = poi.toDetailResponseDTO();
+                    return PoiDetailResponseDTO.builder()
+                            .id(base.id())
+                            .buildingId(base.buildingId())
+                            .floorNo(base.floorNo())
+                            .poiCategoryId(base.poiCategoryId())
+                            .poiMiddleCategoryId(base.poiMiddleCategoryId())
+                            .iconSetId(base.iconSetId())
+                            .position(base.position())
+                            .rotation(base.rotation())
+                            .scale(base.scale())
+                            .name(base.name())
+                            .code(base.code())
+                            .tagNames(base.tagNames())
+                            .cctvList(cctvDtoList)
+                            .isLight(base.isLight())
+                            .lightGroup(base.lightGroup())
+                            .cameraIp(base.cameraIp())
+                            .cameraId(base.cameraId())
+                            .build();
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PoiDetailResponseDTO> findFilteredAllDetail() {
+        List<Poi> poiList = poiRepository.findAllWithPositionPresent();
+
+        return poiList.stream()
+                .map(poi -> {
+                    List<PoiCctv> cctvs = poiCctvRepository.findAllByPoi(poi);
+
+                    List<PoiCctvDTO> cctvDtoList = cctvs.stream()
+                            .map(PoiCctvDTO::from)
+                            .toList();
+
+                    PoiDetailResponseDTO base = poi.toDetailResponseDTO();
 
                     return PoiDetailResponseDTO.builder()
                             .id(base.id())
@@ -126,6 +165,8 @@ public class PoiService {
                             .cctvList(cctvDtoList)
                             .isLight(base.isLight())
                             .lightGroup(base.lightGroup())
+                            .cameraIp(base.cameraIp())
+                            .cameraId(base.cameraId())
                             .build();
                 })
                 .toList();
@@ -151,6 +192,8 @@ public class PoiService {
                 .tagNames(dto.tagNames() != null ? new ArrayList<>(dto.tagNames()) : new ArrayList<>())
                 .isLight(dto.isLight())
                 .lightGroup(dto.lightGroup())
+                .cameraIp(dto.cameraIp())
+                .cameraId(dto.cameraId())
                 .build();
 
         validateAssociation(dto);
@@ -174,21 +217,28 @@ public class PoiService {
                     .toList();
             poi.getPoiCctvs().addAll(cctvEntities);
         }
-        Poi savedPoi = poiRepository.save(poi);
-        if (!dto.tagNames().isEmpty()) {
-            tagClientService.addTags(dto.tagNames());
+        PoiCategory category = poiCategoryRepository.findById(dto.poiCategoryId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY));
+        if (category.getName().equalsIgnoreCase("cctv")) {
+            // cctv entity에도 추가
         }
+
+        Poi savedPoi = poiRepository.save(poi);
+
+         if (!ObjectUtils.isEmpty(dto.tagNames())) {
+//             tagClientService.addTags(dto.tagNames());
+         }
 
         return savedPoi.getId();
     }
 
     private void validateAssociation(CreatePoiDTO dto) {
         this.validateAssociation(UpdatePoiDTO.builder()
-                        .buildingId(dto.buildingId())
-                        .floorNo(dto.floorNo())
-                        .poiCategoryId(dto.poiCategoryId())
-                        .iconSetId(dto.iconSetId())
-                        .build());
+                .buildingId(dto.buildingId())
+                .floorNo(dto.floorNo())
+                .poiCategoryId(dto.poiCategoryId())
+                .iconSetId(dto.iconSetId())
+                .build());
     }
 
     private void validateAssociation(UpdatePoiDTO dto) {
@@ -201,10 +251,13 @@ public class PoiService {
 
         List<FloorHistory> floorHistories = floorHistoryRepository.findByBuildingFileHistoryId(history.getId());
 
-        boolean isNoneMatchFloorId = floorHistories.stream()
-                .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
-        if (isNoneMatchFloorId) {
-            throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
+        // floorNo가 null이 아닐 때만 층 검증 수행
+        if (dto.floorNo() != null) {
+            boolean isNoneMatchFloorId = floorHistories.stream()
+                    .noneMatch(floor -> Objects.equals(floor.getFloor().getFloorNo(), dto.floorNo()));
+            if (isNoneMatchFloorId) {
+                throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
+            }
         }
 
 //        boolean isNoneMatchInPoiSet = building.getPoiSet().getPoiCategories().stream()
@@ -243,7 +296,7 @@ public class PoiService {
                             .isMain(c.isMain())
                             .build())
                     .toList();
-            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup());
+            poi.update(dto.name(), dto.code(), dto.tagNames(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
         }
 //        List<PoiCctv> newCctvs = dto.cctvList().stream()
 //                .map(c -> PoiCctv.builder()
@@ -252,13 +305,17 @@ public class PoiService {
 //                        .isMain(c.isMain())
 //                        .build())
 //                .toList();
-        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup());
-        if (dto.tagNames() != null) {
-            tagClientService.addTags(dto.tagNames());
+        poi.update(dto.name(), dto.code(), dto.tagNames(), null, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
+        if (!dto.tagNames().isEmpty()) {
+//            tagClientService.addTags(dto.tagNames());
         }
 
         if (dto.floorNo() != null) {
             poi.changeFloorNo(dto.floorNo());
+        }
+
+        if(dto.position() != null){
+            poi.changePosition(dto.position());
         }
 
         updateIfNotNull(dto.buildingId(), poi::changeBuilding, buildingRepository, ErrorCode.NOT_FOUND_BUILDING);
@@ -266,7 +323,6 @@ public class PoiService {
         updateIfNotNull(dto.iconSetId(), poi::changeIconSet, iconSetRepository, ErrorCode.NOT_FOUND_ICON_SET);
         updateIfNotNull(dto.poiMiddleCategoryId(), poi::changePoiMiddleCategory, poiMiddleCategoryRepository, ErrorCode.NOT_FOUND_POI_CATEGORY);
     }
-
 
     private void validateUpdateCode(UpdatePoiDTO dto, Poi poi) {
         if (!poi.getCode().equals(dto.code()) && poiRepository.existsByCode(dto.code())) {
@@ -301,6 +357,13 @@ public class PoiService {
     private void updateSpatial(Long id, Consumer<Poi> updateMethod) {
         Poi poi = getPoi(id);
         updateMethod.accept(poi);
+    }
+
+    @Transactional
+    public void updateCameraId(Long id, String cameraId) {
+        poiRepository.findById(id)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING))
+                .updateCameraId(cameraId);
     }
 
     @Transactional
@@ -345,20 +408,30 @@ public class PoiService {
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUILDING));
 
             List<PoiCategory> poiCategoryList = poiCategoryRepository.findAll();
-            List<IconSet> iconSetList = iconSetRepository.findAll();
             List<PoiMiddleCategory> poiMiddleCategoryList = poiMiddleCategoryRepository.findAll();
+
+            Map<String, Poi> poiMapByName = new LinkedHashMap<>();
+
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
                 existValidCheck(poiMap);
 
-//                poiRepository.findByName(poiMap.get(POI_NAME.value))
-//                        .ifPresent(found -> {
-//                            throw new CustomException(ErrorCode.DUPLICATE_NAME, "Duplicate Poi Name : " + poiMap.get(POI_NAME.value));
-//                        });
-                Optional<Poi> currentPoi = poiRepository.findByName(poiMap.get(POI_NAME.value));
-                if (currentPoi.isPresent()) {
+                String code = poiMap.get(POI_CODE.value);
+                String name = poiMap.get(POI_NAME.value);
+                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split("[,\\n]"))
+                        .map(String::trim)
+                        .filter(StringUtils::hasText)
+                        .toList();
+
+                if (poiMapByName.containsKey(name)) {
+                    poiMapByName.get(name).getTagNames().addAll(tags);
                     continue;
                 }
+
+//                Optional<Poi> currentPoi = poiRepository.findByName(poiMap.get(POI_NAME.value));
+//                if (currentPoi.isPresent()) {
+//                    continue;
+//                }
                 if (poiRepository.existsByCode(poiMap.get(POI_CODE.value))) {
                     throw new CustomException(ErrorCode.DUPLICATED_POI_CODE, "Duplcate Poi Code: " + poiMap.get(POI_CODE.value));
                 }
@@ -369,30 +442,12 @@ public class PoiService {
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiCategory Name: " + poiMap.get(POI_CATEGORY_NAME.value)));
 
-//                IconSet iconSet = iconSetList.stream()
-//                        .filter(c -> c.getName().equalsIgnoreCase(poiMap.get(POI_ICONSET_NAME.value)))
-//                        .limit(1)
-//                        .findFirst()
-//                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ICON_SET, "NotFound Iconset Name: " + poiMap.get(POI_ICONSET_NAME.value)));
-
-
                 PoiMiddleCategory poiMiddleCategory = poiMiddleCategoryList.stream()
                         .filter(m -> m.getPoiCategory().getId().equals(poiCategory.getId()))
                         .filter(m -> m.getName().equalsIgnoreCase(poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)))
                         .limit(1)
                         .findFirst()
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI_CATEGORY, "NotFound PoiMiddleCategory Name: " + poiMap.get(POI_MIDDLE_CATEGORY_NAME.value)));
-
-//                if(poiMiddleCategory.getIconSets().get(0).getId() != iconSet.getId()) {
-//                    throw new CustomException(ErrorCode.INVALID_ICON_SET_ASSOCIATION,
-//                            "Not Associate - PoiCategory : " + poiMap.get(POI_CATEGORY_NAME.value)
-//                                    + "/ Iconset: " + poiMap.get(POI_ICONSET_NAME.value));
-//                }
-
-                List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split(","))
-                        .map(String::trim)
-                        .filter(StringUtils::hasText)
-                        .toList();
 
                 CreatePoiDTO.CreatePoiDTOBuilder poiDTOBuilder = CreatePoiDTO.builder()
                         .code(poiMap.get(POI_CODE.value))
@@ -457,12 +512,19 @@ public class PoiService {
                 }
 
                 changeField(poiDto, poi);
-
+                poiMapByName.put(name, poi);
                 result.add(poi);
             }
 
             try {
+                List<String> allTagNames = result.stream()
+                        .flatMap(poi -> poi.getTagNames().stream())
+                        .toList();
                 poiRepository.saveAll(result);
+                if (!allTagNames.isEmpty()) {
+                    System.out.println("allTagNames : " + allTagNames);
+//                    tagClientService.addTags(allTagNames);
+                }
 
             } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
                 if(e.getRootCause().getMessage().contains("Data too long for column")) {

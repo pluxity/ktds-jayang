@@ -16,6 +16,7 @@ class PluxPlayer {
         this.ctx = this.canvasDom.getContext('2d');
         this.decodeWorker = null
         this.streamServerIP = null
+        this.recordServerIp = null
     }
 
     playBack(deviceId, startDate, endTime) {
@@ -24,7 +25,7 @@ class PluxPlayer {
         }
         deviceId = deviceId.slice(0, -2) + "02";
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-playback-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.streamServerIP?.[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
+        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.recordServerIp?.[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -144,9 +145,166 @@ class PluxPlayer {
         callback(cameraList);
     }
 
+    async getMngServerInfo() {
+        const soapBody = this.createSoapBody("<ns1:GetManagementServerInfo />")
+        const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody);
+        console.log("GetManagementServerInfo response : ", response);
+    }
+
+    async getStreamUri(cameraIp, username, password) {
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password);
+        const operationBody = `
+            <GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">
+              <StreamSetup>
+                <Stream xmlns="http://www.onvif.org/ver10/schema">RTP-Unicast</Stream>
+                <Transport xmlns="http://www.onvif.org/ver10/schema">
+                  <Protocol>UDP</Protocol>
+                </Transport>
+              </StreamSetup>
+              <ProfileToken>DefaultProfile-03</ProfileToken>
+            </GetStreamUri>`.trim();
+        const soapBody = this.createDirectCamSoapBody(
+            operationBody,
+            username,
+            passwordDigest,
+            nonce,
+            created
+        );
+
+        const response = await this.sendSoapRequest(
+            this.httpRelayUrl + ":" + this.httpRelayPort,
+            "http://" + cameraIp + ":" + 80 + "/onvif/media_service",
+            soapBody
+        );
+
+        let uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
+        console.log("uri : ", uri);
+
+        const resp = await fetch(
+            `${this.httpRelayUrl}:${this.httpRelayPort}/start_stream`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cameraIp,
+                    rtspUrl: uri,
+                    username,
+                    password
+                })
+            }
+        );
+
+        const { url: hlsUrl } = await resp.json();
+        console.log("HLS URL:", hlsUrl);
+        return hlsUrl;
+    }
+
+    async getLiveStreamUri(cameraIp, username, password) {
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password);
+
+        const operationBody = `
+            <GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">
+              <StreamSetup>
+                <Stream xmlns="http://www.onvif.org/ver10/schema">RTP-Unicast</Stream>
+                <Transport xmlns="http://www.onvif.org/ver10/schema">
+                  <Protocol>UDP</Protocol>
+                </Transport>
+              </StreamSetup>
+              <ProfileToken>DefaultProfile-03</ProfileToken>
+            </GetStreamUri>`.trim();
+
+        const soapBody = this.createDirectCamSoapBody(
+            operationBody,
+            username,
+            passwordDigest,
+            nonce,
+            created
+        );
+
+        const response = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`,
+            `http://${cameraIp}:80/onvif/media_service`,
+            soapBody
+        );
+
+        const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
+
+        const liveWsPort = this.wsRelayUrl.startsWith('https') ? 4013 : 4003;
+
+        const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
+        console.log("Live RTSP URI:", uri);
+        console.log("Live WS URL:", liveUrl);
+        return liveUrl;
+    }
+
+    async GetUser() {
+        const soapBody = this.createSoapBody("<ns1:GetUser />")
+        const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody);
+        console.log("GetUser response : ", response);
+    }
+
+    async GetUserCamAssign() {
+        const soapBody = this.createSoapBody("<ns1:GetUserCamAssign />")
+        const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody);
+        console.log("GetUserCamAssign response : ", response);
+    }
+
+    async getRecordingServerList() {
+
+        let getRecordCamBody = this.createSoapBody(
+            `<ns1:GetRecordCam>
+                    <ns1:ServerID>${this.LG_server_ip + ":" + this.LG_server_port}</ns1:ServerID>
+                </ns1:GetRecordCam> `
+        );
+        let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, getRecordCamBody);
+
+        let parsedResponse = this.parseResponse(response);
+        let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordCamResponse"]["ns1:GetRecordCamResult"]["ns1:RECORDCAMASSIGN"];
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const soapBody1 = this.createSoapBody("<ns1:GetRecordServerList/>");
+        response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody1);
+        parsedResponse = this.parseResponse(response);
+        let recordServerList = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordServerListResponse"]["ns1:GetRecordServerListResult"]["ns1:RECORD_SERVER"];
+
+        let recordServerIP = {}
+
+        if (typeof recordServerList == "object" && recordServerList && recordServerList.hasOwnProperty("ns1:strRecServerName")) {
+            recordServerIP[recordServerList["ns1:strRecServerName"]] = recordServerList["ns1:strRecServerIP"]
+        }
+        else{
+            recordServerList?.map(item => {
+                if(item.hasOwnProperty("ns1:strRecServerName")){
+                    recordServerList[item["ns1:strRecServerName"]] = item["ns1:strRecServerIP"]
+                }
+            })
+        }
+
+        const camAssignList = Array.isArray(camAssign) ? camAssign : [camAssign];
+        console.log("camAssignList : ", camAssignList);
+        let recordServerIPFromCamId = {}
+
+        camAssignList.map(item => {
+            recordServerIPFromCamId[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
+        })
+
+        console.log("recordServerIPFromCamId : ", recordServerIPFromCamId);
+        this.recordServerIP = recordServerIPFromCamId
+        this.recordServerIP = Object.fromEntries(
+            Object.entries(this.recordServerIP).map(([id, addr]) => [
+                id.slice(0, -2) + "02",
+                addr
+            ])
+        );
+        return recordServerIPFromCamId
+    }
+
     async streamRecServerSetting() {
         let getstreamcambody = this.createSoapBody("<ns1:GetStreamCam/>");
         let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, getstreamcambody);
+
+        console.log("streamRecServerSetting response : ", response);
         let parsedResponse = this.parseResponse(response);
         let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"];
 
@@ -159,43 +317,50 @@ class PluxPlayer {
 
         let streamServerIP = {}
 
-
         if (typeof streamServerList == "object" && streamServerList && streamServerList.hasOwnProperty("ns1:strStrServerName")) {
             streamServerIP[streamServerList["ns1:strStrServerName"]] = streamServerList["ns1:strStrServerIP"]
         }
         else{
-            streamServerList.map(item => {
+            streamServerList?.map(item => {
                 if(item.hasOwnProperty("ns1:strStrServerName")){    
                     streamServerIP[item["ns1:strStrServerName"]] = item["ns1:strStrServerIP"]
                 }
             })
         }
 
-
+        const camAssignList = Array.isArray(camAssign) ? camAssign : [camAssign];
+        console.log("camAssignList : ", camAssignList);
         let streamServerIPFromCamId = {}
-        camAssign.map(item => {
+        camAssignList.map(item => {
             streamServerIPFromCamId[item["ns1:strCameraID"]] = streamServerIP[item["ns1:strStrServerName"]]
         })
-      
-        this.streamServerIP = streamServerIPFromCamId
-        return streamServerIPFromCamId
 
+        console.log("streamServerIPFromCamId : ", streamServerIPFromCamId);
+        this.streamServerIP = streamServerIPFromCamId
+        this.streamServerIP = Object.fromEntries(
+            Object.entries(this.streamServerIP).map(([id, addr]) => [
+                id.slice(0, -2) + "02",
+                addr
+            ])
+        );
+        return streamServerIPFromCamId
     }
 
     async getStrNameFromCamId(callback) {
-        const serverId = "192.168.4.106";
+        const serverId = "192.168.4.149:9100";
         const soapBody  = this.createSoapBody(
-            `<tns:GetRecordCam>
-                <tns:ServerID>${serverId}</tns:ServerID>
-            </tns:GetRecordCam> `
+            `<ns1:GetRecordCam>
+                        <ns1:ServerID>${serverId}</ns1:ServerID>
+                    </ns1:GetRecordCam> `
         )
         const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody)
-        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"]
-
+        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordCamResponse"]["ns1:GetRecordCamResult"]["ns1:RECORDCAMASSIGN"]
+        const camAssignList = Array.isArray(camassign) ? camassign : [camassign];
         let strnamefromcamid = {}
-        camassign.map(item => {
-            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strStrServerName"]
+        camAssignList.map(item => {
+            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
         })
+        console.log("strnamefromcamid : ", strnamefromcamid);
         callback(strnamefromcamid)
     } 
 

@@ -60,6 +60,7 @@ public class FileInfoService {
         return fileInfo.toDto();
     }
 
+    // History 저장용
     public FileInfoDTO saveFile(MultipartFile file, FileEntityType type, SaveStrategy saveStrategy, String version, String directoryName) throws IOException {
 
         Objects.requireNonNull(saveStrategy, () -> {
@@ -85,6 +86,7 @@ public class FileInfoService {
         return fileInfo.toDto();
     }
 
+    // Building 저장용
     public FileInfoDTO saveFile(MultipartFile file, FileEntityType type, SaveStrategy saveStrategy, String version) throws IOException {
         Objects.requireNonNull(saveStrategy, () -> {
             log.error(INVALID_FILE_IO_STRATEGY.getMessage());

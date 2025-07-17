@@ -98,7 +98,7 @@
                             <tr>
                                 <th>층 선택</th>
                                 <td colspan="3">
-                                    <select name="floorId" id="selectFloorIdRegister" class="form-select" title="층 선택" required data-rules="required" data-tagname="층">
+                                    <select name="floorId" id="selectFloorIdRegister" class="form-select" title="층 선택" data-tagname="층">
                                         <option class="selected" value="">층 선택</option>
                                     </select>
                                 </td>
@@ -147,6 +147,14 @@
                                     <textarea name="tagName" id="tagRegister" class="form-control input-sm" placeholder="태그를 입력해주세요." style="height:200px;" title="태그 이름" data-tagname="태그 이름"></textarea>
                                 </td>
                             </tr>
+
+                            <tr class="cameraIp hidden">
+                                <th>카메라 IP</th>
+                                <td colspan="3">
+                                    <input type="text" name="cameraIp" id="cameraIpRegister" class="form-control" placeholder="" data-tagname="카메라 IP">
+                                </td>
+                            </tr>
+
                             <tr class="selectCctv hidden">
                                 <th>지정카메라</th>
                                 <td colspan="3">
@@ -264,6 +272,14 @@
                                     <textarea name="tagName" id="tagModify" class="form-control input-sm" placeholder="태그를 입력해주세요." style="height:200px;" title="태그 이름" data-tagname="태그 이름"></textarea>
                                 </td>
                             </tr>
+
+                            <tr class="cameraIp hidden">
+                                <th>카메라 IP</th>
+                                <td colspan="3">
+                                    <input type="text" name="cameraIp" id="cameraIpModify" class="form-control" placeholder="" data-tagname="카메라 IP">
+                                </td>
+                            </tr>
+
                             <tr class="selectCctv hidden">
                                 <th>지정카메라</th>
                                 <td colspan="3">
@@ -331,7 +347,7 @@
                             <tr>
                                 <th>층 선택</th>
                                 <td colspan="3">
-                                    <select name="floorId" id="selectFloorIdBatchRegister" class="form-select" title="층 선택" required data-rules="required" data-tagname="층">
+                                    <select name="floorId" id="selectFloorIdBatchRegister" class="form-select" title="층 선택" data-tagname="층">
                                         <option class="selected" value="">층 선택</option>
                                     </select>
                                 </td>

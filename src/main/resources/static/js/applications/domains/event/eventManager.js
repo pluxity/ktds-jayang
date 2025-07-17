@@ -232,7 +232,6 @@ const EventManager = (() => {
         }
     }
 
-
     // 알람 팝업 생성
     function createWarningPopup(alarm) {
         const warningTemplate = document.createElement('div');
@@ -277,8 +276,13 @@ const EventManager = (() => {
     }
 
     // CCTV 스트리밍 초기화 함수
-    function initializeCCTVStream(canvasId, cctvCode) {
+    window.livePlayers = window.livePlayers || [];
+    function initializeCCTVStream(canvasId, cctvCode, cameraIp) {
         const canvasElement = document.getElementById(canvasId);
+        const dummyCanvas = document.createElement('canvas');
+        dummyCanvas.width  = 1;
+        dummyCanvas.height = 1;
+        const canvasDom = canvasElement.tagName.toLowerCase() === 'video' ? dummyCanvas : canvasElement;
         if (!canvasElement) return;
 
         api.get("/cctv/config").then(res => {
@@ -294,11 +298,129 @@ const EventManager = (() => {
 
                 LG_live_port: cctvConfig.lgLivePort,
                 LG_playback_port: cctvConfig.lgPlaybackPort,
-                canvasDom: canvasElement
+                canvasDom: canvasDom
             });
-            livePlayer.livePlay(cctvCode);
+
+            const username = cctvConfig.username;
+            const password = cctvConfig.password;
+            // get cctv direct uri
+            // live
+            livePlayer
+                // .getStreamUri(cameraIp, username, password)
+                .getLiveStreamUri(cameraIp, username, password)
+                .then(hlsUrl => {
+                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, livePlayer);
+                    // playVideoInCanvas(hlsUrl, canvasElement, livePlayer);
+                    // playVideoInVideo(hlsUrl, canvasElement, livePlayer);
+                    window.livePlayers.push({ player: livePlayer });
+                    livePlayer.cameraIp = cameraIp;
+                    livePlayer.httpRelayUrl = cctvConfig.httpRelayUrl;
+                    livePlayer.httpRelayPort = cctvConfig.httpRelayPort;
+                })
+
             return livePlayer;
         })
+    }
+
+    // video 말고 canvas 에 재생할때
+    function playVideoInCanvas(url, canvas, player) {
+        const video = document.createElement('video');
+        video.autoplay = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.crossOrigin = 'anonymous';
+        video.style.display = 'none';
+        document.body.appendChild(video);
+        const ctx = canvas.getContext('2d');
+        let rafId;
+        player.cancelled = false;
+        let hls;
+        player.type = 'hls';
+
+        if (Hls.isSupported()) {
+            hls = new Hls({
+                liveSyncDuration: 1.5,
+                liveMaxLatencyDuration: 3,
+                enableWorker: true,
+                lowLatencyMode: true
+            });
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play().catch(e => console.error('Play failed:', e));
+                rafId = requestAnimationFrame(drawFrame);
+            });
+        }
+
+        function drawFrame() {
+            if (player.cancelled || video.paused || video.ended) return;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            rafId = requestAnimationFrame(drawFrame);
+        }
+
+        player.videoEl = video;
+        player.rafId = () => rafId;
+        player.cancelDraw = () => {
+            player.cancelled = true;
+            cancelAnimationFrame(rafId);
+        };
+        player.hls = hls;
+    }
+
+    function playLiveJsmpegInCanvas(wsUrl, canvas, player) {
+        const playerInstance = new JSMpeg.Player(wsUrl, {
+            canvas: canvas,
+            autoplay: true,
+            audio: false,
+            loop: false,
+            videoBufferSize: 1024 * 1024,
+            preserveDrawingBuffer: false,
+            disableGl: true
+        });
+
+        player.cancelDraw = () => {
+            if (playerInstance.source && playerInstance.source.socket) {
+                playerInstance.source.socket.close();
+            }
+            playerInstance.destroy();
+        };
+
+        player.livePlayer = playerInstance;
+        player.type = 'ws';
+    }
+
+
+
+    // video
+    // video 태그로 직접 재생 할때
+    function playVideoInVideo(url, videoEl, player) {
+        videoEl.controls = true;
+        let hls;
+        player.cancelled = false;
+
+        if (Hls.isSupported()) {
+            hls = new Hls({
+                liveSyncDuration: 1.5,
+                liveMaxLatencyDuration: 3,
+                enableWorker: true,
+                lowLatencyMode: true
+            });
+            hls.loadSource(url);
+            hls.attachMedia(videoEl);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                if (!player.cancelled) {
+                    videoEl.play().catch(e => console.error(e));
+                }
+            });
+        }
+
+        player.videoEl = videoEl;
+        player.hls = hls || null;
+        player.cancelPlay = () => {
+            player.cancelled = true;
+            if (hls) hls.destroy();
+            videoEl.pause();
+        };
     }
 
     // MainCCTV 팝업 생성

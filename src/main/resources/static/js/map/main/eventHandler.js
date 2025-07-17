@@ -118,20 +118,32 @@
 
     const viewEquipmentList = () => {
         equipmentList.addEventListener('click', (event) => {
+            const allContainer = equipmentList.closest('.all');
             if (equipmentListPop.style.display === 'none') {
                 equipmentListPop.style.display = 'inline-block';
+                if (allContainer && !allContainer.classList.contains('active')) {
+                    allContainer.classList.add('active');
+                }
                 categoryList = PoiCategoryManager.findAll();
                 equipGroupLinks.forEach(link => {
                     const linkClass = link.className.toLowerCase();
-                    const matchedCategory = categoryList.find(category =>
-                        category.name.toLowerCase() === linkClass);
 
+                    const matchedCategory = categoryList.find(category => {
+                        const categoryName = category.name.toLowerCase();
+                        if (categoryName === '출입통제') {
+                            return linkClass.includes('출입');
+                        }
+                        return categoryName === linkClass;
+                    });
                     if (matchedCategory) {
                         link.setAttribute('data-category-id', matchedCategory.id);
                     }
                 });
             } else {
                 equipmentListPop.style.display = 'none';
+                if (allContainer && allContainer.classList.contains('active')) {
+                    allContainer.classList.remove('active');
+                }
             }
         })
     }
@@ -172,8 +184,14 @@
             systemTabs.forEach(tab => {
                 tab.classList.remove('active')
             });
+            // layerPopup.clearAllIntervals();
             layerPopup.closePlayers()
         };
+
+        const toggleMenu = document.querySelector('#toggle-menu').closest('.all');
+        if (toggleMenu.classList.contains('active')) {
+            toggleMenu.classList.remove('active');
+        }
 
         const currentPopup = document.getElementById('systemPopup');
         document.querySelectorAll(".popup-basic").forEach(element => {
@@ -219,7 +237,7 @@
                     firstTab: elevatorTab,
                     secondTab: escalatorTab,
                     firstContent: elevatorContent,
-                    secondContent: escalatorContent
+                    secondContent: escalatorContent,
                 });
 
             },
@@ -231,12 +249,49 @@
                 const monitorContent = document.getElementById('parkingMonitorContent');
 
                 initPopup(parkingPop, clickedItem);
-                registerTabHandlers({
-                    firstTab: guideTab,
-                    secondTab: monitorTab,
-                    firstContent: guideContent,
-                    secondContent: monitorContent
-                });
+                // registerTabHandlers({
+                //     firstTab: guideTab,
+                //     secondTab: monitorTab,
+                //     firstContent: guideContent,
+                //     secondContent: monitorContent
+                // });
+                api.get('/parking/search', {
+                    params: {
+                        // startTime: '2025-06-02 03:00:00.000',
+                        // endTime: '2025-06-02 10:00:00.000',
+                        // deviceId: 'DEV001'
+                    }
+                }).then(res => {
+                    const {result} = res.data;
+                    console.log("result : ", result);
+                    // 이거 layerPopup.setParking에서 해야함
+                    const tbody = document.querySelector('#parkingList tbody');
+                    tbody.innerHTML = '';
+                    document.getElementById('parkingTotalCnt').textContent = result.length;
+                    result.forEach((item, index) => {
+                        const tr = document.createElement('tr');
+                        const formatDateTime = (dt) => {
+                            if (!dt) return '';
+                            const date = new Date(dt);
+                            return date.toLocaleDateString('ko-KR', {hour12: false});
+                        };
+                        tr.innerHTML = `
+                          <td>${index + 1}</td>
+                          <td>${item.deviceId || ''}</td>
+                          <td>${item.deviceName || ''}</td>
+                          <td>${item.inoutType === 0 ? '입차' : '출차'}</td>
+                          <td>${item.gateDatetime}</td>
+                          <td>${item.carNo || ''}</td>
+                          <td>${item.inoutCarId || ''}</td>
+                          <td>${item.parkingFee ?? 0}</td>
+                          <td>${item.regularType === 'T' ? '정기' : '일반'}</td>
+                        `;
+
+                        tbody.appendChild(tr);
+                    })
+                }).catch((err) => {
+                    console.error(err);
+                })
             },
             airTab: () => {
                 layerPopup.setAirTab();
@@ -269,18 +324,27 @@
             secondContent
         } = option;
 
+        const clearActiveBtns = (container) => {
+            container.querySelectorAll('.select-box__btn--active')
+                .forEach(btn => btn.classList.remove('select-box__btn--active'));
+        }
+
         firstTab.addEventListener('click', () => {
             switchTab(firstTab, secondTab, firstContent, secondContent);
+            clearActiveBtns(secondContent);
+            layerPopup.setElevator();
         });
 
         secondTab.addEventListener('click', () => {
             switchTab(secondTab, firstTab, secondContent, firstContent);
+            clearActiveBtns(firstContent);
+            layerPopup.setEscalator();
         });
 
         // 초기 상태 설정
         switchTab(firstTab, secondTab, firstContent, secondContent);
+        // layerPopup.setElevator();
     };
-
 
     const initPopup = (popup, clickedItem) => {
         popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
@@ -348,7 +412,8 @@
             systemPopup.style.display = 'none';
             eventLayerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
+            // 이거 왜?
+            // Px.Poi.ShowAll();
             const sopPopup = document.querySelector("#sopLayerPopup");
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
@@ -392,7 +457,7 @@
         const mapPopup = document.getElementById('mapLayerPopup');
         mapPopup.style.display = 'inline-block';
         mapPopup.style.position = 'absolute';
-        mapPopup.style.transform = 'translate(80px, 5%)';
+        mapPopup.style.transform = 'translate(100px, 10%)';
         // mapPopup.style.zIndex = '50';
 
         titleElement.textContent = title;
@@ -1199,7 +1264,7 @@
 
     // test중
     const getPoiRenderingAndList = async (buildingId) => {
-        await PoiManager.getPoiList().then(() => {
+        await PoiManager.getFilteredPoiList().then(() => {
             let filteredList = PoiManager.findByBuilding(buildingId)
 
             if (filteredList === undefined || filteredList.length < 1) {

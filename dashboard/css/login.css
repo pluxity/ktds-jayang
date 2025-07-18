@@ -40,6 +40,7 @@
   font-size: 0.875rem;
   color: var(--color-black);
   letter-spacing: -0.00875rem;
+  cursor: pointer;
 }
 
 .button--solid-upper {
@@ -218,6 +219,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 
 .popup-basic {
   display: inline-block;
+  position: absolute;
   background-color: var(--color-black);
   border-radius: 10px;
   -webkit-box-sizing: border-box;

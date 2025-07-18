@@ -295,6 +295,108 @@
             <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
             <aside class="event-state event-state--active"></aside>
         </div>
+
+        <!-- ptz viewer -->
+        <div class="ptz-viewer popup-basic" style="top:35%; left:50%; transform:translate(-50%, -50%);">
+            <div class="popup-basic__head">
+                <h2>CAM-1F-001</h2>
+                <button type="button" class="close"><span class="hide">close</span></button>
+            </div>
+        
+            <!-- 비디오 컨테이너 -->
+            <div class="ptz-viewer__video">
+                <div class="video">
+                    <!-- 실제 동영상 예시 (placeholder 대신) -->
+                    <div class="video__container">
+                         <div> <!-- 동영상 영역 --> </div>
+                        <!-- 동영상이 없을 때 placeholder -->
+                        <div class="video__placeholder">실시간 CCTV 영상</div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- 하단 컨트롤 바 -->
+            <div class="ptz-viewer__playback">
+                <div class="playback">
+                    <div class="playback__mode">
+                        <!-- default: button--ghost-lower, 클릭 시 button--solid-middle로 변경  -->
+                        <button type="button" class="button button--solid-middle">LIVE</button>
+                        <button type="button" class="button button--ghost-lower">PLAY BACK</button>
+                    </div>
+                    <!-- 위에 mode의 playback 버튼 클릭 시 playback__action--active 클래스 추가 및 disabled 제거 -->
+                    <div class="playback__action">
+                        <button type="button" class="playback__button playback__button--play" disabled><span class="hide">play</span></button>
+                        <button type="button" class="playback__button playback__button--pause" disabled><span class="hide">pause</span></button>
+                        <button type="button" class="playback__button playback__button--stop" disabled><span class="hide">stop</span></button>
+                    </div>
+                    <!-- 클릭 시 playback__toggle--active 클래스 추가 -->
+                    <button type="button" class="playback__toggle" id="toggleControl"><span class="hide">PTZ 패널 컨트롤 버튼</span></button>
+                </div>
+            </div>
+        
+            <!-- 뷰어 바로 아래 붙는 슬라이드 제어 패널 -->
+            <div class="ptz-viewer__panel" id="slidePanel">
+                <div class="inner">
+                    <!-- 조이스틱 -->
+                    <div class="joystick">
+                        <div class="joystick__bg">
+                            <div class="joystick__stick" id="joystickStick"></div>
+                            <div class="joystick__directions">
+                                <span class="joystick__direction joystick__direction--up"></span>
+                                <span class="joystick__direction joystick__direction--up-right"></span>
+                                <span class="joystick__direction joystick__direction--right"></span>
+                                <span class="joystick__direction joystick__direction--down-right"></span>
+                                <span class="joystick__direction joystick__direction--down"></span>
+                                <span class="joystick__direction joystick__direction--down-left"></span>
+                                <span class="joystick__direction joystick__direction--left"></span>
+                                <span class="joystick__direction joystick__direction--up-left"></span>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- 슬라이더 컨트롤 -->
+                    <div class="controls">
+                        <div class="controls__group">
+                            <span class="controls__label">회전/속도</span>
+                            <button class="controls__btn controls__btn--zoom-in" data-target="rotation"><span class="hide">회전/속도 감소</span></button>
+                            <div class="controls__slider">
+                                <div class="controls__track"></div>
+                                <div class="controls__progress" data-progress="0"></div>
+                                <input type="range" class="controls__input" min="0" max="100" value="0" data-type="rotation">
+                            </div>
+                            <button class="controls__btn controls__btn--zoom-out" data-target="rotation"><span class="hide">회전/속도 증가</span></button>
+                        </div>
+                        
+                        <div class="controls__group">
+                            <span class="controls__label">포커스</span>
+                            <button class="controls__btn controls__btn--focus-in" data-target="focus"><span class="hide">포커스 감소</span></button>
+                            <div class="controls__slider">
+                                <div class="controls__track"></div>
+                                <div class="controls__progress" data-progress="0"></div>
+                                <input type="range" class="controls__input" min="0" max="100" value="0" data-type="focus">
+                            </div>
+                            <button class="controls__btn controls__btn--focus-out" data-target="focus"><span class="hide">포커스 증가</span></button>
+                        </div>
+                        
+                        <div class="controls__group">
+                            <span class="controls__label">조리개</span>
+                            <button class="controls__btn controls__btn--iris-in" data-target="iris"><span class="hide">조리개 감소</span></button>
+                            <div class="controls__slider">
+                                <div class="controls__track"></div>
+                                <div class="controls__progress" data-progress="0"></div>
+                                <input type="range" class="controls__input" min="0" max="100" value="0" data-type="iris">
+                            </div>
+                            <button class="controls__btn controls__btn--iris-out" data-target="iris"><span class="hide">조리개 증가</span></button>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- 카메라 리셋 버튼 -->
+                 <div class="controls__reset">
+                     <button type="button" class="button button--solid-middle" id="resetCamera">카메라 리셋</button>
+                 </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

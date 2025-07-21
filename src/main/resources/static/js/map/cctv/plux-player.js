@@ -236,7 +236,9 @@ class PluxPlayer {
     }
 
     async getLiveStreamUri(cameraIp, username, password) {
-        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password);
+
+        const time = await this.getSystemDateAndTime(cameraIp);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
 
         const operationBody = `
             <GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">
@@ -557,6 +559,54 @@ class PluxPlayer {
 
         return { nonce, created, passwordDigest };
     }
+
+    async getSystemDateAndTime(cameraIp) {
+        const soapBody =
+            `<?xml version="1.0" encoding="UTF-8"?>
+                <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+                    <soap:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                        <GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/>
+                            </soap:Body>
+                                </soap:Envelope>`
+        console.log("soapBody : ", soapBody);
+        const response = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`,
+            `http://${cameraIp}:80/onvif/media_service`,
+            soapBody);
+        let parsedResponse = this.parseResponse(response);
+        let timestamp = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
+        let time = timestamp["tt:Time"];
+        let hour = time["tt:Hour"];
+        let minute = time["tt:Minute"];
+        let second = time["tt:Second"];
+        let date = timestamp["tt:Date"];
+        let year = date["tt:Year"];
+        let month = date["tt:Month"];
+        let day = date["tt:Day"];
+        return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second + ".000Z";
+    }
+
+    async generatePasswordDigest(password, time) {
+        const created = time;
+        const nonceBytes = this.getRandomBytes();
+        // base64로 인코딩
+        let base64String = '';
+        for (let i = 0; i < nonceBytes.length; i++) {
+            base64String += String.fromCharCode(nonceBytes[i]);
+        }
+        const nonce = btoa(base64String);
+        const encoder = new TextEncoder();
+        const createdBytes = encoder.encode(created);
+        const passwordBytes = encoder.encode(password);
+        const digestSource = new Uint8Array([...nonceBytes, ...createdBytes, ...passwordBytes]);
+        const hashBuffer = await crypto.subtle.digest("SHA-1", digestSource);
+
+        // Step 3: 결과를 Base64로 인코딩
+        const sha1Digest = new Uint8Array(hashBuffer);
+        const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
+        return {nonce, created, passwordDigest};
+    }
+
 
     createSoapBody(body) {
         return `<?xml version="1.0" encoding="UTF-8"?>

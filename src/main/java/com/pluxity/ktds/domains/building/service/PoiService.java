@@ -288,20 +288,21 @@ public class PoiService {
 
     @Transactional
     public void updatePoi(@NotNull final Long id, @NotNull @Valid final UpdatePoiDTO dto) {
+        List<PoiCctv> newCctvs = null;
+
         Poi poi = getPoi(id);
         validateUpdateCode(dto, poi);
         validateAssociation(dto);
 
         // CCTV 업데이트
         if (dto.cctvList() != null && !dto.cctvList().isEmpty()) {
-            List<PoiCctv> newCctvs = dto.cctvList().stream()
+            newCctvs = dto.cctvList().stream()
                     .map(c -> PoiCctv.builder()
                             .poi(poi)
                             .code(c.code())
                             .isMain(c.isMain())
                             .build())
                     .toList();
-            poi.update(dto.name(), dto.code(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
         }
 
         // 태그 업데이트
@@ -311,6 +312,8 @@ public class PoiService {
             // 외부 서버 동기화
             poiTagSyncService.syncPoiUnregisteredTags(poi);
         }
+
+        poi.update(dto.name(), dto.code(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
 
         if (dto.floorNo() != null) {
             poi.changeFloorNo(dto.floorNo());

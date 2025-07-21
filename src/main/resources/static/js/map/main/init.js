@@ -1555,6 +1555,13 @@ const Init = (function () {
         const player = window.livePlayers[canvasId];
         const btnType = button.getAttribute('data-btn-type');
 
+        if (!player.cameraIp) {
+            const poiId = canvasId.slice(5);
+            const poiInfo = Px.Poi.GetData(poiId);
+            player.cameraIp = poiInfo.property.cameraIp;
+
+        }
+
         switch (btnType) {
             case 'play':
                 if(player.isPaused) {

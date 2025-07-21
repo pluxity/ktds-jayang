@@ -948,7 +948,8 @@ const layerPopup = (function () {
         tdBuilding.textContent = buildingInfo.name;
 
         const tdFloor = document.createElement('td');
-        tdFloor.textContent = floorInfo.name;
+
+        tdFloor.textContent = floorInfo?.name;
 
         const tdEquipment = document.createElement('td');
         tdEquipment.classList.add('align-left');
@@ -962,6 +963,7 @@ const layerPopup = (function () {
         tdEquipment.addEventListener('click', function() {
             // popup close추가
 
+            console.log("poi : ", poi);
             if (!poi.position) {
                 alertSwal('POI를 배치해주세요');
                 return;
@@ -1190,6 +1192,9 @@ const layerPopup = (function () {
 
             const poiList = PoiManager.findAll();
             const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
+            // const filteringPoiList = poiList.filter(poi =>
+            //     poi.poiCategory === Number(id) && poi.position
+            // );
             layerPopup.setCategoryData(title, filteringPoiList, null, true);
         }
     })
@@ -1236,7 +1241,7 @@ const layerPopup = (function () {
 
             const statusItems = ['A', 'B'].includes(buildingName)
                 ? ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장']
-                : ['자동운전', '고장', '점검중', '파킹', '독립운전', '중량초과', '1차소방운전', '2차소방운전', '화재관제운전', '화재관제운전 귀착'];
+                : ['자동운전', '고장', '점검중', '파킹', '독립운전', '중량초과', '1차소방운전', '2차소방운전', '화재관제운전', '화재관제운전귀착'];
 
             statusBtn.textContent = '상태 전체';
             filterElevatorByStatus('상태 전체');
@@ -1488,7 +1493,12 @@ const layerPopup = (function () {
 
     function renderPagedPage(type) {
         const { entries, currentPage, mode } = paged[type];
-        const slice = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+        const validEntries = entries.filter(([idStr]) =>
+            PoiManager.findById(Number(idStr))
+        );
+        console.log("validEntries : ", validEntries);
+        const slice = validEntries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
         const pageData = Object.fromEntries(slice);
 
         if (type === 'elevator') {
@@ -1500,7 +1510,14 @@ const layerPopup = (function () {
 
     function renderPagedPagination(type) {
         const { entries, currentPage } = paged[type];
-        const totalPages = Math.ceil(entries.length / pageSize);
+        const validEntries = entries.filter(([idStr]) =>
+            PoiManager.findById(Number(idStr))
+        );
+        const totalPages = Math.ceil(validEntries.length / pageSize);
+
+        if (paged[type].currentPage > totalPages) {
+            paged[type].currentPage = totalPages || 1;
+        }
 
         const content = document.getElementById(`${type}Content`);
         const paging = content.querySelector('.search-result__paging');
@@ -1814,6 +1831,7 @@ const layerPopup = (function () {
 
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
+            console.log("poiInfo : ", poiInfo);
             if (!poiInfo) return;
             const tagMap = dto.TAGs.reduce((map, t) => {
                 const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);

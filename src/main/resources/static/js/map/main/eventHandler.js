@@ -262,13 +262,13 @@
                         // deviceId: 'DEV001'
                     }
                 }).then(res => {
-                    const {result} = res.data;
-                    console.log("result : ", result);
+                    const result = res.data;
+
                     // 이거 layerPopup.setParking에서 해야함
                     const tbody = document.querySelector('#parkingList tbody');
                     tbody.innerHTML = '';
-                    document.getElementById('parkingTotalCnt').textContent = result.length;
-                    result.forEach((item, index) => {
+                    document.getElementById('parkingTotalCnt').textContent = result?.length;
+                    result?.forEach((item, index) => {
                         const tr = document.createElement('tr');
                         const formatDateTime = (dt) => {
                             if (!dt) return '';
@@ -445,6 +445,9 @@
         viewResult.setAttribute('data-category-id', id);
         const poiList = PoiManager.findAll();
         const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
+        // const filteringPoiList = poiList.filter(poi =>
+        //     poi.poiCategory === Number(id) && poi.position
+        // );
         layerPopup.setCategoryData(title, filteringPoiList);
         // PoiManager.getPoiByCategoryId(id).then(pois => {
         //     layerPopup.setCategoryData(title, pois);

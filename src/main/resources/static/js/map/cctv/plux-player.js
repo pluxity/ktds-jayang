@@ -15,17 +15,35 @@ class PluxPlayer {
         this.canvasDom = options.canvasDom;
         this.ctx = this.canvasDom.getContext('2d');
         this.decodeWorker = null
-        this.streamServerIP = null
-        this.recordServerIp = null
+        this.streamServerIP = null;
+        this.recordServerIP = null;
     }
 
-    playBack(deviceId, startDate, endTime) {
+    async playBack(deviceId, startDate, endTime) {
         if (this.decodeWorker) {
             this.decodeWorker.terminate()
         }
-        deviceId = deviceId.slice(0, -2) + "02";
+        await this.recordServerSetting();
+
+        deviceId = deviceId.slice(0, -2) + "10";
+
+        const destinationIp = this.recordServerIP[deviceId];
+        if (!destinationIp) {
+            console.error("해당 deviceId의 녹화 서버를 찾을 수 없습니다:", deviceId);
+            console.error("사용 가능한 카메라 목록:", Object.keys(this.recordServerIP));
+            return;
+        }
+
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-playback-worker.js");
-        this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp:this.recordServerIp?.[deviceId], destinationPort: this.LG_playback_port, deviceId, startDate, endTime });
+        this.decodeWorker.postMessage({
+            relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort,
+            destinationIp: destinationIp,
+            destinationPort: this.LG_playback_port,
+            deviceId,
+            startDate,
+            endTime
+        });
+
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
             if (eventData.function == "decodeFrame") {
@@ -43,7 +61,6 @@ class PluxPlayer {
         }
         this.decodeWorker = new Worker("/static/js/map/cctv/plux-live-worker.js");
         deviceId = deviceId.slice(0, -2) + "02";
-        console.log(this.streamServerIP?.[deviceId])
         this.decodeWorker.postMessage({ relayServerUrl: this.wsRelayUrl + ":" + this.wsRelayPort, destinationIp: this.streamServerIP?.[deviceId], destinationPort: this.LG_live_port, deviceId });
         this.decodeWorker.onmessage = (e) => {
             var eventData = e.data
@@ -53,7 +70,26 @@ class PluxPlayer {
                 frame.close();
             }
         };
+    }
 
+    // 재생 제어 메서드들
+    pausePlayback() {
+        if (this.decodeWorker) {
+            this.decodeWorker.postMessage({ command: 'pause' });
+        }
+    }
+
+    resumePlayback() {
+        if (this.decodeWorker) {
+            this.decodeWorker.postMessage({ command: 'resume' });
+        }
+    }
+
+    stopPlayback() {
+        if (this.decodeWorker) {
+            this.decodeWorker.postMessage({ command: 'stop' });
+
+        }
     }
 
     async ptzControl(deviceUrl, devicePort, x, y, id, password) {
@@ -200,17 +236,19 @@ class PluxPlayer {
     }
 
     async getLiveStreamUri(cameraIp, username, password) {
-        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password);
+
+        const time = await this.getSystemDateAndTime(cameraIp);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
 
         const operationBody = `
             <GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">
               <StreamSetup>
                 <Stream xmlns="http://www.onvif.org/ver10/schema">RTP-Unicast</Stream>
                 <Transport xmlns="http://www.onvif.org/ver10/schema">
-                  <Protocol>UDP</Protocol>
+                  <Protocol>TCP</Protocol>
                 </Transport>
               </StreamSetup>
-              <ProfileToken>DefaultProfile-03</ProfileToken>
+              <ProfileToken>DefaultProfile-02</ProfileToken>
             </GetStreamUri>`.trim();
 
         const soapBody = this.createDirectCamSoapBody(
@@ -221,6 +259,8 @@ class PluxPlayer {
             created
         );
 
+        console.log("soapBody : ", soapBody);
+
         const response = await this.sendSoapRequest(
             `${this.httpRelayUrl}:${this.httpRelayPort}`,
             `http://${cameraIp}:80/onvif/media_service`,
@@ -229,7 +269,7 @@ class PluxPlayer {
 
         const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
 
-        const liveWsPort = this.wsRelayUrl.startsWith('https') ? 4013 : 4003;
+        const liveWsPort = this.wsRelayUrl.startsWith('wss') ? 4013 : 4003;
 
         const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
         console.log("Live RTSP URI:", uri);
@@ -282,14 +322,12 @@ class PluxPlayer {
         }
 
         const camAssignList = Array.isArray(camAssign) ? camAssign : [camAssign];
-        console.log("camAssignList : ", camAssignList);
         let recordServerIPFromCamId = {}
 
         camAssignList.map(item => {
             recordServerIPFromCamId[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
         })
 
-        console.log("recordServerIPFromCamId : ", recordServerIPFromCamId);
         this.recordServerIP = recordServerIPFromCamId
         this.recordServerIP = Object.fromEntries(
             Object.entries(this.recordServerIP).map(([id, addr]) => [
@@ -304,7 +342,6 @@ class PluxPlayer {
         let getstreamcambody = this.createSoapBody("<ns1:GetStreamCam/>");
         let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, getstreamcambody);
 
-        console.log("streamRecServerSetting response : ", response);
         let parsedResponse = this.parseResponse(response);
         let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"];
 
@@ -316,6 +353,7 @@ class PluxPlayer {
         let streamServerList = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamServerListResponse"]["ns1:GetStreamServerListResult"]["ns1:STREAM_SERVER"];
 
         let streamServerIP = {}
+
 
         if (typeof streamServerList == "object" && streamServerList && streamServerList.hasOwnProperty("ns1:strStrServerName")) {
             streamServerIP[streamServerList["ns1:strStrServerName"]] = streamServerList["ns1:strStrServerIP"]
@@ -329,13 +367,11 @@ class PluxPlayer {
         }
 
         const camAssignList = Array.isArray(camAssign) ? camAssign : [camAssign];
-        console.log("camAssignList : ", camAssignList);
         let streamServerIPFromCamId = {}
         camAssignList.map(item => {
             streamServerIPFromCamId[item["ns1:strCameraID"]] = streamServerIP[item["ns1:strStrServerName"]]
         })
 
-        console.log("streamServerIPFromCamId : ", streamServerIPFromCamId);
         this.streamServerIP = streamServerIPFromCamId
         this.streamServerIP = Object.fromEntries(
             Object.entries(this.streamServerIP).map(([id, addr]) => [
@@ -346,21 +382,96 @@ class PluxPlayer {
         return streamServerIPFromCamId
     }
 
+    async recordServerSetting() {
+        const getRecordServerListBody = this.createSoapBody("<ns1:GetRecordServerList />");
+        let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort,
+            "http://" + this.LG_server_ip + ":" + this.LG_server_port, getRecordServerListBody);
+        let parsedResponse = this.parseResponse(response);
+        let recordServerList = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordServerListResponse"]
+            ["ns1:GetRecordServerListResult"]["ns1:RECORD_SERVER"];
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        let recordServerMap  = {}; // 서버 Name → 서버 IP 매핑
+        let camServerMap  = {}; // 카메라ID → 서버IP 매핑
+
+        // recordServerList 단일 객체인지 배열인지 확인하여 처리
+        if (Array.isArray(recordServerList)) {
+            // 배열인 경우
+            recordServerList.forEach(item => {
+                recordServerMap[item["ns1:strRecServerName"]] = item["ns1:strRecServerIP"];
+            });
+        } else if (recordServerList && typeof recordServerList === 'object') {
+            // 단일 객체인 경우
+            recordServerMap[recordServerList["ns1:strRecServerName"]] = recordServerList["ns1:strRecServerIP"];
+        }
+
+        // console.log("recordServerMap:", recordServerMap);
+        /* recordServerMap 예시:
+           {
+               "serverName: serverIP,
+               "serverName: serverIP,
+               "serverName: serverIP
+           }
+        */
+
+        for (const serverName in recordServerMap) {
+
+            // SOAP 요청 생성 및 전송
+            const getRecordCamBody = this.createSoapBody("<ns1:GetRecordCam>" +
+                "<ns1:ServerID>" + this.LG_server_ip + ":" + this.LG_server_port + "</ns1:ServerID>"
+                + " </ns1:GetRecordCam>");
+
+            let response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort,
+                "http://" + this.LG_server_ip + ":" + this.LG_server_port, getRecordCamBody);
+
+            let parsedResponse = this.parseResponse(response);
+            let camAssign = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordCamResponse"]
+                ["ns1:GetRecordCamResult"]["ns1:RECORDCAMASSIGN"];
+
+            // camAssign 단일 객체인지 배열인지 확인하여 처리
+            if (Array.isArray(camAssign)) {
+                // 배열인 경우 - 각 카메라ID를 키로, 서버IP를 값으로 저장
+                camAssign.forEach(item => {
+                   if(item["ns1:strRecServerName"] === serverName) {
+                       camServerMap[item["ns1:strCameraID"]] = recordServerMap[serverName]; // 카메라ID -> 서버IP
+                   }
+                });
+            } else if (camAssign && typeof camAssign === 'object') {
+                // 단일 객체인 경우 - 카메라ID를 키로, 서버IP를 값으로 저장
+                if(camAssign["ns1:strRecServerName"] === serverName) {
+                    camServerMap[camAssign["ns1:strCameraID"]] = recordServerMap[serverName]; // 카메라ID -> 서버IP
+                }
+            }
+        }
+
+        // console.log("camServerMap:", camServerMap);
+        /*
+           camServerMap  예시:
+           {
+               camID : serverIp,
+               camID : serverIp,
+               camID : serverIp
+           }
+        */
+        this.recordServerIP = camServerMap;
+        return camServerMap;
+    }
+
     async getStrNameFromCamId(callback) {
-        const serverId = "192.168.4.149:9100";
+        const serverId = "192.168.4.106";
         const soapBody  = this.createSoapBody(
-            `<ns1:GetRecordCam>
-                        <ns1:ServerID>${serverId}</ns1:ServerID>
-                    </ns1:GetRecordCam> `
+            `<tns:GetRecordCam>
+                <tns:ServerID>${serverId}</tns:ServerID>
+            </tns:GetRecordCam> `
         )
         const response = await this.sendSoapRequest(this.httpRelayUrl + ":" + this.httpRelayPort, "http://" + this.LG_server_ip + ":" + this.LG_server_port, soapBody)
-        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetRecordCamResponse"]["ns1:GetRecordCamResult"]["ns1:RECORDCAMASSIGN"]
-        const camAssignList = Array.isArray(camassign) ? camassign : [camassign];
+        let camassign = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["ns1:GetStreamCamResponse"]["ns1:GetStreamCamResult"]["ns1:STREAMCAMASSIGN"]
+
         let strnamefromcamid = {}
-        camAssignList.map(item => {
-            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strRecServerName"]
+        camassign.map(item => {
+            strnamefromcamid[item["ns1:strCameraID"]] = item["ns1:strStrServerName"]
         })
-        console.log("strnamefromcamid : ", strnamefromcamid);
         callback(strnamefromcamid)
     } 
 
@@ -425,6 +536,77 @@ class PluxPlayer {
 
         return { nonce, created, passwordDigest };
     }
+
+    async generatePasswordDigest2(password, created) {
+
+        const nonceBytes = this.getRandomBytes();
+
+        // base64로 인코딩
+        let base64String = '';
+        for (let i = 0; i < nonceBytes.length; i++) {
+            base64String += String.fromCharCode(nonceBytes[i]);
+        }
+        const nonce = btoa(base64String);
+
+        const encoder = new TextEncoder();
+        const createdBytes = encoder.encode(created);
+        const passwordBytes = encoder.encode(password);
+        const digestSource = new Uint8Array([...nonceBytes, ...createdBytes, ...passwordBytes]);
+
+        const hashBuffer = await crypto.subtle.digest("SHA-1", digestSource);
+        const sha1Digest = new Uint8Array(hashBuffer);
+        const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
+
+        return { nonce, created, passwordDigest };
+    }
+
+    async getSystemDateAndTime(cameraIp) {
+        const soapBody =
+            `<?xml version="1.0" encoding="UTF-8"?>
+                <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+                    <soap:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                        <GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/>
+                            </soap:Body>
+                                </soap:Envelope>`
+        console.log("soapBody : ", soapBody);
+        const response = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`,
+            `http://${cameraIp}:80/onvif/media_service`,
+            soapBody);
+        let parsedResponse = this.parseResponse(response);
+        let timestamp = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
+        let time = timestamp["tt:Time"];
+        let hour = time["tt:Hour"];
+        let minute = time["tt:Minute"];
+        let second = time["tt:Second"];
+        let date = timestamp["tt:Date"];
+        let year = date["tt:Year"];
+        let month = date["tt:Month"];
+        let day = date["tt:Day"];
+        return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second + ".000Z";
+    }
+
+    async generatePasswordDigest(password, time) {
+        const created = time;
+        const nonceBytes = this.getRandomBytes();
+        // base64로 인코딩
+        let base64String = '';
+        for (let i = 0; i < nonceBytes.length; i++) {
+            base64String += String.fromCharCode(nonceBytes[i]);
+        }
+        const nonce = btoa(base64String);
+        const encoder = new TextEncoder();
+        const createdBytes = encoder.encode(created);
+        const passwordBytes = encoder.encode(password);
+        const digestSource = new Uint8Array([...nonceBytes, ...createdBytes, ...passwordBytes]);
+        const hashBuffer = await crypto.subtle.digest("SHA-1", digestSource);
+
+        // Step 3: 결과를 Base64로 인코딩
+        const sha1Digest = new Uint8Array(hashBuffer);
+        const passwordDigest = btoa(String.fromCharCode.apply(null, sha1Digest));
+        return {nonce, created, passwordDigest};
+    }
+
 
     createSoapBody(body) {
         return `<?xml version="1.0" encoding="UTF-8"?>

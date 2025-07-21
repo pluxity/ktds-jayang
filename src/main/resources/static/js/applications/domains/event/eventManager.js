@@ -276,50 +276,95 @@ const EventManager = (() => {
     }
 
     // CCTV 스트리밍 초기화 함수
-    window.livePlayers = window.livePlayers || [];
-    function initializeCCTVStream(canvasId, cctvCode, cameraIp) {
+    // window.livePlayers = window.livePlayers || [];
+    if (!window.livePlayers) window.livePlayers = {};
+
+    // CCTV 설정을 가져오는 함수
+    async function getCCTVConfig() {
+        try {
+            const res = await api.get("/cctv/config");
+            return res.data.result;
+        } catch (error) {
+            console.error("CCTV 설정을 가져오는 데 실패했습니다:", error);
+            return null;
+        }
+    }
+
+    function createPlayer(config, canvasDom) {
+        const player = new PluxPlayer({
+            wsRelayUrl: config.wsRelayUrl,
+            wsRelayPort: config.wsRelayPort,
+            httpRelayUrl: config.httpRelayUrl,
+            httpRelayPort: config.httpRelayPort,
+
+            LG_server_ip: config.lgServerIp,
+            LG_server_port: config.lgServerPort,
+
+            LG_live_port: config.lgLivePort,
+            LG_playback_port: config.lgPlaybackPort,
+            canvasDom: canvasDom
+        });
+        window.livePlayers[canvasDom.id] = player;
+        return player;
+    }
+
+    async function playLiveStream(canvasId, cameraIp) {
+        const config = await getCCTVConfig();
         const canvasElement = document.getElementById(canvasId);
         const dummyCanvas = document.createElement('canvas');
         dummyCanvas.width  = 1;
         dummyCanvas.height = 1;
         const canvasDom = canvasElement.tagName.toLowerCase() === 'video' ? dummyCanvas : canvasElement;
-        if (!canvasElement) return;
+        const player = getOrCreatePlayer(canvasId, config, canvasDom);
 
-        api.get("/cctv/config").then(res => {
-            const cctvConfig = res.data.result;
-            const livePlayer = new PluxPlayer({
-                wsRelayUrl: cctvConfig.wsRelayUrl,
-                wsRelayPort: cctvConfig.wsRelayPort,
-                httpRelayUrl: cctvConfig.httpRelayUrl,
-                httpRelayPort: cctvConfig.httpRelayPort,
-
-                LG_server_ip: cctvConfig.lgServerIp,
-                LG_server_port: cctvConfig.lgServerPort,
-
-                LG_live_port: cctvConfig.lgLivePort,
-                LG_playback_port: cctvConfig.lgPlaybackPort,
-                canvasDom: canvasDom
-            });
-
-            const username = cctvConfig.username;
-            const password = cctvConfig.password;
-            // get cctv direct uri
-            // live
-            livePlayer
-                // .getStreamUri(cameraIp, username, password)
-                .getLiveStreamUri(cameraIp, username, password)
-                .then(hlsUrl => {
-                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, livePlayer);
-                    // playVideoInCanvas(hlsUrl, canvasElement, livePlayer);
-                    // playVideoInVideo(hlsUrl, canvasElement, livePlayer);
-                    window.livePlayers.push({ player: livePlayer });
-                    livePlayer.cameraIp = cameraIp;
-                    livePlayer.httpRelayUrl = cctvConfig.httpRelayUrl;
-                    livePlayer.httpRelayPort = cctvConfig.httpRelayPort;
+        player.
+            getLiveStreamUri(cameraIp, config.username, config.password)
+            // getStreamUri(cameraIp, config.username, config.password)
+            .then(hlsUrl => {
+                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, player);
+                    // playVideoInCanvas(hlsUrl, canvasElement, player);
+                    player.cameraIp = cameraIp;
+                    player.httpRelayUrl = config.httpRelayUrl;
+                    player.httpRelayPort = config.httpRelayPort;
                 })
+    }
 
-            return livePlayer;
-        })
+
+    async function playPlaybackStream(canvasId, cameraIp, startDate, endTime) {
+        const config = await getCCTVConfig();
+        const canvasElement = document.getElementById(canvasId);
+        const player = getOrCreatePlayer(canvasId, config, canvasElement);
+
+        await player.getDeviceInfo((cameraList) => {
+            let foundCamera = null;
+
+            if (Array.isArray(cameraList)) {
+                // 배열인 경우
+                foundCamera = cameraList.find(c => c && c["ns1:strIPAddress"] === cameraIp);
+            } else if (cameraList && typeof cameraList === 'object') {
+                // 객체인 경우
+                if (cameraList["ns1:strIPAddress"] === cameraIp) {
+                    // 단일 카메라 객체인 경우
+                    foundCamera = cameraList;
+                } else {
+                    // 키-값 형태의 객체인 경우, 값들을 순회
+                    foundCamera = Object.values(cameraList).find(c =>
+                        c && typeof c === 'object' && c["ns1:strIPAddress"] === cameraIp
+                    );
+                }
+            }
+
+            const deviceId = foundCamera["ns1:strCameraID"];
+
+            player.playBack(deviceId, startDate, endTime);
+        });
+    }
+
+    function getOrCreatePlayer(canvasId, config, canvasElement) {
+        if (!window.livePlayers[canvasId]) {
+            window.livePlayers[canvasId] = createPlayer(config, canvasElement);
+        }
+        return window.livePlayers[canvasId];
     }
 
     // video 말고 canvas 에 재생할때
@@ -339,13 +384,19 @@ const EventManager = (() => {
 
         if (Hls.isSupported()) {
             hls = new Hls({
-                liveSyncDuration: 1.5,
-                liveMaxLatencyDuration: 3,
+                liveSyncDuration: 0.1,
+                liveMaxLatencyDuration: 0.3,
                 enableWorker: true,
-                lowLatencyMode: true
+                lowLatencyMode: true,
+                maxBufferLength: 0.5
             });
             hls.loadSource(url);
             hls.attachMedia(video);
+
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error('HLS error:', data);
+            });
+
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 video.play().catch(e => console.error('Play failed:', e));
                 rafId = requestAnimationFrame(drawFrame);
@@ -360,14 +411,27 @@ const EventManager = (() => {
 
         player.videoEl = video;
         player.rafId = () => rafId;
+        player.hls = hls;
+
         player.cancelDraw = () => {
             player.cancelled = true;
             cancelAnimationFrame(rafId);
+            if (hls) {
+                hls.stopLoad();
+                hls.detachMedia();
+                hls.destroy();
+            }
+            video.pause();
+            video.src = '';
+            document.body.removeChild(video);
         };
-        player.hls = hls;
     }
 
     function playLiveJsmpegInCanvas(wsUrl, canvas, player) {
+        if (player.livePlayer) {
+            player.cancelDraw();
+            player.livePlayer = null;
+        }
         const playerInstance = new JSMpeg.Player(wsUrl, {
             canvas: canvas,
             autoplay: true,
@@ -379,10 +443,18 @@ const EventManager = (() => {
         });
 
         player.cancelDraw = () => {
-            if (playerInstance.source && playerInstance.source.socket) {
-                playerInstance.source.socket.close();
+            try {
+                if (player.livePlayer === playerInstance) {
+                    if (playerInstance.source && playerInstance.source.socket) {
+                        console.log('Closing WebSocket connection');
+                        playerInstance.source.socket.close();
+                    }
+                    playerInstance.destroy();
+                    player.livePlayer = null;
+                }
+            } catch (e) {
+                console.warn("destroy error", e);
             }
-            playerInstance.destroy();
         };
 
         player.livePlayer = playerInstance;
@@ -423,19 +495,18 @@ const EventManager = (() => {
         };
     }
 
-    // MainCCTV 팝업 생성
-    function createMainCCTVPopup(mainCctv) {
-        const mainCctvTemplate = document.createElement('div');
-        mainCctvTemplate.className = 'main-cctv-container';
-        const canvasId = `cctv${mainCctv.id}`;
-        mainCctvTemplate.innerHTML = `
-            <div class="main-cctv-item" data-cctv-id="${mainCctv.id}">
+    function createCctvItem(cctv, index = 0, isMain = false) {
+        const canvasId = `cctv${cctv.id}`;
+        const width = isMain ? 800 : 320;
+        const height = isMain ? 450 : 180;
+        return `
+            <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
                 <div class="cctv-header">
-                    <span class="cctv-title">${mainCctv.cctvName || '메인 CCTV'}</span>
+                    <span class="cctv-title">${cctv.cctvName || (isMain ? '메인 CCTV' : `CCTV ${index + 1}`)}</span>
                     <button type="button" class="cctv-close">×</button>
                 </div>
                 <div class="cctv-content">
-                    <canvas id="cctv${mainCctv.id}" width="800" height="450"></canvas>
+                    <canvas id="${canvasId}" width="${width}" height="${height}"></canvas>
                     <div class="cctv-controls">
                         <button type="button" class="btn-play">▶</button>
                         <button type="button" class="btn-rotate">↻</button>
@@ -443,10 +514,19 @@ const EventManager = (() => {
                 </div>
             </div>
         `;
+    }
+
+    // MainCCTV 팝업 생성
+    async function createMainCCTVPopup(mainCctv) {
+        const mainCctvTemplate = document.createElement('div');
+        mainCctvTemplate.className = 'main-cctv-container';
+        mainCctvTemplate.innerHTML = createCctvItem(mainCctv, 0, true);
+
         document.body.appendChild(mainCctvTemplate);
 
-        // CCTV 스트리밍 시작
-        initializeCCTVStream(canvasId, mainCctv.code);
+        const canvasId = `cctv${mainCctv.id}`;
+        const cameraIp = mainCctv.property.cameraIp;
+        await playLiveStream(canvasId, cameraIp);
 
         mainCctvTemplate.querySelector('.cctv-close').addEventListener('click', (event) => {
             closeEventPopup(event);
@@ -455,45 +535,21 @@ const EventManager = (() => {
     }
 
     // SubCCTV 팝업 생성
-    function createSubCCTVPopup(subCctvs) {
+    async function createSubCCTVPopup(subCctvs) {
         const subCctvTemplate = document.createElement('div');
         subCctvTemplate.className = 'cctv-container';
 
-        // CCTV 아이템들을 동적으로 생성
-        const cctvItems = subCctvs.map((cctv, index) => {
-            const canvasId = `cctv${cctv.id}`;
-            return `
-            <div class="cctv-item" data-cctv-id="${cctv.id}">
-                <div class="cctv-header">
-                    <span class="cctv-title">${cctv.cctvName || `CCTV ${index + 1}`}</span>
-                    <button type="button" class="cctv-close">×</button>
-                </div>
-                <div class="cctv-content">
-                    <canvas id="cctv${cctv.id}" width="320" height="180"></canvas>
-                    <div class="cctv-controls">
-                        <button type="button" class="btn-play">▶</button>
-                        <button type="button" class="btn-rotate">↻</button>
-                    </div>
-                </div>
-            </div>
-            `;
-        }).join('');
-
-        subCctvTemplate.innerHTML = `
-        <div class="cctv-grid">
-            ${cctvItems}
-        </div>
-    `;
+        const cctvItems = subCctvs.map((cctv, idx) => createCctvItem(cctv, idx, false)).join('');
+        subCctvTemplate.innerHTML = `<div class="cctv-grid">${cctvItems}</div>`;
 
         document.body.appendChild(subCctvTemplate);
 
-        // 각 CCTV 스트리밍 시작
-        const players = new Map(); // CCTV ID와 player 인스턴스 매핑
-        subCctvs.forEach(cctv => {
-            const player = initializeCCTVStream(`cctv${cctv.id}`, cctv.code);
-            if (player) players.set(cctv.id, player);
+        // 각각의 CCTV에 대해 스트리밍 시작
+        subCctvs.forEach((cctv) => {
+            const canvasId = `cctv-${cctv.id}`;
+            const cameraIp = cctv.property.cameraIp;
+            playLiveStream(canvasId, cameraIp);
         });
-
 
         const closeButtons = subCctvTemplate.querySelectorAll('.cctv-close');
         closeButtons.forEach(button => {
@@ -869,7 +925,8 @@ const EventManager = (() => {
         initializeLatest24HoursList,
         initializeProcessChart,
         initializeDateChart,
-        initializeCCTVStream
+        playLiveStream,
+        playPlaybackStream,
     }
 })();
 

@@ -287,7 +287,7 @@
         })
     });
 
-    await PoiManager.getFilteredPoiList();
+    // await PoiManager.getFilteredPoiList();
     await PatrolManager.getPatrolList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.header__info .date');
@@ -539,7 +539,14 @@ const Init = (function () {
                             }
                         }
                         if (samePopupOpen) return;
-                        renderPoiInfo(poiInfo);
+                        if (poiInfo.group.toLowerCase() === 'cctv') {
+                            setTimeout(() => {
+                                renderPoiInfo(poiInfo);
+                            }, 100)
+                        } else {
+                            renderPoiInfo(poiInfo);
+                        }
+
 
                     });
                     Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
@@ -700,16 +707,41 @@ const Init = (function () {
                     <div class="cctv-content">
                         <input type="hidden" class="poi-id" value="${poiInfo.id}">
                         <canvas id="cctv-${poiInfo.id}" width="800" height="450"></canvas>
-<!--                        <video id="cctv-${poiInfo.id}" width="100%" height="100%"></video>-->
-<!--                        <div class="cctv-controls">-->
-<!--                            <button type="button" class="btn-play">▶</button>-->
-<!--                            <button type="button" class="btn-rotate">↻</button>-->
-<!--                        </div>-->
+<!--                        <video id="cctv-${poiInfo.id}" width="100%" height="100%"></video>-->                    
+                    </div>
+                     <div class="cctv-bottom">
+                        <div class="cctv-mode-switch">
+                            <label style="display:flex; align-items:center; gap:2px; cursor:pointer;">
+                                <input type="radio" name="cctv-mode-${poiInfo.id}" value="live" checked style="accent-color:#007bff;"> Live
+                            </label>
+                            <label style="display:flex; align-items:center; gap:2px; cursor:pointer;">
+                                <input type="radio" name="cctv-mode-${poiInfo.id}" value="playback" style="accent-color:#007bff;"> Playback
+                            </label>
+                        </div>                          
+                        <div class="cctv-controls">
+                            <button class="cctv-controls-btn play" type="button" data-btn-type="play">
+                                <span class="hide">play</span>
+                            </button>
+                            <button class="cctv-controls-btn pause" type="button" data-btn-type="pause">
+                                <span class="hide">pause</span>
+                            </button>
+                            <button class="cctv-controls-btn stop" type="button" data-btn-type="stop">
+                                <span class="hide">stop</span>
+                            </button>
+                        </div>
+                     </div>
+                    <div class="cctv-footer" style="display: none;">
+                        <div class="date-picker" >
+                            <input type="date">
+                        </div>
+                        <div class="time-picker">
+                            <input type="time">
+                        </div>
                     </div>
                 </div>`;
             const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
             popupInfo.style.position = 'fixed';
-            popupInfo.style.zIndex = '9999';
+            popupInfo.style.zIndex = '999';
             popupInfo.style.left = `${x}px`;
             popupInfo.style.top = `${y}px`;
 
@@ -726,14 +758,14 @@ const Init = (function () {
 
             activePopups.set(poiInfo.id, { dom: popupInfo });
             updatePosition();
+            await EventManager.playLiveStream(canvasId,poiInfo.property.cameraIp);
 
-            EventManager.initializeCCTVStream(canvasId, poiInfo.property.code, poiInfo.property.cameraIp);
 
             const closeBtn = popupInfo.querySelector('.cctv-close');
             closeBtn.addEventListener('click', () => {
                 // 팝업 제거
                 popupInfo.remove();
-                layerPopup.closePlayers();
+                layerPopup.closePlayer(canvasId);
             });
             return popupInfo;
         } else {
@@ -1464,6 +1496,127 @@ const Init = (function () {
             updatePosition();
         }
     }
+
+    document.addEventListener('change', async function (e) {
+        // CCTV 모드 라디오 버튼 변경 시
+        if (e.target.matches('input[name^="cctv-mode-"]')) {
+            const selectedValue = e.target.value;
+            const poiId = e.target.name.replace('cctv-mode-', '');
+            const poiInfo = Px.Poi.GetData(poiId);
+            const cameraIp = poiInfo.property.cameraIp;
+            const canvasId = `cctv-${poiId}`;
+            const player = window.livePlayers[canvasId];
+            const cctvContainer = document.querySelector('.main-cctv-item');
+            const controlButtons = cctvContainer.querySelectorAll('.cctv-controls-btn');
+
+            // 모드에 따른 처리
+            if (selectedValue === 'live') {
+                player.stopPlayback(); // playback 정지
+                player.isLive = true; // player live 상태
+                document.querySelector('.cctv-footer').style.display = 'none'; // 하단 playback 메뉴 비활성화
+
+                controlButtons.forEach(btn => {
+                    btn.disabled = true;
+                });
+
+                await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+
+            } else if (selectedValue === 'playback') {
+                player.cancelDraw && player.cancelDraw(); // live 정지
+                player.isLive = false; // player playback 상태
+                controlButtons.forEach(btn => {
+                    btn.disabled = false;
+                });
+
+                // 하단 활성화
+                document.querySelector('.cctv-footer').style.display = 'flex'; // 하단 playback 메뉴 활성화
+            }
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.cctv-controls-btn')) {
+            const button = e.target.closest('.cctv-controls-btn');
+            handlePlayButton(button);
+        }
+    });
+
+
+    async function handlePlayButton(button) {
+        console.log(button.getAttribute('data-btn-type'));
+
+        // 버튼이 속한 CCTV 팝업의 ID 찾기
+        const cctvContainer = button.closest('.main-cctv-item');
+        if (!cctvContainer) {
+            return;
+        }
+        const canvas = cctvContainer.querySelector('canvas');
+        const canvasId = canvas.id;
+        const player = window.livePlayers[canvasId];
+        const btnType = button.getAttribute('data-btn-type');
+
+        if (!player.cameraIp) {
+            const poiId = canvasId.slice(5);
+            const poiInfo = Px.Poi.GetData(poiId);
+            player.cameraIp = poiInfo.property.cameraIp;
+
+        }
+
+        switch (btnType) {
+            case 'play':
+                if(player.isPaused) {
+                    // 일시정지 상태에서 재생
+                    console.log("일시정지 상태에서 재생");
+                    player.resumePlayback();
+                }else {
+                    // 처음 재생
+                    console.log("처음 재생");
+                    const dateValue = document.querySelector('.cctv-footer input[type="date"]').value;
+                    const timeValue = document.querySelector('.cctv-footer input[type="time"]').value;
+
+                    if(!dateValue || !timeValue) {
+                        alertSwal("재생할 날짜와 시간을 선택해주세요.");
+                        return;
+                    }
+                    const startDate = new Date(`${dateValue}T${timeValue}`);
+                    // 임시로 30분 설정
+                    const endTime = {
+                        minutes:30
+                    }
+                    await EventManager.playPlaybackStream(canvasId, player.cameraIp, startDate, endTime);
+                }
+                player.isPaused = false;
+                break;
+            case 'pause':
+                player.isPaused = true; // 일시정지 상태로 변경
+                player.pausePlayback();
+                break;
+            case 'stop':
+                player.isPaused = false; // 일시정지 상태 해제
+                player.stopPlayback();
+                break;
+        }
+    }
+
+    function resetPlaybackState(canvasId) {
+        const player = window.livePlayers[canvasId];
+        if (player) {
+            player.isPaused = false;
+            player.stopPlayback();
+        }
+    }
+
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('.cctv-bottom input[type="date"], .cctv-bottom input[type="time"]')) {
+            const cctvContainer = e.target.closest('.main-cctv-item, .cctv-item');
+            if (!cctvContainer) return;
+            const canvas = cctvContainer.querySelector('canvas');
+            if (!canvas) return;
+            const canvasId = canvas.id;
+            resetPlaybackState(canvasId);
+        }
+    });
+
     function processUPSData(apiData) {
         const lineVoltageData = { input: {}, output: {} };  // 선간전압
         const phaseVoltageData = { input: {}, output: {} }; // 상간전압

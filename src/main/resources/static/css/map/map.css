@@ -3311,8 +3311,332 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 .event-state {
   height: calc(100% - 12.5rem);
 }
-
-.event-state {
-  height: calc(100%);
+.cctv-container {
+  padding: 10px;
 }
+
+.cctv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.cctv-item {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cctv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #333;
+  color: white;
+  border-radius: 4px 4px 0 0;
+}
+
+.cctv-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.cctv-content {
+  position: relative;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cctv-bottom {
+  height: 3rem;
+  display: flex;
+  background-color: #333;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+.cctv-mode-switch {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cctv-controls .play{
+  -webkit-mask-position: -95px -5px;
+  mask-position: -95px -5px;
+}
+
+.cctv-controls .pause{
+  -webkit-mask-position: -5px -5px;
+  mask-position: -5px -5px;
+}
+
+.cctv-controls .stop{
+  -webkit-mask-position: -45px -5px;
+  mask-position: -45px -5px;
+}
+
+.cctv-controls-btn {
+  width: 32px;
+  height: 32px;
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon_play.svg");
+  mask-image: url("/static/images/viewer/icon24/icon_play.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background-color: var(--color-grayscale03);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.cctv-controls-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+
+
+.cctv-controls button:hover {
+  background: rgba(0,0,0,0.7);
+}
+
+.main-cctv-container {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.main-cctv-item {
+  width: 450px;
+}
+
+.main-cctv-item .cctv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #333;
+  color: white;
+  border-radius: 4px 4px 0 0;
+}
+
+.main-cctv-item canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.main-cctv-item .cctv-controls {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.popup-warning {
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+.main-cctv-container {
+  display: block;
+  position: fixed;
+  z-index: 999;
+}
+
+.cctv-container {
+  display: block;
+  position: fixed;
+  z-index: 999;
+}
+
+.system-pop-header{
+  position: relative;
+}
+
+.system-pop-header-tab{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+}
+
+.system-pop-header-tab li{
+  height: 30px;
+}
+
+#parkingPop .button--solid-middle, #airPop .button--solid-middle {
+  flex: none;
+  width: 100px;
+}
+
+#parkingGuideContent .reflesh{
+  display: inline-block;
+  background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -180px -10px;
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+}
+
+.parking-status-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.parkingStatus {
+  font-size: 0.8rem;
+  color: white;
+  background: #dd0046;
+  display: inline-block;
+  padding: 6px 10px;
+  text-align: center;
+  line-height: 1.2;
+  border-radius: 3px;
+}
+
+#parkingCurrentCount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #d9dde3;
+}
+
+#parkingTotalCount {
+  font-size: 1rem;
+  color: #757680;
+}
+
+.card-list{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.air-card {
+  padding: 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #393c43;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  margin: 0 auto;
+}
+
+.air-card.on .air-card__header {
+  background: #1976d2;
+}
+
+.air-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: #222;
+}
+
+.air-card__status {
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+}
+
+.air-card__title {
+  flex: 1;
+  font-size: 0.8rem;
+  color: #fff;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.air-card__link {
+  color: #fff;
+  text-decoration: none;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.air-card__body {
+  display: flex;
+  padding: 0.3rem;
+  gap: 1rem;
+  height: 80px;
+}
+
+.air-card__temp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 90px;
+}
+
+.air-card__temp-info {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.air-card__temp-label {
+  font-size: 0.8rem;
+  color: #bdbdbd;
+}
+
+.air-card__temp-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0.6rem 0;
+}
+
+.air-card__temp-set {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.air-card__temp-set span {
+  color: #bdbdbd;
+}
+
+.air-card__functions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-left: 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.air-card__functions li {
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #bdbdbd;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  padding: 0;
+}
+
+
+
 /*# sourceMappingURL=map.css.map */

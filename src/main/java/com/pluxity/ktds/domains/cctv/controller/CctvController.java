@@ -40,6 +40,10 @@ public class CctvController {
     private String lgLivePort;
     @Value("${cctv.LG-playback-port}")
     private String lgPlaybackPort;
+    @Value("${cctv.username}")
+    private String username;
+    @Value("${cctv.password}")
+    private String password;
 
     private final CctvService cctvService;
     private final PoiService poiService;
@@ -65,6 +69,8 @@ public class CctvController {
         config.put("lgServerPort", lgServerPort);
         config.put("lgLivePort", lgLivePort);
         config.put("lgPlaybackPort", lgPlaybackPort);
+        config.put("username", username);
+        config.put("password", password);
         return DataResponseBody.of(config);
     }
 

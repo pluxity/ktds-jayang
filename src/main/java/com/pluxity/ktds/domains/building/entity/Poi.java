@@ -3,20 +3,18 @@ package com.pluxity.ktds.domains.building.entity;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
-import com.pluxity.ktds.domains.cctv.entity.Cctv;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
-import com.pluxity.ktds.domains.event.entity.Alarm;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -70,10 +68,9 @@ public class Poi {
     @Column(name = "code", nullable = false)
     private String code;
 
-    @ElementCollection
-    @CollectionTable(name = "poi_tags", joinColumns = @JoinColumn(name = "poi_id"))
-    @Column(name = "tag_names")
-    private List<String> tagNames = new ArrayList<>();
+    @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PoiTag> poiTags = new ArrayList<>();
+
     @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PoiCctv> poiCctvs = new ArrayList<>();
 
@@ -90,26 +87,21 @@ public class Poi {
     private String cameraId;
 
     @Builder
-    public Poi(String name, String code, List<String> tagNames, Boolean isLight, String lightGroup, String cameraIp, String cameraId) {
+    public Poi(String name, String code, Boolean isLight, String lightGroup, String cameraIp, String cameraId) {
         this.name = name;
         this.code = code;
-        this.tagNames = tagNames != null ? new ArrayList<>(tagNames) : new ArrayList<>();
         this.isLight = isLight;
         this.lightGroup = lightGroup;
         this.cameraIp = cameraIp;
         this.cameraId = cameraId;
     }
 
-    public void update(String name, String code, List<String> tagNames, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup, String cameraIp, String cameraId) {
+    public void update(String name, String code, List<PoiCctv> poiCctvs, Boolean isLight, String lightGroup, String cameraIp, String cameraId) {
         if (StringUtils.hasText(name)) {
             this.name = name;
         }
         if (StringUtils.hasText(code)) {
             this.code = code;
-        }
-        if (tagNames != null) {
-            this.tagNames.clear();
-            this.tagNames.addAll(tagNames);
         }
         if (poiCctvs != null) {
             this.poiCctvs.clear();
@@ -125,12 +117,6 @@ public class Poi {
             this.cameraIp = cameraIp;
         }
         this.cameraId = cameraId;
-    }
-
-    public void changeTags(List<String> tagNames) {
-        this.tagNames.clear();
-        this.tagNames.addAll(tagNames);
-        this.tagNames = new ArrayList<>(tagNames);
     }
 
     public void changeBuilding(Building building) {
@@ -174,6 +160,28 @@ public class Poi {
         this.cameraId = cameraId;
     }
 
+    public void updatePoiTags(List<String> newTagNames) {
+        if(newTagNames == null) {
+            this.poiTags.clear();
+            return;
+        }
+
+        List<String> existingTagNames = this.poiTags.stream()
+                .map(PoiTag::getTagName)
+                .toList();
+
+        // 기존에 있지만 새로운 리스트에 없는 태그 제거
+        this.poiTags.removeIf(tag -> !newTagNames.contains(tag.getTagName()));
+
+        // 새로운 리스트에 있지만 기존에 없는 태그들 추가
+        for (String tagName : newTagNames) {
+            if (!existingTagNames.contains(tagName)) {
+                PoiTag poiTag = new PoiTag(tagName);
+                poiTag.changePoi(this);  // 연관관계 설정
+            }
+        }
+    }
+
     public PoiDetailResponseDTO toDetailResponseDTO() {
         return PoiDetailResponseDTO.builder()
                 .id(this.getId())
@@ -202,6 +210,12 @@ public class Poi {
                 .cameraIp(this.getCameraIp())
                 .cameraId(this.getCameraId())
                 .build();
+    }
+
+    public List<String> getTagNames() {
+        return poiTags.stream()
+                .map(PoiTag::getTagName)
+                .collect(Collectors.toList());
     }
 
     public PoiResponseDTO toResponseDTO() {

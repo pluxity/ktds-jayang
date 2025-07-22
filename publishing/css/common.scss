@@ -250,7 +250,7 @@ $base-img-path:"/static/images/viewer/";
 
 /* GNB */
 .header{
-    position:absolute; top:0; left:0; z-index:9999; 
+    position:fixed; top:0; left:0; z-index:997;
     display:flex; align-items:center; justify-content:space-between;
     padding:0 23px 0 30px; background-color:rgba(52, 52, 60, 0.50); box-sizing:border-box; 
     -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);

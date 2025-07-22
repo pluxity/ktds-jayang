@@ -5,6 +5,7 @@
 /* Toast */
 /* 경고 팝업 */
 /* 기본 팝업 */
+/* 팝업 배경 덮기 */
 /* 이벤트 팝업 - 공지사항/SOP */
 /* POi Pin 정보 팝업 */
 /* DatePicker/TimePicker */
@@ -20,6 +21,7 @@
 /* selectbox */
 /* POI Menu */
 /* ToolBox */
+/* PTZ Viewer */
 /* 이벤트 현황 */
 .button {
   display: -webkit-box;
@@ -219,7 +221,8 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 
 .popup-basic {
   display: inline-block;
-  position: absolute;
+  position: fixed;
+  z-index: 998;
   background-color: var(--color-black);
   border-radius: 10px;
   -webkit-box-sizing: border-box;
@@ -487,7 +490,17 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 }
 
 .search-result {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
   padding: 20px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  height: calc(100% - 52px);
 }
 
 .search-result__filter {
@@ -499,9 +512,8 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 }
 
 .search-result__filter .button {
-  -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  min-width: 2.8125rem;
+  width: 5rem;
   height: 100%;
 }
 
@@ -602,7 +614,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  margin-top: 29px;
+  margin-top: auto;
 }
 
 .search-result__footer .download {
@@ -682,13 +694,14 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  height: 100%;
 }
 
 .search-result__space .section {
   padding: 18px;
 }
 
-.search-result__space .section--select {
+.search-result__space .section--info {
   border-right: 1px solid var(--color-grayscale-dark);
   width: 15rem;
 }
@@ -697,6 +710,13 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
 }
 
 .search-result__space .section__head {

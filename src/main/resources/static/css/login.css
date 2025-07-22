@@ -830,8 +830,8 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 .patrol-info__ctrl button {
   width: 24px;
   height: 24px;
-  -webkit-mask-image: url("/dashboard/img/icon24/icon_play.svg");
-  mask-image: url("/dashboard/img/icon24/icon_play.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon24/icon_play.svg");
+  mask-image: url("/static/images/viewer/icon24/icon_play.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   background-color: var(--color-grayscale03);

@@ -13,6 +13,7 @@
 @include sop_accordion;
 
 // popup
+@include popup_dimmed;
 @include popup_warning;
 @include popup_event;
 @include popup_basic;
@@ -41,7 +42,7 @@ $base-img-path:"/static/images/viewer/";
 
 /* Main */
 .system-tap{
-    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:999;
     ul{
         display:flex; align-items:center; justify-content:center;
         border:1px solid var(--color-black); border-radius:40px; background:linear-gradient(180deg, rgba(116, 122, 165, 0.60) 0%, rgba(0, 0, 0, 0.00) 100%), #25262E;
@@ -257,6 +258,66 @@ $base-img-path:"/static/images/viewer/";
         }
     }
 }
+
+.parking-area{
+    &__head{
+        margin-bottom:10px;
+        color:var(--color-grayscale-light); font-size:1.125rem; font-weight:700;
+    }
+    &__summary{
+        display:flex; align-items:center;
+        margin-bottom:10px;
+        .title{
+            color:var(--color-grayscale-light); font-size:1.125rem; 
+            strong{font-size:1.5rem;}
+        }
+        .refresh{
+            display:inline-block;
+            margin-left:auto; background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -180px -10px; 
+            width:14px; height:14px; 
+            cursor:pointer;
+        }
+    }
+    &__list{
+        margin-right:-10px; padding-right:4px; 
+        height:36.875rem; min-height:36.875rem; overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable;
+
+        &::-webkit-scrollbar {width:6px;}
+        &::-webkit-scrollbar-thumb {
+            background-color:var(--color-grayscale-dark); 
+            border-radius:3px; 
+        }
+        &::-webkit-scrollbar-track {
+            background-color:var(--color-black-key); ;
+            border-radius:3px;
+        }
+        .item{
+            display:flex; align-items:center; grid-gap:7px;
+            padding:10px; background-color:var(--color-grayscale-dark); border-radius:5px; box-sizing:border-box;
+            ~ .item{margin-top:15px;}
+            &__level{
+                display:flex; align-items:center; justify-content:center;
+                background-color:var(--color-grayscale03); border-radius:100%;
+                width:2.5rem; height:2.5rem;
+                color:var(--color-grayscale01); font-size:1rem;
+            }
+            &__count{
+                color:var(--color-grayscale02); font-size:1.25rem;
+                strong{color:#fff;}
+            }
+            &__link{
+                display:inline-block;
+                margin-left:auto; width:14px; height:14px;
+                -webkit-mask-image:url('#{$base-img-path}icon14/icon14.svg'); mask-image:url('#{$base-img-path}icon14/icon14.svg'); 
+                -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+                -webkit-mask-position:-10px -10px; mask-position:-10px -10px;
+                background-color:var(--color-grayscale02);
+                cursor:pointer;
+            }
+        }
+    }
+}
+
 
 // 이벤트 현황
 .event-state{height:calc(100% - 12.5rem);}

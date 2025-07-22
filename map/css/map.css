@@ -5,6 +5,7 @@
 /* Toast */
 /* 경고 팝업 */
 /* 기본 팝업 */
+/* 팝업 배경 덮기 */
 /* 이벤트 팝업 - 공지사항/SOP */
 /* POi Pin 정보 팝업 */
 /* DatePicker/TimePicker */
@@ -83,6 +84,7 @@
 /* selectbox */
 /* POI Menu */
 /* ToolBox */
+/* PTZ Viewer */
 /* 이벤트 현황 */
 .button {
   display: -webkit-box;
@@ -769,6 +771,16 @@
   margin-top: 5px;
 }
 
+.popup-basic__dimmed {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
 .popup-warning {
   position: absolute;
   background-color: var(--color-black);
@@ -1058,7 +1070,8 @@
 
 .popup-basic {
   display: inline-block;
-  position: absolute;
+  position: fixed;
+  z-index: 998;
   background-color: var(--color-black);
   border-radius: 10px;
   -webkit-box-sizing: border-box;
@@ -1326,7 +1339,17 @@
 }
 
 .search-result {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
   padding: 20px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  height: calc(100% - 52px);
 }
 
 .search-result__filter {
@@ -1338,9 +1361,8 @@
 }
 
 .search-result__filter .button {
-  -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  min-width: 2.8125rem;
+  width: 5rem;
   height: 100%;
 }
 
@@ -1441,7 +1463,7 @@
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  margin-top: 29px;
+  margin-top: auto;
 }
 
 .search-result__footer .download {
@@ -1521,13 +1543,14 @@
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  height: 100%;
 }
 
 .search-result__space .section {
   padding: 18px;
 }
 
-.search-result__space .section--select {
+.search-result__space .section--info {
   border-right: 1px solid var(--color-grayscale-dark);
   width: 15rem;
 }
@@ -1536,6 +1559,13 @@
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
 }
 
 .search-result__space .section__head {
@@ -3295,11 +3325,12 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 
 /* Main */
 .system-tap {
-  position: absolute;
+  position: fixed;
   bottom: 20px;
   left: 50%;
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
+  z-index: 999;
 }
 
 .system-tap ul {
@@ -3748,6 +3779,126 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 .left-info--escalator .detail__state--off {
   -webkit-filter: grayscale(1);
           filter: grayscale(1);
+}
+
+.parking-area__head {
+  margin-bottom: 10px;
+  color: var(--color-grayscale-light);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.parking-area__summary {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-bottom: 10px;
+}
+
+.parking-area__summary .title {
+  color: var(--color-grayscale-light);
+  font-size: 1.125rem;
+}
+
+.parking-area__summary .title strong {
+  font-size: 1.5rem;
+}
+
+.parking-area__summary .refresh {
+  display: inline-block;
+  margin-left: auto;
+  background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -180px -10px;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.parking-area__list {
+  margin-right: -10px;
+  padding-right: 4px;
+  height: 36.875rem;
+  min-height: 36.875rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+.parking-area__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.parking-area__list::-webkit-scrollbar-thumb {
+  background-color: var(--color-grayscale-dark);
+  border-radius: 3px;
+}
+
+.parking-area__list::-webkit-scrollbar-track {
+  background-color: var(--color-black-key);
+  border-radius: 3px;
+}
+
+.parking-area__list .item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  grid-gap: 7px;
+  padding: 10px;
+  background-color: var(--color-grayscale-dark);
+  border-radius: 5px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.parking-area__list .item ~ .item {
+  margin-top: 15px;
+}
+
+.parking-area__list .item__level {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background-color: var(--color-grayscale03);
+  border-radius: 100%;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-grayscale01);
+  font-size: 1rem;
+}
+
+.parking-area__list .item__count {
+  color: var(--color-grayscale02);
+  font-size: 1.25rem;
+}
+
+.parking-area__list .item__count strong {
+  color: #fff;
+}
+
+.parking-area__list .item__link {
+  display: inline-block;
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: -10px -10px;
+  mask-position: -10px -10px;
+  background-color: var(--color-grayscale02);
+  cursor: pointer;
 }
 
 .event-state {

@@ -189,11 +189,11 @@ $base-img-path:"/static/images/viewer/";
 /* 기본 팝업 */
 @mixin popup_basic{
     .popup-basic{
-        display:inline-block; position:absolute;
+        display:inline-block; position:fixed; z-index:998;
         background-color:var(--color-black); border-radius:10px; box-sizing:border-box;
         border-top:2px solid var(--color-mint); box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
         width:25rem; height:38.75rem;
-        
+
         // popup 사이즈 클래스 
         &--small{
             padding:15px; 
@@ -291,11 +291,13 @@ $base-img-path:"/static/images/viewer/";
         // 검색결과 : 장비 목록 영역 , 가상 순찰 , 이벤트 전체 현황, 설비, 주차, 충전소   
         @at-root{
             .search-result{
-                padding:20px; 
+                display:flex; flex-direction:column;
+                padding:20px; box-sizing:border-box;
+                height:calc(100% - 52px);
                 &__filter{
                     display:flex; grid-gap:5px;
                     height:30px;
-                    .button{flex:1; height:100%;}
+                    .button{ min-width:2.8125rem; width:5rem; height:100%;}
                 }
                 &__contents{
                     margin-top:18px;
@@ -345,7 +347,7 @@ $base-img-path:"/static/images/viewer/";
                 }
                 &__footer{
                     position:relative; display:flex; align-items:center; justify-content:center;
-                    margin-top:29px;
+                    margin-top:auto;
                     .download{
                         position:absolute; right:0;
                         padding:0 10px; background-color:var(--color-grayscale-dark); border-radius:7px;
@@ -381,14 +383,15 @@ $base-img-path:"/static/images/viewer/";
                 }
                 &__space{
                     display:flex;
+                    height:100%;
                     .section{
                         padding:18px;
                         
-                        &--select{
+                        &--info{
                             border-right:1px solid var(--color-grayscale-dark);
                             width:15rem;
                         }
-                        &--contents{flex:1;}
+                        &--contents{flex:1; display:flex; flex-direction:column;}
                         &__head{
                             display:flex; align-items:center;
                             margin-bottom:8px;
@@ -402,7 +405,7 @@ $base-img-path:"/static/images/viewer/";
                     }
                     .accordion{height:578px; max-height:578px;}
                 }
-                &--space{padding:0;}
+                &--space{padding:0;} 
             }
         }
 
@@ -577,6 +580,13 @@ $base-img-path:"/static/images/viewer/";
         }             
     }
 }       
+
+/* 팝업 배경 덮기 */
+@mixin popup_dimmed{
+    .popup-basic__dimmed{
+        position:fixed; left:0; top:0; width:100vw; height:100vh; background-color:rgba(0, 0, 0, 0.5); z-index:998;
+    }
+}
 
 /* 이벤트 팝업 - 공지사항/SOP */
 @mixin popup_event{

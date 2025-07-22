@@ -729,6 +729,16 @@ body{
   margin-top: 5px;
 }
 
+.popup-dimmed {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
 .popup-warning {
   background-color: var(--color-black);
   border: 2px solid var(--color-danger);
@@ -943,10 +953,14 @@ body{
 
 .popup-basic {
   display: inline-block;
+  position: fixed;
+  z-index: 998;
   background-color: var(--color-black);
   border-radius: 10px;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   border-top: 2px solid var(--color-mint);
+  -webkit-box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
   box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
   width: 25rem;
   height: 38.75rem;
@@ -1185,7 +1199,17 @@ body{
 }
 
 .search-result {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
   padding: 20px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  height: calc(100% - 52px);
 }
 .search-result__filter {
   display: flex;
@@ -1193,7 +1217,8 @@ body{
   height: 30px;
 }
 .search-result__filter .button {
-  flex: 1;
+  min-width: 2.8125rem;
+  width: 5rem;
   height: 100%;
 }
 .search-result__contents {
@@ -1267,10 +1292,16 @@ body{
 }
 .search-result__footer {
   position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
   align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
   justify-content: center;
-  margin-top: 29px;
+  margin-top: auto;
 }
 .search-result__footer .download {
   position: absolute;
@@ -1331,17 +1362,29 @@ body{
   cursor: pointer;
 }
 .search-result__space {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  height: 100%;
 }
 .search-result__space .section {
   padding: 18px;
 }
-.search-result__space .section--select {
+.search-result__space .section--info {
   border-right: 1px solid var(--color-grayscale-dark);
   width: 15rem;
 }
 .search-result__space .section--contents {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
   flex: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 .search-result__space .section__head {
   display: flex;

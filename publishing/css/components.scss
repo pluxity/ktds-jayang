@@ -583,7 +583,7 @@ $base-img-path:"/static/images/viewer/";
 
 /* 팝업 배경 덮기 */
 @mixin popup_dimmed{
-    .popup-basic__dimmed{
+    .popup-dimmed{
         position:fixed; left:0; top:0; width:100vw; height:100vh; background-color:rgba(0, 0, 0, 0.5); z-index:998;
     }
 }

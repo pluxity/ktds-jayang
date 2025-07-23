@@ -255,43 +255,8 @@
                 //     firstContent: guideContent,
                 //     secondContent: monitorContent
                 // });
-                api.get('/parking/search', {
-                    params: {
-                        // startTime: '2025-06-02 03:00:00.000',
-                        // endTime: '2025-06-02 10:00:00.000',
-                        // deviceId: 'DEV001'
-                    }
-                }).then(res => {
-                    const result = res.data;
-
-                    // 이거 layerPopup.setParking에서 해야함
-                    const tbody = document.querySelector('#parkingList tbody');
-                    tbody.innerHTML = '';
-                    document.getElementById('parkingTotalCnt').textContent = result?.length;
-                    result?.forEach((item, index) => {
-                        const tr = document.createElement('tr');
-                        const formatDateTime = (dt) => {
-                            if (!dt) return '';
-                            const date = new Date(dt);
-                            return date.toLocaleDateString('ko-KR', {hour12: false});
-                        };
-                        tr.innerHTML = `
-                          <td>${index + 1}</td>
-                          <td>${item.deviceId || ''}</td>
-                          <td>${item.deviceName || ''}</td>
-                          <td>${item.inoutType === 0 ? '입차' : '출차'}</td>
-                          <td>${item.gateDatetime}</td>
-                          <td>${item.carNo || ''}</td>
-                          <td>${item.inoutCarId || ''}</td>
-                          <td>${item.parkingFee ?? 0}</td>
-                          <td>${item.regularType === 'T' ? '정기' : '일반'}</td>
-                        `;
-
-                        tbody.appendChild(tr);
-                    })
-                }).catch((err) => {
-                    console.error(err);
-                })
+                layerPopup.resetParkingFilterUI();
+                layerPopup.setParking();
             },
             airTab: () => {
                 layerPopup.setAirTab();

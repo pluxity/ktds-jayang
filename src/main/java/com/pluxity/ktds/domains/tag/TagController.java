@@ -31,6 +31,7 @@ public class TagController {
     private final ObjectMapper objectMapper;
 
     private final TagService tagService;
+
     @GetMapping("/elevator")
     public ResponseEntity<Map<Long, TagResponseDTO>> getElevatorTags(
             @RequestParam(value = "buildingId", required = false) Long buildingId,
@@ -47,6 +48,13 @@ public class TagController {
             @RequestParam("type") String type
     ) throws JsonProcessingException {
         Map<Long, TagResponseDTO> poiTagResponseMap = tagService.processEsclTagDataByPoi(type);
+
+        return ResponseEntity.ok(poiTagResponseMap);
+    }
+
+    @GetMapping("/parking")
+    public ResponseEntity<TagResponseDTO> getParkingTags() {
+        TagResponseDTO poiTagResponseMap = tagService.processParkingTags();
 
         return ResponseEntity.ok(poiTagResponseMap);
     }

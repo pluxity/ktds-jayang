@@ -1913,6 +1913,410 @@ const layerPopup = (function () {
 
     const elevatorPopup = document.getElementById('elevatorPop');
 
+    // 주차 popup start
+    let parkingResult = [];
+    let parkCurrentPage = 1;
+    const PARK_PAGE_SIZE = 15;
+
+    function renderParkingTable() {
+        const tbody = document.querySelector('#parkingContentList tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        const start = (parkCurrentPage - 1) * PARK_PAGE_SIZE;
+        const slice = parkingResult.slice(start, start + PARK_PAGE_SIZE);
+
+        const formatDateTime = (dt) => {
+            if (!dt) return '';
+            return new Date(dt).toLocaleString('ko-KR', { hour12: false });
+        };
+
+        slice.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${start + idx + 1}</td>
+              <td>${item.deviceId || ''}</td>
+              <td>${item.deviceName || ''}</td>
+              <td>${item.inoutType === 0 ? '입구' : '출구'}</td>
+              <td>${item.gateDatetime}</td>
+              <td>${item.carNo || ''}</td>
+              <td>${item.inoutCarId || ''}</td>
+              <td>${item.parkingFee ?? 0}</td>
+              <td>${item.regularType === 'R' ? '정기권' : '일반권'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderParkingPaging() {
+        const pagingWrap = document.querySelector('#parkingPaging');
+        if (!pagingWrap) return;
+
+        const numEl = pagingWrap.querySelector('.number');
+        const leftBtn = pagingWrap.querySelector('button.left');
+        const rightBtn= pagingWrap.querySelector('button.right');
+        if (!numEl) return;
+
+        const totalPages = Math.ceil(parkingResult.length / PARK_PAGE_SIZE);
+        numEl.innerHTML = '';
+
+        for (let p = 1; p <= totalPages; p++) {
+            const span = document.createElement('span');
+            span.textContent = p;
+            if (p === parkCurrentPage) span.classList.add('active');
+            numEl.appendChild(span);
+        }
+
+        leftBtn  && (leftBtn.disabled  = parkCurrentPage === 1);
+        rightBtn && (rightBtn.disabled = parkCurrentPage === totalPages);
+    }
+
+    let pagingBound = false;
+    function bindPagingEvents() {
+        if (pagingBound) return;
+        pagingBound = true;
+
+        const pagingWrap = document.querySelector('#parkingPaging');
+        if (!pagingWrap) return;
+
+        pagingWrap.addEventListener('click', (e) => {
+            const left = e.target.closest('button.left');
+            const right = e.target.closest('button.right');
+            const num = e.target.closest('.number > span');
+
+            const totalPages = Math.ceil(parkingResult.length / PARK_PAGE_SIZE);
+
+            if (left && parkCurrentPage > 1) {
+                parkCurrentPage--;
+            } else if (right && parkCurrentPage < totalPages) {
+                parkCurrentPage++;
+            } else if (num) {
+                const p = Number(num.textContent);
+                if (!isNaN(p)) parkCurrentPage = p;
+            } else {
+                return;
+            }
+
+            renderParkingTable();
+            renderParkingPaging();
+        });
+    }
+
+    const uniq = arr => [...new Set(arr.filter(v => v != null && v !== ''))];
+
+    function populateUl(ul, list) {
+        if (!ul) return;
+        ul.innerHTML = '';
+        // "전체"
+        const liAll = document.createElement('li');
+        liAll.textContent = '전체';
+        liAll.dataset.value = '';
+        ul.appendChild(liAll);
+
+        list.forEach(v => {
+            const li = document.createElement('li');
+            li.textContent = v.label;
+            li.dataset.value = v.value;
+            ul.appendChild(li);
+        });
+    }
+
+    function fillSelectOptions(data) {
+        const deviceIdUl   = document.querySelector('#deviceIdSelect .select-box__content ul');
+        const inoutTypeUl  = document.querySelector('#inoutTypeSelect .select-box__content ul');
+        const inoutCarIdUl = document.querySelector('#inoutCarIdSelect .select-box__content ul');
+        const regularTypeUl= document.querySelector('#regularTypeSelect .select-box__content ul');
+        const carNoUl      = document.querySelector('#carNoSelect .select-box__content ul');
+
+        const deviceIds = uniq(data.map(v => v.deviceId));
+        const carIds = uniq(data.map(v => v.inoutCarId));
+        const carNos = uniq(data.map(v => v.carNo));
+
+        populateUl(deviceIdUl, deviceIds.map(v => ({ label: v, value: v })));
+        populateUl(inoutTypeUl, [
+            { label: '입구', value: '0' },
+            { label: '출구', value: '1' }
+        ]);
+        populateUl(inoutCarIdUl, carIds.map(v => ({ label: v, value: v })));
+        populateUl(regularTypeUl, [
+            { label: '정기권', value: 'R' },
+            { label: '일반권', value: 'T' }
+        ]);
+        populateUl(carNoUl, carNos.map(v => ({ label: v, value: v })));
+    }
+
+    let optionsFilled = false;
+
+    function resetParkingFilterUI() {
+
+        const startInput = document.getElementById('parkStartDate');
+        const endInput   = document.getElementById('parkEndDate');
+
+        if (startInput) startInput.value = '';
+        if (endInput)   endInput.value   = '';
+
+        ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#carNoSelect']
+            .forEach(id => {
+                const btn = document.querySelector(`${id} .select-box__btn`);
+                if (btn) {
+                    btn.textContent = '전체';
+                    btn.dataset.value = '';
+                }
+            });
+
+        const deviceName = document.getElementById('deviceName');
+        if (deviceName) deviceName.value = '';
+    }
+
+
+    const getParkingTags = () => {
+        return api.get('/api/tags/parking').then(res => res.data?.TAGs ?? []);
+    }
+    const getParkingSearch = (params = {}) => {
+        return api.get('/parking/search', { params }).then(res => Array.isArray(res.data) ? res.data : []);
+    }
+
+    function renderTagSummaryAndList(parkingTagValue) {
+        const grouped = parkingTagValue.reduce((acc, { tagName, ...rest }) => {
+            const parts = tagName.split('-');
+            const key = parts[1];
+            if (!acc[key]) acc[key] = [];
+            acc[key].push({ tagName, ...rest });
+            return acc;
+        }, {});
+
+        const listEl = document.querySelector('#parkingInfo .parking-area__list');
+        listEl.innerHTML = '';
+        let summaryEl = null;
+
+        Object.entries(grouped).forEach(([key, items]) => {
+            const totalObj = items.find(i => i.tagName.endsWith('Total'));
+            const parkingObj = items.find(i => i.tagName.endsWith('Parking'));
+            const total = totalObj   ? Number(totalObj.currentValue)   : 0;
+            const parking = parkingObj ? Number(parkingObj.currentValue) : 0;
+            const label = key === 'null' ? 'Total' : `${key}`;
+
+            const div = document.createElement('div');
+            if (label === 'Total') {
+                div.className = 'parking-area__summary';
+                div.innerHTML = `
+                    <div class="title"><strong>${parking}</strong>/${total}</div>
+                    <button id="parkSummaryRefresh" type="button" class="refresh"><span class="hide">새로고침</span></button>
+                  `;
+                summaryEl = div;
+            } else {
+                div.className = 'item';
+                div.innerHTML = `
+                    <span class="item__level">${label}</span>
+                    <div class="item__count"><strong>${parking}</strong>/${total}</div>
+                    <button id="parkSummaryRefresh" type="button" class="item__link"><span class="hide">자세히보기</span></button>
+                  `;
+                listEl.appendChild(div);
+            }
+        });
+
+        if (summaryEl) {
+            listEl.prepend(summaryEl);
+        }
+        bindParkSummaryRefresh();
+    }
+
+    function renderResultHeader(result) {
+        const totalCnt = result.length.toLocaleString();
+        const titleEl = document.getElementById('parkingTotalCnt');
+        if (!titleEl) return;
+
+        const btn = titleEl.querySelector('button');
+        titleEl.innerHTML = `총 ${totalCnt}`;
+        if (btn) titleEl.appendChild(btn);
+    }
+
+    function renderResultTableAndPaging(result) {
+        parkingResult = result;
+        parkCurrentPage = 1;
+
+        const tbody = document.querySelector('#parkingContentList tbody');
+        if (tbody) tbody.innerHTML = '';
+
+        bindPagingEvents();
+        renderParkingPaging();
+        renderParkingTable();
+    }
+
+    const setParking = (searchParams = {}) => {
+        Promise.all([
+            getParkingTags(),
+            getParkingSearch(searchParams)
+        ]).then(([parkingTagValue, result]) => {
+
+            renderTagSummaryAndList(parkingTagValue);
+
+            if (!optionsFilled) {
+                fillSelectOptions(result);
+                optionsFilled = true;
+            }
+
+            renderResultHeader(result);
+            renderResultTableAndPaging(result);
+
+        }).catch(err => {
+            console.error('setParking error:', err);
+        });
+    }
+
+    function buildParams() {
+        const param = {};
+        const start = document.getElementById('parkStartDate')?.value || '';
+        const end   = document.getElementById('parkEndDate')?.value || '';
+
+        if (start && end && new Date(start) > new Date(end)) {
+            alertSwal('종료일이 시작일보다 빠릅니다.')
+            return null;
+        }
+
+        if (start) {
+            param.startTime = `${start} 00:00:00.000`;
+        }
+        if (end){
+            param.endTime = `${end} 23:59:59.999`;
+        }
+
+        const getVal = sel => document.querySelector(`${sel} .select-box__btn`)?.dataset.value ?? '';
+
+        const deviceId = getVal('#deviceIdSelect');
+        const inoutType = getVal('#inoutTypeSelect');
+        const exitId = getVal('#inoutCarIdSelect');
+        const regularType = getVal('#regularTypeSelect');
+        const carNo = getVal('#carNoSelect');
+
+        const deviceName  = document.getElementById('deviceName')?.value.trim() ?? '';
+
+        const setIf = (k, v) => { if (v !== '' && v != null) param[k] = v; };
+
+        setIf('deviceId', deviceId);
+        setIf('inoutType', inoutType);
+        setIf('exitId', exitId);
+        setIf('regularType', regularType);
+        setIf('carNo', carNo);
+        setIf('deviceName', deviceName);
+
+        return param;
+    }
+
+    document.getElementById('parkSearchBtn').addEventListener('click', async () => {
+        const params = buildParams();
+
+        try {
+            const result = await getParkingSearch(params);
+            renderResultHeader(result);
+            renderResultTableAndPaging(result);
+        } catch (e) {
+            console.error('parkSearchBtn click error:', e);
+        }
+    });
+
+    ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#carNoSelect']
+        .forEach(id => {
+            const box = document.querySelector(id);
+            if (box && !box.dataset.bound) {
+                initSelectBox(box);
+                box.dataset.bound = '1';
+            }
+        });
+
+    document.getElementById('parkRefresh').addEventListener('click', async (event) => {
+        try {
+            resetParkingFilterUI();
+            const result = await getParkingSearch({});
+            renderResultHeader(result);
+            renderResultTableAndPaging(result);
+        } catch (err) {
+            console.error('parkRefresh error:', err);
+        }
+    })
+
+    document.getElementById('parkSummaryRefresh').addEventListener('click', async (e) => {
+        try {
+            const parkingTagValue = await getParkingTags();
+            renderTagSummaryAndList(parkingTagValue);
+        } catch (err) {
+            console.error('tags refresh error:', err);
+        }
+    })
+
+    function bindParkSummaryRefresh() {
+        const btn = document.getElementById('parkSummaryRefresh');
+        if (!btn) return;
+        btn.onclick = null;
+        btn.addEventListener('click', async () => {
+            try {
+                const parkingTagValue = await getParkingTags();
+                renderTagSummaryAndList(parkingTagValue);
+            } catch (err) {
+                console.error('tags refresh error:', err);
+            }
+        });
+    }
+
+    function initSelectBox(box) {
+        const btn = box.querySelector('.select-box__btn');
+        const content = box.querySelector('.select-box__content');
+        if (!btn || !content) return;
+
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('select-box__btn--active');
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+
+        content.addEventListener('click', e => {
+            const li = e.target.closest('li');
+            if (!li) return;
+
+            btn.textContent   = li.textContent;
+            btn.dataset.value = li.dataset.value ?? '';
+            btn.classList.remove('select-box__btn--active');
+            content.style.display = 'none';
+        });
+    }
+
+    function downloadParkingExcel() {
+        if (!Array.isArray(parkingResult) || parkingResult.length === 0) return;
+
+        const header = [
+            'No', '입차장비 ID', '입차 장비명', '입출구',
+            '입출차 시각', '차량 번호', '출차 ID', '주차 요금', '구분'
+        ];
+
+        const rows = parkingResult.map((item, idx) => ([
+            idx + 1,
+            item.deviceId || '',
+            item.deviceName || '',
+            (item.inoutType === 0 || item.inoutType === '0') ? '입구' : '출구',
+            item.gateDatetime || '',
+            item.carNo || '',
+            item.inoutCarId || '',
+            item.parkingFee ?? 0,
+            item.regularType === 'R' ? '정기권' : '일반권'
+        ]));
+
+        const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'parking');
+
+        const startVal = document.getElementById('parkStartDate')?.value || 'all';
+        const endVal   = document.getElementById('parkEndDate')?.value   || 'all';
+        const rangeStr = (startVal === 'all' && endVal === 'all') ? 'all' : `${startVal}_${endVal}`;
+
+        XLSX.writeFile(wb, `parking_${rangeStr}.xlsx`);
+    }
+
+    const btn = document.querySelector('#parkingFooter .download');
+    if (btn && !btn.dataset.bound) {
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', downloadParkingExcel);
+    }
+    // 주차 popup end
+
     const setElevatorTab_old = () => {
         const popupUl = elevatorPopup.querySelector('.section--contents ul')
         // popupUl.innerHTML = '';
@@ -2740,16 +3144,40 @@ const layerPopup = (function () {
             updatePoiSelectBox(poiListData);
             setDatePicker();
             const alarmTypes = [
-                { value: 0, label: "Normal" },
-                { value: 255, label: "복귀" },
-                { value: 1, label: "ON Alarm" },
-                { value: 2, label: "OFF Alarm" },
-                { value: 3, label: "Low-Low Alarm" },
-                { value: 4, label: "Low-High Alarm" },
-                { value: 5, label: "High-Low Alarm" },
-                { value: 6, label: "High-High Alarm" },
-                { value: 7, label: "Off State Alarm" },
-                { value: 8, label: "On State Alarm" }
+                { value: 0,  label: "강제문열림" },
+                { value: 1,  label: "장시간 문열림" },
+                { value: 2,  label: "소화전(옥내,옥외)" },
+                { value: 3,  label: "불꽃감지기" },
+                { value: 4,  label: "연기감지기" },
+                { value: 5,  label: "열감지기" },
+                { value: 6,  label: "가스감지기" },
+                { value: 7,  label: "공기흡입형감지기" },
+                { value: 8,  label: "1차폐쇄" },
+                { value: 9,  label: "2차폐쇄" },
+                { value: 10, label: "Normal" },
+                { value: 11, label: "Alarm" },
+                { value: 12, label: "펌프 경보(고장)" },
+                { value: 13, label: "OCR" },
+                { value: 14, label: "OCGR" },
+                { value: 15, label: "UVR" },
+                { value: 16, label: "NVR" },
+                { value: 17, label: "ELD" },
+                { value: 18, label: "ATS" },
+                { value: 19, label: "고장" },
+                { value: 20, label: "점검중" },
+                { value: 21, label: "파킹" },
+                { value: 22, label: "독립운전" },
+                { value: 23, label: "중량초과" },
+                { value: 24, label: "화재관제운전" },
+                { value: 25, label: "화재관제운전 귀착" },
+                { value: 26, label: "1차소방운전" },
+                { value: 27, label: "2차소방운전" },
+                { value: 28, label: "전용운전" },
+                { value: 29, label: "보수운전" },
+                { value: 30, label: "정전운전" },
+                { value: 31, label: "화재운전" },
+                { value: 32, label: "지진운전" },
+                { value: 33, label: "배회 이벤트" }
             ];
             createEventCheck(alarmTypes, "eventCheckBoxList");
         }
@@ -3134,7 +3562,9 @@ const layerPopup = (function () {
         setLight,
         setAirTab,
         setEscalator,
-        clearAllIntervals
+        clearAllIntervals,
+        setParking,
+        resetParkingFilterUI
     }
 })();
 

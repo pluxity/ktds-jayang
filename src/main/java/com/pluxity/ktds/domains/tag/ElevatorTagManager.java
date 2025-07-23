@@ -79,7 +79,7 @@ public class ElevatorTagManager {
         IndependentDriving("Independent driving", Map.of("0", "OFF", "1", "독립운전")),
         Overweight("Overweight", Map.of("0", "OFF", "1", "중량초과")),
         FireControlDriving("Fire control driving", Map.of("0", "OFF", "1", "화재관제운전")),
-        FireControlDrivingResults("Fire control driving results", Map.of("0", "OFF", "1", "화재관제운전 귀착")),
+        FireControlDrivingResults("Fire control driving results", Map.of("0", "OFF", "1", "화재관제운전귀착")),
         FirstFireDriving("1st fire driving", Map.of("0", "OFF", "1", "1차소방운전")),
         SecondFireDriving("Second fire driving", Map.of("0", "OFF", "1", "2차소방운전"));
 

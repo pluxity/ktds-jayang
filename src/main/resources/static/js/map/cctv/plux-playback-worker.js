@@ -374,6 +374,8 @@
     let endTime
     let endDate
 
+    let isPauseRequested = false;
+
     let bufferQueue = new Uint8Array();
     let lastTime = performance.now();
     let pauseStartTime = null;
@@ -397,7 +399,8 @@
 
 
     function pausePlayback() {
-            relaySocket.send(stopPacket);
+        isPauseRequested = true;
+        relaySocket.send(stopPacket);
     }
 
     function resumePlayback() {
@@ -498,7 +501,14 @@
             bePacket = createPlayPacket(true)
             stopPacket = createStopPacket()
         } else if (wReqType == 303) {
-            console.log("해당 시간에 재생할 수 있는 데이터가 없음");
+
+            if (!isPauseRequested) {
+                self.postMessage({
+                    function: "error",
+                    errorType: "NO_DATA",
+                    message: "해당 시간에 재생할 수 있는 데이터가 없습니다."
+                });
+            }
         } else if (wReqType == 1111) {
             console.log("네트워크가 불안정하여 재생이 중단됨");
         } else {
@@ -872,7 +882,9 @@
         sendDate = new Date(startDate)
         endTime = eventData.endTime
 
+
         setEndDate()
+        console.log("endDate", endDate);
 
         startPacket = createPlayPacket()
         bePacket = createPlayPacket(true)

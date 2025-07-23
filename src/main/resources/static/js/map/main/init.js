@@ -693,52 +693,14 @@ const Init = (function () {
         console.log("renderPoiInfo poiInfo : ", poiInfo);
         if (poiInfo.group.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
-            const popupInfo = document.createElement('div');
-
-            popupInfo.className = 'main-cctv-container';
-            popupInfo.classList.add('popup-info');
+            const cctvTemplate = document.getElementById('cctv-popup-template');
+            const popupInfo = cctvTemplate.content.cloneNode(true).querySelector('.popup-info');
             const canvasId = `cctv-${poiInfo.id}`;
-            popupInfo.innerHTML =
-                `<div class="main-cctv-item" data-cctv-id="${poiInfo.id}">
-                    <div class="cctv-header">
-                        <span class="cctv-title">${poiInfo.displayText}</span>
-                        <button type="button" class="cctv-close">×</button>
-                    </div>
-                    <div class="cctv-content">
-                        <input type="hidden" class="poi-id" value="${poiInfo.id}">
-                        <canvas id="cctv-${poiInfo.id}" width="800" height="450"></canvas>
-<!--                        <video id="cctv-${poiInfo.id}" width="100%" height="100%"></video>-->                    
-                    </div>
-                     <div class="cctv-bottom">
-                        <div class="cctv-mode-switch">
-                            <label style="display:flex; align-items:center; gap:2px; cursor:pointer;">
-                                <input type="radio" name="cctv-mode-${poiInfo.id}" value="live" checked style="accent-color:#007bff;"> Live
-                            </label>
-                            <label style="display:flex; align-items:center; gap:2px; cursor:pointer;">
-                                <input type="radio" name="cctv-mode-${poiInfo.id}" value="playback" style="accent-color:#007bff;"> Playback
-                            </label>
-                        </div>                          
-                        <div class="cctv-controls">
-                            <button class="cctv-controls-btn play" type="button" data-btn-type="play">
-                                <span class="hide">play</span>
-                            </button>
-                            <button class="cctv-controls-btn pause" type="button" data-btn-type="pause">
-                                <span class="hide">pause</span>
-                            </button>
-                            <button class="cctv-controls-btn stop" type="button" data-btn-type="stop">
-                                <span class="hide">stop</span>
-                            </button>
-                        </div>
-                     </div>
-                    <div class="cctv-footer" style="display: none;">
-                        <div class="date-picker" >
-                            <input type="date">
-                        </div>
-                        <div class="time-picker">
-                            <input type="time">
-                        </div>
-                    </div>
-                </div>`;
+
+            // 데이터 바인딩
+            popupInfo.querySelector(`[data-camera-name]`).textContent = poiProperty.name;
+            popupInfo.querySelector('.video__container canvas').id = canvasId;
+
             const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
             popupInfo.style.position = 'fixed';
             popupInfo.style.zIndex = '999';
@@ -746,6 +708,7 @@ const Init = (function () {
             popupInfo.style.top = `${y}px`;
 
             document.body.appendChild(popupInfo);
+            setupCctvControls(popupInfo, poiProperty);
 
             const updatePosition = () => {
                 const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
@@ -758,8 +721,6 @@ const Init = (function () {
 
             activePopups.set(poiInfo.id, { dom: popupInfo });
             updatePosition();
-            await EventManager.playLiveStream(canvasId,poiInfo.property.cameraIp);
-
 
             const closeBtn = popupInfo.querySelector('.cctv-close');
             closeBtn.addEventListener('click', () => {
@@ -1497,50 +1458,487 @@ const Init = (function () {
         }
     }
 
-    document.addEventListener('change', async function (e) {
-        // CCTV 모드 라디오 버튼 변경 시
-        if (e.target.matches('input[name^="cctv-mode-"]')) {
-            const selectedValue = e.target.value;
-            const poiId = e.target.name.replace('cctv-mode-', '');
-            const poiInfo = Px.Poi.GetData(poiId);
-            const cameraIp = poiInfo.property.cameraIp;
-            const canvasId = `cctv-${poiId}`;
-            const player = window.livePlayers[canvasId];
-            const cctvContainer = document.querySelector('.main-cctv-item');
-            const controlButtons = cctvContainer.querySelectorAll('.cctv-controls-btn');
+    // 재생 버튼 색상과 날짜 초기화 함수
+    function resetPlaybackControls(popupInfo) {
+        // 재생 버튼 색상 초기화
+        popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+            btn.style.backgroundColor = '';
+        });
 
-            // 모드에 따른 처리
-            if (selectedValue === 'live') {
+        // 날짜/시간 입력값 초기화
+        popupInfo.querySelector('#startDate').value = '';
+        popupInfo.querySelector('#startTime').value = '';
+        popupInfo.querySelector('#endHours').value = '0';
+        popupInfo.querySelector('#endMinutes').value = '30';
+        popupInfo.querySelector('#endSeconds').value = '0';
+    }
+
+    async function setupCctvControls(popupInfo, poiInfo) {
+        resetPlaybackControls(popupInfo);
+
+        // LIVE/PLAYBACK 모드 전환
+        const liveBtn = popupInfo.querySelector('.button--solid-middle');
+        const playbackBtn = popupInfo.querySelector('.button--ghost-lower');
+        const canvasId = `cctv-${poiInfo.id}`;
+        const cameraIp = poiInfo.cameraIp;
+
+        liveBtn.addEventListener('click', async () => {
+            resetPlaybackControls(popupInfo);
+
+            const player = window.livePlayers[canvasId];
+            if (player) {
+                player.cameraIp = cameraIp; // player에 카메라 IP 설정
+
+                // player 상태 초기화
+                if (player.isPaused === undefined) {
+                    player.isPaused = false;
+                }
+            }
+
+            if(player){
                 player.stopPlayback(); // playback 정지
                 player.isLive = true; // player live 상태
-                document.querySelector('.cctv-footer').style.display = 'none'; // 하단 playback 메뉴 비활성화
+            }
+            liveBtn.classList.add('button--solid-middle');
+            liveBtn.classList.remove('button--ghost-lower');
+            playbackBtn.classList.add('button--ghost-lower');
+            playbackBtn.classList.remove('button--solid-middle');
 
-                controlButtons.forEach(btn => {
-                    btn.disabled = true;
-                });
+            // LIVE 모드 활성화
+            await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+        });
 
-                await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+        playbackBtn.addEventListener('click', () => {
+            const player = window.livePlayers[canvasId];
+            if (player) {
+                player.cameraIp = cameraIp; // player에 카메라 IP 설정
 
-            } else if (selectedValue === 'playback') {
+                player.onPlaybackError = (errorType, message) => {
+                    console.log("Playback Error:", errorType, message);
+
+                    // ToDo:버튼 색상 초기화
+                    popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+                        btn.style.backgroundColor = '';
+                    });
+
+                    // 재생 상태 초기화
+                    if (player.isPaused !== undefined) {
+                        player.isPaused = false;
+                    }
+
+                    // 에러 타입별 처리
+                    switch (errorType) {
+                        case "NO_DATA":
+                            console.log("해당 시간에 데이터가 없음");
+                            break;
+                        case "NETWORK_ERROR":
+                            console.log("네트워크 오류");
+                            break;
+                        default:
+                            console.log("알 수 없는 오류");
+                    }
+                };
+            }
+            playbackBtn.classList.add('button--solid-middle');
+            playbackBtn.classList.remove('button--ghost-lower');
+            liveBtn.classList.add('button--ghost-lower');
+            liveBtn.classList.remove('button--solid-middle');
+
+            resetPlaybackControls(popupInfo); // 재생 버튼 색상과 날짜 초기화
+
+            // PLAYBACK 모드 활성화
+            if(player) {
                 player.cancelDraw && player.cancelDraw(); // live 정지
                 player.isLive = false; // player playback 상태
-                controlButtons.forEach(btn => {
-                    btn.disabled = false;
-                });
-
-                // 하단 활성화
-                document.querySelector('.cctv-footer').style.display = 'flex'; // 하단 playback 메뉴 활성화
             }
-        }
-    });
+        });
 
-    document.addEventListener('click', function(e) {
-        if (e.target.matches('.cctv-controls-btn')) {
-            const button = e.target.closest('.cctv-controls-btn');
-            handlePlayButton(button);
-        }
-    });
+        // PTZ 컨트롤 설정
+        setUpPtzControls(popupInfo);
 
+        await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+    }
+
+    function setUpPtzControls(popupInfo) {
+        // PTZ 요소들이 있는지 확인 (특정 팝업 내에서만)
+        const ptzViewer = popupInfo.querySelector('.ptz-viewer');
+        if (!ptzViewer) return;
+
+        // PTZ 제어 패널 토글
+        const handleToggleControlPanel = () => {
+            const panel = popupInfo.querySelector('#slidePanel');
+            const isActive = panel.classList.contains('ptz-viewer__panel--active');
+
+            if (isActive) {
+                panel.classList.remove('ptz-viewer__panel--active');
+            } else {
+                panel.classList.add('ptz-viewer__panel--active');
+            }
+        };
+
+        const handleModeSwitch = (mode) => {
+            const playbackContainer = popupInfo.querySelector('.playback');
+            const modeBtns = popupInfo.querySelectorAll('.playback__mode .button');
+            const actionGroup = popupInfo.querySelector('.playback__action');
+            const actionButtons = actionGroup?.querySelectorAll('.playback__button');
+
+            // 시간 설정 컨트롤
+            const timeControls = popupInfo.querySelector('#timeControls');
+
+            // PTZ 컨트롤
+            const joystick = popupInfo.querySelector('.joystick');
+            const ptzControls = popupInfo.querySelector('.controls');
+            const resetBtn = popupInfo.querySelector('.controls__reset');
+
+            const panel = popupInfo.querySelector('#slidePanel');
+
+            // 모든 모드 버튼 스타일 초기화
+            modeBtns.forEach(btn => {
+                btn.classList.remove('button--solid-middle', 'button--ghost-lower');
+                const btnText = btn.textContent.trim().toLowerCase();
+                if ((mode === 'live' && btnText === 'live') ||
+                    (mode === 'playback' && (btnText === 'play back' || btnText === 'playback'))) {
+                    btn.classList.add('button--solid-middle');
+                } else {
+                    btn.classList.add('button--ghost-lower');
+                }
+            });
+
+            // 컨테이너 클래스 변경
+            if (playbackContainer) {
+                playbackContainer.classList.remove('playback--live', 'playback--playback');
+                playbackContainer.classList.add(`playback--${mode}`);
+            }
+
+            // 재생 컨트롤 버튼 활성화 상태 관리
+            if (actionGroup) {
+                if (mode === 'playback') {
+                    actionGroup.classList.add('playback__action--active');
+                    actionButtons?.forEach(btn => btn.removeAttribute('disabled'));
+                } else {
+                    actionGroup.classList.remove('playback__action--active');
+                    actionButtons?.forEach(btn => btn.setAttribute('disabled', 'disabled'));
+                }
+            }
+
+            // PTZ 컨트롤 표시/숨김 관리 (하나로 묶어서)
+            if (ptzControls) {
+                const canvasId = popupInfo.querySelector('canvas').id;
+                const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                const isPTZ = poiInfo?.property?.poiMiddleCategoryName === 'PTZ';
+
+                if (mode === 'live' && isPTZ) {
+                    // LIVE 모드이면서 PTZ 카메라: PTZ 컨트롤 표시
+                    ptzControls.style.display = 'flex';
+                    joystick.style.display = 'flex';
+                    resetBtn.style.display = 'flex';
+                    timeControls.style.display = 'none';
+                    panel.style.padding = '20px 20px';
+                } else if (mode === 'playback') {
+                    // 그 외: PTZ 컨트롤 숨김
+                    ptzControls.style.display = 'none';
+                    joystick.style.display = 'none';
+                    resetBtn.style.display = 'none';
+                    panel.style.padding = '20px 20px';
+                    timeControls.style.display = 'flex';
+                } else{
+                    ptzControls.style.display = 'none';
+                    joystick.style.display = 'none';
+                    resetBtn.style.display = 'none';
+                    timeControls.style.display = 'none';
+                    panel.style.padding = 0;
+                }
+            }
+
+            console.log(`Mode switched to: ${mode.toUpperCase()}`);
+        };
+
+
+        // 슬라이더 진행도 업데이트 함수
+        const updateSliderProgress = (slider) => {
+            const progress = slider.parentElement.querySelector('.controls__progress');
+            const value = slider.value;
+            const max = slider.max;
+            const percentage = (value / max) * 100;
+            progress.style.width = percentage + '%';
+            progress.setAttribute('data-progress', value);
+        };
+
+        // 슬라이더 값 변경 함수
+        const changeSliderValue = (type, change) => {
+            const slider = popupInfo.querySelector(`[data-type="${type}"]`);
+            if (!slider) return;
+
+            const currentValue = parseInt(slider.value);
+            const newValue = Math.max(0, Math.min(100, currentValue + change));
+
+            slider.value = newValue;
+            updateSliderProgress(slider);
+
+            const label = slider.closest('.controls__group')?.querySelector('.controls__label')?.textContent;
+            console.log(`${label}: ${newValue}`);
+        };
+
+        // 조이스틱 기능 초기화
+        const initJoystick = () => {
+            const joystick = popupInfo.querySelector('#joystickStick');
+            if (!joystick) return;
+
+            const container = joystick.parentElement;
+            let isDragging = false;
+            let centerX, centerY;
+
+            // 조이스틱 중심점 계산
+            const updateCenter = () => {
+                const rect = container.getBoundingClientRect();
+                centerX = rect.left + rect.width / 2;
+                centerY = rect.top + rect.height / 2;
+            };
+
+            const moveJoystick = (clientX, clientY) => {
+                updateCenter();
+
+                const deltaX = clientX - centerX;
+                const deltaY = clientY - centerY;
+                const maxRadius = 60;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                let finalX = deltaX;
+                let finalY = deltaY;
+
+                if (distance > maxRadius) {
+                    const angle = Math.atan2(deltaY, deltaX);
+                    finalX = Math.cos(angle) * maxRadius;
+                    finalY = Math.sin(angle) * maxRadius;
+                }
+
+                joystick.style.transform = `translate(-50%, -50%) translate(${finalX}px, ${finalY}px)`;
+
+                const panSpeed = Math.round((finalX / maxRadius) * 100);
+                const tiltSpeed = Math.round((-finalY / maxRadius) * 100);
+
+                console.log(`PTZ Command - Pan: ${panSpeed}, Tilt: ${tiltSpeed}`);
+            };
+
+            const resetJoystick = () => {
+                joystick.style.transform = 'translate(-50%, -50%)';
+                console.log('PTZ Command - Stop');
+            };
+
+            // 마우스 이벤트
+            joystick.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                updateCenter();
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                moveJoystick(e.clientX, e.clientY);
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    resetJoystick();
+                }
+            });
+
+            // 터치 이벤트
+            joystick.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                updateCenter();
+                e.preventDefault();
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                moveJoystick(touch.clientX, touch.clientY);
+                e.preventDefault();
+            });
+
+            document.addEventListener('touchend', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    resetJoystick();
+                }
+            });
+
+            window.addEventListener('resize', updateCenter);
+            setTimeout(updateCenter, 100);
+        };
+
+        // 이벤트 리스너 설정
+        const initEventListeners = () => {
+            // 토글 버튼 이벤트
+            const toggleBtn = popupInfo.querySelector('#toggleControl');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', handleToggleControlPanel);
+
+                // 토글 버튼 상태 업데이트
+                const updateToggleButton = () => {
+                    const panel = popupInfo.querySelector('#slidePanel');
+                    if (panel && panel.classList.contains('ptz-viewer__panel--active')) {
+                        toggleBtn.classList.add('playback__toggle--active');
+                    } else {
+                        toggleBtn.classList.remove('playback__toggle--active');
+                    }
+                };
+
+                toggleBtn.addEventListener('click', () => {
+                    setTimeout(updateToggleButton, 10);
+                });
+            }
+
+            // 모드 버튼 이벤트 리스너
+            popupInfo.querySelectorAll('.playback__mode .button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const btnText = this.textContent.trim().toLowerCase();
+                    const mode = btnText === 'live' ? 'live' : 'playback';
+                    handleModeSwitch(mode);
+                });
+            });
+
+            // 초기 상태 설정 (LIVE 모드로 시작)
+            handleModeSwitch('live');
+
+                    // 재생 버튼 색상 변경 함수
+            const updatePlaybackButtonColor = (activeButton) => {
+                // 모든 재생 버튼 색상 초기화
+                popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+                    btn.style.backgroundColor = '';
+                });
+                // 활성화된 버튼만 색상 적용
+                if (activeButton) {
+                    activeButton.style.backgroundColor = '#00f5bf';
+                }
+            };
+
+            // 재생 컨트롤 버튼 이벤트 리스너
+            popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+                btn.addEventListener('click', async function () {
+
+                    const dateValue = document.querySelector('.ptz-viewer__panel input[type="date"]').value;
+                    const timeValue = document.querySelector('.ptz-viewer__panel input[type="time"]').value;
+
+                    if (!dateValue || !timeValue) {
+                        alertSwal("재생할 날짜와 시간을 선택해주세요.");
+                        return;
+                    }
+
+                    if (this.hasAttribute('disabled')) return;
+
+                    const canvasId = popupInfo.querySelector('canvas').id;
+                    const player = window.livePlayers[canvasId];
+                    let cameraIp = null;
+                    if(player){
+                        cameraIp = player.cameraIp;
+                    }else{
+                        const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                        cameraIp = poiInfo.property.cameraIp;
+                    }
+
+                    const btnClass = this.className;
+                    if (btnClass.includes('playback__button--play')) {
+                        console.log('Playback: Play');
+                        if (player && player.isPaused) {
+
+                            player.resumePlayback();
+                        } else {
+
+                            const endHours = parseInt(popupInfo.querySelector('#endHours').value) || 0;
+                            const endMinutes = parseInt(popupInfo.querySelector('#endMinutes').value) || 0;
+                            const endSeconds = parseInt(popupInfo.querySelector('#endSeconds').value) || 0;
+
+                            const startDate = new Date(`${dateValue}T${timeValue}`);
+                            const endTime = {
+                                hour: endHours,
+                                minutes: endMinutes,
+                                second: endSeconds
+                            };
+
+                            await EventManager.playPlaybackStream(canvasId, cameraIp, startDate, endTime);
+                        }
+                        updatePlaybackButtonColor(this);
+
+                    } else if (btnClass.includes('playback__button--pause')) {
+                        player.isPaused = true; // 일시정지 상태로 변경
+                        player.pausePlayback();
+                        updatePlaybackButtonColor(this);
+                    } else if (btnClass.includes('playback__button--stop')) {
+                        player.isPaused = false; // 일시정지 상태 해제
+                        player.stopPlayback();
+                        updatePlaybackButtonColor(this);
+                    }
+                });
+            });
+
+            // 슬라이더 이벤트 리스너
+            popupInfo.querySelectorAll('.controls__input').forEach(slider => {
+                updateSliderProgress(slider);
+
+                slider.addEventListener('input', function() {
+                    updateSliderProgress(this);
+                    const label = this.closest('.controls__group')?.querySelector('.controls__label')?.textContent;
+                    console.log(`${label}: ${this.value}`);
+                });
+            });
+
+            // 컨트롤 버튼 이벤트 리스너
+            ['rotation', 'focus', 'iris'].forEach(type => {
+                popupInfo.querySelectorAll(`.controls__btn[data-target="${type}"]`).forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const btnClass = this.className;
+                        let change = 0;
+
+                        if (btnClass.includes('zoom-in') || btnClass.includes('focus-in') || btnClass.includes('iris-in')) {
+                            change = -5; // in은 감소
+                        } else if (btnClass.includes('zoom-out') || btnClass.includes('focus-out') || btnClass.includes('iris-out')) {
+                            change = 5;  // out은 증가
+                        }
+
+                        if (change !== 0) {
+                            changeSliderValue(type, change);
+                        }
+                    });
+                });
+            });
+
+            // 카메라 리셋 버튼
+            const resetBtn = popupInfo.querySelector('#resetCamera');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    console.log('Camera Reset');
+
+                    // 조이스틱 리셋
+                    const joystickStick = popupInfo.querySelector('#joystickStick');
+                    if (joystickStick) {
+                        joystickStick.style.transform = 'translate(-50%, -50%)';
+                    }
+
+                    // 슬라이더 리셋
+                    popupInfo.querySelectorAll('.controls__input').forEach(slider => {
+                        slider.value = 0;
+                        updateSliderProgress(slider);
+                    });
+                });
+            }
+        };
+
+        // 초기화
+        initJoystick();
+        initEventListeners();
+
+        setTimeout(() => {
+            handleModeSwitch('live');
+        }, 100);
+    }
+
+    function validateDateTimeInputs() {
+
+
+    }
 
     async function handlePlayButton(button) {
         console.log(button.getAttribute('data-btn-type'));
@@ -1607,7 +2005,7 @@ const Init = (function () {
     }
 
     document.addEventListener('change', function(e) {
-        if (e.target.matches('.cctv-bottom input[type="date"], .cctv-bottom input[type="time"]')) {
+        if (e.target.matches('.ptz-viewer__panel input[type="date"], .ptz-viewer__panel input[type="time"]')) {
             const cctvContainer = e.target.closest('.main-cctv-item, .cctv-item');
             if (!cctvContainer) return;
             const canvas = cctvContainer.querySelector('canvas');

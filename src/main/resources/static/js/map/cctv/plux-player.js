@@ -17,6 +17,8 @@ class PluxPlayer {
         this.decodeWorker = null
         this.streamServerIP = null;
         this.recordServerIP = null;
+
+        this.onPlaybackError = null;
     }
 
     async playBack(deviceId, startDate, endTime) {
@@ -51,6 +53,12 @@ class PluxPlayer {
 
                 this.ctx.drawImage(frame, 0, 0, this.canvasDom.width, this.canvasDom.height);
                 frame.close();
+            }else if (eventData.function == "error") {
+                alertSwal(eventData.message);
+                // 에러 콜백 호출
+                if (this.onPlaybackError) {
+                    this.onPlaybackError(eventData.errorType, eventData.message);
+                }
             }
         };
     }

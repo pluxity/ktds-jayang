@@ -2171,7 +2171,7 @@ const layerPopup = (function () {
     // 설비 popup
     const equipmentPopup = document.getElementById('equipmentPop');
     const setEquipmentTab = () => {
-        const popupUl = equipmentPopup.querySelector('.section--select ul')
+        const popupUl = equipmentPopup.querySelector('.section--info ul')
         popupUl.replaceChildren()
         const eqAccordion = document.getElementById("eqAccordion");
         eqAccordion.replaceChildren();
@@ -2317,7 +2317,7 @@ const layerPopup = (function () {
     };
 
     const updateActiveTab = (selectedTab) => {
-        document.querySelectorAll(".section--select ul li").forEach(tab => {
+        document.querySelectorAll(".section--info ul li").forEach(tab => {
             tab.classList.remove("active");
             tab.setAttribute("aria-selected", "false");
         });
@@ -2453,8 +2453,8 @@ const layerPopup = (function () {
             console.log("Stopping playback player for canvasId:", canvasId);
             player.stopPlayback();
         }
-
         delete window.livePlayers[canvasId];
+        console.log(`Player for canvasId ${canvasId} closed.`);
     }
 
     // date picker default setting

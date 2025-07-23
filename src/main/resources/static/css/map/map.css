@@ -3489,11 +3489,29 @@ canvas {
   display: flex;
 }
 
+/*.ptz-viewer__panel .inner {*/
+/*  display: -webkit-box;*/
+/*  display: -ms-flexbox;*/
+/*  display: flex;*/
+/*  grid-gap: 25px;*/
+/*}*/
+
 .ptz-viewer__panel .inner {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  grid-gap: 25px;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+/* timeControls가 보일 때만 column 레이아웃 */
+.ptz-viewer__panel .inner:has(#timeControls:not([style*="display: none"])) {
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* timeControls가 숨겨져 있을 때는 기존 row 레이아웃 */
+.ptz-viewer__panel .inner:has(#timeControls[style*="display: none"]) {
+  flex-direction: row;
+  gap: 25px;
 }
 
 .ptz-viewer__panel .joystick {
@@ -3802,6 +3820,131 @@ canvas {
 .ptz-viewer__panel .controls__btn--iris-out {
   -webkit-mask-position: -210px -50px;
   mask-position: -210px -50px;
+}
+/* 시간 설정 컨테이너 */
+#timeControls {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* 시작 시간 행 (1줄) */
+.start-time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.start-time-row .controls__label {
+  color: var(--color-grayscale-light);
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 65px;
+}
+
+.start-time-row .date-picker,
+.start-time-row .time-picker {
+  flex: 1;
+}
+
+.start-time-row .date-picker input,
+.start-time-row .time-picker input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: var(--color-grayscale-light);
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.start-time-row .date-picker input:focus,
+.start-time-row .time-picker input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+/* 재생 시간 행 (2줄) */
+.playback-duration-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.playback-duration-row .controls__label {
+  color: var(--color-grayscale-light);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 재생 시간 입력 스타일 */
+.duration-picker {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.duration-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.duration-input input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: var(--color-grayscale-light);
+  padding: 10px 8px;
+  font-size: 0.875rem;
+  width: 65px;
+  text-align: center;
+  transition: border-color 0.2s ease;
+}
+
+.duration-input input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.duration-input input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.duration-input input::-webkit-inner-spin-button,
+.duration-input input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.duration-input input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.duration-label {
+  color: var(--color-grayscale-light);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+/* 호버 효과 */
+#timeControls:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 입력 필드 호버 효과 */
+#timeControls input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 

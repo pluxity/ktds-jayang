@@ -305,6 +305,7 @@ const EventManager = (() => {
             canvasDom: canvasDom
         });
         window.livePlayers[canvasDom.id] = player;
+        console.log("Player created for canvas:", canvasDom.id);
         return player;
     }
 
@@ -336,6 +337,7 @@ const EventManager = (() => {
         const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
         await player.getDeviceInfo((cameraList) => {
+            player.cameraIp = cameraIp;
             let foundCamera = null;
 
             if (Array.isArray(cameraList)) {

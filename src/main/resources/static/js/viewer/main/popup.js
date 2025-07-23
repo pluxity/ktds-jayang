@@ -2109,7 +2109,7 @@ const layerPopup = (function () {
                 div.innerHTML = `
                     <span class="item__level">${label}</span>
                     <div class="item__count"><strong>${parking}</strong>/${total}</div>
-                    <button id="parkSummaryRefresh" type="button" class="item__link"><span class="hide">자세히보기</span></button>
+                    <button id="parkSummaryDetail" type="button" class="item__link"><span class="hide">자세히보기</span></button>
                   `;
                 listEl.appendChild(div);
             }

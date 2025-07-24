@@ -357,6 +357,7 @@ const Init = (function () {
                         displayName: "외부 전경",
                         baseFloor: 1,
                         groupId: 0,
+                        property: 'sbm'
                     });
                 }
 
@@ -391,10 +392,10 @@ const Init = (function () {
                         Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                             moveToPoi(poiInfo.id)
                         });
+
                         Px.Effect.Outline.HoverEventOn('area_no');
                         Px.Effect.Outline.AddHoverEventCallback(
                             throttle(async (event) => {
-
                                 if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
                                     const firstFloorId = outdoorBuilding.floors[0].id;
                                     Px.Effect.Outline.Add(firstFloorId);
@@ -402,8 +403,12 @@ const Init = (function () {
                             }, 10)
                         );
 
-                        // Px.Effect.Outline.Add(sbmDataArray[0].baseFloor)
                         Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
+                            console.log("event : ", event);
+                        });
+
+                        // Px.Effect.Outline.Add(sbmDataArray[0].baseFloor)
+                        Px.Event.AddEventListener('dblclick', 'sbm', (event) => {
                             // Px.Effect.Outline 참고
                             // Px.Effect.Outline.HoverEventOn('area_no');
                             if (firstIndoorBuilding) {

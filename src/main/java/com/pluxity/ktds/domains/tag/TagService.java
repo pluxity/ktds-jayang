@@ -183,4 +183,36 @@ public class TagService {
         return poiTagResponseMap;
     }
 
+    // test
+    public TagResponseDTO processParkingTags() {
+
+        List<String> parkingTags = List.of(
+                "C-null-PK-GU-G-ParkTotal",
+                "C-null-PK-GU-G-ParkEmpty",
+                "C-null-PK-GU-G-Parking",
+                "C-P1-PK-GU-null-Total",
+                "C-P1-PK-GU-null-Empty",
+                "C-P1-PK-GU-null-Parking",
+                "C-P2-PK-GU-null-Total",
+                "C-P2-PK-GU-null-Empty",
+                "C-P2-PK-GU-null-Parking",
+                "C-P3-PK-GU-null-Total",
+                "C-P3-PK-GU-null-Empty",
+                "C-P3-PK-GU-null-Parking",
+                "C-P4-PK-GU-null-Total",
+                "C-P4-PK-GU-null-Empty",
+                "C-P4-PK-GU-null-Parking",
+                "C-P5-PK-GU-null-Total",
+                "C-P5-PK-GU-null-Empty",
+                "C-P5-PK-GU-null-Parking"
+        );
+
+        TagResponseDTO all = restTemplate.postForObject(
+                baseUrl + "/?ReadTags",
+                parkingTags,
+                TagResponseDTO.class
+        );
+        return all;
+    }
+
 }

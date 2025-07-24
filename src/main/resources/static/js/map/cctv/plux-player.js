@@ -103,21 +103,23 @@ class PluxPlayer {
     async ptzControl(deviceUrl, devicePort, x, y, id, password) {
         console.log(deviceUrl, devicePort, x, y, id, password);
 
+        const time = await this.getSystemDateAndTime(deviceUrl);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
         try {
-            const digest = await this.generatePasswordDigest(password);
             if (x == 0 && y == 0) {
                 await this.ptzStop(deviceUrl, devicePort, id, password);
             } else {
                 let soap_message = this.createDirectCamSoapBody(
                     `<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
+                    <ProfileToken>Profile_1</ProfileToken>
                     <Velocity>
                         <PanTilt x="${x}" y="${y}"
                             space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace"
                             xmlns="http://www.onvif.org/ver10/schema" />
                     </Velocity>
                 </ContinuousMove>`,
-                    id, digest.passwordDigest, digest.nonce, digest.created
+                    id, passwordDigest, nonce, created
                 );
                 const response = await this.sendSoapRequest(
                     this.httpRelayUrl + ":" + this.httpRelayPort,
@@ -134,19 +136,19 @@ class PluxPlayer {
 
     async zoom(deviceUrl, devicePort, id, password, zoom) {
         try {
-            const digest = await this.generatePasswordDigest(password);
-            if (zoom > 2) { zoom = 2 }
-            else if (zoom < -2) { zoom = -2 }
+            const time = await this.getSystemDateAndTime(deviceUrl);
+            const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
             let soap_message = this.createDirectCamSoapBody(
-                `<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
-                    <Velocity>
+                `<AbsoluteMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
+                        <ProfileToken>Profile_1</ProfileToken>
+                        <Position>
                         <Zoom x="${zoom}"
-                    space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace"
+                    space="http://www.onvif.org/ver10/tptz/ZoomSpaces/PositionGenericSpace"
                     xmlns="http://www.onvif.org/ver10/schema" />
-                    </Velocity>
-                </ContinuousMove>`,
-                id, digest.passwordDigest, digest.nonce, digest.created
+                    </Position>
+                </AbsoluteMove>`,
+                id, passwordDigest, nonce, created
             );
             const response = await this.sendSoapRequest(
                 this.httpRelayUrl + ":" + this.httpRelayPort,
@@ -160,15 +162,19 @@ class PluxPlayer {
     }
 
     async ptzStop(deviceUrl, devicePort, id, password) {
+
+        const time = await this.getSystemDateAndTime(deviceUrl);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
+
         try {
-            const digest = await this.generatePasswordDigest(password);
             let soap_message = this.createDirectCamSoapBody(
                 `<Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
+                    <ProfileToken>Profile_1</ProfileToken>
                     <PanTilt>true</PanTilt>
                     <Zoom>true</Zoom>
                 </Stop>`,
-                id, digest.passwordDigest, digest.nonce, digest.created
+                id, passwordDigest, nonce, created
             );
             const response = await this.sendSoapRequest(
                 this.httpRelayUrl + ":" + this.httpRelayPort,
@@ -243,8 +249,57 @@ class PluxPlayer {
         return hlsUrl;
     }
 
-    async getLiveStreamUri(cameraIp, username, password) {
+    async getProfiles(cameraIp, username, password) {
+        const time = await this.getSystemDateAndTime(cameraIp);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
 
+        const operationBody = `
+        <GetProfiles xmlns="http://www.onvif.org/ver10/media/wsdl">
+        </GetProfiles>`.trim();
+
+        const soapBody = this.createDirectCamSoapBody(
+            operationBody,
+            username,
+            passwordDigest,
+            nonce,
+            created
+        );
+
+        console.log("GetProfiles soapBody:", soapBody);
+
+        const response = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`,
+            `http://${cameraIp}:80/onvif/media_service`,
+            soapBody
+        );
+
+        const parsedResponse = this.parseResponse(response);
+        console.log("GetProfiles 응답:", parsedResponse);
+
+        // 프로파일 목록 추출
+        const profiles = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetProfilesResponse"]["trt:Profiles"];
+        return profiles;
+    }
+
+    async getConfiguration(deviceUrl, cameraIp, username, password) {
+        const time = await this.getSystemDateAndTime(cameraIp);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
+        let getConfig = this.createDirectCamSoapBody(
+            `<GetConfigurations xmlns="http://www.onvif.org/ver20/ptz/wsdl" />`,
+            id, passwordDigest, nonce, created
+        );
+
+        const response = await this.sendSoapRequest(
+            this.httpRelayUrl + ":" + this.httpRelayPort,
+            "http://" + deviceUrl + ":80/onvif/ptz_service",
+            getConfig
+        );
+
+        console.log("getConfiguration response : ", response);
+    }
+
+    async getLiveStreamUri(cameraIp, username, password) {
         const time = await this.getSystemDateAndTime(cameraIp);
         const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
 
@@ -255,8 +310,8 @@ class PluxPlayer {
                 <Transport xmlns="http://www.onvif.org/ver10/schema">
                   <Protocol>TCP</Protocol>
                 </Transport>
-              </StreamSetup>
-              <ProfileToken>DefaultProfile-02</ProfileToken>
+              </StreamSetup>             
+              <ProfileToken>Profile_1</ProfileToken>
             </GetStreamUri>`.trim();
 
         const soapBody = this.createDirectCamSoapBody(
@@ -275,11 +330,21 @@ class PluxPlayer {
             soapBody
         );
 
-        const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
+        // const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
+        let uri = this.parseResponse(response)["env:Envelope"]["env:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
+
+        // 공백 및 &amp; 제거
+        uri = uri.replace(/\s+/g, '').replace(/&amp;/g, '&');
 
         const liveWsPort = this.wsRelayUrl.startsWith('wss') ? 4013 : 4003;
 
-        const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
+        // 모든 특수문자를 URL 인코딩
+        const encodedUri = encodeURIComponent(uri);
+        const encodedUser = encodeURIComponent(username);
+        const encodedPass = encodeURIComponent(password);
+
+        // const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
+        const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodedUri}&user=${encodedUser}&pass=${encodedPass}`;
         console.log("Live RTSP URI:", uri);
         console.log("Live WS URL:", liveUrl);
         return liveUrl;
@@ -582,7 +647,8 @@ class PluxPlayer {
             `http://${cameraIp}:80/onvif/media_service`,
             soapBody);
         let parsedResponse = this.parseResponse(response);
-        let timestamp = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
+        // let timestamp = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
+        let timestamp = parsedResponse["env:Envelope"]["env:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
         let time = timestamp["tt:Time"];
         let hour = time["tt:Hour"];
         let minute = time["tt:Minute"];

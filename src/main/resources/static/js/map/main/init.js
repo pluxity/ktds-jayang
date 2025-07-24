@@ -1516,7 +1516,6 @@ const Init = (function () {
                 player.onPlaybackError = (errorType, message) => {
                     console.log("Playback Error:", errorType, message);
 
-                    // ToDo:버튼 색상 초기화
                     popupInfo.querySelectorAll('.playback__button').forEach(btn => {
                         btn.style.backgroundColor = '';
                     });
@@ -1555,6 +1554,21 @@ const Init = (function () {
 
         // PTZ 컨트롤 설정
         setUpPtzControls(popupInfo);
+
+        // 조이스틱 쓰로틀링 100ms에 한번만 이벤트 발생
+        let lastMoveTime = 0;
+        const THROTTLE_DELAY = 100;
+
+        let joystick = new JOYSTICK(document.getElementById('joystick-area'));
+        joystick.stick.addEventListener('moveStick', async (e) => {
+            const now = Date.now();
+            if(now - lastMoveTime >= THROTTLE_DELAY) {
+                lastMoveTime = now;
+                await EventManager.livePlayMove(canvasId, e.detail.x, e.detail.y);
+            }
+
+        })
+
 
         await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
     }
@@ -1679,100 +1693,23 @@ const Init = (function () {
             console.log(`${label}: ${newValue}`);
         };
 
-        // 조이스틱 기능 초기화
-        const initJoystick = () => {
-            const joystick = popupInfo.querySelector('#joystickStick');
-            if (!joystick) return;
 
-            const container = joystick.parentElement;
-            let isDragging = false;
-            let centerX, centerY;
-
-            // 조이스틱 중심점 계산
-            const updateCenter = () => {
-                const rect = container.getBoundingClientRect();
-                centerX = rect.left + rect.width / 2;
-                centerY = rect.top + rect.height / 2;
-            };
-
-            const moveJoystick = (clientX, clientY) => {
-                updateCenter();
-
-                const deltaX = clientX - centerX;
-                const deltaY = clientY - centerY;
-                const maxRadius = 60;
-                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                let finalX = deltaX;
-                let finalY = deltaY;
-
-                if (distance > maxRadius) {
-                    const angle = Math.atan2(deltaY, deltaX);
-                    finalX = Math.cos(angle) * maxRadius;
-                    finalY = Math.sin(angle) * maxRadius;
-                }
-
-                joystick.style.transform = `translate(-50%, -50%) translate(${finalX}px, ${finalY}px)`;
-
-                const panSpeed = Math.round((finalX / maxRadius) * 100);
-                const tiltSpeed = Math.round((-finalY / maxRadius) * 100);
-
-                console.log(`PTZ Command - Pan: ${panSpeed}, Tilt: ${tiltSpeed}`);
-            };
-
-            const resetJoystick = () => {
-                joystick.style.transform = 'translate(-50%, -50%)';
-                console.log('PTZ Command - Stop');
-            };
-
-            // 마우스 이벤트
-            joystick.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                updateCenter();
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                moveJoystick(e.clientX, e.clientY);
-            });
-
-            document.addEventListener('mouseup', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    resetJoystick();
-                }
-            });
-
-            // 터치 이벤트
-            joystick.addEventListener('touchstart', (e) => {
-                isDragging = true;
-                updateCenter();
-                e.preventDefault();
-            });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                const touch = e.touches[0];
-                moveJoystick(touch.clientX, touch.clientY);
-                e.preventDefault();
-            });
-
-            document.addEventListener('touchend', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    resetJoystick();
-                }
-            });
-
-            window.addEventListener('resize', updateCenter);
-            setTimeout(updateCenter, 100);
-        };
 
         // 이벤트 리스너 설정
         const initEventListeners = () => {
             // 토글 버튼 이벤트
             const toggleBtn = popupInfo.querySelector('#toggleControl');
+
+            const canvasId = popupInfo.querySelector('canvas').id;
+            const player = window.livePlayers[canvasId];
+            let cameraIp = null;
+            if(player){
+                cameraIp = player.cameraIp;
+            }else{
+                const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                cameraIp = poiInfo.property.cameraIp;
+            }
+
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', handleToggleControlPanel);
 
@@ -1829,16 +1766,6 @@ const Init = (function () {
 
                     if (this.hasAttribute('disabled')) return;
 
-                    const canvasId = popupInfo.querySelector('canvas').id;
-                    const player = window.livePlayers[canvasId];
-                    let cameraIp = null;
-                    if(player){
-                        cameraIp = player.cameraIp;
-                    }else{
-                        const poiInfo = Px.Poi.GetData(canvasId.slice(5));
-                        cameraIp = poiInfo.property.cameraIp;
-                    }
-
                     const btnClass = this.className;
                     if (btnClass.includes('playback__button--play')) {
                         console.log('Playback: Play');
@@ -1878,10 +1805,14 @@ const Init = (function () {
             popupInfo.querySelectorAll('.controls__input').forEach(slider => {
                 updateSliderProgress(slider);
 
-                slider.addEventListener('input', function() {
+                slider.addEventListener('input', async function() {
                     updateSliderProgress(this);
                     const label = this.closest('.controls__group')?.querySelector('.controls__label')?.textContent;
                     console.log(`${label}: ${this.value}`);
+                    if(label === '확대/축소'){
+                        const zoom = this.value / 100; // 0~1 범위로 변환
+                        await EventManager.livePlayZoom(canvasId, zoom);
+                    }
                 });
             });
 
@@ -1926,8 +1857,6 @@ const Init = (function () {
             }
         };
 
-        // 초기화
-        initJoystick();
         initEventListeners();
 
         setTimeout(() => {

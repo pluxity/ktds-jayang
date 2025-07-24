@@ -362,6 +362,25 @@ const EventManager = (() => {
         });
     }
 
+    async function livePlayMove(canvasId, x, y) {
+        const config = await getCCTVConfig();
+        const canvasElement = document.getElementById(canvasId);
+        const player = getOrCreatePlayer(canvasId, config, canvasElement);
+
+        x = (parseInt(-x) / 100).toFixed(6);
+        y = (parseInt(y) / 100).toFixed(6);
+
+        await player.ptzControl(player.cameraIp, "80", x, y, config.username, config.password)
+    }
+
+    async function livePlayZoom(canvasId, zoom) {
+        const config = await getCCTVConfig();
+        const canvasElement = document.getElementById(canvasId);
+        const player = getOrCreatePlayer(canvasId, config, canvasElement);
+
+        await player.zoom(player.cameraIp, "80", config.username, config.password, zoom);
+    }
+
     function getOrCreatePlayer(canvasId, config, canvasElement) {
         if (!window.livePlayers[canvasId]) {
             window.livePlayers[canvasId] = createPlayer(config, canvasElement);
@@ -929,6 +948,8 @@ const EventManager = (() => {
         initializeDateChart,
         playLiveStream,
         playPlaybackStream,
+        livePlayMove,
+        livePlayZoom
     }
 })();
 

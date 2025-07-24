@@ -393,8 +393,8 @@
 
                     <!-- 조이스틱 -->
                     <div class="joystick">
-                        <div class="joystick__bg">
-                            <div class="joystick__stick" id="joystickStick"></div>
+                        <div class="joystick__bg" id="joystick-area">
+<!--                            <div class="joystick__stick" id="joystickStick"></div>-->
                             <div class="joystick__directions">
                                 <span class="joystick__direction joystick__direction--up"></span>
                                 <span class="joystick__direction joystick__direction--up-right"></span>
@@ -411,9 +411,9 @@
                     <!-- 슬라이더 컨트롤 -->
                     <div class="controls">
                         <div class="controls__group">
-                            <span class="controls__label">회전/속도</span>
+                            <span class="controls__label">확대/축소</span>
                             <button class="controls__btn controls__btn--zoom-in" data-target="rotation"><span
-                                    class="hide">회전/속도 감소</span></button>
+                                    class="hide">확대/축소 감소</span></button>
                             <div class="controls__slider">
                                 <div class="controls__track"></div>
                                 <div class="controls__progress" data-progress="0"></div>
@@ -421,7 +421,7 @@
                                        data-type="rotation">
                             </div>
                             <button class="controls__btn controls__btn--zoom-out" data-target="rotation"><span
-                                    class="hide">회전/속도 증가</span></button>
+                                    class="hide">확대/축소 증가</span></button>
                         </div>
 
                         <div class="controls__group">

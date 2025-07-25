@@ -2005,13 +2005,17 @@ const layerPopup = (function () {
     const uniq = arr => [...new Set(arr.filter(v => v != null && v !== ''))];
 
     function populateUl(ul, list) {
+
         if (!ul) return;
         ul.innerHTML = '';
         // "전체"
-        const liAll = document.createElement('li');
-        liAll.textContent = '전체';
-        liAll.dataset.value = '';
-        ul.appendChild(liAll);
+        const isInParkSearchSelect = ul.closest('#parkSearchSelect') !== null;
+        if (!isInParkSearchSelect) {
+            const liAll = document.createElement('li');
+            liAll.textContent = '전체';
+            liAll.dataset.value = '';
+            ul.appendChild(liAll);
+        }
 
         list.forEach(v => {
             const li = document.createElement('li');
@@ -2022,17 +2026,29 @@ const layerPopup = (function () {
     }
 
     function fillSelectOptions(data) {
-        const deviceIdUl   = document.querySelector('#deviceIdSelect .select-box__content ul');
-        const inoutTypeUl  = document.querySelector('#inoutTypeSelect .select-box__content ul');
+        const deviceIdUl = document.querySelector('#deviceIdSelect .select-box__content ul');
+        const inoutTypeUl = document.querySelector('#inoutTypeSelect .select-box__content ul');
         const inoutCarIdUl = document.querySelector('#inoutCarIdSelect .select-box__content ul');
         const regularTypeUl= document.querySelector('#regularTypeSelect .select-box__content ul');
-        const carNoUl      = document.querySelector('#carNoSelect .select-box__content ul');
+        const searchSelectUl = document.querySelector('#parkSearchSelect .select-box__content ul');
 
-        const deviceIds = uniq(data.map(v => v.deviceId));
         const carIds = uniq(data.map(v => v.inoutCarId));
-        const carNos = uniq(data.map(v => v.carNo));
 
-        populateUl(deviceIdUl, deviceIds.map(v => ({ label: v, value: v })));
+        populateUl(deviceIdUl, [
+            { label: 'IN01', value: '1' },
+            { label: 'IN02', value: '2' },
+            { label: 'IN04', value: '3' },
+            { label: 'IN05', value: '4' },
+            { label: 'IN06', value: '5' },
+            { label: 'IN07', value: '6' },
+            { label: 'OT01', value: '7' },
+            { label: 'OT02', value: '8' },
+            { label: 'OT03', value: '9' },
+            { label: 'OT05', value: '10' },
+            { label: 'OT06', value: '11' },
+            { label: 'OT07', value: '12' },
+            { label: 'OT08', value: '13' }
+        ]);
         populateUl(inoutTypeUl, [
             { label: '입구', value: '0' },
             { label: '출구', value: '1' }
@@ -2042,30 +2058,47 @@ const layerPopup = (function () {
             { label: '정기권', value: 'R' },
             { label: '일반권', value: 'T' }
         ]);
-        populateUl(carNoUl, carNos.map(v => ({ label: v, value: v })));
+        populateUl(searchSelectUl, [
+            { label: '차량번호', value: 'carNo' },
+            { label: '입차장비명', value: 'deviceNm' }
+        ]);
+        // populateUl(carNoUl, carNos.map(v => ({ label: v, value: v })));
     }
 
     let optionsFilled = false;
-
+    const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     function resetParkingFilterUI() {
 
         const startInput = document.getElementById('parkStartDate');
         const endInput   = document.getElementById('parkEndDate');
 
-        if (startInput) startInput.value = '';
-        if (endInput)   endInput.value   = '';
+        if(startInput) startInput.value = '';
+        if(endInput) endInput.value = '';
+        // if (startInput && !startInput.value) {
+        //     const now = new Date();
+        //     const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        //     startInput.value = ymd(first);
+        // }
+        // if (endInput && !endInput.value) {
+        //     endInput.value = ymd(new Date());
+        // }
 
-        ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#carNoSelect']
+        ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#parkSearchSelect']
             .forEach(id => {
                 const btn = document.querySelector(`${id} .select-box__btn`);
                 if (btn) {
-                    btn.textContent = '전체';
-                    btn.dataset.value = '';
+                    if (id === '#parkSearchSelect') {
+                        btn.textContent = '차량번호';
+                        btn.dataset.value = 'carNo';
+                    } else {
+                        btn.textContent = '전체';
+                        btn.dataset.value = '';
+                    }
                 }
             });
 
-        const deviceName = document.getElementById('deviceName');
-        if (deviceName) deviceName.value = '';
+        const parkSearchInput = document.getElementById('parkSearchInput');
+        if (parkSearchInput) parkSearchInput.value = '';
     }
 
 
@@ -2109,7 +2142,7 @@ const layerPopup = (function () {
                 div.innerHTML = `
                     <span class="item__level">${label}</span>
                     <div class="item__count"><strong>${parking}</strong>/${total}</div>
-                    <button id="parkSummaryDetail" type="button" class="item__link"><span class="hide">자세히보기</span></button>
+                    <button id="parkSummaryDetail_${label}" type="button" class="item__link" data-label="${label}"><span class="hide">자세히보기</span></button>
                   `;
                 listEl.appendChild(div);
             }
@@ -2119,6 +2152,7 @@ const layerPopup = (function () {
             listEl.prepend(summaryEl);
         }
         bindParkSummaryRefresh();
+        bindParkSummaryDetail();
     }
 
     function renderResultHeader(result) {
@@ -2144,6 +2178,10 @@ const layerPopup = (function () {
     }
 
     const setParking = (searchParams = {}) => {
+        // if (!searchParams || Object.keys(searchParams).length === 0) {
+        //     const p = buildParams();
+        //     if (p) searchParams = p;
+        // }
         Promise.all([
             getParkingTags(),
             getParkingSearch(searchParams)
@@ -2169,6 +2207,17 @@ const layerPopup = (function () {
         const start = document.getElementById('parkStartDate')?.value || '';
         const end   = document.getElementById('parkEndDate')?.value || '';
 
+        // if (!start || !end) {
+        //     const now = new Date();
+        //     if (!start) {
+        //         const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        //         start = `${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(first.getDate()).padStart(2,'0')}`;
+        //     }
+        //     if (!end) {
+        //         end = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        //     }
+        // }
+
         if (start && end && new Date(start) > new Date(end)) {
             alertSwal('종료일이 시작일보다 빠릅니다.')
             return null;
@@ -2187,9 +2236,9 @@ const layerPopup = (function () {
         const inoutType = getVal('#inoutTypeSelect');
         const exitId = getVal('#inoutCarIdSelect');
         const regularType = getVal('#regularTypeSelect');
-        const carNo = getVal('#carNoSelect');
+        const searchType = getVal('#parkSearchSelect');
 
-        const deviceName  = document.getElementById('deviceName')?.value.trim() ?? '';
+        const parkSearchInput  = document.getElementById('parkSearchInput')?.value.trim() ?? '';
 
         const setIf = (k, v) => { if (v !== '' && v != null) param[k] = v; };
 
@@ -2197,25 +2246,28 @@ const layerPopup = (function () {
         setIf('inoutType', inoutType);
         setIf('exitId', exitId);
         setIf('regularType', regularType);
-        setIf('carNo', carNo);
-        setIf('deviceName', deviceName);
+        setIf('searchType', searchType);
+        setIf('parkSearchInput', parkSearchInput);
 
+        console.log("param : ", param);
         return param;
     }
 
-    document.getElementById('parkSearchBtn').addEventListener('click', async () => {
-        const params = buildParams();
+    const parkSearchBtn = document.getElementById('parkSearchBtn');
+    if (parkSearchBtn) {
+        parkSearchBtn.addEventListener('click', async () => {
+            const params = buildParams();
+            try {
+                const result = await getParkingSearch(params);
+                renderResultHeader(result);
+                renderResultTableAndPaging(result);
+            } catch (e) {
+                console.error('parkSearchBtn click error:', e);
+            }
+        });
+    }
 
-        try {
-            const result = await getParkingSearch(params);
-            renderResultHeader(result);
-            renderResultTableAndPaging(result);
-        } catch (e) {
-            console.error('parkSearchBtn click error:', e);
-        }
-    });
-
-    ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#carNoSelect']
+    ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#parkSearchSelect']
         .forEach(id => {
             const box = document.querySelector(id);
             if (box && !box.dataset.bound) {
@@ -2224,25 +2276,32 @@ const layerPopup = (function () {
             }
         });
 
-    document.getElementById('parkRefresh').addEventListener('click', async (event) => {
-        try {
-            resetParkingFilterUI();
-            const result = await getParkingSearch({});
-            renderResultHeader(result);
-            renderResultTableAndPaging(result);
-        } catch (err) {
-            console.error('parkRefresh error:', err);
-        }
-    })
+    const parkRefreshBtn = document.getElementById('parkRefresh');
+    if (parkRefreshBtn) {
+        parkRefreshBtn.addEventListener('click', async (event) => {
+            try {
+                resetParkingFilterUI();
+                const params = buildParams() || {};
+                const result = await getParkingSearch(params);
+                renderResultHeader(result);
+                renderResultTableAndPaging(result);
+            } catch (err) {
+                console.error('parkRefresh error:', err);
+            }
+        })
+    }
 
-    document.getElementById('parkSummaryRefresh').addEventListener('click', async (e) => {
-        try {
-            const parkingTagValue = await getParkingTags();
-            renderTagSummaryAndList(parkingTagValue);
-        } catch (err) {
-            console.error('tags refresh error:', err);
-        }
-    })
+    // const parkSummaryRefreshBtn = document.getElementById('parkSummaryRefresh');
+    // if (parkSummaryRefreshBtn) {
+    //     parkSummaryRefreshBtn.addEventListener('click', async (e) => {
+    //         try {
+    //             const parkingTagValue = await getParkingTags();
+    //             renderTagSummaryAndList(parkingTagValue);
+    //         } catch (err) {
+    //             console.error('tags refresh error:', err);
+    //         }
+    //     })
+    // }
 
     function bindParkSummaryRefresh() {
         const btn = document.getElementById('parkSummaryRefresh');
@@ -2256,6 +2315,29 @@ const layerPopup = (function () {
                 console.error('tags refresh error:', err);
             }
         });
+    }
+
+    function bindParkSummaryDetail() {
+
+        const buildingList = BuildingManager.findAll();
+        const parkingMap = (buildingList || []).find(building => building?.name?.includes('주차장'));
+        const currentId = new URLSearchParams(location.search).get('buildingId');
+        document.querySelectorAll('.item__link').forEach(item => {
+            item.addEventListener('click', () => {
+                document.getElementById('systemPopup').style.display = 'none';
+                document.getElementById('parkingPop').style.display = 'none';
+                document.getElementById('parkingTab').classList.remove = 'active'
+
+                const label = item.dataset.label;
+                if (String(currentId) !== String(parkingMap.id)) {
+                    sessionStorage.setItem('parkingFloor', label);
+                    window.location.href = `/map?buildingId=${parkingMap.id}`;
+                }
+                const floor = (parkingMap?.floors || []).find(f => f?.name === label);
+                Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(floor.id);
+            })
+        })
     }
 
     function initSelectBox(box) {

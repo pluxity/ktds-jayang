@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,6 @@ public class ParkingDataService {
                     "carNo, inoutCarId, parkingFee, regularType";
     private static final String BASE_QUERY = "SELECT " + COLUMN_LIST + " FROM dbo.INOUT";
 
-
     public List<Map<String, Object>> getAllColumn() {
         return secondaryJdbcTemplate.queryForList(BASE_QUERY);
     }
@@ -31,9 +31,9 @@ public class ParkingDataService {
             String inoutType,
             String exitId,
             String regularType,
-            String carNo,
+            String searchType,
             String parkingLotName,
-            String deviceName
+            String parkSearchInput
     ) {
 
         StringBuilder sql = new StringBuilder(BASE_QUERY);
@@ -68,17 +68,18 @@ public class ParkingDataService {
             conditions.add("regularType = ?");
             params.add(regularType);
         }
-        if (carNo != null && !carNo.isEmpty()) {
-            conditions.add("carNo = ?");
-            params.add(carNo);
-        }
         if (parkingLotName != null && !parkingLotName.isEmpty()) {
             conditions.add("parkingLotName LIKE ?");
             params.add("%" + parkingLotName + "%");
         }
-        if (deviceName != null && !deviceName.isEmpty()) {
-            conditions.add("deviceName LIKE ?");
-            params.add("%" + deviceName + "%");
+        if (parkSearchInput != null && !parkSearchInput.isEmpty()) {
+            if (Objects.equals(searchType, "carNo")) {
+                conditions.add("carNo LIKE ?");
+                params.add("%" + parkSearchInput + "%");
+            } else {
+                conditions.add("deviceName LIKE ?");
+                params.add("%" + parkSearchInput + "%");
+            }
         }
 
         if (!conditions.isEmpty()) {

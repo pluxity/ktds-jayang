@@ -734,7 +734,7 @@ const Init = (function () {
             const popupInfo = document.createElement('div');
 
             popupInfo.className = 'popup-info';
-            const statusCell = poiProperty.poiCategoryName === '공기질센서'
+            const statusCell = poiProperty.poiCategoryName === '공기질'
                 ? `<th>단계</th>`
                 : '';
             popupInfo.innerHTML =
@@ -942,13 +942,19 @@ const Init = (function () {
                                     </tr>
                                 `;
                             }).join('');
-                        } else if (['비상발전기', '저압 배전반', '특고압 배전반', '특고압 변압기'].includes(poiProperty.poiMiddleCategoryName)) {
+                        } else if (['비상발전기', '저압 배전반', '특고압 배전반', '특고압 변압기', '발전기'].includes(poiProperty.poiMiddleCategoryName)) {
 
                             console.log("poiProperty.poiMiddleCategoryName : ", poiProperty.poiMiddleCategoryName);
 
                             // GEN일 때도 따로 처리해야됨.
                             // 충전기 전압, 배터리 전압, 주파수, 역률 등등 추가 정보
-                            if (poiProperty.poiMiddleCategoryName === '특고압 변압기') {
+                            if (poiProperty.poiMiddleCategoryName === '특고압 변압기' ||
+                                    (
+                                    poiProperty.poiMiddleCategoryName === '저압 배전반' &&
+                                    data.TAGs.some(tag =>
+                                        ['ELD', 'ATS', 'NVR'].some(keyword => tag.tagName.includes(keyword))
+                                    )
+                                )) {
                                 tbody.innerHTML = data.TAGs.map(tag => {
                                     const statusText = { 0: '정상', 1: '경보' }[tag.currentValue];
                                     return `
@@ -977,7 +983,8 @@ const Init = (function () {
                                 "3상_유효전력": "유효전력",
                                 "3상_무효전력": "무효전력",
                                 "유효전력량": "유효 전력량",
-                                "무효전력량": "무효 전력량"
+                                "무효전력량": "무효 전력량",
+                                "R상_전압_30": "R상 전압 30"
                             };
 
                             const unmatchedTags = [];
@@ -995,6 +1002,11 @@ const Init = (function () {
                             const rowList = data.TAGs.map(tag => {
                                 const tagNamePart = tag.tagName.split('-').pop();
                                 const parts = tagNamePart.split('_');
+
+                                if (!isNaN(parts[parts.length - 1])) {
+                                    parts.pop();
+                                }
+
                                 let key = '';
                                 if (parts.length >= 3 && ['R', 'S', 'T', '3상'].includes(parts[parts.length - 3])) {
                                     key = parts.slice(-3).join('_');
@@ -1012,6 +1024,12 @@ const Init = (function () {
                                 if (TAG_LABEL_MAP[key]) {
                                     let unit = '';
                                     switch (true) {
+                                        case key.includes('무효전력량'):
+                                            unit = 'kVarh';
+                                            break;
+                                        case key.includes('무효전력'):
+                                            unit = 'kVar';
+                                            break;
                                         case key.includes('전력량'):
                                             unit = 'kWH';
                                             break;
@@ -1023,6 +1041,9 @@ const Init = (function () {
                                             break;
                                         case key.includes('전력'):
                                             unit = 'kW';
+                                            break;
+                                        case key.includes('주파수'):
+                                            unit = 'Hz';
                                             break;
                                         default:
                                             unit = '';
@@ -1061,22 +1082,24 @@ const Init = (function () {
                                             tagName: tag.tagName,
                                             currentValue: tag.currentValue
                                         });
-                                    } else if (tag.tagName.includes('ATS')) {
-                                        unmatchedGroups.ATS.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('NVR')) {
-                                        unmatchedGroups.NVR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('ELD')) {
-                                        unmatchedGroups.ELD.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('ACB_ON') || tag.tagName.includes('VCB_ON')) {
+                                    }
+                                    // else if (tag.tagName.includes('ATS')) {
+                                    //     unmatchedGroups.ATS.push({
+                                    //         tagName: tag.tagName,
+                                    //         currentValue: tag.currentValue
+                                    //     });
+                                    // } else if (tag.tagName.includes('NVR')) {
+                                    //     unmatchedGroups.NVR.push({
+                                    //         tagName: tag.tagName,
+                                    //         currentValue: tag.currentValue
+                                    //     });
+                                    // } else if (tag.tagName.includes('ELD')) {
+                                    //     unmatchedGroups.ELD.push({
+                                    //         tagName: tag.tagName,
+                                    //         currentValue: tag.currentValue
+                                    //     });
+                                    // }
+                                    else if (tag.tagName.includes('ACB_ON') || tag.tagName.includes('VCB_ON') || tag.tagName.includes('POINT')) {
                                         unmatchedGroups.CB_ON.push({
                                             tagName: tag.tagName,
                                             currentValue: tag.currentValue
@@ -1092,6 +1115,7 @@ const Init = (function () {
                                 }
                             }).filter(Boolean);
 
+                            console.log("unmatchedGroups : ", unmatchedGroups);
                             if (rowList.length <= 10) {
                                 tbody.innerHTML = rowList.map(row => `
                                     <tr>
@@ -1146,11 +1170,17 @@ const Init = (function () {
                             row2.style.display = 'flex';
                             row2.style.gap = '8px';
 
-                            const alertGroups = ['CB_ON', 'OCR', 'OCGR', 'UVR', 'NVR', 'ELD', 'ATS'];
+                            // const alertGroups = ['CB_ON', 'OCR', 'OCGR', 'UVR', 'NVR', 'ELD', 'ATS'];
+                            const alertGroups = ['CB_ON', 'OCR', 'OCGR', 'UVR'];
                             alertGroups.forEach((group, i) => {
                                 // tag에 있는거만 버튼만듬
                                 const groupData = unmatchedGroups[group];
-                                const filtered = groupData.filter(tag => tag.tagName.includes(group));
+                                const filtered = groupData.filter(tag => {
+                                    if (group === 'CB_ON') {
+                                        return tag.tagName.includes('CB_ON') || tag.tagName.includes('POINT');
+                                    }
+                                    return tag.tagName.includes(group);
+                                });
                                 if (filtered.length === 0) return;
                                 const isActive = unmatchedGroups[group]?.some(tag => tag.currentValue === '1');
 
@@ -1177,12 +1207,12 @@ const Init = (function () {
                             content.appendChild(buttonWrapper);
 
                             // label 색깔 처리 테스트중
-                            ['OCR', 'OCGR', 'UVR', 'CB_ON', 'ATS', 'NVR', 'ELD'].forEach(group => {
-                                const found = unmatchedGroups[group].find(tag => tag.currentValue == '1');
-                                if (found) {
-                                    console.log(`${group} group has active tag:`, found);
-                                }
-                            });
+                            // ['OCR', 'OCGR', 'UVR', 'CB_ON', 'ATS', 'NVR', 'ELD'].forEach(group => {
+                            //     const found = unmatchedGroups[group].find(tag => tag.currentValue == '1');
+                            //     if (found) {
+                            //         console.log(`${group} group has active tag:`, found);
+                            //     }
+                            // });
 
                         }  else if (poiProperty.poiMiddleCategoryName === '무정전전원장치') {
 
@@ -1384,8 +1414,9 @@ const Init = (function () {
                         }
 
                         else {
+                            console.log("data : " , data);
                             tbody.innerHTML = data.TAGs.map(tag => {
-                                const statusCell = poiProperty.poiCategoryName === '공기질센서'
+                                const statusCell = poiProperty.poiCategoryName === '공기질'
                                     ? `<td>${getStatusText(tag.S)}</td>`
                                     : '';
                                 return `
@@ -1396,6 +1427,7 @@ const Init = (function () {
                                     </tr>
                                 `;
                             }).join('');
+
                         }
                     } else {
                         tbody.innerHTML = `

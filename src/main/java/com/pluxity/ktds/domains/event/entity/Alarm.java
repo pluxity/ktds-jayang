@@ -62,6 +62,10 @@ public class Alarm {
     @Comment("태그 이름")
     private String tagName;
 
+    @Column(name = "tag_value")
+    @Comment("태그 값")
+    private String tagValue;
+
     public void updateConfirmTime(LocalDateTime confirmTime) {
         this.confirmTime = confirmTime;
     }
@@ -73,6 +77,7 @@ public class Alarm {
                 .deviceNm(this.deviceNm)
                 .alarmType(this.alarmType.getStatus())
                 .tagName(this.tagName)
+                .tagValue(this.tagValue)
                 .buildingNm(this.buildingNm)
                 .floorNm(this.floorNm)
                 .process(this.process)

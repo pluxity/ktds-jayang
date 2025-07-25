@@ -14,6 +14,7 @@ public record AlarmResponseDTO(
         String alarmType,
         String process,
         String tagName,
+        String tagValue,
         LocalDateTime occurrenceDate,
         LocalDateTime confirmDate
 ){}

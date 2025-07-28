@@ -701,6 +701,13 @@ const Init = (function () {
             popupInfo.querySelector(`[data-camera-name]`).textContent = poiProperty.name;
             popupInfo.querySelector('.video__container canvas').id = canvasId;
 
+            const cameraNameEl = popupInfo.querySelector(`[data-camera-name]`);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.className = 'poi-id';
+            hiddenInput.value = poiInfo.id;
+            cameraNameEl.parentNode.insertBefore(hiddenInput, cameraNameEl.nextSibling);
+
             const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
             popupInfo.style.position = 'fixed';
             popupInfo.style.zIndex = '999';

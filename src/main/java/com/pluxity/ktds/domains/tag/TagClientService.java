@@ -2,6 +2,8 @@ package com.pluxity.ktds.domains.tag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pluxity.ktds.domains.tag.dto.AlarmData;
+import com.pluxity.ktds.domains.tag.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.tag.dto.TagData;
 import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
@@ -283,6 +285,61 @@ public class TagClientService {
                 ));
             }
             TagResponseDTO processedDto = new TagResponseDTO(
+                    processedTags.size(),
+                    rawResponse.timestamp(),
+                    processedTags
+            );
+
+            String resultJson = objectMapper.writeValueAsString(processedDto);
+            return ResponseEntity.ok(resultJson);
+        } catch (RestClientException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Service Unavailable : " + e.getMessage());
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("JSON Processing Error : " + e.getMessage());
+        }
+    }
+
+    public ResponseEntity<String> testReadAlarm(List<String> tags) {
+        try {
+            String requestStr = objectMapper.writeValueAsString(tags);
+            HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
+            ResponseEntity<String> response = restTemplate.exchange(
+                    baseUrl + "/?ReadAlarm",
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+
+            if (response.getBody() == null) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No data");
+            }
+            AlarmResponseDTO rawResponse = objectMapper.readValue(response.getBody(), AlarmResponseDTO.class);
+
+            List<AlarmData> processedTags = new ArrayList<>();
+            for (AlarmData td : rawResponse.alarmDataList()) {
+                String tagName = td.tagName();
+                String[] parts = tagName.split("-");
+                String rawValue = td.tagValue();
+                String enumName = parts[parts.length - 1];
+                String desc = null;
+                String prefix = parts[0];
+                String category = parts[2];
+                String evMiddleCategory = parts[3];
+
+                desc = rawValue;
+                processedTags.add(new AlarmData(
+                        td.occurrenceDate(),
+                        tagName,
+                        desc,
+                        td.alarmStatus(),
+                        td.alarmType(),
+                        td.confirmStatus(),
+                        td.confirmTime()
+                ));
+            }
+            AlarmResponseDTO processedDto = new AlarmResponseDTO(
                     processedTags.size(),
                     rawResponse.timestamp(),
                     processedTags

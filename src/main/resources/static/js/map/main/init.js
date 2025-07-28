@@ -1367,7 +1367,7 @@ const Init = (function () {
                                           </tr>
                                       `;
                             }).join('');
-                        }else if(poiProperty.poiMiddleCategoryName === 'BIPV'){
+                        } else if(poiProperty.poiMiddleCategoryName === 'BIPV'){
                             // 태그를 두 그룹으로 분리
                             const regularTags = data.TAGs.filter(tag => !tag.tagName.includes('-G-'));
                             const comprehensiveTags = data.TAGs.filter(tag => tag.tagName.includes('-G-'));
@@ -1418,9 +1418,120 @@ const Init = (function () {
                                           </tr>
                                       `;
                             }).join('');
-                        }
+                        } else if (poiProperty.poiMiddleCategoryName == "공기질") {
+                            let locationRow = '';
 
-                        else {
+                            const renderOrder = [
+                                'Temperature',
+                                'Humidity',
+                                'Noise',
+                                'VOC',
+                                'PM10',
+                                'PM25',
+                                'CICI',
+                                'COCI'
+                            ];
+
+                            const tagsBySuffix = Object.fromEntries(
+                                data.TAGs.map(tag => {
+                                    const suffix = tag.tagName.split('_').pop();
+                                    return [suffix, tag];
+                                })
+                            );
+
+                            const renderedRows = renderOrder.map(suffix => {
+                                const tag = tagsBySuffix[suffix];
+                                if (!tag) return '';
+
+                                let label = '';
+                                let unit = '';
+                                let grade = '-';
+
+                                switch (suffix) {
+                                    case 'Temperature':
+                                        label = '온도';
+                                        unit = '˚C';
+                                        break;
+                                    case 'Humidity':
+                                        label = '습도';
+                                        unit = '%';
+                                        break;
+                                    case 'Noise':
+                                        label = '소음';
+                                        unit = 'dB';
+                                        break;
+                                    case 'VOC':
+                                        label = '휘발성유기화합물';
+                                        unit = 'ppm';
+                                        break;
+                                    case 'PM10':
+                                        label = '미세먼지';
+                                        unit = '㎍/㎥';
+                                        if (tag.currentValue != null && !isNaN(tag.currentValue)) {
+                                            const value = parseFloat(tag.currentValue);
+                                            if (value <= 30)
+                                                grade = '좋음';
+                                            else if (value <= 80)
+                                                grade = '보통';
+                                            else if (value <= 150)
+                                                grade = '나쁨';
+                                            else
+                                                grade = '매우나쁨';
+                                        }
+                                        break;
+                                    case 'PM25':
+                                        label = '초미세먼지';
+                                        unit = '㎍/㎥';
+                                        if (tag.currentValue != null && !isNaN(tag.currentValue)) {
+                                            const value = parseFloat(tag.currentValue);
+                                            if (value <= 15)
+                                                grade = '좋음';
+                                            else if (value <= 35)
+                                                grade = '보통';
+                                            else if (value <= 75)
+                                                grade = '나쁨';
+                                            else
+                                                grade = '매우나쁨';
+                                        }
+                                        break;
+                                    case 'CICI':
+                                        label = '실내 쾌적지수';
+                                        unit = '';
+                                        if (!locationRow) {
+                                            locationRow = `
+                                                <tr>
+                                                    <td>설치위치</td>
+                                                    <td>실내</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            `;
+                                        }
+                                        break;
+                                    case 'COCI':
+                                        label = '실외 쾌적지수';
+                                        unit = '';
+                                        if (!locationRow) {
+                                            locationRow = `
+                                                <tr>
+                                                    <td>설치위치</td>
+                                                    <td>실외</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            `;
+                                        }
+                                        break;
+                                }
+                                return `
+                                    <tr>
+                                        <td>${label}</td>
+                                        <td>${tag.currentValue || '-'}${unit}</td>
+                                        <td>${(suffix === 'PM10' || suffix === 'PM25') ? grade : '-'}</td>
+                                    </tr>
+                                `;
+                            }).filter(row => row !== '').join('');
+
+                            tbody.innerHTML = (locationRow || '') + renderedRows;
+                        } else {
                             console.log("data : " , data);
                             tbody.innerHTML = data.TAGs.map(tag => {
                                 const statusCell = poiProperty.poiCategoryName === '공기질'

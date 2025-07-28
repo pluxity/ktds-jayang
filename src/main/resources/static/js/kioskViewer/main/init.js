@@ -152,8 +152,8 @@
         const kioskInfo    = document.querySelector('.kiosk-info');
         const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
         const nameMap = {
-            B2: 'B1',
-            B1: 'G1'
+            B2: 'B1F',
+            B1: 'GF'
         };
         storeBuilding.floors
             .filter(floor => kioskSet.has(floor.name))

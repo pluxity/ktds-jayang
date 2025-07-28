@@ -72,8 +72,8 @@ const popup = (function () {
                 thumbnailUrl = '/static/img/kiosk/img_kiosk_thumb.svg';
             }
             const nameMap = {
-                B2: 'B1',
-                B1: 'G1'
+                B2: 'B1F',
+                B1: 'GF'
             };
 
             const floor = BuildingManager.findFloorsByHistory().find(
@@ -199,8 +199,8 @@ const popup = (function () {
         const storeBuilding = await BuildingManager.findStore();
         const kioskSet = new Set(['B2','B1','1F','2F']);
         const nameMap = {
-            B2: 'B1',
-            B1: 'G1'
+            B2: 'B1F',
+            B1: 'GF'
         };
         const version = storeBuilding.getVersion()
         const floors = BuildingManager.findFloorsByHistory();

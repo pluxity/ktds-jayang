@@ -26,8 +26,8 @@
             document.getElementById('buildingId').value = buildingId;
 
             const nameMap = {
-                B2: 'B1',
-                B1: 'G1'
+                B2: 'B1F',
+                B1: 'GF'
             };
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
@@ -294,8 +294,8 @@
         const initLeftFloorSelect = () => {
             let floors = BuildingManager.findStore().floors;
             const nameMap = {
-                B2: 'B1',
-                B1: 'G1'
+                B2: 'B1F',
+                B1: 'GF'
             };
             floors
                 .filter(floor => kioskSet.has(floor.name))

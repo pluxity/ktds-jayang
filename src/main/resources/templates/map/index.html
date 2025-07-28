@@ -394,7 +394,7 @@
                     <!-- 조이스틱 -->
                     <div class="joystick">
                         <div class="joystick__bg" id="joystick-area">
-<!--                            <div class="joystick__stick" id="joystickStick"></div>-->
+<!--                           <div class="joystick__stick" id="joystickStick"></div>-->
                             <div class="joystick__directions">
                                 <span class="joystick__direction joystick__direction--up"></span>
                                 <span class="joystick__direction joystick__direction--up-right"></span>
@@ -412,43 +412,25 @@
                     <div class="controls">
                         <div class="controls__group">
                             <span class="controls__label">확대/축소</span>
-                            <button class="controls__btn controls__btn--zoom-in" data-target="rotation"><span
+                            <button class="controls__btn controls__btn--zoom-out" data-target="zoomOut"><span
                                     class="hide">확대/축소 감소</span></button>
-                            <div class="controls__slider">
-                                <div class="controls__track"></div>
-                                <div class="controls__progress" data-progress="0"></div>
-                                <input type="range" class="controls__input" min="0" max="100" value="0"
-                                       data-type="rotation">
-                            </div>
-                            <button class="controls__btn controls__btn--zoom-out" data-target="rotation"><span
+                            <button class="controls__btn controls__btn--zoom-in" data-target="zoomIn"><span
                                     class="hide">확대/축소 증가</span></button>
                         </div>
 
                         <div class="controls__group">
                             <span class="controls__label">포커스</span>
-                            <button class="controls__btn controls__btn--focus-in" data-target="focus"><span
+                            <button class="controls__btn controls__btn--focus-out" data-target="focusOut"><span
                                     class="hide">포커스 감소</span></button>
-                            <div class="controls__slider">
-                                <div class="controls__track"></div>
-                                <div class="controls__progress" data-progress="0"></div>
-                                <input type="range" class="controls__input" min="0" max="100" value="0"
-                                       data-type="focus">
-                            </div>
-                            <button class="controls__btn controls__btn--focus-out" data-target="focus"><span
+                            <button class="controls__btn controls__btn--focus-in" data-target="focusIn"><span
                                     class="hide">포커스 증가</span></button>
                         </div>
 
                         <div class="controls__group">
                             <span class="controls__label">조리개</span>
-                            <button class="controls__btn controls__btn--iris-in" data-target="iris"><span class="hide">조리개 감소</span>
+                            <button class="controls__btn controls__btn--iris-out" data-target="irisOut"><span class="hide">조리개 감소</span>
                             </button>
-                            <div class="controls__slider">
-                                <div class="controls__track"></div>
-                                <div class="controls__progress" data-progress="0"></div>
-                                <input type="range" class="controls__input" min="0" max="100" value="0"
-                                       data-type="iris">
-                            </div>
-                            <button class="controls__btn controls__btn--iris-out" data-target="iris"><span class="hide">조리개 증가</span>
+                            <button class="controls__btn controls__btn--iris-in" data-target="irisIn"><span class="hide">조리개 증가</span>
                             </button>
                         </div>
                     </div>

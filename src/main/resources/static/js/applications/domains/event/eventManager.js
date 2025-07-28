@@ -370,16 +370,50 @@ const EventManager = (() => {
         x = (parseInt(-x) / 100).toFixed(6);
         y = (parseInt(y) / 100).toFixed(6);
 
-        await player.ptzControl(player.cameraIp, "80", x, y, config.username, config.password)
+        await player.ptzControl(player.cameraIp, x, y, config.username, config.password)
     }
 
-    async function livePlayZoom(canvasId, zoom) {
+    // PTZ 컨트롤 공통 함수
+    async function executePTZAction(canvasId, method, value) {
         const config = await getCCTVConfig();
         const canvasElement = document.getElementById(canvasId);
         const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
-        await player.zoom(player.cameraIp, "80", config.username, config.password, zoom);
+        await player[method](player.cameraIp, config.username, config.password, value);
     }
+
+    // Zoom 컨트롤
+    async function continuousZoom(canvasId, zoom) {
+        await executePTZAction(canvasId, 'continuousZoom', zoom);
+    }
+
+    async function stopZoom(canvasId) {
+        await executePTZAction(canvasId, 'continuousZoom', 0);
+    }
+
+    // Focus 컨트롤
+    async function continuousFocus(canvasId, speed) {
+        await executePTZAction(canvasId, 'continuousFocus', speed);
+    }
+
+    async function stopFocus(canvasId) {
+        await executePTZAction(canvasId, 'continuousFocus', 0);
+    }
+
+    // Iris 컨트롤
+    async function continuousIris(canvasId, speed) {
+        await executePTZAction(canvasId, 'continuousIris', speed);
+    }
+
+    async function stopIris(canvasId) {
+        await executePTZAction(canvasId, 'continuousIris', 0);
+    }
+
+    // Camera Reset
+    async function resetCamera(canvasId) {
+        await executePTZAction(canvasId, 'resetCamera', 0);
+    }
+
 
     function getOrCreatePlayer(canvasId, config, canvasElement) {
         if (!window.livePlayers[canvasId]) {
@@ -949,7 +983,13 @@ const EventManager = (() => {
         playLiveStream,
         playPlaybackStream,
         livePlayMove,
-        livePlayZoom
+        continuousZoom,
+        continuousFocus,
+        continuousIris,
+        resetCamera,
+        stopZoom,
+        stopFocus,
+        stopIris
     }
 })();
 

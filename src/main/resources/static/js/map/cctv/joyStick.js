@@ -5,7 +5,7 @@ function JOYSTICK(parent) {
     this.maxMove = 180;  //일정 범위
     this.tempAngle = "stop";
     this.stick = document.createElement('div');
-    this.stick.classList.add('joystick-stick');
+    this.stick.classList.add('joystick__stick');
     parent.appendChild(this.stick);
 
     this.stick.addEventListener('mousedown', this.handleMouseDown.bind(this));
@@ -56,9 +56,9 @@ JOYSTICK.prototype.handleMouseMove = function (event) {
     if (Math.abs(xDiff) > this.maxMove || Math.abs(yDiff) > this.maxMove) {
         if (this.dragStart === null) return;
         this.stick.style.transition = '.2s';
-        this.stick.style.transform = `translate3d(0px, 0px, 0px)`;
+        // 중앙으로 돌아가기
+        this.stick.style.transform = `translate(-50%, -50%)`;
         this.dragStart = null;
-        // this.currentPos = { x: 0, y: 0 };
 
         this.stickMove(0, 0);
         return;
@@ -68,19 +68,20 @@ JOYSTICK.prototype.handleMouseMove = function (event) {
 
     const xNew = distance * Math.cos(angle);
     const yNew = distance * Math.sin(angle);
-    this.stick.style.transform = `translate3d(${xNew}px, ${yNew}px, 0px)`;
+
+    // 중앙 위치(-50%, -50%)에서 이동
+    this.stick.style.transform = `translate(calc(-50% + ${xNew}px), calc(-50% + ${yNew}px))`;
 
     this.stickMove(xNew, yNew);
 };
 
 JOYSTICK.prototype.handleMouseUp = function (event) {
-
     if (this.dragStart === null) return;
 
     this.stick.style.transition = '.2s';
-    this.stick.style.transform = `translate3d(0px, 0px, 0px)`;
+    // 중앙으로 돌아가기
+    this.stick.style.transform = `translate(-50%, -50%)`;
     this.dragStart = null;
-    // this.currentPos = { x: 0, y: 0 };
 
     this.stickMove(0, 0);
 };

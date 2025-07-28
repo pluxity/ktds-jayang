@@ -3498,20 +3498,17 @@ canvas {
 
 .ptz-viewer__panel .inner {
   display: flex;
-  gap: 25px;
-  align-items: flex-start;
+  gap: 60px;
 }
 
 /* timeControls가 보일 때만 column 레이아웃 */
 .ptz-viewer__panel .inner:has(#timeControls:not([style*="display: none"])) {
   flex-direction: column;
-  gap: 20px;
 }
 
 /* timeControls가 숨겨져 있을 때는 기존 row 레이아웃 */
 .ptz-viewer__panel .inner:has(#timeControls[style*="display: none"]) {
   flex-direction: row;
-  gap: 25px;
 }
 
 .ptz-viewer__panel .joystick {
@@ -3690,7 +3687,7 @@ canvas {
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  grid-gap: 10px;
+  grid-gap: 20px;
   min-width: 15.625rem;
 }
 

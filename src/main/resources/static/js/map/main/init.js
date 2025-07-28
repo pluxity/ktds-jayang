@@ -1587,18 +1587,15 @@ const Init = (function () {
         // PTZ 컨트롤 설정
         setUpPtzControls(popupInfo);
 
-        // 조이스틱 쓰로틀링 100ms에 한번만 이벤트 발생
-        let lastMoveTime = 0;
-        const THROTTLE_DELAY = 100;
 
         let joystick = new JOYSTICK(document.getElementById('joystick-area'));
-        joystick.stick.addEventListener('moveStick', async (e) => {
-            const now = Date.now();
-            if(now - lastMoveTime >= THROTTLE_DELAY) {
-                lastMoveTime = now;
-                await EventManager.livePlayMove(canvasId, e.detail.x, e.detail.y);
-            }
 
+        const throttledLivePlayMove = throttle(async (canvasId, x, y) => {
+            await EventManager.livePlayMove(canvasId, x, y);
+        }, 100);
+
+        joystick.stick.addEventListener('moveStick', async (e) => {
+            await throttledLivePlayMove(canvasId, e.detail.x, e.detail.y);
         })
 
 
@@ -1622,7 +1619,7 @@ const Init = (function () {
             }
         };
 
-        const handleModeSwitch = (mode) => {
+        const handleModeSwitch = async (mode) => {
             const playbackContainer = popupInfo.querySelector('.playback');
             const modeBtns = popupInfo.querySelectorAll('.playback__mode .button');
             const actionGroup = popupInfo.querySelector('.playback__action');
@@ -1687,7 +1684,7 @@ const Init = (function () {
                     resetBtn.style.display = 'none';
                     panel.style.padding = '20px 20px';
                     timeControls.style.display = 'flex';
-                } else{
+                } else {
                     ptzControls.style.display = 'none';
                     joystick.style.display = 'none';
                     resetBtn.style.display = 'none';
@@ -1731,16 +1728,6 @@ const Init = (function () {
         const initEventListeners = () => {
             // 토글 버튼 이벤트
             const toggleBtn = popupInfo.querySelector('#toggleControl');
-
-            const canvasId = popupInfo.querySelector('canvas').id;
-            const player = window.livePlayers[canvasId];
-            let cameraIp = null;
-            if(player){
-                cameraIp = player.cameraIp;
-            }else{
-                const poiInfo = Px.Poi.GetData(canvasId.slice(5));
-                cameraIp = poiInfo.property.cameraIp;
-            }
 
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', handleToggleControlPanel);
@@ -1788,6 +1775,16 @@ const Init = (function () {
             popupInfo.querySelectorAll('.playback__button').forEach(btn => {
                 btn.addEventListener('click', async function () {
 
+                    const canvasId = popupInfo.querySelector('canvas').id;
+                    const player = window.livePlayers[canvasId];
+                    let cameraIp = null;
+                    if(player){
+                        cameraIp = player.cameraIp;
+                    }else{
+                        const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                        cameraIp = poiInfo.property.cameraIp;
+                    }
+
                     const dateValue = document.querySelector('.ptz-viewer__panel input[type="date"]').value;
                     const timeValue = document.querySelector('.ptz-viewer__panel input[type="time"]').value;
 
@@ -1802,7 +1799,7 @@ const Init = (function () {
                     if (btnClass.includes('playback__button--play')) {
                         console.log('Playback: Play');
                         if (player && player.isPaused) {
-
+                            player.isPaused = false;
                             player.resumePlayback();
                         } else {
 
@@ -1833,58 +1830,46 @@ const Init = (function () {
                 });
             });
 
-            // 슬라이더 이벤트 리스너
-            popupInfo.querySelectorAll('.controls__input').forEach(slider => {
-                updateSliderProgress(slider);
+            // PTZ 컨트롤 버튼들
+            const ptzButtons = [
+                { btn: popupInfo.querySelector('.controls__btn--zoom-in[data-target="zoomIn"]'), type: 'zoom', direction: 0.3, startMethod: 'continuousZoom', stopMethod: 'stopZoom' },
+                { btn: popupInfo.querySelector('.controls__btn--zoom-out[data-target="zoomOut"]'), type: 'zoom', direction: -0.3, startMethod: 'continuousZoom', stopMethod: 'stopZoom' },
+                { btn: popupInfo.querySelector('.controls__btn--focus-in[data-target="focusIn"]'), type: 'focus', direction: 0.3, startMethod: 'continuousFocus', stopMethod: 'stopFocus' },
+                { btn: popupInfo.querySelector('.controls__btn--focus-out[data-target="focusOut"]'), type: 'focus', direction: -0.3, startMethod: 'continuousFocus', stopMethod: 'stopFocus' },
+                { btn: popupInfo.querySelector('.controls__btn--iris-in[data-target="irisIn"]'), type: 'iris', direction: 0.3, startMethod: 'continuousIris', stopMethod: 'stopIris' },
+                { btn: popupInfo.querySelector('.controls__btn--iris-out[data-target="irisOut"]'), type: 'iris', direction: -0.3, startMethod: 'continuousIris', stopMethod: 'stopIris' }
+            ];
 
-                slider.addEventListener('input', async function() {
-                    updateSliderProgress(this);
-                    const label = this.closest('.controls__group')?.querySelector('.controls__label')?.textContent;
-                    console.log(`${label}: ${this.value}`);
-                    if(label === '확대/축소'){
-                        const zoom = this.value / 100; // 0~1 범위로 변환
-                        await EventManager.livePlayZoom(canvasId, zoom);
-                    }
-                });
-            });
-
-            // 컨트롤 버튼 이벤트 리스너
-            ['rotation', 'focus', 'iris'].forEach(type => {
-                popupInfo.querySelectorAll(`.controls__btn[data-target="${type}"]`).forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const btnClass = this.className;
-                        let change = 0;
-
-                        if (btnClass.includes('zoom-in') || btnClass.includes('focus-in') || btnClass.includes('iris-in')) {
-                            change = -5; // in은 감소
-                        } else if (btnClass.includes('zoom-out') || btnClass.includes('focus-out') || btnClass.includes('iris-out')) {
-                            change = 5;  // out은 증가
-                        }
-
-                        if (change !== 0) {
-                            changeSliderValue(type, change);
+            // PTZ 버튼 이벤트 설정
+            ptzButtons.forEach(({ btn, type, direction, startMethod, stopMethod }) => {
+                if (btn) {
+                    btn.addEventListener('mousedown', async () => {
+                        const canvasId = popupInfo.querySelector('canvas').id;
+                        const player = window.livePlayers[canvasId];
+                        if (player) {
+                            await EventManager[startMethod](canvasId, direction);
                         }
                     });
-                });
+
+                    btn.addEventListener('mouseup', async () => {
+                        const canvasId = popupInfo.querySelector('canvas').id;
+                        const player = window.livePlayers[canvasId];
+                        if (player) {
+                            await EventManager[stopMethod](canvasId);
+                        }
+                    });
+                }
             });
 
-            // 카메라 리셋 버튼
+            // 리셋 버튼
             const resetBtn = popupInfo.querySelector('#resetCamera');
             if (resetBtn) {
-                resetBtn.addEventListener('click', function() {
-                    console.log('Camera Reset');
-
-                    // 조이스틱 리셋
-                    const joystickStick = popupInfo.querySelector('#joystickStick');
-                    if (joystickStick) {
-                        joystickStick.style.transform = 'translate(-50%, -50%)';
+                resetBtn.addEventListener('click', async () => {
+                    const canvasId = popupInfo.querySelector('canvas').id;
+                    const player = window.livePlayers[canvasId];
+                    if (player) {
+                        await EventManager.resetCamera(canvasId);
                     }
-
-                    // 슬라이더 리셋
-                    popupInfo.querySelectorAll('.controls__input').forEach(slider => {
-                        slider.value = 0;
-                        updateSliderProgress(slider);
-                    });
                 });
             }
         };
@@ -1894,11 +1879,6 @@ const Init = (function () {
         setTimeout(() => {
             handleModeSwitch('live');
         }, 100);
-    }
-
-    function validateDateTimeInputs() {
-
-
     }
 
     async function handlePlayButton(button) {

@@ -80,3 +80,8 @@ cctv:
   LG-server-Port: 9100
   LG-live-port: 555
   LG-playback-port: 554
+  username: admin
+  password: pluxity123!@#
+
+tags:
+  batchSize: 1000

@@ -6,11 +6,13 @@ import com.pluxity.ktds.domains.building.repostiory.PoiTagRepository;
 import com.pluxity.ktds.domains.tag.TagClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,6 +22,9 @@ public class PoiTagSyncService {
     
     private final PoiTagRepository poiTagRepository;
     private final TagClientService tagClientService;
+
+    @Value("${tags.batchSize}")
+    private int batchSize;
 
     
     /**
@@ -50,16 +55,29 @@ public class PoiTagSyncService {
     /**
      * PoiTag 리스트 동기화
      */
-    private void syncPoiTags(List<PoiTag> poiTags) {
-        if(registerTagToExternalServer(poiTags)){
-            for (PoiTag poiTag : poiTags) {
-                // poiTag.markAsRegistered(); update 막음
-                log.debug("POI {}  등록 성공", poiTag.getTagName());
-            }
-            poiTagRepository.saveAll(poiTags);
+    public void syncPoiTags(List<PoiTag> poiTags) {
+        List<String> tagNames = poiTags.stream()
+                .map(PoiTag::getTagName)
+                .toList();
 
-        }else {
-            log.warn( "등록 실패" );
+        List<List<String>> batches = createBatches(tagNames);
+
+        for( List<String> tagBatch : batches) {
+            if(registerTagToExternalServer(tagBatch)) {
+                log.info("{}개의 태그 등록 성공", tagBatch.size());
+                // 등록 성공 시 PoiTag의 externalRegistered 상태를 true로 업데이트
+                List<Long> batchTagIds = poiTags.stream()
+                        .filter(tag -> tagBatch.contains(tag.getTagName()))
+                        .map(PoiTag::getId)
+                        .toList();
+
+                if(! batchTagIds.isEmpty()){
+                    int updateCount = poiTagRepository.updateExternalRegisteredByIds(batchTagIds);
+                    log.info("일괄 업데이트 완료: {}개", updateCount);
+                }
+            }else {
+                log.warn( "등록 실패" );
+            }
         }
     }
     
@@ -78,9 +96,9 @@ public class PoiTagSyncService {
     /**
      * 외부 서버에 태그 등록(일괄)
      */
-    private boolean registerTagToExternalServer(List<PoiTag> tagNames) {
+    private boolean registerTagToExternalServer(List<String> tagNames) {
         try {
-            // tagClientService.addTag(tagNames);
+//            tagClientService.addTags(tagNames);
             log.debug("외부 서버에 태그 등록 요청: TAG SIZE={}", tagNames.size());
 
             // 임시로 성공으로 처리 (실제 구현 시 제거)
@@ -90,5 +108,21 @@ public class PoiTagSyncService {
             log.error("외부 서버 태그 등록 실패: 오류={}", e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 태그 리스트를 배치로 분할
+     * 100개씩 묶어서 처리
+     */
+
+    private List<List<String>> createBatches(List<String> tagNames) {
+        List<List<String>> batches = new ArrayList<>();
+
+        for (int i = 0; i < tagNames.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, tagNames.size());
+            batches.add(tagNames.subList(i, end));
+        }
+
+        return batches;
     }
 } 

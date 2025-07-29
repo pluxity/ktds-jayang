@@ -58,6 +58,7 @@ public class PoiService {
     private final BuildingFileHistoryRepository buildingFileHistoryRepository;
     private final FloorHistoryRepository floorHistoryRepository;
     private final PoiTagSyncService poiTagSyncService;
+    private final PoiTagRepository poiTagRepository;
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -173,8 +174,8 @@ public class PoiService {
     }
 
     @Transactional(readOnly = true)
-    public Poi findPoiIdsByTagName(String tagName){
-        return poiRepository.findPoiByTagName(tagName);
+    public PoiTag findPoiIdsByTagName(String tagName){
+        return poiTagRepository.findByTagName(tagName);
     }
 
     @Transactional

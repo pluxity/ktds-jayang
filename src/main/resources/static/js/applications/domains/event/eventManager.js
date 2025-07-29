@@ -36,7 +36,7 @@ const EventManager = (() => {
 
     // SSE 연결
     const connectToSSE = () => {
-        const eventSource = new EventSource(`${api.defaults.baseURL}/events/subscribe`);
+        const eventSource = new EventSource(`/events/subscribe`);
 
         // 이벤트 발생 시
         eventSource.addEventListener('newAlarm', async (event) => {

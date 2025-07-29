@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pluxity.ktds.domains.building.entity.PoiTag;
 import com.pluxity.ktds.domains.tag.ElevatorTagManager;
 import java.util.*;
 import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
@@ -84,7 +85,7 @@ public class PoiController {
     }
 
     @GetMapping("/tagNames/{tagName}")
-    public DataResponseBody<Poi> findPoiByTagName(@PathVariable String tagName) {
+    public DataResponseBody<PoiTag> findPoiByTagName(@PathVariable String tagName) {
         return DataResponseBody.of(service.findPoiIdsByTagName(tagName));
     }
 

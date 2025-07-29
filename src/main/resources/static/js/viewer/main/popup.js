@@ -3226,40 +3226,27 @@ const layerPopup = (function () {
             updatePoiSelectBox(poiListData);
             setDatePicker();
             const alarmTypes = [
-                { value: 0,  label: "강제문열림" },
-                { value: 1,  label: "장시간 문열림" },
-                { value: 2,  label: "소화전(옥내,옥외)" },
-                { value: 3,  label: "불꽃감지기" },
-                { value: 4,  label: "연기감지기" },
-                { value: 5,  label: "열감지기" },
-                { value: 6,  label: "가스감지기" },
-                { value: 7,  label: "공기흡입형감지기" },
-                { value: 8,  label: "1차폐쇄" },
-                { value: 9,  label: "2차폐쇄" },
-                { value: 10, label: "Normal" },
-                { value: 11, label: "Alarm" },
-                { value: 12, label: "펌프 경보(고장)" },
-                { value: 13, label: "OCR" },
-                { value: 14, label: "OCGR" },
-                { value: 15, label: "UVR" },
-                { value: 16, label: "NVR" },
-                { value: 17, label: "ELD" },
-                { value: 18, label: "ATS" },
-                { value: 19, label: "고장" },
-                { value: 20, label: "점검중" },
-                { value: 21, label: "파킹" },
-                { value: 22, label: "독립운전" },
-                { value: 23, label: "중량초과" },
-                { value: 24, label: "화재관제운전" },
-                { value: 25, label: "화재관제운전 귀착" },
-                { value: 26, label: "1차소방운전" },
-                { value: 27, label: "2차소방운전" },
-                { value: 28, label: "전용운전" },
-                { value: 29, label: "보수운전" },
-                { value: 30, label: "정전운전" },
-                { value: 31, label: "화재운전" },
-                { value: 32, label: "지진운전" },
-                { value: 33, label: "배회 이벤트" }
+                { value: 0,  label: "경보" },
+                { value: 1,  label: "Alarm" },
+                { value: 2,  label: "강제문열림" },
+                { value: 3,  label: "장시간 문열림" },
+                { value: 4,  label: "1차폐쇄" },
+                { value: 5,  label: "2차폐쇄" },
+                { value: 6,  label: "고장" },
+                { value: 7,  label: "점검중" },
+                { value: 8,  label: "파킹" },
+                { value: 9,  label: "독립운전" },
+                { value: 10,  label: "중량초과" },
+                { value: 11,  label: "화재관제운전" },
+                { value: 12,  label: "화재관제운전 귀착" },
+                { value: 13,  label: "1차소방운전" },
+                { value: 14,  label: "2차소방운전" },
+                { value: 15,  label: "전용운전" },
+                { value: 16,  label: "보수운전" },
+                { value: 17,  label: "정전운전" },
+                { value: 18,  label: "화재운전" },
+                { value: 19,  label: "지진운전" },
+                { value: 20,  label: "배회이벤트" }
             ];
             createEventCheck(alarmTypes, "eventCheckBoxList");
         }
@@ -3295,7 +3282,8 @@ const layerPopup = (function () {
                 )
             );
 
-            let searchedAlarms = filteredAlarms.slice();
+            // let searchedAlarms = filteredAlarms.slice();
+            let searchedAlarms = data.slice();
 
             if (selectedBuilding !== '전체' && selectedBuilding !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
@@ -3354,17 +3342,26 @@ const layerPopup = (function () {
             eventPopup.style.left = '50%';
             eventPopup.style.transform = 'translate(-50%, -50%)';
             eventPopup.style.display = 'inline-block';
-            alarmCountEl.textContent = searchedAlarms.length.toLocaleString();
+
+            const matchedAlarms = searchedAlarms.filter(data =>
+                poiList.some(poi =>
+                    poi.tagNames.some(tag =>
+                        tag.toLowerCase() === data.tagName.toLowerCase()
+                    )
+                )
+            );
+
+            alarmCountEl.textContent = matchedAlarms.length.toLocaleString();
             // 페이지당 10개씩
             const itemsPerPage = 10;
             let currentPage = 1;
-            const totalPages = Math.ceil(searchedAlarms.length / itemsPerPage);
+            const totalPages = Math.ceil(matchedAlarms.length / itemsPerPage);
             const paginationContainer = document.querySelector(".search-result__paging .number");
 
             const renderTable = (page) => {
                 tableBody.innerHTML = "";
                 const startIndex = (page - 1) * itemsPerPage;
-                const pageAlarms = searchedAlarms.slice(startIndex, startIndex + itemsPerPage);
+                const pageAlarms = matchedAlarms.slice(startIndex, startIndex + itemsPerPage);
                 pageAlarms.forEach((data) => {
 
                     const eventRow = document.createElement('tr');
@@ -3376,12 +3373,13 @@ const layerPopup = (function () {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === data.tagName.toLowerCase())
                     );
+                    console.log("taggedPoi : ", taggedPoi);
 
                     if (taggedPoi) {
                         eventRow.innerHTML = `
                             <td>${taggedPoi.property.buildingName || '-'}</td>
                             <td>${taggedPoi.property.floorNo || '-'}</td>
-                            <td>${data.alarmType || '-'}</td>
+                            <td>${data.event || '-'}</td>
                             <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
                             <td>${taggedPoi.name || '-'}</td>
                             <td>${formatDateTime(data.occurrenceDate) || '-'}</td>

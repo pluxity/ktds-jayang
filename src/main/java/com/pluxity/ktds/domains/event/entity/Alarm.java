@@ -43,6 +43,14 @@ public class Alarm {
     @Comment("공정명")
     private String process;
 
+    @Column(name = "equipment")
+    @Comment("장비")
+    private String equipment;
+
+    @Column(name = "event")
+    @Comment("이벤트명")
+    private String event;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "alarm_type", columnDefinition = "VARCHAR(255) DEFAULT 'NORMAL'")
     @Comment("알람 종류")
@@ -81,6 +89,8 @@ public class Alarm {
                 .buildingNm(this.buildingNm)
                 .floorNm(this.floorNm)
                 .process(this.process)
+                .equipment(this.equipment)
+                .event(this.event)
                 .occurrenceDate(this.occurrenceDate)
                 .confirmDate(this.confirmTime)
                 .build();

@@ -7,6 +7,7 @@ import com.pluxity.ktds.domains.tag.TagClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -23,19 +24,26 @@ public class PoiTagSyncService {
     private final PoiTagRepository poiTagRepository;
     private final TagClientService tagClientService;
 
-    @Value("${tags.batchSize}")
+    @Value("${tags.sync.batchSize}")
     private int batchSize;
+
+
+    @Value("${tags.sync.startup-enabled}")
+    private boolean startupEnabled;
 
     
     /**
      * 서버 시작 시 모든 POI 태그 동기화
+     * enabled 여부에 따라 동작
      */
-//    @EventListener(ApplicationReadyEvent.class)
-//    public void syncAllPoiTagsOnStartup() {
-//        log.info("서버 시작 - POI 태그 동기화 시작");
-//        syncUnregisteredTags();
-//        log.info("서버 시작 - POI 태그 동기화 완료");
-//    }
+    @EventListener(ApplicationReadyEvent.class)
+    public void syncAllPoiTagsOnStartup() {
+        if(startupEnabled){
+            log.info("서버 시작 - POI 태그 동기화 시작");
+            syncUnregisteredTags();
+            log.info("서버 시작 - POI 태그 동기화 완료");
+        }
+    }
     
     /**
      * 미등록 태그들 동기화
@@ -98,7 +106,7 @@ public class PoiTagSyncService {
      */
     private boolean registerTagToExternalServer(List<String> tagNames) {
         try {
-//            tagClientService.addTags(tagNames);
+            tagClientService.addTags(tagNames);
             log.debug("외부 서버에 태그 등록 요청: TAG SIZE={}", tagNames.size());
 
             // 임시로 성공으로 처리 (실제 구현 시 제거)

@@ -84,4 +84,6 @@ cctv:
   password: pluxity123!@#
 
 tags:
-  batchSize: 1000
+  sync:
+    batchSize: 1000
+    startup-enabled: false

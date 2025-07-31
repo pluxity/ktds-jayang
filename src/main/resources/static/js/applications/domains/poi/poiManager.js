@@ -254,29 +254,32 @@ const PoiManager = (() => {
     }
 
     const renderAllPoiToEngineByBuildingId = (buildingId) => {
-        const poiData = [];
-        poiList.filter((poi) => {
-            return poi.property.buildingId === Number(buildingId);
-        }).forEach((poi) => {
-            if (poi.position === null) {
-                return;
-            }
-            poiData.push(poi.poiOptions);
-        });
+        return new Promise((resolve, reject) => {
+            const poiData = [];
+            poiList.filter((poi) => {
+                return poi.property.buildingId === Number(buildingId);
+            }).forEach((poi) => {
+                if (poi.position === null) {
+                    return;
+                }
+                poiData.push(poi.poiOptions);
+            });
 
-        Px.Poi.AddFromDataArray(poiData, () => {
-            Px.Poi.GetDataAll().forEach((poi) => {
-                Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
-                Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
-                const isAdmin = window.location.href.includes('admin');
-                if (poi.property.isLight) {
-                    Px.Poi.SetIconSize(poi.id, 50);
-                    if (!isAdmin)
-                        Px.Poi.SetTextSize(poi.id, 1);
-                }
-                if (poi.property.code.toLowerCase().includes("tms")) {
-                    TmsEventHandler.renderSetColor(poi.property.code);
-                }
+            Px.Poi.AddFromDataArray(poiData, () => {
+                Px.Poi.GetDataAll().forEach((poi) => {
+                    Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
+                    Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
+                    const isAdmin = window.location.href.includes('admin');
+                    if (poi.property.isLight) {
+                        Px.Poi.SetIconSize(poi.id, 50);
+                        if (!isAdmin)
+                            Px.Poi.SetTextSize(poi.id, 1);
+                    }
+                    if (poi.property.code.toLowerCase().includes("tms")) {
+                        TmsEventHandler.renderSetColor(poi.property.code);
+                    }
+                });
+                resolve(); // 완료 시 resolve 호출
             });
         });
     };

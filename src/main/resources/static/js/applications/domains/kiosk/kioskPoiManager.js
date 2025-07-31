@@ -122,7 +122,7 @@ const KioskPoiManager = (() => {
         poiData.push(kioskPoi.poiOptions);
         });
 
-        Px.Poi.AddFromDataArraySync(poiData);
+        Px.Poi.AddFromDataArray(poiData);
     };
 
     const renderKioskPoiByIdAddByMouse = (id) => {
@@ -132,7 +132,7 @@ const KioskPoiManager = (() => {
             KioskPoiManager.patchKioskPoiPosition(kioskPoiId, kioskPoiData.position);
         };
 
-        Px.Poi.AddByMouseSync(kioskPoiDataEngine);
+        Px.Poi.AddByMouse(kioskPoiDataEngine);
     };
 
     const findDetailAll = () => {

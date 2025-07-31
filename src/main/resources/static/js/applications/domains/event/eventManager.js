@@ -315,8 +315,7 @@ const EventManager = (() => {
         const dummyCanvas = document.createElement('canvas');
         dummyCanvas.width  = 1;
         dummyCanvas.height = 1;
-        const canvasDom = canvasElement.tagName.toLowerCase() === 'video' ? dummyCanvas : canvasElement;
-        const player = getOrCreatePlayer(canvasId, config, canvasDom);
+        const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
         player.
             getLiveStreamUri(cameraIp, config.username, config.password)

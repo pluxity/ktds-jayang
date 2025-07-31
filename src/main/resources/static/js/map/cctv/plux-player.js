@@ -480,21 +480,11 @@ class PluxPlayer {
             soapBody
         );
 
-        // const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
-        let uri = this.parseResponse(response)["env:Envelope"]["env:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
-
-        // 공백 및 &amp; 제거
-        uri = uri.replace(/\s+/g, '').replace(/&amp;/g, '&');
+        const uri = this.parseResponse(response)["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["trt:GetStreamUriResponse"]["trt:MediaUri"]["tt:Uri"];
 
         const liveWsPort = this.wsRelayUrl.startsWith('wss') ? 4013 : 4003;
 
-        // 모든 특수문자를 URL 인코딩
-        const encodedUri = encodeURIComponent(uri);
-        const encodedUser = encodeURIComponent(username);
-        const encodedPass = encodeURIComponent(password);
-
-        // const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
-        const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodedUri}&user=${encodedUser}&pass=${encodedPass}`;
+        const liveUrl = `${this.wsRelayUrl}:${liveWsPort}/ws/live?rtsp=${encodeURIComponent(uri)}&user=${username}&pass=${password}`;
         console.log("Live RTSP URI:", uri);
         console.log("Live WS URL:", liveUrl);
         return liveUrl;
@@ -796,8 +786,7 @@ class PluxPlayer {
             `http://${cameraIp}:80/onvif/media_service`,
             soapBody);
         let parsedResponse = this.parseResponse(response);
-        // let timestamp = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
-        let timestamp = parsedResponse["env:Envelope"]["env:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
+        let timestamp = parsedResponse["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["tds:GetSystemDateAndTimeResponse"]["tds:SystemDateAndTime"]["tt:UTCDateTime"]
         let time = timestamp["tt:Time"];
         let hour = time["tt:Hour"];
         let minute = time["tt:Minute"];

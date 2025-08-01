@@ -80,9 +80,10 @@ const leftPoiListInit = async () => {
         document
             .querySelector('#registeredPoiSelect')
             .addEventListener('change', (event) => {
+                const registeredValues = event.target.value;
                 const floorId = document.querySelector('#floorNo').value;
                 const poiList = PoiManager.findByBuilding(BUILDING_ID)
-                    .filter(poi => Array.isArray(poi.cctvList) && poi.cctvList.length > 0)
+                    .filter(selectedCCTVStatus(registeredValues))
                     .filter(selectedFloor(floorId));
                 renderingPoiList(poiList);
             });
@@ -266,7 +267,8 @@ const getPoiRenderingAndList = async () => {
 
         if (
             document.querySelector('#poi-tab').classList.contains('active') ||
-            document.querySelector('#patrol-tab').classList.contains('active')
+            document.querySelector('#patrol-tab').classList.contains('active') ||
+            document.querySelector('#cctv-tab').classList.contains('active')
         ) {
             renderingPoiList(displayPoiList);
         }
@@ -363,3 +365,11 @@ const renderingPoiList = (filteredList) => {
 
 const selectedPoiCategory = (poiCategoryIdList) => (poi) =>
     poiCategoryIdList.includes(String(poi.poiCategory));
+
+const selectedCCTVStatus = (values) => {
+    const arr = Array.isArray(values) ? values : [values];
+    return (poi) => {
+        const has = Array.isArray(poi.cctvList) && poi.cctvList.length > 0;
+        return arr.some(v => (v === '0' && has) || (v === '1' && !has));
+    };
+};

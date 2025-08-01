@@ -197,6 +197,9 @@
                 renderPatrolList();
             } else if (target.id === 'cctv-tab') {
                 document.getElementById('registeredPoiSelect').style.display = 'flex';
+                getPoiRenderingAndList();
+                Px.VirtualPatrol.Clear();
+                Px.VirtualPatrol.Editor.Off();
             }
             changeEventFloor(document.getElementById('floorNo').value);
         });
@@ -241,6 +244,12 @@ function changeEventFloor(floorNo) {
             if(activePatrolId != null) {
                 patrolPointImport(activePatrolId.dataset.id, floorId);
             }
+            break;
+        }
+        case 'cctv-tab': {
+            getPoiRenderingAndList();
+            document.querySelector('#virtualPatrolCtrlToolBar').classList.remove('active');
+            document.querySelector('#evacRouteBtnToolBar').classList.add('active');
             break;
         }
         default:

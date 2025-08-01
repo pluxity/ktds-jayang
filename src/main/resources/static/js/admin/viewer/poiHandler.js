@@ -35,6 +35,10 @@ const leftPoiListInit = async () => {
                 label: String(poiCategory.name),
                 value: String(poiCategory.id),
             }));
+        const registeredOptions = [
+            { label: '등록 장비', value: '0' },
+            { label: '미등록 장비', value: '1' }
+        ];
 
         VirtualSelect.init({
             ele: '#poiSelect',
@@ -49,6 +53,19 @@ const leftPoiListInit = async () => {
             allOptionsSelectedText: '모두 선택됨',
         });
 
+        VirtualSelect.init({
+            ele: '#registeredPoiSelect',
+            options: registeredOptions,
+            selectedValue: registeredOptions.map(opt => opt.value),
+            multiple: true,
+            silentInitialValueSet: true,
+            search: false,
+            name: 'registeredPoiSelect',
+            placeholder: '장비 목록',
+            selectAllText: '전체 선택',
+            allOptionsSelectedText: '모두 선택됨',
+        });
+
         document
             .querySelector('#poiSelect')
             .addEventListener('change', (event) => {
@@ -56,6 +73,16 @@ const leftPoiListInit = async () => {
                 const floorId = document.querySelector('#floorNo').value;
                 const poiList = PoiManager.findByBuilding(BUILDING_ID)
                     .filter(selectedPoiCategory(poiCategoryIds))
+                    .filter(selectedFloor(floorId));
+                renderingPoiList(poiList);
+            });
+
+        document
+            .querySelector('#registeredPoiSelect')
+            .addEventListener('change', (event) => {
+                const floorId = document.querySelector('#floorNo').value;
+                const poiList = PoiManager.findByBuilding(BUILDING_ID)
+                    .filter(poi => Array.isArray(poi.cctvList) && poi.cctvList.length > 0)
                     .filter(selectedFloor(floorId));
                 renderingPoiList(poiList);
             });

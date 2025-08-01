@@ -184,16 +184,19 @@
 
             Px.Poi.HideAll();
 
-
             if (target.id === 'poi-tab') {
+                document.getElementById('registeredPoiSelect').style.display = 'none';
                 editPoiToolBar.style.display = '';
                 getPoiRenderingAndList();
                 Px.VirtualPatrol.Clear();
                 Px.VirtualPatrol.Editor.Off();
             } else if (target.id === 'patrol-tab') {
+                document.getElementById('registeredPoiSelect').style.display = 'none';
                 editPoiToolBar.style.display = 'none';
                 getPoiRenderingAndList();
                 renderPatrolList();
+            } else if (target.id === 'cctv-tab') {
+                document.getElementById('registeredPoiSelect').style.display = 'flex';
             }
             changeEventFloor(document.getElementById('floorNo').value);
         });

@@ -1579,7 +1579,6 @@ const Init = (function () {
                                 `;
                             }).join('');
                         } else {
-                            console.log("data : " , data);
                             tbody.innerHTML = data.TAGs.map(tag => {
                                 const statusCell = poiProperty.poiCategoryName === '공기질'
                                     ? `<td>${getStatusText(tag.S)}</td>`

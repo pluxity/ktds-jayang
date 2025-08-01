@@ -28,11 +28,35 @@ const EventManager = (() => {
         try {
             // SSE 연결 시작
             connectToSSE();
+            connectToVmsEventSSE();
 
         } catch (error) {
             console.error('미해제 알람 조회 실패:', error);
         }
     }
+
+    const connectToVmsEventSSE = () => {
+        console.log('try connectToVmsEventSSE');
+        const eventSource = new EventSource('/vms-event/subscribe');
+
+        eventSource.onopen = () => {
+            console.log("onopen");
+        }
+
+        eventSource.addEventListener('vmsEvent', async (event) => {
+            const dto = JSON.parse(event.data);
+            console.log('vmsEvent :', dto);
+            // TODO: 여기서 dto 처리 로직 추가
+        });
+
+        eventSource.onmessage  = e => {
+            console.log("e : ", e);
+        }
+
+        eventSource.onerror  = err => {
+            console.log("err : ", err);
+        }
+    };
 
     // SSE 연결
     const connectToSSE = () => {

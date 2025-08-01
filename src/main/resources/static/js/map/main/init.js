@@ -519,10 +519,6 @@ const Init = (function () {
                     // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
                     Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                        moveToPoi(poiInfo.id);
-                    });
-
-                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
                         const clickedPoiId = String(poiInfo.id);
                         const allPopups = document.querySelectorAll('.popup-info');
                         let samePopupOpen = false;
@@ -565,8 +561,9 @@ const Init = (function () {
                         } else {
                             renderPoiInfo(poiInfo);
                         }
+                    });
 
-
+                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
                     });
                     Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
                         console.log("event : ", event);
@@ -1628,7 +1625,16 @@ const Init = (function () {
 
             // 닫기 이벤트
             const closeBtn = popupInfo.querySelector('.close');
-            closeBtn.addEventListener('click', () => {
+            closeBtn.addEventListener('click', (event) => {
+
+                // 조명 poi일 때는 선택도 풀리게
+                const poiId = document.querySelector('.popup-info .poi-id')?.value || null;
+                const poiData = Px.Poi.GetData(Number(poiId));
+                if (poiData.group == '조명') {
+                    Px.Poi.RestoreColorAll();
+                    selectedGroup = null;
+                    selectedId = null;
+                }
                 // 이벤트 리스너 제거
                 refreshBtn.removeEventListener('click', updateTagData);
                 // 팝업 제거

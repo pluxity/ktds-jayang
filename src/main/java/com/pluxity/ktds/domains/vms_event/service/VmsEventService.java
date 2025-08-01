@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.vms_event.service;
 
+import com.pluxity.ktds.domains.event.service.EventEmitterService;
 import com.pluxity.ktds.domains.vms_event.dto.VmsEventDto;
 import com.pluxity.ktds.domains.vms_event.entity.VmsEvent;
 import com.pluxity.ktds.domains.vms_event.repository.VmsEventRepository;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class VmsEventService {
 
     private final VmsEventRepository vmsEventRepository;
-
     @Transactional
     public void save(VmsEventDto dto) {
         VmsEvent vmsEvent = dto.toEntity();

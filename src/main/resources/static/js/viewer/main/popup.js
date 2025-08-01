@@ -727,9 +727,17 @@ const layerPopup = (function () {
         const buildingSet = new Set();
         const floorSet = new Set();
 
+        const lightGroupCount = new Set(
+            pois
+                .filter(poi => poi.poiMiddleCategoryDetail?.name === '전등')
+                .map(poi => poi.property.lightGroup)
+        ).size;
+
         const categoryCounts = pois.reduce((acc, poi) => {
             const category = poi.poiMiddleCategoryDetail?.name || '기타';
-            acc[category] = (acc[category] || 0) + 1;
+            if (category !== '전등') {
+                acc[category] = (acc[category] || 0) + 1;
+            }
             return acc;
         }, {});
 
@@ -744,10 +752,21 @@ const layerPopup = (function () {
             }
         });
 
+        const seenLightGroups = new Set();
         // accordion data set
         pois.forEach(poi => {
             const category = poi.poiMiddleCategoryDetail?.name || '기타';
-            createAccordion(poi, categoryCounts[category]);
+            if (category === '전등') {
+                const groupKey = poi.property.lightGroup;
+                if (!seenLightGroups.has(groupKey)) {
+                    seenLightGroups.add(groupKey);
+                    console.log("poi : ", poi);
+                    console.log("lightGroupCount : ", lightGroupCount);
+                    createAccordion(poi, lightGroupCount);
+                }
+            } else {
+                createAccordion(poi, categoryCounts[category]);
+            }
         })
 
         // select
@@ -797,7 +816,12 @@ const layerPopup = (function () {
         // popup.style.zIndex = '50';
         // total count
         // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
-        document.getElementById("totalEqCount").textContent = pois.length.toLocaleString();
+        if (newTitle == '조명') {
+            document.getElementById("totalEqCount").textContent =
+                new Set(pois.map(poi => poi.property.lightGroup)).size.toLocaleString();
+        } else {
+            document.getElementById("totalEqCount").textContent = pois.length.toLocaleString();
+        }
     }
 
     function createAccordion2(poi, categoryCount) {
@@ -839,7 +863,6 @@ const layerPopup = (function () {
             ['건물', '층', '장비명'].forEach(text => {
                 const th = document.createElement('th');
                 th.setAttribute('scope', 'col');
-                th.textContent = text;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
@@ -893,13 +916,7 @@ const layerPopup = (function () {
             accordionBtn.textContent = `${categoryName} (${categoryCount})`;
 
             accordionBtn.addEventListener('click', () => {
-                // const allBtns = accordionElement.querySelectorAll('.accordion__btn');
-                // if (accordionBtn.classList.contains('accordion__btn--active')) {
-                //     accordionBtn.classList.remove('accordion__btn--active');
-                // } else {
-                //     allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
-                //     accordionBtn.classList.add('accordion__btn--active');
-                // }
+
                 if (accordionBtn.classList.contains('accordion__btn--active')) {
                     accordionBtn.classList.remove('accordion__btn--active');
                 } else {
@@ -921,6 +938,7 @@ const layerPopup = (function () {
             ['건물', '층', '장비명'].forEach(text => {
                 const th = document.createElement('th');
                 th.setAttribute('scope', 'col');
+                console.log("text : ", text);
                 th.textContent = text;
                 headerRow.appendChild(th);
             });
@@ -954,8 +972,13 @@ const layerPopup = (function () {
         const tdEquipment = document.createElement('td');
         tdEquipment.classList.add('align-left');
         tdEquipment.setAttribute('data-poi-id', poi.id);
-        tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
-        // tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
+
+        if (poi.property.poiCategoryName == '조명') {
+            tdEquipment.innerHTML = `${poi.property.lightGroup}`;
+        } else {
+            tdEquipment.innerHTML = `${poi.name}`;
+        }
+        // tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
         tr.appendChild(tdBuilding);
         tr.appendChild(tdFloor);
         tr.appendChild(tdEquipment);
@@ -2530,7 +2553,7 @@ const layerPopup = (function () {
             const firstFloor = defaultBuilding.floors[0];
             if (firstFloor) {
                 floorBtn.textContent = firstFloor.name;
-                lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+                // lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
             }
             floorUl.innerText = '';
             defaultBuilding.floors.forEach(floor => {
@@ -2841,6 +2864,8 @@ const layerPopup = (function () {
         })
     }
 
+    let selectedLightGroup = null;
+    let selectedLightId = null;
     const movePoi = async (id) => {
         let poiId;
         if (id.constructor.name === 'PointerEvent') {
@@ -2873,7 +2898,7 @@ const layerPopup = (function () {
         Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(Number(floor.id));
         Px.Poi.HideAll();
-        console.log("poiData : ", poiData);
+
         Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
 
         Px.Camera.MoveToPoi({
@@ -2881,6 +2906,23 @@ const layerPopup = (function () {
             isAnimation: true,
             duration: 500,
         });
+        console.log("poiData : ", poiData);
+        if (poiData.property.lightGroup) {
+            if (selectedLightGroup === poiData.property.lightGroup) {
+                if (selectedLightId === poiData.id) {
+                    Px.Poi.RestoreColorAll();
+                    selectedLightGroup = null;
+                    selectedLightId = null;
+                } else {
+                    selectedLightId = poiData.id;
+                }
+            } else {
+                Px.Poi.RestoreColorAll();
+                Px.Poi.SetColorByProperty('lightGroup', poiData.property.lightGroup, '#f80606');
+                selectedLightGroup = poiData.property.lightGroup;
+                selectedLightId = poiData.id;
+            }
+        }
     };
 
     const closePlayers = () => {

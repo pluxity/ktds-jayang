@@ -1530,6 +1530,57 @@ const Init = (function () {
                             }).filter(row => row !== '').join('');
 
                             tbody.innerHTML = (locationRow || '') + renderedRows;
+                        } else if(poiProperty.poiMiddleCategoryName == "시스템에어컨") {
+                            tbody.innerHTML = data.TAGs.map(tag => {
+                                const parts = tag.tagName.split('-');
+                                const suffix = parts[parts.length - 1];
+                                let label = '';
+                                let unit = '';
+
+                                switch (suffix) {
+                                    case 'power':
+                                        label = '전원';
+                                        break;
+                                    case 'opMode':
+                                        label = '모드';
+                                        break;
+                                    case 'roomTemp':
+                                        label = '현재온도';
+                                        unit = '˚C';
+                                        break;
+                                    case 'setTemp':
+                                        label = '설정온도';
+                                        unit = '˚C';
+                                        break;
+                                    case 'fanSpeed':
+                                        label = '팬속도';
+                                        break;
+                                    default:
+                                        label = suffix;
+                                        break;
+                                }
+
+                                let displayValue = '-';
+                                if (tag.currentValue !== undefined && tag.currentValue !== null && tag.currentValue !== '') {
+                                    const v = String(tag.currentValue);
+                                    if (suffix === 'power') {
+                                        displayValue = v === '0' ? 'OFF' : v === '1' ? 'ON' : tag.currentValue;
+                                    } else if (suffix === 'opMode') {
+                                        displayValue = v === '0' ? '냉방' : v === '1' ? '난방' : tag.currentValue;
+                                    } else {
+                                        displayValue = tag.currentValue;
+                                    }
+                                }
+
+                                const valueWithUnit = displayValue === '-' ? '-' : `${displayValue}${unit}`;
+
+                                return `
+                                  <tr>
+                                      <td>${label}</td>
+                                      <td>${valueWithUnit}</td>
+                                  </tr>
+                                `;
+                            }).join('');
                         } else {
                             console.log("data : " , data);
                             tbody.innerHTML = data.TAGs.map(tag => {

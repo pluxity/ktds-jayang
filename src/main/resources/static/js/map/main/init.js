@@ -1578,6 +1578,27 @@ const Init = (function () {
                                   </tr>
                                 `;
                             }).join('');
+                        } else if(poiProperty.poiCategoryName == "조명") {
+                            const head = popupInfo.querySelector('.popup-info__head');
+                            head.querySelectorAll('h2').forEach(h => h.remove());
+
+                            const h2 = document.createElement('h2');
+                            h2.append(document.createTextNode(`${poiProperty.lightGroup || ''}`));
+                            h2.append(document.createElement('br'));
+                            h2.append(document.createTextNode(poiProperty.name));
+
+                            const hidden = head.querySelector('input.poi-id');
+                            hidden.after(h2);
+                            tbody.innerHTML = data.TAGs.map(tag => {
+                                console.log("tag : ", tag);
+                                const statusText = { 0: 'ON', 1: 'OFF' }[tag.currentValue];
+                                return `
+                                    <tr>
+                                        <td>상태</td>
+                                        <td>${statusText}</td>
+                                    </tr>
+                                `;
+                            }).join('');
                         } else {
                             tbody.innerHTML = data.TAGs.map(tag => {
                                 const statusCell = poiProperty.poiCategoryName === '공기질'

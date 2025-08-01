@@ -328,28 +328,22 @@ const Init = (function () {
                     const { buildingFile, floors } = outdoorBuilding;
                     const version = outdoorBuilding.getVersion();
                     const { directory } = buildingFile;
-                    // sbmDataArray = floors.map((floor) => {
-                    //     const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
-                    //     const sbmData = {
-                    //         url,
-                    //         id: floor.sbmFloor[0].id,
-                    //         displayName: floor.sbmFloor[0].sbmFileName,
-                    //         baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                    //         groupId: floor.sbmFloor[0].sbmFloorGroup,
-                    //     };
-                    //     return sbmData;
-                    // });
                     sbmDataArray = floors.flatMap(floor =>
-                        floor.sbmFloor.map(sbm => ({
-                            url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
-                            id: floor.id,
-                            displayName: sbm.sbmFileName,
-                            baseFloor: sbm.sbmFloorBase,
-                            groupId: sbm.sbmFloorGroup,
-                            property: 'sbm'
-                        }))
+                        floor.sbmFloor.map(sbm => {
+                            const parts = sbm.sbmFileName.split('_');
+                            const alias = parts.length >= 2 ? parts[parts.length - 2] : '';
+                            return {
+                                url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
+                                id: floor.id,
+                                displayName: alias,
+                                baseFloor: sbm.sbmFloorBase,
+                                groupId: sbm.sbmFloorGroup,
+                                isSelectable: true,
+                                property: sbm.sbmFloorBase
+                            };
+                        })
                     );
-
+                    console.log("sbmDataArray : ", sbmDataArray);
                 } else {
                     sbmDataArray.push({
                         url: "/static/assets/modeling/outside/KTDS_Out_All_250109/KTDS_Out_All_250109_1F_0.sbm",
@@ -384,16 +378,21 @@ const Init = (function () {
                                 z: -541.8192260742188
                             }
                         });
+
                         Px.Model.Visible.ShowAll();
+                        Px.Camera.EnableScreenPanning()
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
-                        Px.Event.On();
                         Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                             moveToPoi(poiInfo.id)
                         });
 
-                        Px.Effect.Outline.HoverEventOn('area_no');
+                        // Px.Effect.Outline.HoverEventOn('area_no');
+
+                        Px.Event.AddEventListener('pointerup', 'sbm', (data)=>{
+                            Px.Effect.Outline.Add(data.floorId);
+                        });
                         Px.Effect.Outline.AddHoverEventCallback(
                             throttle(async (event) => {
                                 if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
@@ -403,17 +402,27 @@ const Init = (function () {
                             }, 10)
                         );
 
-                        Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
-                            console.log("event : ", event);
-                        });
-
+                        Px.Event.On();
+                        setTimeout(() => {
+                            Px.Event.On();
+                        }, 1000)
                         // Px.Effect.Outline.Add(sbmDataArray[0].baseFloor)
-                        Px.Event.AddEventListener('dblclick', 'sbm', (event) => {
-                            // Px.Effect.Outline 참고
-                            // Px.Effect.Outline.HoverEventOn('area_no');
-                            if (firstIndoorBuilding) {
-                                window.location.href = `/map?buildingId=${firstIndoorBuilding.id}`;
+                        Px.Event.AddEventListener('dblclick', 'sbm', (data) => {
+                            const buildingList = BuildingManager.findAll();
+
+                            console.log('마우 버튼 눌림', data);
+                            if (!data.displayName) return;
+
+                            const display = data.displayName;
+                            const matched = buildingList.find(b =>
+                                typeof b.name === 'string' && (display.includes(b.name) || b.name.includes(display))
+                            );
+                            console.log("matched : ", matched)
+                            if (!matched) {
+                                return;
                             }
+
+                            window.location.href = `/map?buildingId=${matched.id}`;
                         });
 
                         contents.style.position = 'static';

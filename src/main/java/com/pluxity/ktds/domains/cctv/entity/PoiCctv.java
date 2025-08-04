@@ -18,16 +18,16 @@ public class PoiCctv {
     @JoinColumn(name = "poi_id", nullable = false)
     private Poi poi;
 
-    @Column(name = "code", nullable = false)
-    private String code;
+    @Column(name = "cctv_name", nullable = false)
+    private String cctvName;
 
     @Column(name = "is_main", nullable = false)
     private String isMain;
 
     @Builder
-    public PoiCctv(Poi poi, String code, String isMain) {
+    public PoiCctv(Poi poi, String cctvName, String isMain) {
         this.poi = poi;
-        this.code = code;
+        this.cctvName = cctvName;
         this.isMain = isMain;
     }
 }

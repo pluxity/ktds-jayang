@@ -1,9 +1,6 @@
 package com.pluxity.ktds.domains.building.service;
 
-import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
-import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
-import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
-import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
+import com.pluxity.ktds.domains.building.dto.*;
 import com.pluxity.ktds.domains.building.entity.*;
 import com.pluxity.ktds.domains.building.repostiory.*;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
@@ -211,7 +208,7 @@ public class PoiService {
             List<PoiCctv> cctvEntities = dto.cctvList().stream()
                     .map(cctvData -> PoiCctv.builder()
                             .poi(poi)
-                            .code(cctvData.code())
+                            .cctvName(cctvData.cctvName())
                             .isMain(cctvData.isMain())
                             .build())
                     .toList();
@@ -300,7 +297,7 @@ public class PoiService {
             newCctvs = dto.cctvList().stream()
                     .map(c -> PoiCctv.builder()
                             .poi(poi)
-                            .code(c.code())
+                            .cctvName(c.cctvName())
                             .isMain(c.isMain())
                             .build())
                     .toList();
@@ -488,7 +485,7 @@ public class PoiService {
                     if (mainCctv != null && !mainCctv.isBlank()) {
                         cctvDTOList.add(
                                 PoiCctvDTO.builder()
-                                        .code(mainCctv)
+                                        .cctvName(mainCctv)
                                         .isMain("Y")
                                         .build()
                         );
@@ -498,7 +495,7 @@ public class PoiService {
                         if (subCctv != null && !subCctv.isBlank()) {
                             cctvDTOList.add(
                                     PoiCctvDTO.builder()
-                                            .code(subCctv)
+                                            .cctvName(subCctv)
                                             .isMain("N")
                                             .build()
                             );
@@ -514,7 +511,7 @@ public class PoiService {
                 for (PoiCctvDTO dto : cctvDTOList) {
                     PoiCctv cctv = PoiCctv.builder()
                             .poi(poi)
-                            .code(dto.code())
+                            .cctvName(dto.cctvName())
                             .isMain(dto.isMain())
                             .build();
                     poi.getPoiCctvs().add(cctv);
@@ -552,6 +549,39 @@ public class PoiService {
 
         } catch(IOException e) {
             throw new CustomException(ErrorCode.FAILED_BATCH_REGISTER_POI);
+        }
+    }
+
+    @Transactional
+    public void addCctvToPois(List<AddCctvToPoisDTO> dtoList) {
+        for (AddCctvToPoisDTO dto : dtoList) {
+            // 1. CCTV인 POI 조회
+            Poi cctvPoi = getPoi(dto.cctvPoiId());
+
+            // 2. CCTV 카테고리인지 확인
+            if (!cctvPoi.getPoiCategory().getName().equalsIgnoreCase("cctv")) {
+                throw new CustomException(ErrorCode.INVALID_POI_CATEGORY_WITH_POI_SET);
+            }
+
+            // 3. 대상 POI들 조회
+            List<Poi> targetPois = poiRepository.findAllById(dto.targetPoiIds());
+
+            // 4. 각 대상 POI에 CCTV 정보 추가
+            for (Poi targetPoi : targetPois) {
+                // 이미 같은 CCTV가 연결되어 있는지 확인
+                boolean alreadyExists = targetPoi.getPoiCctvs().stream()
+                        .anyMatch(cctv -> cctv.getCctvName().equals(cctvPoi.getName()));
+
+                if (!alreadyExists) {
+                    PoiCctv newCctv = PoiCctv.builder()
+                            .poi(targetPoi)
+                            .cctvName(cctvPoi.getName())  // CCTV POI의 이름을 CCTV 이름으로 사용
+                            .isMain("Y")
+                            .build();
+
+                    targetPoi.getPoiCctvs().add(newCctv);
+                }
+            }
         }
     }
 

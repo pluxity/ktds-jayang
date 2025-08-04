@@ -201,7 +201,7 @@ public class Poi {
                 .cctvList(this.poiCctvs.stream()
                         .map(cctv -> PoiCctvDTO.builder()
                                 .id(cctv.getId())
-                                .code(cctv.getCode())
+                                .cctvName(cctv.getCctvName())
                                 .isMain(cctv.getIsMain())
                                 .build())
                         .toList())

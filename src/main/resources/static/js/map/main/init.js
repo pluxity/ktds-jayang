@@ -686,7 +686,6 @@ const Init = (function () {
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
-        console.log("renderPoiInfo poiInfo : ", poiInfo);
         if (poiInfo.group.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
             const cctvTemplate = document.getElementById('cctv-popup-template');
@@ -736,6 +735,8 @@ const Init = (function () {
             const poiProperty = poiInfo.property;
             const popupInfo = document.createElement('div');
 
+            console.log("poiProperty : ", poiProperty);
+
             popupInfo.className = 'popup-info';
             const statusCell = poiProperty.poiCategoryName === '공기질'
                 ? `<th>단계</th>`
@@ -767,6 +768,19 @@ const Init = (function () {
                         </tbody>
                     </table>
                 </div>`;
+
+            if (poiProperty.poiCategoryName == "조명") {
+                const head = popupInfo.querySelector('.popup-info__head');
+                head.querySelectorAll('h2').forEach(h => h.remove());
+
+                const h2 = document.createElement('h2');
+                h2.append(document.createTextNode(`${poiProperty.lightGroup || ''}`));
+                h2.append(document.createElement('br'));
+                h2.append(document.createTextNode(poiProperty.name));
+
+                const hidden = head.querySelector('input.poi-id');
+                hidden.after(h2);
+            }
 
             // poi 상태 가져오기
             const updateTagData = async () => {
@@ -1579,16 +1593,17 @@ const Init = (function () {
                                 `;
                             }).join('');
                         } else if(poiProperty.poiCategoryName == "조명") {
-                            const head = popupInfo.querySelector('.popup-info__head');
-                            head.querySelectorAll('h2').forEach(h => h.remove());
-
-                            const h2 = document.createElement('h2');
-                            h2.append(document.createTextNode(`${poiProperty.lightGroup || ''}`));
-                            h2.append(document.createElement('br'));
-                            h2.append(document.createTextNode(poiProperty.name));
-
-                            const hidden = head.querySelector('input.poi-id');
-                            hidden.after(h2);
+                            // const head = popupInfo.querySelector('.popup-info__head');
+                            // head.querySelectorAll('h2').forEach(h => h.remove());
+                            //
+                            // const h2 = document.createElement('h2');
+                            // h2.append(document.createTextNode(`${poiProperty.lightGroup || ''}`));
+                            // h2.append(document.createElement('br'));
+                            // h2.append(document.createTextNode(poiProperty.name));
+                            //
+                            // console.log("h2 : ", h2);
+                            // const hidden = head.querySelector('input.poi-id');
+                            // hidden.after(h2);
                             tbody.innerHTML = data.TAGs.map(tag => {
                                 console.log("tag : ", tag);
                                 const statusText = { 0: 'ON', 1: 'OFF' }[tag.currentValue];

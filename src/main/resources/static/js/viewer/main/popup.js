@@ -2896,10 +2896,17 @@ const layerPopup = (function () {
     
         // 같은 building 내에서의 이동
         Px.Model.Visible.HideAll();
-        Px.Model.Visible.Show(Number(floor.id));
-        Px.Poi.HideAll();
+        const building = BuildingManager.findById(poiData.property.buildingId);
+        if (building.isIndoor === 'N') {
+            Px.Model.Visible.ShowAll();
+            Px.Poi.HideAll();
+            Px.Poi.ShowAll();
+        } else {
+            Px.Model.Visible.Show(Number(floor.id));
+            Px.Poi.HideAll();
+            Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
+        }
 
-        Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
 
         Px.Camera.MoveToPoi({
             id: poiId,

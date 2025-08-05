@@ -5,9 +5,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,34 +26,47 @@ public class ZipUtil {
 
     public static void extractFiles(InputStream inputStream, Path targetDirectory, String glbUuid) throws IOException, IllegalArgumentException {
         List<Path> extractedFilePaths = new ArrayList<>();
+        byte[] zipData = inputStream.readAllBytes();
 
-        try (ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8)) {
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
-                if (!zipEntry.isDirectory()) {
-                    String fileName = zipEntry.getName();
-                    Path targetFilePath;
-                    
-                    // GLB 파일이고 UUID가 제공된 경우 파일명 변경
-                    if (glbUuid != null && fileName.toLowerCase().endsWith(".glb")) {
-                        String extension = getFileExtension(fileName);
-                        String newFileName = glbUuid + "." + extension;
-                        targetFilePath = targetDirectory.resolve(newFileName);
+        Charset[] charSetList = new Charset[] {
+                Charset.forName("Cp949"),
+                StandardCharsets.UTF_8
+        };
+
+        for (Charset charset : charSetList) {
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(zipData);
+                 ZipInputStream zis = (charset != null) ? new ZipInputStream(bais, charset) : new ZipInputStream(bais)) {
+
+                ZipEntry zipEntry;
+                while ((zipEntry = zis.getNextEntry()) != null) {
+                    if (zipEntry.isDirectory()) {
+                        Files.createDirectories(targetDirectory.resolve(zipEntry.getName()));
                     } else {
-                        targetFilePath = targetDirectory.resolve(fileName);
+                        String fileName = zipEntry.getName();
+                        Path targetFilePath;
+
+                        if (glbUuid != null && fileName.toLowerCase().endsWith(".glb")) {
+                            String extension = getFileExtension(fileName);
+                            String newFileName = glbUuid + "." + extension;
+                            targetFilePath = targetDirectory.resolve(newFileName);
+                        } else {
+                            targetFilePath = targetDirectory.resolve(fileName);
+                        }
+
+                        Files.createDirectories(targetFilePath.getParent());
+                        try (OutputStream os = Files.newOutputStream(targetFilePath)) {
+                            zis.transferTo(os);
+                        }
+                        extractedFilePaths.add(targetFilePath);
                     }
-                    
-                    Files.createDirectories(targetFilePath.getParent());
-                    Files.copy(zis, targetFilePath);
-                    extractedFilePaths.add(targetFilePath);
-                } else {
-                    Files.createDirectories(targetDirectory.resolve(zipEntry.getName()));
+                    zis.closeEntry();
                 }
-                zipEntry = zis.getNextEntry();
+                return;
             }
         }
     }
-    
+
+
     /**
      * 파일명에서 확장자를 추출하는 헬퍼 메서드
      */

@@ -126,10 +126,9 @@ public class Initializer implements CommandLineRunner {
 //                throw new CustomException(ErrorCode.INVALID_FILE);
 //            }
 //        }
-
         if (!buildingRepository.existsByIsIndoor("N")) {
             try {
-                Resource resource = new ClassPathResource("static/assets/modeling/outside/KTDS_Out_All_250109.zip");
+                Resource resource = new ClassPathResource("static/assets/modeling/outside/ktds_model.zip");
                 byte[] fileContent;
                 try (InputStream is = resource.getInputStream()) {
                     fileContent = is.readAllBytes();
@@ -141,15 +140,15 @@ public class Initializer implements CommandLineRunner {
                         "application/zip",
                         fileContent
                 );
-                FileInfoDTO fileInfoDTO = buildingService.saveFile(multipartFile, "v1");
+                FileInfoDTO fileInfoDTO = buildingService.saveFile(multipartFile, "20250805");
 
                 CreateBuildingDTO dto = CreateBuildingDTO.builder()
-                        .code("Outdoor")
+                        .code("viewer")
                         .description("외부 전경")
                         .fileInfoId(fileInfoDTO.id())
                         .isIndoor("N")
-                        .name("외부 전경")
-                        .version("v1")
+                        .name("viewer")
+                        .version("20250805")
                         .build();
 
                 Long buildingId = buildingService.saveBuilding(dto);

@@ -70,14 +70,14 @@ public class BuildingService {
 
     @Transactional(readOnly = true)
     public List<BuildingResponseDTO> findAll() {
-        return buildingRepository.findAll().stream()
+        return buildingRepository.findAllByIsIndoor("Y").stream()
                 .map(Building::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<BuildingDetailResponseDTO> findDetailAll() {
-        return buildingRepository.findAll().stream()
+        return buildingRepository.findAllByIsIndoor("Y").stream()
                 .filter(building -> !"store".equals(building.getCode()))
                 .map(Building::toDetailResponseDTO)
                 .toList();

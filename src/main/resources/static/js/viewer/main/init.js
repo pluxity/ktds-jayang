@@ -247,47 +247,39 @@ const Init = (function () {
         setCategoryId(equipmentGroup, categoryList);
     };
 
-    // init floor
-    const initFloors = (buildingId) => {
-        const { floors } = BuildingManager.findById(buildingId);
-        // floor setting
-        const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
-        floors.forEach(floor => {
-            const floorLi = document.createElement('li');
-            floorLi.setAttribute('floor-id', floor.id);
-            floorLi.textContent = floor.name
-            floorUl.appendChild(floorLi);
+    const initBuildingList = () => {
+        const buildingList = BuildingManager.findAll();
+        const buildingUi = document.querySelector('#floor-info .floor-info__detail ul');
+
+        buildingList.forEach(building => {
+            const buildingLi = document.createElement('li');
+            buildingLi.setAttribute('building-id', building.id);
+            buildingLi.textContent = building.name
+            buildingUi.appendChild(buildingLi);
         })
-        clickFloor();
+        clickBuilding();
     }
-    const clickFloor = () => {
-        const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
+
+    const clickBuilding = () => {
+        const buildingBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
         // btnClick
-        floorBtns.forEach(floorBtn => {
-            floorBtn.style.cursor = 'pointer';
-            floorBtn.addEventListener('click', event => {
-                Px.Model.Visible.HideAll();
-                Px.Poi.HideAll();
-                let floorId = floorBtn.getAttribute('floor-id')
-                Px.Model.Visible.Show(Number(floorId));
-                const poiList = PoiManager.findAll();
-                const filteredPois = poiList.filter(poi => poi.floorNo === Number(floorId));
-                filteredPois.forEach(poi => {
-                    Px.Poi.Show(Number(poi.id));
-                });
-                Px.Camera.ExtendView();
-                // PoiManager.getPoisByFloorId(floorId).then(pois => {
-                //     pois.forEach(poi => {
-                //         Px.Poi.Show(Number(poi.id));
-                //     })
-                // })
-            })
-        })
-        // allFloor
-        const allFloor = document.querySelector('.floor-info__ctrl');
-        allFloor.addEventListener('click', event => {
-            Px.Model.Visible.ShowAll();
-            Px.Camera.ExtendView();
+        buildingBtns.forEach(buildingBtn => {
+            buildingBtn.style.cursor = 'pointer';
+            buildingBtn.addEventListener('click', event => {
+
+                    const buildingList = BuildingManager.findAll();
+                    const display = buildingBtn.textContent;
+                    const matched = buildingList.find(b =>
+                        typeof b.name === 'string' && (display.includes(b.name) || b.name.includes(display))
+                    );
+                    console.log("matched : ", matched)
+                    if (!matched) {
+                        return;
+                    }
+
+                    window.location.href = `/map?buildingId=${matched.id}`;
+
+            });
         })
     }
 
@@ -317,7 +309,8 @@ const Init = (function () {
             await BuildingManager.getFloorsByHistoryVersion(version);
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
             let buildingId = outdoorBuilding ? outdoorBuilding.id : null;
-            initFloors(buildingId);
+            //initFloors(buildingId);
+            initBuildingList();
             document.getElementById("buildingName").setAttribute("building-id", buildingId);
             document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
 
@@ -390,17 +383,17 @@ const Init = (function () {
 
                         // Px.Effect.Outline.HoverEventOn('area_no');
 
-                        Px.Event.AddEventListener('pointerup', 'sbm', (data)=>{
-                            Px.Effect.Outline.Add(data.floorId);
-                        });
-                        Px.Effect.Outline.AddHoverEventCallback(
-                            throttle(async (event) => {
-                                if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
-                                    const firstFloorId = outdoorBuilding.floors[0].id;
-                                    Px.Effect.Outline.Add(firstFloorId);
-                                }
-                            }, 10)
-                        );
+                        // Px.Event.AddEventListener('pointerup', 'sbm', (data)=>{
+                        //     Px.Effect.Outline.Add(data.floorId);
+                        // });
+                        // Px.Effect.Outline.AddHoverEventCallback(
+                        //     throttle(async (event) => {
+                        //         if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
+                        //             const firstFloorId = outdoorBuilding.floors[0].id;
+                        //             Px.Effect.Outline.Add(firstFloorId);
+                        //         }
+                        //     }, 10)
+                        // );
 
                         Px.Event.On();
                         setTimeout(() => {

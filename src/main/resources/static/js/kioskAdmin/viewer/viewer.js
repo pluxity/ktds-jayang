@@ -321,13 +321,13 @@
     const initDropUpMenu = () => {
 
         VirtualSelect.init({
-            ele: '#poiSelect',
+            ele: '#kioskPoiSelect',
             options: categoryList,
             selectedValue: categoryList.map((category) => category.value),
             multiple: true,
             silentInitialValueSet: true,
             search: false,
-            name: 'poiSelect',
+            name: 'kioskPoiSelect',
             placeholder: 'POI 카테고리',
             selectAllText: '전체 선택',
             allOptionsSelectedText: '모두 선택됨',

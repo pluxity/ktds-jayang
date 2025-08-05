@@ -97,14 +97,14 @@ body {
     top: 4rem;
 }
 
-/*#poiSelect {*/
-/*    position: absolute;*/
-/*    left: 26.5rem;*/
-/*    bottom: 1rem;*/
-/*    z-index: 9999;*/
-/*    display: flex;*/
-/*    width: 10rem;*/
-/*}*/
+#kioskPoiSelect {
+    position: absolute;
+    left: 26.5rem;
+    bottom: 1rem;
+    z-index: 9999;
+    display: flex;
+    width: 10rem;
+}
 
 #poiWrapper {
     position: absolute;

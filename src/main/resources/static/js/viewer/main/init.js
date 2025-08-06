@@ -331,7 +331,7 @@ const Init = (function () {
                                 displayName: alias,
                                 baseFloor: sbm.sbmFloorBase,
                                 groupId: sbm.sbmFloorGroup,
-                                isSelectable: true,
+                                isSelectable: alias !== '기타시설',
                                 property: sbm.sbmFloorBase
                             };
                         })

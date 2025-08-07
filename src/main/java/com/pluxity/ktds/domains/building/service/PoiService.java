@@ -19,12 +19,14 @@ import com.pluxity.ktds.global.utils.ExcelUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Validated
@@ -135,19 +138,37 @@ public class PoiService {
 
     @Transactional(readOnly = true)
     public List<PoiDetailResponseDTO> findFilteredAllDetail() {
+        log.info("findFilteredAllDetail() start");
+        StopWatch sw = new StopWatch();
+
+        sw.start("findAll");
         List<Poi> poiList = poiRepository.findAllWithPositionPresent();
+        sw.stop();
 
-        return poiList.stream()
-                .map(poi -> {
-                    List<PoiCctv> cctvs = poiCctvRepository.findAllByPoi(poi);
+        sw.start("batchCctvFetch");
+//        Map<Long, List<PoiCctv>> cctvMap = poiList.stream()
+//                .collect(Collectors.toMap(
+//                        Poi::getId,
+//                        poi -> poiCctvRepository.findAllByPoi(poi)
+//                ));
+        List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
+        Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
+                        .collect(Collectors.groupingBy(cctv -> cctv.getPoi().getId()));
+        sw.stop();
 
-                    List<PoiCctvDTO> cctvDtoList = cctvs.stream()
-                            .map(PoiCctvDTO::from)
-                            .toList();
+        sw.start("dto start");
 
-                    PoiDetailResponseDTO base = poi.toDetailResponseDTO();
+        List<PoiDetailResponseDTO> result = new ArrayList<>(poiList.size());
+        for (Poi poi : poiList) {
+            List<PoiCctvDTO> cctvDtoList = cctvMap
+                    .getOrDefault(poi.getId(), Collections.emptyList())
+                    .stream()
+                    .map(PoiCctvDTO::from)
+                    .toList();
 
-                    return PoiDetailResponseDTO.builder()
+            PoiDetailResponseDTO base = poi.toDetailResponseDTO();
+            result.add(
+                    PoiDetailResponseDTO.builder()
                             .id(base.id())
                             .buildingId(base.buildingId())
                             .floorNo(base.floorNo())
@@ -165,9 +186,13 @@ public class PoiService {
                             .lightGroup(base.lightGroup())
                             .cameraIp(base.cameraIp())
                             .cameraId(base.cameraId())
-                            .build();
-                })
-                .toList();
+                            .build()
+            );
+        }
+
+        sw.stop();
+        log.info(sw.prettyPrint());
+        return result;
     }
 
     @Transactional(readOnly = true)

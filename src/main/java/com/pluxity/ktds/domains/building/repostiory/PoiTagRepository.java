@@ -44,4 +44,6 @@ public interface PoiTagRepository extends JpaRepository<PoiTag, Long> {
     @Query("UPDATE PoiTag pt SET pt.externalRegistered = true WHERE pt.id IN :ids")
     int updateExternalRegisteredByIds(@Param("ids") List<Long> ids);
 
+    List<PoiTag> findByTagNameContaining(String pattern);
+
 } 

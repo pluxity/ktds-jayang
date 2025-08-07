@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface PoiCctvRepository extends JpaRepository<PoiCctv, Long> {
     List<PoiCctv> findAllByPoi(Poi poi);
+    List<PoiCctv> findAllByPoiIn(List<Poi> poiList);
 }

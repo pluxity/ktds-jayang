@@ -58,4 +58,11 @@ public class TagController {
 
         return ResponseEntity.ok(poiTagResponseMap);
     }
+
+    @GetMapping("/elevator/add")
+    public ResponseEntity<String> addAllElevatorTags() {
+        String body = tagService.addAllElevatorTags();
+        return ResponseEntity.ok(body);
+    }
+
 }

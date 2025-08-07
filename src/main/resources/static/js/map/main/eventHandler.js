@@ -224,22 +224,26 @@
                 lightPop.style.display = 'block';
             },
             elevatorTab: () => {
-                console.log("elevatorTab");
-                layerPopup.setElevator();
+                // 여기서 elevator 태그 add
+                api.get('/api/tags/elevator/add').then(res => {
+                    console.log("res : ", res);
+                    layerPopup.setElevator();
 
-                const elevatorTab = document.querySelector('.elevator-tab');
-                const escalatorTab = document.querySelector('.escalator-tab');
-                const elevatorContent = document.getElementById('elevatorContent');
-                const escalatorContent = document.getElementById('escalatorContent');
+                    const elevatorTab = document.querySelector('.elevator-tab');
+                    const escalatorTab = document.querySelector('.escalator-tab');
+                    const elevatorContent = document.getElementById('elevatorContent');
+                    const escalatorContent = document.getElementById('escalatorContent');
 
-                initPopup(elevatorPop, clickedItem);
-                registerTabHandlers({
-                    firstTab: elevatorTab,
-                    secondTab: escalatorTab,
-                    firstContent: elevatorContent,
-                    secondContent: escalatorContent,
-                });
-
+                    initPopup(elevatorPop, clickedItem);
+                    registerTabHandlers({
+                        firstTab: elevatorTab,
+                        secondTab: escalatorTab,
+                        firstContent: elevatorContent,
+                        secondContent: escalatorContent,
+                    });
+                }).catch(err => {
+                    console.error(err);
+                })
             },
             parkingTab: () => {
 
@@ -377,8 +381,7 @@
             systemPopup.style.display = 'none';
             eventLayerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
-            // 이거 왜?
-            // Px.Poi.ShowAll();
+            
             const sopPopup = document.querySelector("#sopLayerPopup");
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
@@ -1253,13 +1256,13 @@
         container.innerHTML = '';
         Px.Core.Initialize(container, async () => {
 
-            const { buildingFile, floors } = await BuildingManager.findById(buildingId);
+            const building = await BuildingManager.findById(buildingId);
+            const { buildingFile, floors } = building;
             const { directory } = buildingFile;
-
             const sbmDataArray = floors
                 .flatMap(floor =>
                     floor.sbmFloor.map(sbm => ({
-                        url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
+                        url: `/Building/${directory}/${building.getVersion()}/${sbm.sbmFileName}`,
                         id: floor.id,
                         displayName: sbm.sbmFileName,
                         baseFloor: sbm.sbmFloorBase,

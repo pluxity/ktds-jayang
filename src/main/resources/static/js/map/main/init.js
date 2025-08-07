@@ -328,7 +328,6 @@
     initBuilding();
     setDateTime();
     setInterval(updateCurrentTime, 1000);
-
 })();
 
 const Init = (function () {
@@ -563,18 +562,7 @@ const Init = (function () {
                         }
                     });
 
-                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
-                    });
-                    Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
-                        console.log("event : ", event);
-                    })
-
                     Px.Effect.Outline.HoverEventOn('area_no');
-                    Px.Effect.Outline.AddHoverEventCallback(
-                        throttle((event) => {
-
-                        }, 1000)
-                    );
                     if(building?.camera3d)
                         Px.Camera.SetState(JSON.parse(building.camera3d));
 
@@ -1592,7 +1580,8 @@ const Init = (function () {
                                   </tr>
                                 `;
                             }).join('');
-                        } else if(poiProperty.poiCategoryName == "조명") {
+                        } else if(['조명', '항공장애'].includes(poiProperty.poiCategoryName)) {
+
                             // const head = popupInfo.querySelector('.popup-info__head');
                             // head.querySelectorAll('h2').forEach(h => h.remove());
                             //

@@ -48,7 +48,7 @@ public class TagClientService {
             String requestStr = objectMapper.writeValueAsString(tags);
             HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
             ResponseEntity<String> response = restTemplate.exchange(
-                    baseUrl + "/?addtags",
+                    baseUrl + "/?AddTags",
                     HttpMethod.POST,
                     request,
                     String.class
@@ -152,7 +152,7 @@ public class TagClientService {
         try {
             HttpEntity<String> request = new HttpEntity<>(null, setHeaders());
             ResponseEntity<String> response = restTemplate.exchange(
-                    baseUrl + "/?clearTags",
+                    baseUrl + "/?ClearTags",
                     HttpMethod.POST,
                     request,
                     String.class

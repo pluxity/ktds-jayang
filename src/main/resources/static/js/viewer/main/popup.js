@@ -1520,7 +1520,6 @@ const layerPopup = (function () {
         const validEntries = entries.filter(([idStr]) =>
             PoiManager.findById(Number(idStr))
         );
-        console.log("validEntries : ", validEntries);
         const slice = validEntries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
         const pageData = Object.fromEntries(slice);
 
@@ -1715,15 +1714,12 @@ const layerPopup = (function () {
                 }
             }
 
-            console.log("filterStatus : ", filterStatus);
-            console.log("stateText : ", stateText);
             if (filterStatus !== '상태 전체' && stateText !== filterStatus) {
                 return;
             }
 
             // DOM 렌더링
             const elevatorLi = document.createElement('li');
-            console.log("poiInfo : ", poiInfo);
             const buildingLabel = `[${poiInfo.property.buildingName}]`;
 
             const formattedStateText = stateText.match(/.{1,4}/g).join('<br>');
@@ -2900,7 +2896,6 @@ const layerPopup = (function () {
         if (building.isIndoor === 'N') {
             Px.Model.Visible.ShowAll();
             Px.Poi.HideAll();
-            Px.Poi.ShowAll();
         } else {
             Px.Model.Visible.Show(Number(floor.id));
             Px.Poi.HideAll();
@@ -3115,7 +3110,6 @@ const layerPopup = (function () {
         const poiBtn = poiSelect.querySelector(".select-box__btn");
         const poiContent = poiSelect.querySelector(".select-box__content ul");
         poiContent.innerHTML = '';
-        console.log("poiList : ", poiList);
         if (poiList.length == 0) {
             poiBtn.textContent = "없음";
             poiBtn.classList.add("select__btn--disabled");
@@ -3534,8 +3528,7 @@ const layerPopup = (function () {
         if (!target) return;
         target.style.display = 'none';
         Px.VirtualPatrol.Clear();
-        Px.Poi.ShowAll();
-        Px.Model.Visible.ShowAll();
+        // Px.Model.Visible.ShowAll();
 
         if (target.id === 'mapLayerPopup') {
             document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));

@@ -3055,21 +3055,23 @@ const layerPopup = (function () {
         const floorBtn = floorSelect.querySelector(".select-box__btn");
         const floorContent = floorSelect.querySelector(".select-box__content ul");
         floorContent.innerHTML = '';
-
+        const allPois = PoiManager.findAll();
         const liAll = document.createElement('li');
         liAll.textContent = "전체";
         liAll.onclick = () => {
             floorBtn.textContent = "전체";
             floorBtn.classList.remove("select-box__btn--active");
             floorSelect.querySelector(".select-box__content").classList.remove("active");
+            const allPois = PoiManager.findAll();
             if (buildingId) {
-                const allPois = PoiManager.findAll();
+                // const allPois = PoiManager.findAll();
                 const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
                 updatePoiSelectBox(filteredPois);
             } else {
-                PoiManager.getFilteredPoiList().then((pois) => {
-                    updatePoiSelectBox(pois);
-                })
+                updatePoiSelectBox(allPois);
+                // PoiManager.getFilteredPoiList().then((pois) => {
+                //     updatePoiSelectBox(pois);
+                // })
             }
         };
         floorContent.appendChild(liAll);
@@ -3083,7 +3085,7 @@ const layerPopup = (function () {
                 floorBtn.classList.remove("select-box__btn--active");
                 floorSelect.querySelector(".select-box__content").classList.remove("active");
 
-                const allPois = PoiManager.findAll();
+                // const allPois = PoiManager.findAll();
                 const filteredPois = allPois.filter(poi => poi.floorNo === Number(floor.no));
                 updatePoiSelectBox(filteredPois);
             }
@@ -3093,9 +3095,7 @@ const layerPopup = (function () {
         if (floorList.length > 0) {
             // floorBtn.textContent = floorList[0].name;
             floorBtn.textContent = "전체";
-            PoiManager.getFilteredPoiList().then((pois) => {
-                updatePoiSelectBox(pois);
-            })
+            updatePoiSelectBox(allPois);
             // PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
             //     updatePoiSelectBox(pois);
             // });
@@ -3265,7 +3265,8 @@ const layerPopup = (function () {
         if (reinitializeSelectBoxes) {
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
-            const poiListData = await PoiManager.getFilteredPoiList();
+            // const poiListData = await PoiManager.getFilteredPoiList();
+            const poiListData = PoiManager.findAll();
             updatePoiSelectBox(poiListData);
             setDatePicker();
             const alarmTypes = [
@@ -3303,7 +3304,8 @@ const layerPopup = (function () {
         const selectedDeviceType = poiBtn.textContent.trim();
         const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
 
-        poiList = await PoiManager.getFilteredPoiList();
+        // poiList = await PoiManager.getFilteredPoiList();
+        poiList = PoiManager.findAll();
         const tableBody = document.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";

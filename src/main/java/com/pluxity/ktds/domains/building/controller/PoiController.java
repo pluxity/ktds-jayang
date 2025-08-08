@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pluxity.ktds.domains.building.dto.*;
+import com.pluxity.ktds.domains.building.service.PoiTagSyncService;
 import com.pluxity.ktds.domains.tag.ElevatorTagManager;
 import java.util.*;
 
@@ -34,6 +35,7 @@ public class PoiController {
     private final PoiService service;
     private final TagClientService tagClientService;
     private final ObjectMapper objectMapper;
+    private final PoiTagSyncService poiTagSyncService;
 
 //    @GetMapping
 //    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
@@ -164,6 +166,18 @@ public class PoiController {
     public ResponseEntity<String> getTestPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
         return tagClientService.testReadTags(tags);
     }
+
+    @PostMapping("/add-tags")
+    public DataResponseBody<Boolean> syncPoiTags(@RequestBody Long poiId) {
+        return DataResponseBody.of(poiTagSyncService.syncPoiTags(poiId));
+    }
+
+    @DeleteMapping("/clear-tags")
+    public ResponseEntity<String> clearPoiTags() {
+        return tagClientService.clearTags();
+    }
+
+
 
     private Map<String, Object> getPoiTagData(List<String> tags) {
         String tagDataStr = tagClientService.readTags(tags).getBody();

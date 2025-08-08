@@ -6,13 +6,11 @@ import com.pluxity.ktds.domains.building.repostiory.*;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
 import com.pluxity.ktds.domains.cctv.repository.PoiCctvRepository;
-import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
-import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -31,7 +29,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Source;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -42,10 +39,10 @@ import java.util.stream.Collectors;
 import static com.pluxity.ktds.global.constant.ExcelHeaderNameCode.*;
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class PoiService {
 
     private final PoiRepository poiRepository;
@@ -253,7 +250,6 @@ public class PoiService {
                 PoiTag poiTag = new PoiTag(tagName);
                 poiTag.changePoi(savedPoi);
             }
-            poiTagSyncService.syncPoiUnregisteredTags(savedPoi);
         }
 
         return savedPoi.getId();
@@ -331,9 +327,6 @@ public class PoiService {
         // 태그 업데이트
         if (!ObjectUtils.isEmpty(dto.tagNames())) {
             poi.updatePoiTags(dto.tagNames());
-
-            // 외부 서버 동기화
-            poiTagSyncService.syncPoiUnregisteredTags(poi);
         }
 
         poi.update(dto.name(), dto.code(), newCctvs, dto.isLight(), dto.lightGroup(), dto.cameraIp(), dto.cameraId());
@@ -549,10 +542,6 @@ public class PoiService {
 
             try {
                 poiRepository.saveAll(result);
-
-                for(Poi poi : result) {
-                    poiTagSyncService.syncPoiUnregisteredTags(poi);
-                }
 
             } catch(InvalidDataAccessResourceUsageException | DataIntegrityViolationException e) {
                 if(e.getRootCause().getMessage().contains("Data too long for column")) {

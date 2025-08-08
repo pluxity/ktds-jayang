@@ -21,7 +21,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         const errorData = error.response.data;
-        if(typeof Swal !== 'undefined') {
+        
+        // X-Skip-Error-Alert 헤더가 있으면 alert 제외
+        const skipAlert = error.config?.headers?.['X-Skip-Error-Alert'] === 'true';
+        
+        if(typeof Swal !== 'undefined' && !skipAlert) {
             Swal.fire({
                 width: 650,
                 icon: 'error',

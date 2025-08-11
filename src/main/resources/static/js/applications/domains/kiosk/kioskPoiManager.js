@@ -5,7 +5,7 @@ const KioskPoiManager = (() => {
     let currentKioskPoi = null;
 
     const dtoToModel = (kioskPoiDto) => {
-        const { id, name, buildingId, floorNo, isKiosk, position, rotation, scale, store, kiosk } = kioskPoiDto;
+        const { id, name, buildingId, floorNo, isKiosk, position, rotation, scale, store, kiosk, category } = kioskPoiDto;
         return new KioskPoi(
             id,
             name,
@@ -17,7 +17,8 @@ const KioskPoiManager = (() => {
             rotation,
             scale,
             isKiosk ? null : store,
-            isKiosk ? kiosk : null
+            isKiosk ? kiosk : null,
+            category
         );
     }
 
@@ -122,7 +123,7 @@ const KioskPoiManager = (() => {
         poiData.push(kioskPoi.poiOptions);
         });
 
-        Px.Poi.AddFromDataArray(poiData);
+        Px.Poi.AddFromDataArraySync(poiData);
     };
 
     const renderKioskPoiByIdAddByMouse = (id) => {

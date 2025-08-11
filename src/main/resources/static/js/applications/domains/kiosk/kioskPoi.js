@@ -8,6 +8,7 @@ class KioskPoi {
     #property;
     #store;
     #kiosk;
+    #category;
 
     constructor(
         id,
@@ -21,6 +22,7 @@ class KioskPoi {
         scale,
         store,
         kiosk,
+        category
     ) {
         this.#id = id;
         this.#name = name;
@@ -33,6 +35,7 @@ class KioskPoi {
         this.#property = property;
         this.#store = store;
         this.#kiosk = kiosk;
+        this.#category = category;
     }
 
     get id() {
@@ -62,6 +65,12 @@ class KioskPoi {
     get kioskIconUrl() {
         return `${CONTEXT_PATH}2D/kiosk/kiosk.svg`;
     }
+    get restaurantIconUrl() {
+        return `${CONTEXT_PATH}2D/kiosk/restaurant.svg`;
+    }
+    get category() {
+        return this.#category;
+    }
     // Px.Poi.Add 용
     get poiOptions() {
         return {
@@ -70,7 +79,7 @@ class KioskPoi {
             group: this.isKiosk ? 'Kiosk' : 'Store',
             lineHeight: SystemSettingManager.find().poiLineLength ?? 40,
             position: this.position ? this.position : {x:0,y:0,z:0},
-            iconUrl: this.isKiosk ? this.kioskIconUrl : this.storeIconUrl,
+            iconUrl: this.isKiosk ? this.kioskIconUrl : this.category === 'F&B' ? this.restaurantIconUrl : this.storeIconUrl,
             property: this.property,
             rotation: {
                 "x": 0,

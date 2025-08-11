@@ -2570,12 +2570,16 @@ input[type=text]:disabled, input[type=password]:disabled {
   -webkit-mask-position: -248px -10px;
   mask-position: -248px -10px;
 }
+
+.floor-info__detail .active{
+  background-color: var(--color-grayscale-dark);
+}
+
 .floor-info__ctrl .all {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
-  background-color: var(--color-grayscale-dark);
   border-radius: 20px;
   width: 30px;
   height: 30px;

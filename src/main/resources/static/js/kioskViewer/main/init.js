@@ -4,6 +4,14 @@
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
       });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
 
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.kiosk-footer .kiosk-footer__date');
@@ -245,8 +253,10 @@ const Init = (function () {
         Px.Camera.MoveToPoi({
             id: kioskPoi.id,
             isAnimation: true,
+            isTopView: true,
+            topViewDistance: 500,
             duration: 500,
-            distanceOffset: 500,
+            // distanceOffset: 500,
             heightOffset:200
         });
     }

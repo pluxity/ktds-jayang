@@ -2091,16 +2091,16 @@ const layerPopup = (function () {
         const startInput = document.getElementById('parkStartDate');
         const endInput   = document.getElementById('parkEndDate');
 
-        if(startInput) startInput.value = '';
-        if(endInput) endInput.value = '';
-        // if (startInput && !startInput.value) {
-        //     const now = new Date();
-        //     const first = new Date(now.getFullYear(), now.getMonth(), 1);
-        //     startInput.value = ymd(first);
-        // }
-        // if (endInput && !endInput.value) {
-        //     endInput.value = ymd(new Date());
-        // }
+        // if(startInput) startInput.value = '';
+        // if(endInput) endInput.value = '';
+        if (startInput && !startInput.value) {
+            const now = new Date();
+            const first = new Date(now.getFullYear(), now.getMonth(), 1);
+            startInput.value = ymd(first);
+        }
+        if (endInput && !endInput.value) {
+            endInput.value = ymd(new Date());
+        }
 
         ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#parkSearchSelect']
             .forEach(id => {
@@ -2201,9 +2201,21 @@ const layerPopup = (function () {
         //     const p = buildParams();
         //     if (p) searchParams = p;
         // }
+        const startInput = document.getElementById('parkStartDate');
+        const endInput = document.getElementById('parkEndDate');
+        const now = new Date();
+        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startDate = ymd(first)
+        const endDate = ymd(now)
+        // if (startInput && !startInput.value) startInput.value = startDate;
+        // if (endInput && !endInput.value) endInput.value = endDate;
+        const startTime = `${startDate} 00:00:00.000`;
+        const endTime = `${endDate} 23:59:59.999`;
+        const params = { ...searchParams, startTime, endTime };
+
         Promise.all([
             getParkingTags(),
-            getParkingSearch(searchParams)
+            getParkingSearch(params)
         ]).then(([parkingTagValue, result]) => {
 
             renderTagSummaryAndList(parkingTagValue);

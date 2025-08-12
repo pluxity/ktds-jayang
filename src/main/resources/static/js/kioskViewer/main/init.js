@@ -92,6 +92,9 @@
                     center: "",
                     onLoad: async function() {
                         await initPoi();
+                        // Px.Camera.SetOrthographic(() => {
+                        //     Init.moveToKiosk(kioskPoi);
+                        // });
                         Init.moveToKiosk(kioskPoi);
                         Px.Event.On();
                         Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
@@ -153,6 +156,23 @@
                     floor: kioskPoi.floorNo
             });
         }
+    });
+
+    const changeButton = document.querySelector('.kiosk-3d__control .change');
+    changeButton.addEventListener('click', async () => {
+        const state = Px.Camera.GetState();
+        if (!state) return;
+
+        const { position, target, rotation } = state;
+        const dx = position.x - target.x;
+        const dy = position.y - target.y;
+        const dz = position.z - target.z;
+        const distance = Math.hypot(dx, dy, dz) || 1;
+        Px.Camera.SetState({
+            position: { x: target.x, y: target.y + distance, z: target.z },
+            target: target,
+            rotation: rotation
+        });
     });
 
     const setFloorList = (storeBuilding, kioskPoi) => {
@@ -248,14 +268,16 @@ const Init = (function () {
         Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(floor.id);
         Px.Poi.HideAll();
+
         // Px.Poi.ShowByProperty("floorId", floor.id);
         Px.Poi.ShowByProperty("floorNo", kioskPoi.floorNo);
+
         Px.Camera.MoveToPoi({
             id: kioskPoi.id,
             isAnimation: true,
             isTopView: true,
             topViewDistance: 500,
-            duration: 500,
+            duration: 0,
             // distanceOffset: 500,
             heightOffset:200
         });

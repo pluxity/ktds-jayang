@@ -85,6 +85,11 @@ public class PoiController {
         return DataResponseBody.of(service.findPoiIdsByTagName(tagName).getPoi().getId());
     }
 
+    @GetMapping("/cctvs/poi-ids")
+    public DataResponseBody<Map<Long, Set<Long>>> getPoiIdsGroupedByCctvName() {
+        return DataResponseBody.of(service.getPoiIdsGroupedByCctvPoiId());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseBody<Long> postPoi(@Valid @RequestBody CreatePoiDTO dto) {

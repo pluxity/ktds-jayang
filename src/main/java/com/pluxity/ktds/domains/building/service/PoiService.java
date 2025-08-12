@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.building.dto.*;
 import com.pluxity.ktds.domains.building.entity.*;
 import com.pluxity.ktds.domains.building.repostiory.*;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
+import com.pluxity.ktds.domains.cctv.dto.PoiCctvResponseDTO;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
 import com.pluxity.ktds.domains.cctv.repository.PoiCctvRepository;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
@@ -597,6 +598,15 @@ public class PoiService {
                 }
             }
         }
+    }
+
+    public Map<Long, Set<Long>> getPoiIdsGroupedByCctvPoiId() {
+        List<PoiCctvResponseDTO> dtos = poiCctvRepository.findByCctvNameWithPoiDto();
+        return dtos.stream()
+                .collect(Collectors.groupingBy(
+                        PoiCctvResponseDTO::getCctvPoiId,
+                        Collectors.mapping(PoiCctvResponseDTO::getPoiId, Collectors.toSet())
+                ));
     }
 
     @NotNull

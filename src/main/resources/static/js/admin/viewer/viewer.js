@@ -388,7 +388,7 @@ function initBuilding() {
                         const cctvTableBody = document.querySelector('#cctvListTable > tbody');
                         if(poiCategoryName.toLowerCase().includes('cctv')) {
                             if (!cctvEquipmentMap.has(poiId)) {
-                                cctvEquipmentMap.set(poiId, new Set());
+                                cctvEquipmentMap.set(poiId, []);
                             }else {
                                 clearActiveCctvRows();
                                 const row = cctvTableBody.querySelector(`tbody > tr[data-poi-id="${poiId}"]`)

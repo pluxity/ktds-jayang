@@ -1,4 +1,5 @@
 const initPoi = async () => {
+    await PoiManager.getPoiList();
     await getPoiRenderingAndList();
     PoiManager.renderAllPoiToEngineByBuildingId(BUILDING_ID);
 
@@ -179,7 +180,7 @@ const unAllocatePoi = (ids) => {
         return api.patch(`/poi/un-allocation/${ids}`)
             .then(() => {
                 ids.forEach((id) => PoiManager.findById(id).removeOn3D());
-                getPoiRenderingAndList();
+                getPoiRenderingAndList(true);
             });
 
     });
@@ -193,86 +194,89 @@ const pagination = (list, page, recordSize) => {
 
 // filteredList = 사이드 poi 리스트
 // displayPoiList = viewer 에 표출되는 poi 리스트
-const getPoiRenderingAndList = async () => {
-    await PoiManager.getPoiList().then(() => {
-        let filteredList = PoiManager.findByBuilding(BUILDING_ID)
-        let displayPoiList = filteredList;
+const getPoiRenderingAndList = async (type) => {
 
-        if (filteredList === undefined || filteredList.length < 1) {
-            console.warn('POI 가 한 개도 없습니다.');
-            return;
-        }
+    if (type === true) {
+        await PoiManager.getPoisByBuildingId(BUILDING_ID);
+    }
 
-        const largePoiCategoryId = Number(
-            document.querySelector('#largePoiCategorySelectSearchForm').value,
+    let filteredList = PoiManager.findByBuilding(BUILDING_ID)
+    let displayPoiList = filteredList;
+
+    if (filteredList === undefined || filteredList.length < 1) {
+        console.warn('POI 가 한 개도 없습니다.');
+        return;
+    }
+
+    const largePoiCategoryId = Number(
+        document.querySelector('#largePoiCategorySelectSearchForm').value,
+    );
+    if (largePoiCategoryId) {
+        filteredList = filteredList.filter(
+            (poi) => poi.poiCategory === largePoiCategoryId,
         );
-        if (largePoiCategoryId) {
-            filteredList = filteredList.filter(
-                (poi) => poi.poiCategory === largePoiCategoryId,
-            );
-        }
+    }
 
-        const poiCategoryCheckbox = [
-            ...document.querySelectorAll(
-                '#dropdownMenuButtonList > li .form-check-input:checked',
-            ),
-        ];
-        poiCategoryCheckbox.forEach((poiCategory) => {
-            filteredList = filteredList.filter(
-                (poi) => poi.poiCategory === Number(poiCategory.value),
-            );
-        });
-
-        const searchKeyword = document.querySelector('#searchKeyword');
-        displayPoiList = filteredList;
-
-        if (searchKeyword.value) {
-            filteredList = filteredList.filter((poi) =>
-                poi.name.toLowerCase().includes(searchKeyword.value.toLowerCase()),
-            );
-
-        }
-
-        if (document.querySelector('#poiAllocate').classList.contains('active')) {  //배치
-            filteredList = filteredList.filter((poi) => poi.position !== null);
-            displayPoiList = displayPoiList.filter(selectedPoiCategory(document.querySelector('#poiSelect').value));
-
-            // 배치일때 filteredList, displayPoiList 모두 현재 선택된 층으로 필터링
-            const floorSelectBoxId = Number(
-                document.querySelector('#floorNo').value);
-            if (floorSelectBoxId !== 0) {
-                filteredList = filteredList.filter(
-                    (poi) => poi.property.floorNo === floorSelectBoxId
-                );
-                displayPoiList = displayPoiList.filter(
-                    (poi) => poi.property.floorNo === floorSelectBoxId
-                );
-            }
-        } else if (document.querySelector('#poiUnAllocate').classList.contains('active')) { // 미배치
-            displayPoiList = displayPoiList.filter(selectedPoiCategory(document.querySelector('#poiSelect').value));
-
-
-            // 미배치일때 displayPoiList만 현재 선택된 층으로 필터링
-            const floorSelectBoxId = Number(document.querySelector('#floorNo').value);
-            if (floorSelectBoxId !== 0) {
-                displayPoiList = displayPoiList.filter(
-                    (poi) => poi.property.floorNo === floorSelectBoxId
-                );
-            }
-
-            filteredList = filteredList.filter((poi) => poi.position === null);
-        }
-
-        poiPaging(filteredList);
-
-        if (
-            document.querySelector('#poi-tab').classList.contains('active') ||
-            document.querySelector('#patrol-tab').classList.contains('active') ||
-            document.querySelector('#cctv-tab').classList.contains('active')
-        ) {
-            renderingPoiList(displayPoiList);
-        }
+    const poiCategoryCheckbox = [
+        ...document.querySelectorAll(
+            '#dropdownMenuButtonList > li .form-check-input:checked',
+        ),
+    ];
+    poiCategoryCheckbox.forEach((poiCategory) => {
+        filteredList = filteredList.filter(
+            (poi) => poi.poiCategory === Number(poiCategory.value),
+        );
     });
+
+    const searchKeyword = document.querySelector('#searchKeyword');
+    displayPoiList = filteredList;
+
+    if (searchKeyword.value) {
+        filteredList = filteredList.filter((poi) =>
+            poi.name.toLowerCase().includes(searchKeyword.value.toLowerCase()),
+        );
+
+    }
+
+    if (document.querySelector('#poiAllocate').classList.contains('active')) {  //배치
+        filteredList = filteredList.filter((poi) => poi.position !== null);
+        displayPoiList = displayPoiList.filter(selectedPoiCategory(document.querySelector('#poiSelect').value));
+
+        // 배치일때 filteredList, displayPoiList 모두 현재 선택된 층으로 필터링
+        const floorSelectBoxId = Number(
+            document.querySelector('#floorNo').value);
+        if (floorSelectBoxId !== 0) {
+            filteredList = filteredList.filter(
+                (poi) => poi.property.floorNo === floorSelectBoxId
+            );
+            displayPoiList = displayPoiList.filter(
+                (poi) => poi.property.floorNo === floorSelectBoxId
+            );
+        }
+    } else if (document.querySelector('#poiUnAllocate').classList.contains('active')) { // 미배치
+        displayPoiList = displayPoiList.filter(selectedPoiCategory(document.querySelector('#poiSelect').value));
+
+
+        // 미배치일때 displayPoiList만 현재 선택된 층으로 필터링
+        const floorSelectBoxId = Number(document.querySelector('#floorNo').value);
+        if (floorSelectBoxId !== 0) {
+            displayPoiList = displayPoiList.filter(
+                (poi) => poi.property.floorNo === floorSelectBoxId
+            );
+        }
+
+        filteredList = filteredList.filter((poi) => poi.position === null);
+    }
+
+    poiPaging(filteredList);
+
+    if (
+        document.querySelector('#poi-tab').classList.contains('active') ||
+        document.querySelector('#patrol-tab').classList.contains('active') ||
+        document.querySelector('#cctv-tab').classList.contains('active')
+    ) {
+        renderingPoiList(displayPoiList);
+    }
 
 };
 

@@ -216,11 +216,13 @@ function changeEventFloor(floorNo) {
     } else {
 
         Px.Model.Visible.HideAll();
+        Px.Poi.HideAll();
 
         const floor = BuildingManager.findFloorsByHistory().find(
             (floor) => floor.no === Number(floorNo),
         );
         Px.Model.Visible.Show(floor.id);
+        Px.Poi.ShowByProperty("floorNo", Number(floorNo));
         Px.Camera.ExtendView();
     }
     const activeId = document.querySelector(
@@ -229,9 +231,9 @@ function changeEventFloor(floorNo) {
 
     switch (activeId) {
         case 'poi-tab': {
+
             document.querySelector('#virtualPatrolCtrlToolBar').classList.remove('active');
             document.querySelector('#evacRouteBtnToolBar').classList.add('active');
-
 
             break;
         }
@@ -760,7 +762,7 @@ function initializeViewerPoiModal() {
                 alertSwal('등록이 완료 되었습니다.').then(() => {
                     document.querySelector('#poiRegisterModal > div > div > div.modal-header > button').click();
                     // POI 리스트 새로고침 (기존 viewer 함수 활용)
-                        getPoiRenderingAndList();
+                        getPoiRenderingAndList(true);
                 });
             });
         });
@@ -807,7 +809,7 @@ function initializeViewerPoiModal() {
                 alertSwal('일괄등록이 완료 되었습니다.').then(() => {
                     document.querySelector('#poiBatchRegisterModal > div > div > div.modal-header > button').click();
                     // POI 리스트 새로고침
-                        getPoiRenderingAndList();
+                        getPoiRenderingAndList(true);
                 });
             }).catch(() => {
                 document.querySelector('#batchRegisterFile').value = '';

@@ -32,6 +32,21 @@ const PoiManager = (() => {
         });
     };
 
+    const getAllocateFilterPoiList = (buildingId, isAllocate) => {
+        return new Promise((resolve) => {
+            api.get(`/poi/allocate`, {
+                params: {
+                    buildingId: buildingId,
+                    isAllocate: isAllocate
+                }
+            }).then((result) => {
+                const { result: data } = result.data;
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+
     const getFilteredPoiList = () => {
         return new Promise((resolve) => {
             api.get(`/poi/filter`).then((result) => {
@@ -275,9 +290,6 @@ const PoiManager = (() => {
                         if (!isAdmin)
                             Px.Poi.SetTextSize(poi.id, 1);
                     }
-                    if (poi.property.code.toLowerCase().includes("tms")) {
-                        TmsEventHandler.renderSetColor(poi.property.code);
-                    }
                 });
                 resolve(); // 완료 시 resolve 호출
             });
@@ -368,6 +380,7 @@ const PoiManager = (() => {
         getPoisByFloorNo,
         getFilteredPoiList,
         initPlayer,
-        patchPoiCameraId
+        patchPoiCameraId,
+        getAllocateFilterPoiList
     };
 })();

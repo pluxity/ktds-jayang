@@ -71,7 +71,7 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             "WHERE a.occurrenceDate BETWEEN :startDate AND :endDate " +
             "AND (:buildingNm IS NULL OR a.buildingNm = :buildingNm) " +
             "AND (:floorNm IS NULL OR a.floorNm = :floorNm) " +
-            "AND (:deviceType IS NULL OR a.deviceNm LIKE CONCAT(:deviceType, '-%')) " +
+            "AND (:deviceType IS NULL OR a.equipment = :deviceType) " +
             "AND (:searchValue IS NULL OR (a.deviceNm LIKE CONCAT('%', :searchValue, '%') " +
             "     OR CONCAT('', a.alarmType) LIKE CONCAT('%', :searchValue, '%')))")
     List<Alarm> findAlarms(

@@ -3274,6 +3274,7 @@ const layerPopup = (function () {
     const taggedPoiMap = new Map();
     const createEventPopup = async (reinitializeSelectBoxes = false) => {
         // const buildingList = await BuildingManager.getBuildingList();
+        console.log("reinitializeSelectBoxes : ", reinitializeSelectBoxes);
         if (reinitializeSelectBoxes) {
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
@@ -3315,10 +3316,10 @@ const layerPopup = (function () {
         const selectedFloor = floorBtn.textContent.trim();
         const selectedDeviceType = poiBtn.textContent.trim();
         const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
-
         // poiList = await PoiManager.getFilteredPoiList();
         poiList = PoiManager.findAll();
-        const tableBody = document.querySelector('.event-info table tbody');
+        const eventLayerPopup = document.getElementById('eventLayerPopup');
+        const tableBody  = eventLayerPopup.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";
 
@@ -3328,6 +3329,20 @@ const layerPopup = (function () {
         const params = new URLSearchParams();
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
+        // if (selectedBuilding && selectedBuilding !== '전체') {
+        //     console.log("buildingNm : ", selectedBuilding);
+        //     params.append('buildingNm', selectedBuilding);
+        // }
+        // if (selectedFloor && selectedFloor !== '전체') {
+        //     console.log("floorNm : ", selectedFloor);
+        //     params.append('floorNm', selectedFloor);
+        // }
+        if (selectedDeviceType && selectedDeviceType !== '전체') {
+            params.append('deviceType', selectedDeviceType);
+        }
+        if (alarmTypeInput) {
+            params.append('searchValue', alarmTypeInput);
+        }
 
         api.get(`/events/alarms?${params.toString()}`).then((res) => {
             const { result: data } = res.data;
@@ -3347,6 +3362,7 @@ const layerPopup = (function () {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
+
                     return taggedPoi && taggedPoi.property.buildingName === selectedBuilding;
                 });
             }
@@ -3393,12 +3409,11 @@ const layerPopup = (function () {
                 });
             }
 
-            const eventPopup = document.querySelector('#eventLayerPopup');
-            eventPopup.style.position = 'absolute';
-            eventPopup.style.top = '50%';
-            eventPopup.style.left = '50%';
-            eventPopup.style.transform = 'translate(-50%, -50%)';
-            eventPopup.style.display = 'inline-block';
+            eventLayerPopup.style.position = 'absolute';
+            eventLayerPopup.style.top = '50%';
+            eventLayerPopup.style.left = '50%';
+            eventLayerPopup.style.transform = 'translate(-50%, -50%)';
+            eventLayerPopup.style.display = 'inline-block';
 
             const matchedAlarms = searchedAlarms.filter(data =>
                 poiList.some(poi =>
@@ -3413,44 +3428,47 @@ const layerPopup = (function () {
             const itemsPerPage = 10;
             let currentPage = 1;
             const totalPages = Math.ceil(matchedAlarms.length / itemsPerPage);
-            const paginationContainer = document.querySelector(".search-result__paging .number");
+            const paginationContainer = eventLayerPopup.querySelector(".search-result__paging .number");
 
             const renderTable = (page) => {
-                tableBody.innerHTML = "";
+                // tableBody.innerHTML = "";
                 const startIndex = (page - 1) * itemsPerPage;
                 const pageAlarms = matchedAlarms.slice(startIndex, startIndex + itemsPerPage);
+
+                const frag = document.createDocumentFragment();
+
                 pageAlarms.forEach((data) => {
 
                     const eventRow = document.createElement('tr');
                     const [formattedOccurrenceDate, formattedConfirmTime] =
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
 
-                    let deviceType = data.deviceNm.split("-")[0];
-
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === data.tagName.toLowerCase())
                     );
-                    console.log("taggedPoi : ", taggedPoi);
 
                     if (taggedPoi) {
                         eventRow.innerHTML = `
                             <td>${taggedPoi.property.buildingName || '-'}</td>
-                            <td>${taggedPoi.property.floorNo || '-'}</td>
+                            <td>${taggedPoi.property.floorName || '-'}</td>
                             <td>${data.event || '-'}</td>
                             <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
                             <td>${taggedPoi.name || '-'}</td>
                             <td>${formatDateTime(data.occurrenceDate) || '-'}</td>
                             <td>${formatDateTime(data.confirmDate) || '-'}</td>
                             <td>
-                                <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
+                                <a href="javascript:void(0);" class="icon-move moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
                                     <span class="hide">도면 이동</span>
                                 </a>
                             </td>
                         `;
-                        tableBody.appendChild(eventRow);
+                        // tableBody.appendChild(eventRow);
+                        frag.appendChild(eventRow);
                         taggedPoiMap.set(taggedPoi.id, taggedPoi);
                     }
                 });
+                tableBody.textContent = '';
+                tableBody.appendChild(frag);
             };
 
             const renderPagination = () => {
@@ -3470,14 +3488,14 @@ const layerPopup = (function () {
                 }
             };
 
-            document.querySelector(".search-result__paging .left").onclick = () => {
+            eventLayerPopup.querySelector(".search-result__paging .left").onclick = () => {
                 if (currentPage > 1) {
                     currentPage--;
                     renderTable(currentPage);
                     renderPagination();
                 }
             };
-            document.querySelector(".search-result__paging .right").onclick = () => {
+            eventLayerPopup.querySelector(".search-result__paging .right").onclick = () => {
                 if (currentPage < totalPages) {
                     currentPage++;
                     renderTable(currentPage);
@@ -3501,8 +3519,8 @@ const layerPopup = (function () {
             await createEventPopup(false);
         });
     }
-    document.querySelector('.event-info').addEventListener('click', event => {
-        const moveLink = event.target.closest('#moveToMap');
+    eventLayerPopup.querySelector('.event-info').addEventListener('click', event => {
+        const moveLink = event.target.closest('.moveToMap');
         if (moveLink) {
             event.preventDefault();
             const poiId = moveLink.getAttribute('data-poi-id');

@@ -715,10 +715,15 @@ div.input_autocomplete ul.input_autocomplete li:hover {
     padding: 5px;
     background-color: #eee;
 }
+.cctv-list-wrapper{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
 .cctv-list {
     width: 100%;
-    height: 85%;
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     margin-bottom: 2rem;

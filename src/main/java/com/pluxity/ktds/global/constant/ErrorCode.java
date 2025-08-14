@@ -27,6 +27,7 @@ public enum ErrorCode implements Code {
   EXIST_POI_CONTAINING_CATEGORY(BAD_REQUEST, "해당 카테고리가 속한 POI가 존재합니다."),
   DUPLICATE_CATEGORY_NAME(CONFLICT, "카테고리 이름이 이미 존재합니다."),
   DUPLICATE_PATROL_NAME(CONFLICT, "이미 존재하는 순찰 이름입니다."),
+  DUPLICATE_CCTV_NAME(CONFLICT, "중복된 CCTV 이름이 있습니다."),
 
   INVALID_JWT_TOKEN(BAD_REQUEST, "JWT 토큰이 유효하지 않습니다."),
   INVALID_FILE(BAD_REQUEST, "파일이 유효하지 않습니다."),
@@ -74,6 +75,7 @@ public enum ErrorCode implements Code {
   NOT_FOUND_VMS_EVENT_USAGE(BAD_REQUEST, "해당하는 VMS 이벤트 정보를 찾을 수 없습니다"),
   NOT_FOUND_WEATHER_API_DATA(BAD_REQUEST, "날씨 api 데이터가 존재하지 않습니다."),
   NOT_FOUND_EVENT_DATA(BAD_REQUEST, "이벤트 데이터가 존재하지 않습니다."),
+  NOT_FOUND_CCTV_POI(BAD_REQUEST, "해당 CCTV를 찾을 수 없습니다. 해당 건물에 등록된 CCTV인지 확인해주세요."),
 
   EMPTY_VALUE_USERNAME(BAD_REQUEST, "아이디를 입력해주세요."),
   EMPTY_VALUE_PASSWORD(BAD_REQUEST, "비밀번호를 입력해주세요."),

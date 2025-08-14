@@ -86,8 +86,10 @@ public class PoiController {
     }
 
     @GetMapping("/cctvs/poi-ids")
-    public DataResponseBody<Map<Long, Set<Long>>> getPoiIdsGroupedByCctvName() {
-        return DataResponseBody.of(service.getPoiIdsGroupedByCctvPoiId());
+    public DataResponseBody<Map<Long, Set<Long>>> getPoiIdsGroupedByCctvPoiId(
+            @RequestParam Long buildingId,
+            @RequestParam Integer floorNo) {
+        return DataResponseBody.of(service.getPoiIdsGroupedByCctvPoiId(buildingId, floorNo));
     }
 
     @PostMapping
@@ -98,8 +100,12 @@ public class PoiController {
 
     @PostMapping("/cctv")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseBody addCctvToPois(@RequestBody List<AddCctvToPoisDTO> dtoList) {
-        service.addCctvToPois(dtoList);
+    public ResponseBody addCctvToPois(
+            @RequestBody List<AddCctvToPoisDTO> dtoList,
+            @RequestParam(value = "buildingId") Long buildingId,
+            @RequestParam(value = "floorNo") Integer floorNo
+    ) {
+        service.addCctvToPois(dtoList, buildingId, floorNo);
         return ResponseBody.of(SUCCESS_CREATE);
     }
 

@@ -2,8 +2,6 @@ package com.pluxity.ktds.domains.building.repostiory;
 
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
-import com.pluxity.ktds.domains.building.entity.Spatial;
-import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -46,4 +44,12 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
 
     @Query("SELECT p FROM Poi p WHERE p.position.x IS NOT NULL AND p.position.y IS NOT NULL AND p.position.z IS NOT NULL")
     List<Poi> findAllWithPositionPresent();
+
+    @Query("SELECT EXISTS (" +
+            "SELECT 1 FROM Poi p " +
+            "JOIN p.poiCategory pc " +
+            "WHERE pc.name = 'CCTV' AND p.name = :poiName " +
+            "AND p.building.id = :buildingId)")
+    boolean existsCctvPoiByNameAndBuildingId(@Param("poiName") String poiName,
+                             @Param("buildingId") Long buildingId);
 }

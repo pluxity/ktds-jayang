@@ -262,6 +262,7 @@ public class PoiService {
                 .floorNo(dto.floorNo())
                 .poiCategoryId(dto.poiCategoryId())
                 .iconSetId(dto.iconSetId())
+                .cctvList(dto.cctvList())
                 .build());
     }
 
@@ -283,6 +284,18 @@ public class PoiService {
                 throw new CustomException(ErrorCode.INVALID_FLOOR_WITH_BUILDING);
             }
         }
+
+        PoiCategory category = poiCategoryRepository.findById(dto.poiCategoryId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_POI_CATEGORY));
+
+        if(!category.getName().equalsIgnoreCase("cctv") && dto.cctvList() != null) {
+            dto.cctvList().forEach(cctv -> {
+                if(!poiRepository.existsCctvPoiByNameAndBuildingId(cctv.cctvName(), dto.buildingId())) {
+                    throw new CustomException(NOT_FOUND_CCTV_POI, "해당 CCTV를 찾을 수 없습니다. 해당 건물에 등록된 CCTV인지 확인해주세요: " + cctv.cctvName());
+                }
+            });
+        }
+
 
 //        boolean isNoneMatchInPoiSet = building.getPoiSet().getPoiCategories().stream()
 //                .filter(poiCategory -> poiCategory.getId().equals(dto.poiCategoryId()))
@@ -391,11 +404,21 @@ public class PoiService {
     @Transactional
     public void delete(@NotNull final Long id) {
         Poi poi = getPoi(id);
+        if("CCTV".equals(poi.getPoiCategory().getName())){
+            poiCctvRepository.deleteByCctvName(poi.getName());
+        }
         poiRepository.delete(poi);
     }
 
     @Transactional
     public void deleteAllById(@NotNull List<Long> ids) {
+        for(Long id : ids) {
+            Poi poi = poiRepository.findById(id)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POI, "Not Found Poi with id: " + id));
+            if("CCTV".equals(poi.getPoiCategory().getName())){
+                poiCctvRepository.deleteByCctvName(poi.getName());
+            }
+        }
         poiRepository.deleteAllById(ids);
     }
 
@@ -500,21 +523,34 @@ public class PoiService {
                 List<PoiCctvDTO> cctvDTOList = Collections.emptyList();
                 if (!poiCategory.getName().equalsIgnoreCase("cctv")) {
                     cctvDTOList = new ArrayList<>();
+                    Set<String> cctvNames = new HashSet<>();
+
+                    // 메인 CCTV 추가
                     String mainCctv = poiMap.get(MAIN_CCTV.value);
                     if (mainCctv != null && !mainCctv.isBlank()) {
+                        String trimmedMainCctv = mainCctv.trim();
+                        cctvNames.add(trimmedMainCctv);
                         cctvDTOList.add(
                                 PoiCctvDTO.builder()
-                                        .cctvName(mainCctv)
+                                        .cctvName(trimmedMainCctv)
                                         .isMain("Y")
                                         .build()
                         );
                     }
+
+                    // 서브 CCTV 추가 (중복 검증 포함)
                     for (String key : List.of(SUB_CCTV1.value, SUB_CCTV2.value, SUB_CCTV3.value, SUB_CCTV4.value)) {
                         String subCctv = poiMap.get(key);
                         if (subCctv != null && !subCctv.isBlank()) {
+                            String trimmedSubCctv = subCctv.trim();
+                            if (cctvNames.contains(trimmedSubCctv)) {
+                                throw new CustomException(DUPLICATE_CCTV_NAME,
+                                        String.format("중복된 CCTV 이름이 있습니다: %s", trimmedSubCctv));
+                            }
+                            cctvNames.add(trimmedSubCctv);
                             cctvDTOList.add(
                                     PoiCctvDTO.builder()
-                                            .cctvName(subCctv)
+                                            .cctvName(trimmedSubCctv)
                                             .isMain("N")
                                             .build()
                             );
@@ -540,6 +576,21 @@ public class PoiService {
                 poiMapByName.put(name, poi);
                 result.add(poi);
             }
+                for (Poi poi : result) {
+                    // CreatePoiDTO로 변환하여 검증
+                    CreatePoiDTO validationDto = CreatePoiDTO.builder()
+                            .buildingId(building.getId())
+                            .floorNo(floorNo)
+                            .poiCategoryId(poi.getPoiCategory().getId())
+                            .cctvList(poi.getPoiCctvs().stream()
+                                    .map(cctv -> new PoiCctvDTO(cctv.getCctvName(), cctv.getIsMain()))
+                                    .toList())
+                            .build();
+
+                    validateAssociation(validationDto);
+                }
+
+
 
             try {
                 poiRepository.saveAll(result);
@@ -568,7 +619,10 @@ public class PoiService {
     }
 
     @Transactional
-    public void addCctvToPois(List<AddCctvToPoisDTO> dtoList) {
+    public void addCctvToPois(List<AddCctvToPoisDTO> dtoList, Long buildingId, Integer floorNo) {
+
+        poiCctvRepository.deleteByBuildingIdAndFloorNo(buildingId, floorNo);
+
         for (AddCctvToPoisDTO dto : dtoList) {
             // 1. CCTV인 POI 조회
             Poi cctvPoi = getPoi(dto.cctvPoiId());
@@ -600,8 +654,8 @@ public class PoiService {
         }
     }
 
-    public Map<Long, Set<Long>> getPoiIdsGroupedByCctvPoiId() {
-        List<PoiCctvResponseDTO> dtos = poiCctvRepository.findByCctvNameWithPoiDto();
+    public Map<Long, Set<Long>> getPoiIdsGroupedByCctvPoiId(Long buildingId, Integer floorNo) {
+        List<PoiCctvResponseDTO> dtos = poiCctvRepository.findByBuildingIdAndFloorNo(buildingId, floorNo);
         return dtos.stream()
                 .collect(Collectors.groupingBy(
                         PoiCctvResponseDTO::getCctvPoiId,

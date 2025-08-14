@@ -9,6 +9,10 @@ public record PoiCctvDTO(
         String cctvName,
         String isMain
 ) {
+    public PoiCctvDTO(String cctvName, String isMain) {
+        this(null, cctvName, isMain);
+    }
+
     public static PoiCctvDTO from(PoiCctv poiCctv) {
         return PoiCctvDTO.builder()
                 .id(poiCctv.getId())

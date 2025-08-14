@@ -1979,11 +1979,48 @@ const layerPopup = (function () {
         const totalPages = Math.ceil(parkingResult.length / PARK_PAGE_SIZE);
         numEl.innerHTML = '';
 
-        for (let p = 1; p <= totalPages; p++) {
+        if (totalPages <= 1) {
+            leftBtn  && (leftBtn.disabled  = true);
+            rightBtn && (rightBtn.disabled = true);
+            return;
+        }
+
+        const maxWindow = 5;
+        let start = Math.max(1, parkCurrentPage - Math.floor(maxWindow / 2));
+        let end   = Math.min(totalPages, start + maxWindow - 1);
+        if (end - start + 1 < maxWindow) {
+            start = Math.max(1, end - (maxWindow - 1));
+        }
+
+        const createPage = (page, text = page) => {
             const span = document.createElement('span');
-            span.textContent = p;
-            if (p === parkCurrentPage) span.classList.add('active');
+            span.textContent = text;
+            if (page === parkCurrentPage) span.classList.add('active');
             numEl.appendChild(span);
+        };
+
+        if (start > 1) {
+            createPage(1);
+            if (start > 2) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.classList.add('dots');
+                numEl.appendChild(dots);
+            }
+        }
+
+        for (let p = start; p <= end; p++) {
+            createPage(p);
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.classList.add('dots');
+                numEl.appendChild(dots);
+            }
+            createPage(totalPages);
         }
 
         leftBtn  && (leftBtn.disabled  = parkCurrentPage === 1);
@@ -3473,18 +3510,52 @@ const layerPopup = (function () {
 
             const renderPagination = () => {
                 paginationContainer.innerHTML = "";
-                for (let i = 1; i <= totalPages; i++) {
+                if (totalPages <= 1) return;
+
+                const maxWindow = 5;
+                let start = Math.max(1, currentPage - Math.floor(maxWindow / 2));
+                let end   = Math.min(totalPages, start + maxWindow - 1);
+                if (end - start + 1 < maxWindow) {
+                    start = Math.max(1, end - (maxWindow - 1));
+                }
+
+                const createPage = (page, text = page) => {
                     const span = document.createElement('span');
-                    span.textContent = i;
-                    if (i === currentPage) {
+                    span.textContent = text;
+                    if (page === currentPage) {
                         span.classList.add("active");
                     }
                     span.addEventListener('click', () => {
-                        currentPage = i;
+                        if (page === currentPage) return;
+                        currentPage = page;
                         renderTable(currentPage);
                         renderPagination();
                     });
                     paginationContainer.appendChild(span);
+                };
+
+                if (start > 1) {
+                    createPage(1);
+                    if (start > 2) {
+                        const dots = document.createElement('span');
+                        dots.textContent = "...";
+                        dots.classList.add("dots");
+                        paginationContainer.appendChild(dots);
+                    }
+                }
+
+                for (let i = start; i <= end; i++) {
+                    createPage(i);
+                }
+
+                if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                        const dots = document.createElement('span');
+                        dots.textContent = "...";
+                        dots.classList.add("dots");
+                        paginationContainer.appendChild(dots);
+                    }
+                    createPage(totalPages);
                 }
             };
 

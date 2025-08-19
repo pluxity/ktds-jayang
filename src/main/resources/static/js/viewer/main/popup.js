@@ -2463,79 +2463,186 @@ const layerPopup = (function () {
     const eventExcelBtn = document.querySelector('#eventDownload');
     eventExcelBtn.addEventListener('click', downloadEventExcel);
 
-    const setElevatorTab_old = () => {
-        const popupUl = elevatorPopup.querySelector('.section--contents ul')
-        // popupUl.innerHTML = '';
-        popupUl.replaceChildren()
+    const eventPdfBtn = document.querySelector('#eventPdfDownload');
+    eventPdfBtn?.addEventListener('click', () => {
+        const txt = sel => (document.querySelector(sel)?.textContent || '').trim();
 
-        // 전체 탭
-        const allTabLi = document.createElement('li');
-        allTabLi.setAttribute('role', 'tab');
-        allTabLi.setAttribute('aria-controls', 'tabpanelAll');
-        allTabLi.setAttribute('id', 'elevTabAll');
-        allTabLi.setAttribute('aria-selected', 'false');
-        allTabLi.setAttribute('tabindex', '0');
-        allTabLi.classList.add("active");
+        const building = txt('#eventBuildingSelect .select-box__btn');
+        const device   = txt('#eventPoiSelect .select-box__btn');
 
-        const allTabA = document.createElement('a');
-        allTabA.setAttribute('href', 'javascript:void(0);');
-        allTabA.textContent = '전체';
+        let mode = 'all', B = null, D = null;
+        if (device && device !== '전체') { mode = 'device';   D = device; }
+        else if (building && building !== '전체') { mode = 'building'; B = building; }
 
-        allTabLi.appendChild(allTabA);
-        // all tab은 default로 맨앞에
-        popupUl.prepend(allTabLi);
+        downloadEventReportPdf({ mode, building: B, device: D });
+    });
 
-        const handleTabClick = (event) => {
-            const clickedTab = event.currentTarget;
-            const parentUl = clickedTab.closest('ul');
-            if (parentUl) {
-                parentUl.querySelectorAll('li').forEach(tab => {
-                    tab.classList.remove("active");
-                });
-                clickedTab.classList.add("active");
+    async function downloadEventReportPdf({ mode = 'all', building = null, device = null } = {}) {
+        // 데이터 소스
+        const list = (window._eventExport?.list && Array.isArray(window._eventExport.list))
+            ? window._eventExport.list
+            : (typeof matchedAlarms !== 'undefined' && Array.isArray(matchedAlarms) ? matchedAlarms : []);
+        const pois = (window._eventExport?.poiList && Array.isArray(window._eventExport.poiList))
+            ? window._eventExport.poiList
+            : (Array.isArray(poiList) ? poiList : []);
+        if (!list.length) return;
+
+        // 피벗 생성
+        const pivot = buildEventPivot(list, pois, { mode, building, device });
+
+        // 오프스크린 DOM 생성
+        const el = document.createElement('div');
+        el.id = 'event-report-pdf';
+        el.style.padding = '24px';
+        el.style.fontFamily = 'Malgun Gothic, Apple SD Gothic Neo, NanumGothic, sans-serif';
+        el.innerHTML = `
+          <style>
+            .title { font-size:20px; font-weight:700; text-align:center; margin-bottom:14px; }
+            .meta { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:10px; }
+            .meta th, .meta td { border:1px solid #aaa; padding:6px 8px; text-align:center; }
+            .data { width:100%; border-collapse:collapse; font-size:12px; }
+            .data th, .data td { border:1px solid #aaa; padding:6px 6px; text-align:center; }
+            .data thead th { background:#efefef; font-weight:700; }
+            .data tfoot td { background:#f4f4f4; font-weight:700; }
+            .left { text-align:left; }
+          </style>
+        
+          <div class="title">이벤트 통계 리포트</div>
+        
+          <table class="meta">
+            <tr>
+              <th style="width:10%">건물</th><td style="width:40%">${pivot.meta.buildingLabel}</td>
+              <th style="width:10%">이벤트</th><td style="width:40%">${pivot.meta.eventLabel}</td>
+            </tr>
+            <tr>
+              <th>장비</th><td>${pivot.meta.deviceLabel}</td>
+              <th>기간</th><td>${pivot.meta.periodLabel}</td>
+            </tr>
+          </table>
+        
+          <div class="section-title" style="margin:8px 0 12px">■ 이벤트 발생 횟수</div>
+          
+          <table class="data">
+            <thead>
+              <tr>
+                <th class="left">장비</th>
+                ${pivot.headers.map(h => `<th>${h}</th>`).join('')}
+                <th>소계</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pivot.rows.map(r => `
+                <tr>
+                  <td class="left">${r.name}</td>
+                  ${r.counts.map(c => `<td>${c === '' ? '' : (c ?? 0)}</td>`).join('')}
+                  <td>${r.subtotal}</td>
+                </tr>`).join('')}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>합계</td>
+                ${pivot.colTotals.map(t => `<td>${t}</td>`).join('')}
+                <td>${pivot.grandTotal}</td>
+              </tr>
+            </tfoot>
+          </table>
+          `;
+
+        document.body.appendChild(el);
+
+        // PDF 저장
+        const s = document.getElementById('start-date')?.value || 'all';
+        const e = document.getElementById('end-date')?.value || 'all';
+        const rangeStr = (s === 'all' && e === 'all') ? 'all' : `${s}_${e}`;
+        const namePart =
+            mode === 'building' ? `building_${pivot.meta.buildingLabel}` :
+                mode === 'device'   ? `device_${pivot.meta.deviceLabel}`   : 'all';
+
+        await html2pdf().set({
+            margin: [10, 10, 14, 10],
+            filename: `event_report_${namePart}_${rangeStr}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(el).save();
+
+        el.remove();
+    }
+
+    // 피벗 생성기
+    function buildEventPivot(list, pois, { mode, building, device }) {
+        const fmt = d => (typeof formatDateTime === 'function' ? formatDateTime(d) : (d ?? ''));
+
+        // tagName → poi
+        const findPoiByTag = (tag) => (pois || []).find(p =>
+            Array.isArray(p.tagNames) &&
+            p.tagNames.some(t => String(t).toLowerCase() === String(tag || '').toLowerCase())
+        );
+
+        // 이벤트 레코드 확장
+        const rows = list.map(it => {
+            const poi = findPoiByTag(it.tagName);
+            return {
+                building: poi?.property?.buildingName ?? '',
+                deviceCat: poi?.property?.poiMiddleCategoryName ?? '기타',
+                eventName: it.event ?? ''
+            };
+        });
+
+        // 1) 컬럼 헤더 = poiList의 "모든 건물"
+        let headers = Array.from(new Set(
+            (pois || []).map(p => p?.property?.buildingName).filter(Boolean)
+        )).sort((a, b) => a.localeCompare(b, 'ko'));
+        if (headers.length === 0) headers = ['전체'];
+
+        // 2) 행 헤더 = poiList의 "모든 장비 분류" ∪ 이벤트에 등장한 분류
+        const deviceFromPois   = (pois || []).map(p => p?.property?.poiMiddleCategoryName).filter(Boolean);
+        const deviceFromEvents = rows.map(r => r.deviceCat);
+        let deviceRows = Array.from(new Set([...deviceFromPois, ...deviceFromEvents]))
+            .sort((a, b) => a.localeCompare(b, 'ko'));
+        if (device && mode === 'device') deviceRows = [device];
+
+        // 3) 카운팅
+        const counts = {};
+        rows.forEach(r => {
+            if (mode === 'building' && building && r.building !== building) return;
+            if (mode === 'device'   && device   && r.deviceCat !== device)   return;
+            counts[r.deviceCat] ??= {};
+            counts[r.deviceCat][r.building] = (counts[r.deviceCat][r.building] || 0) + 1;
+        });
+
+        // 4) 표 본문: 모든 건물 컬럼을 항상 생성
+        const body = deviceRows.map(name => {
+            const perCols = headers.map(h => {
+                const v = counts[name]?.[h] || 0;
+                return (mode === 'building' && building && h !== building) ? '' : v;
+            });
+            const subtotal = perCols.reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
+            return { name, counts: perCols, subtotal };
+        });
+
+        // 5) 합계
+        const colTotals = headers.map((h, i) =>
+            body.reduce((s, r) => s + (typeof r.counts[i] === 'number' ? r.counts[i] : 0), 0)
+        );
+        const grandTotal = body.reduce((s, r) => s + r.subtotal, 0);
+
+        // 6) 메타
+        const s = document.getElementById('start-date')?.value || '전체';
+        const e = document.getElementById('end-date')?.value   || '전체';
+
+        return {
+            headers,
+            rows: body,
+            colTotals,
+            grandTotal,
+            meta: {
+                buildingLabel: building ? building : '전체',
+                deviceLabel:   device   ? device   : '전체',
+                eventLabel: '전체',
+                periodLabel: (s === '전체' && e === '전체') ? '전체' : `${s}~${e}`
             }
-        }
-
-        allTabLi.addEventListener('click', (event) => {
-            handleTabClick(event);
-            const poiList = PoiManager.findAll();
-            PoiManager.getFilteredPoiList().then(poiList => {
-                // cctv중에 중분류가 엘리베이터인거(?)
-                const filteredPoiList = poiList.filter(poi =>
-                    poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
-                    poi.property.poiMiddleCategoryName.toLowerCase() === '승강기');
-                addElevators(filteredPoiList);
-            })
-        });
-
-        // 건물 탭
-        BuildingManager.getBuildingList().then(buildings => {
-            buildings.forEach(building => {
-                const popupLi = document.createElement('li')
-                popupLi.setAttribute('role', 'tab');
-                popupLi.setAttribute('aria-controls', `tabpanel${building.id}`);
-                popupLi.setAttribute('id', `elevTab${building.id}`);
-                popupLi.setAttribute('building-id', `${building.id}`);
-                popupLi.setAttribute('aria-selected', 'false');
-                popupLi.setAttribute('tabindex', '0');
-                const popupAtag = document.createElement('a')
-                popupAtag.setAttribute('href', 'javascript:void(0);');
-                popupAtag.textContent = building.name;
-                popupLi.appendChild(popupAtag);
-                popupUl.appendChild(popupLi);
-                popupLi.addEventListener('click', (event) => {
-                    handleTabClick(event);
-                    const allPois = PoiManager.findAll();
-                    const filteredPoiList = allPois.filter(poi =>
-                        poi.buildingId === Number(building.id) &&
-                        poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
-                        poi.property.poiMiddleCategoryName.toLowerCase() === '승강기'
-                    );
-                    addElevators(filteredPoiList);
-                });
-            })
-        });
-        allTabLi.click();
+        };
     }
 
     const setAirTab = () => {

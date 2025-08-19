@@ -760,8 +760,7 @@ const layerPopup = (function () {
                 const groupKey = poi.property.lightGroup;
                 if (!seenLightGroups.has(groupKey)) {
                     seenLightGroups.add(groupKey);
-                    console.log("poi : ", poi);
-                    console.log("lightGroupCount : ", lightGroupCount);
+
                     createAccordion(poi, lightGroupCount);
                 }
             } else {
@@ -938,7 +937,6 @@ const layerPopup = (function () {
             ['건물', '층', '장비명'].forEach(text => {
                 const th = document.createElement('th');
                 th.setAttribute('scope', 'col');
-                console.log("text : ", text);
                 th.textContent = text;
                 headerRow.appendChild(th);
             });
@@ -986,7 +984,6 @@ const layerPopup = (function () {
         tdEquipment.addEventListener('click', function() {
             // popup close추가
 
-            console.log("poi : ", poi);
             if (!poi.position) {
                 alertSwal('POI를 배치해주세요');
                 return;
@@ -1432,7 +1429,6 @@ const layerPopup = (function () {
             onFloorChange: (building, floor) => {
 
                 const floorPois = PoiManager.findByFloor(floor.id);
-                console.log("floorPoi :", floorPois);
                 const win = lightIframe.contentWindow;
                 win.Px.Model.Visible.HideAll();
                 win.Px.Model.Visible.Show(Number(floor.id));
@@ -1778,7 +1774,6 @@ const layerPopup = (function () {
         renderPagedPage('elevator');
     };
     const filterEscalator = (direction, state) => {
-        console.log('[DEBUG] filterEscalator called', { direction, state });
         escalatorFilterDirection = direction;
         escalatorFilterState = state;
         renderPagedPage('escalator');
@@ -1850,7 +1845,6 @@ const layerPopup = (function () {
 
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
-            console.log("poiInfo : ", poiInfo);
             if (!poiInfo) return;
             const tagMap = dto.TAGs.reduce((map, t) => {
                 const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
@@ -2317,7 +2311,6 @@ const layerPopup = (function () {
         setIf('searchType', searchType);
         setIf('parkSearchInput', parkSearchInput);
 
-        console.log("param : ", param);
         return param;
     }
 
@@ -2467,6 +2460,9 @@ const layerPopup = (function () {
     }
     // 주차 popup end
 
+    const eventExcelBtn = document.querySelector('#eventDownload');
+    eventExcelBtn.addEventListener('click', downloadEventExcel);
+
     const setElevatorTab_old = () => {
         const popupUl = elevatorPopup.querySelector('.section--contents ul')
         // popupUl.innerHTML = '';
@@ -2535,7 +2531,6 @@ const layerPopup = (function () {
                         poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
                         poi.property.poiMiddleCategoryName.toLowerCase() === '승강기'
                     );
-                    console.log("filteredPoiList : ", filteredPoiList);
                     addElevators(filteredPoiList);
                 });
             })
@@ -2957,7 +2952,7 @@ const layerPopup = (function () {
             isAnimation: true,
             duration: 500,
         });
-        console.log("poiData : ", poiData);
+
         if (poiData.property.lightGroup) {
             if (selectedLightGroup === poiData.property.lightGroup) {
                 if (selectedLightId === poiData.id) {
@@ -3256,7 +3251,7 @@ const layerPopup = (function () {
         const defaultLi = document.createElement("li");
         defaultLi.innerHTML = `
             <span class="checkbox-wrap">
-              <input type="checkbox" id="allEventCheck">
+              <input type="checkbox" id="allEventCheck" checked>
               <label for="allEventCheck">이벤트 전체</label>
             </span>
           `;
@@ -3271,6 +3266,7 @@ const layerPopup = (function () {
                     checkbox.checked = checked;
                 }
             });
+            listEl.dispatchEvent(new Event("filterchange"));
         });
 
         alarmTypes.forEach((alarm, index) => {
@@ -3278,7 +3274,7 @@ const layerPopup = (function () {
             const li = document.createElement("li");
             li.innerHTML = `
               <span class="checkbox-wrap">
-                <input type="checkbox" id="${checkId}">
+                <input type="checkbox" id="${checkId}" checked data-type="${alarm.label.toLowerCase()}">
                 <label for="${checkId}">${alarm.label}</label>
               </span>
             `;
@@ -3294,8 +3290,10 @@ const layerPopup = (function () {
                     const allChecked = Array.from(individualCheckboxes).every(cb => cb.checked);
                     allCheckbox.checked = allChecked;
                 }
+                listEl.dispatchEvent(new Event("filterchange"));
             });
         });
+        listEl.dispatchEvent(new Event("filterchange"));
     }
 
     document.getElementById("eventOpenBtn").addEventListener("click", function() {
@@ -3307,15 +3305,12 @@ const layerPopup = (function () {
 
     let globalAlarmList = [];
     let poiList = [];
-
+    let matchedAlarms = [];
     const taggedPoiMap = new Map();
     const createEventPopup = async (reinitializeSelectBoxes = false) => {
-        // const buildingList = await BuildingManager.getBuildingList();
-        console.log("reinitializeSelectBoxes : ", reinitializeSelectBoxes);
         if (reinitializeSelectBoxes) {
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
-            // const poiListData = await PoiManager.getFilteredPoiList();
             const poiListData = PoiManager.findAll();
             updatePoiSelectBox(poiListData);
             setDatePicker();
@@ -3366,14 +3361,7 @@ const layerPopup = (function () {
         const params = new URLSearchParams();
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
-        // if (selectedBuilding && selectedBuilding !== '전체') {
-        //     console.log("buildingNm : ", selectedBuilding);
-        //     params.append('buildingNm', selectedBuilding);
-        // }
-        // if (selectedFloor && selectedFloor !== '전체') {
-        //     console.log("floorNm : ", selectedFloor);
-        //     params.append('floorNm', selectedFloor);
-        // }
+
         if (selectedDeviceType && selectedDeviceType !== '전체') {
             params.append('deviceType', selectedDeviceType);
         }
@@ -3433,16 +3421,15 @@ const layerPopup = (function () {
                 });
             }
 
-            const checkedBoxes = document.querySelectorAll("#eventCheckBoxList input[type='checkbox']:checked");
+            const checkedBoxes = document.querySelectorAll("#eventCheckBoxList input[type='checkbox']:not(#allEventCheck):checked");
             if (checkedBoxes.length > 0) {
-                // 체크된 체크박스의 레이블 텍스트를 소문자 배열로 생성
-                const checkedAlarmTypes = Array.from(checkedBoxes).map(box => {
-                    const labelEl = box.nextElementSibling;
-                    return labelEl ? labelEl.textContent.trim().toLowerCase() : "";
-                });
+                const norm = s => String(s || "").trim().toLowerCase();
+                const checkedEvents = Array.from(checkedBoxes).map(box =>
+                    box.dataset.type ? norm(box.dataset.type) : norm(box.nextElementSibling?.textContent)
+                );
                 searchedAlarms = searchedAlarms.filter((alarm) => {
-                    // alarm.alarmType가 enum이거나 문자열일 때, 체크된 항목 중 하나와 정확히 일치하는 경우만 필터링
-                    return alarm.alarmType && checkedAlarmTypes.includes(alarm.alarmType.toLowerCase());
+                    const ev = norm(alarm.event);
+                    return ev && checkedEvents.includes(ev);
                 });
             }
 
@@ -3452,7 +3439,8 @@ const layerPopup = (function () {
             eventLayerPopup.style.transform = 'translate(-50%, -50%)';
             eventLayerPopup.style.display = 'inline-block';
 
-            const matchedAlarms = searchedAlarms.filter(data =>
+            matchedAlarms = searchedAlarms
+                .filter(data =>
                 poiList.some(poi =>
                     poi.tagNames.some(tag =>
                         tag.toLowerCase() === data.tagName.toLowerCase()
@@ -3460,11 +3448,15 @@ const layerPopup = (function () {
                 )
             );
 
+            const baseAlarms = matchedAlarms.slice();
+
+            window._eventExport = { list: matchedAlarms, poiList: Array.isArray(poiList) ? poiList.slice() : [] };
+
             alarmCountEl.textContent = matchedAlarms.length.toLocaleString();
             // 페이지당 10개씩
             const itemsPerPage = 10;
             let currentPage = 1;
-            const totalPages = Math.ceil(matchedAlarms.length / itemsPerPage);
+            let totalPages = Math.ceil(matchedAlarms.length / itemsPerPage);
             const paginationContainer = eventLayerPopup.querySelector(".search-result__paging .number");
 
             const renderTable = (page) => {
@@ -3473,6 +3465,7 @@ const layerPopup = (function () {
                 const pageAlarms = matchedAlarms.slice(startIndex, startIndex + itemsPerPage);
 
                 const frag = document.createDocumentFragment();
+                taggedPoiMap.clear();
 
                 pageAlarms.forEach((data) => {
 
@@ -3514,7 +3507,7 @@ const layerPopup = (function () {
 
                 const maxWindow = 5;
                 let start = Math.max(1, currentPage - Math.floor(maxWindow / 2));
-                let end   = Math.min(totalPages, start + maxWindow - 1);
+                let end = Math.min(totalPages, start + maxWindow - 1);
                 if (end - start + 1 < maxWindow) {
                     start = Math.max(1, end - (maxWindow - 1));
                 }
@@ -3574,10 +3567,106 @@ const layerPopup = (function () {
                 }
             };
 
-            renderTable(currentPage);
-            renderPagination();
+            // 필터 테스트
+            function onEventFilterChange() {
+                const toKey = v => String(v ?? "").trim().toLowerCase();
+                const eventCheckboxListEl = document.getElementById("eventCheckBoxList");
+
+                const selectedEventKeys = Array.from(
+                    eventCheckboxListEl.querySelectorAll("input[type='checkbox']:not(#allEventCheck):checked")
+                ).map(cb => cb.dataset.type ? toKey(cb.dataset.type) : toKey(cb.nextElementSibling?.textContent));
+
+                const keySet = new Set(selectedEventKeys);
+
+                const filteredAlarmList = selectedEventKeys.length === 0
+                    ? []
+                    : baseAlarms.filter(a => {
+                        const evKey = toKey(a.event);
+                        return evKey && keySet.has(evKey);
+                    });
+
+                matchedAlarms = filteredAlarmList;
+
+                window._eventExport = {
+                    list: matchedAlarms.slice(),
+                    poiList: Array.isArray(poiList) ? poiList : []
+                };
+
+                alarmCountEl.textContent = matchedAlarms.length.toLocaleString();
+                totalPages = Math.max(1, Math.ceil(matchedAlarms.length / itemsPerPage));
+                currentPage = 1;
+                renderTable(currentPage);
+                renderPagination();
+            }
+
+            const eventCheckboxListEl = document.getElementById("eventCheckBoxList");
+            if (eventCheckboxListEl) {
+                if (eventCheckboxListEl._onEventFilterChange) {
+                    eventCheckboxListEl.removeEventListener("filterchange", eventCheckboxListEl._onEventFilterChange);
+                }
+                eventCheckboxListEl._onEventFilterChange = onEventFilterChange;
+                eventCheckboxListEl.addEventListener("filterchange", onEventFilterChange);
+                eventCheckboxListEl.dispatchEvent(new Event("filterchange"));
+            } else {
+                renderTable(currentPage);
+                renderPagination();
+            }
         });
     }
+    // event excel download
+    function downloadEventExcel() {
+        const safe = (v) => (v == null ? '' : v);
+        const fmt = (d) => (typeof formatDateTime === 'function' ? safe(formatDateTime(d)) : safe(d));
+
+        const listCandidate =
+            (window._eventExport && Array.isArray(window._eventExport.list) && window._eventExport.list) ||
+            (typeof matchedAlarms !== 'undefined' && Array.isArray(matchedAlarms) && matchedAlarms) ||
+            (Array.isArray(globalAlarmList) && globalAlarmList) || [];
+
+        const poisSource =
+            (window._eventExport && Array.isArray(window._eventExport.poiList) && window._eventExport.poiList) ||
+            (Array.isArray(poiList) && poiList) || [];
+
+        if (listCandidate.length === 0) return;
+
+        const header = [
+            'No','건물','층','이벤트명','장비분류','장비명','발생일시','해제일시'
+        ];
+
+        const rows = listCandidate.map((item, idx) => {
+            const taggedPoi = poisSource.find(p =>
+                Array.isArray(p.tagNames) &&
+                p.tagNames.some(t => String(t).toLowerCase() === String(item.tagName || '').toLowerCase())
+            );
+
+            const building = taggedPoi?.property?.buildingName || '-';
+            const floor = taggedPoi?.property?.floorName || '-';
+            const category = taggedPoi?.property?.poiMiddleCategoryName || '-';
+            const deviceNm = taggedPoi?.name || '-';
+
+            return [
+                idx + 1,
+                building,
+                floor,
+                safe(item.event),
+                category,
+                deviceNm,
+                fmt(item.occurrenceDate),
+                fmt(item.confirmDate),
+            ];
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'events');
+
+        const startVal = document.getElementById('start-date')?.value || 'all';
+        const endVal   = document.getElementById('end-date')?.value || 'all';
+        const rangeStr = (startVal === 'all' && endVal === 'all') ? 'all' : `${startVal}_${endVal}`;
+
+        XLSX.writeFile(wb, `events_${rangeStr}.xlsx`);
+    }
+
     document.getElementById('eventSearchBtn').addEventListener('click', async () => {
         await createEventPopup(false);
     });

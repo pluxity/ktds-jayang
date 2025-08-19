@@ -100,13 +100,25 @@ public class PoiService {
 
     @Transactional(readOnly = true)
     public List<PoiDetailResponseDTO> findAllDetail() {
+        log.info("findAllDetail() start");
+
+        StopWatch sw = new StopWatch("findAllDetail");
+
+        sw.start("poiRepository.findAll");
         List<Poi> poiList = poiRepository.findAll();
+        sw.stop();
 
-        return poiList.stream()
+        sw.start("poiCctvRepository.findAllByPoiIn");
+        List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
+
+        Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
+                .collect(Collectors.groupingBy(poiCctv -> poiCctv.getPoi().getId()));
+        sw.stop();
+
+        sw.start("DTO mapping");
+        List<PoiDetailResponseDTO> result = poiList.stream()
                 .map(poi -> {
-                    List<PoiCctv> cctvs = poiCctvRepository.findAllByPoi(poi);
-
-                    List<PoiCctvDTO> cctvDtoList = cctvs.stream()
+                    List<PoiCctvDTO> cctvDtoList = cctvMap.getOrDefault(poi.getId(), List.of()).stream()
                             .map(PoiCctvDTO::from)
                             .toList();
 
@@ -132,6 +144,11 @@ public class PoiService {
                             .build();
                 })
                 .toList();
+        sw.stop();
+
+        log.info(sw.prettyPrint());
+
+        return result;
     }
 
     @Transactional(readOnly = true)

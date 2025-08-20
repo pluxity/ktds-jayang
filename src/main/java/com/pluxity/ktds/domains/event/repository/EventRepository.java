@@ -7,7 +7,6 @@ import com.pluxity.ktds.domains.event.entity.Alarm;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,7 +16,7 @@ import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Alarm, Long> {
     @Query("""
-            SELECT new com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO(a.process, COUNT(a.id))
+            SELECT new com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO(a.event, COUNT(a.id))
             FROM Alarm a
             WHERE a.occurrenceDate >= :sevenDays
             GROUP BY a.event

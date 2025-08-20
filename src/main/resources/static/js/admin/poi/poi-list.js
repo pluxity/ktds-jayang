@@ -520,7 +520,7 @@ function validateCctvDuplicates(mainCctvValue, subCctvFields) {
         } else {
             const cameraIp = document.querySelector(`#cameraIp${type}`).value;
             params.cameraIp = cameraIp;
-            params.cameraId = await getCameraId(params.cameraIp);
+            // params.cameraId = await getCameraId(params.cameraIp);
         }
 
         if(poiCategory.name.includes('센서')) {

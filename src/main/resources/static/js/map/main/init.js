@@ -4,7 +4,7 @@
     const cookieMatch = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)');
     const USER_ID = cookieMatch ? cookieMatch[2] : null;
 
-    if (!USER_ID) {
+    if (!USER_ID || USER_ID.toLowerCase() === 'kiosk') {
         window.location.href = '/login';
     }
     api.get(`/users/userid/${USER_ID}`).then((result) => {

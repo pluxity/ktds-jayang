@@ -3494,17 +3494,25 @@ const layerPopup = (function () {
             const { result: data } = res.data;
             globalAlarmList = data;
 
+            console.log("globalAlarmList : ", globalAlarmList.length);
             const filteredAlarms = data.filter(alarm =>
                 poiList.some(poi =>
                     poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                 )
             );
 
+            console.log('EHP/PARK in data:', data.filter(a =>
+                /^(EHP|PARK)$/i.test(String(a?.equipment ?? a?.process ?? ''))
+            ).length);
+
+            const isEHP = a => String(a?.equipment ?? '').trim().toUpperCase() === 'EHP';
+
             // let searchedAlarms = filteredAlarms.slice();
             let searchedAlarms = data.slice();
 
             if (selectedBuilding !== '전체' && selectedBuilding !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3515,6 +3523,7 @@ const layerPopup = (function () {
 
             if (selectedFloor !== '전체' && selectedFloor !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3524,6 +3533,7 @@ const layerPopup = (function () {
 
             if (selectedDeviceType !== '전체' && selectedDeviceType !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3535,6 +3545,7 @@ const layerPopup = (function () {
             if (deviceNmInput !== '') {
                 const searchTerm = deviceNmInput.toLowerCase();
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3549,6 +3560,7 @@ const layerPopup = (function () {
                     box.dataset.type ? norm(box.dataset.type) : norm(box.nextElementSibling?.textContent)
                 );
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const ev = norm(alarm.event);
                     return ev && checkedEvents.includes(ev);
                 });
@@ -3560,8 +3572,9 @@ const layerPopup = (function () {
             eventLayerPopup.style.transform = 'translate(-50%, -50%)';
             eventLayerPopup.style.display = 'inline-block';
 
-            matchedAlarms = searchedAlarms
-                .filter(data =>
+            console.log("searchedAlarms : ", searchedAlarms);
+            matchedAlarms = searchedAlarms.filter(data =>
+                isEHP(data) ||
                 poiList.some(poi =>
                     poi.tagNames.some(tag =>
                         tag.toLowerCase() === data.tagName.toLowerCase()
@@ -3595,28 +3608,47 @@ const layerPopup = (function () {
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
 
                     const taggedPoi = poiList.find(poi =>
-                        poi.tagNames.some(tag => tag.toLowerCase() === data.tagName.toLowerCase())
+                        poi.tagNames?.some(tag => tag && data.tagName && tag.toLowerCase() === data.tagName.toLowerCase())
                     );
 
-                    if (taggedPoi) {
-                        eventRow.innerHTML = `
-                            <td>${taggedPoi.property.buildingName || '-'}</td>
-                            <td>${taggedPoi.property.floorName || '-'}</td>
-                            <td>${data.event || '-'}</td>
-                            <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
-                            <td>${taggedPoi.name || '-'}</td>
+                    let buildingName = taggedPoi?.property?.buildingName ?? '-';
+                    let floorName = taggedPoi?.property?.floorName ?? '-';
+                    let middleCat = taggedPoi?.property?.poiMiddleCategoryName ?? '-';
+                    let poiName = taggedPoi?.name ?? '-';
+                    let moveCls = taggedPoi ? '' : 'disabled';
+                    let poiId = taggedPoi?.id ?? '';
+                    const isEhpRow = String(data?.equipment ?? '').trim().toUpperCase() === 'EHP';
+                    if (isEhpRow && !taggedPoi) {
+                        const tag = String(data.tagName || '');
+                        const parts = tag.split('-');
+                        if (parts.length >= 2) {
+                            buildingName = parts[0] || '-';
+                            floorName = parts[1] || '-';
+                        }
+                        middleCat = '에어컨';
+                        const m = tag.match(/EHP-(\d+)/i);
+                        poiName = m ? `EHP-${m[1]}` : 'EHP';
+                        moveCls = 'disabled';
+                        poiId = '';
+                    }
+                    eventRow.innerHTML = `
+                            <td>${buildingName}</td>
+                            <td>${floorName}</td>
+                            <td>${data.event ?? '-'}</td>
+                            <td>${middleCat}</td>
+                            <td>${poiName}</td>
                             <td>${formatDateTime(data.occurrenceDate) || '-'}</td>
                             <td>${formatDateTime(data.confirmDate) || '-'}</td>
                             <td>
-                                <a href="javascript:void(0);" class="icon-move moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
-                                    <span class="hide">도면 이동</span>
-                                </a>
+                              <a href="javascript:void(0);" class="icon-move moveToMap ${moveCls}" data-poi-id="${poiId}">
+                                <span class="hide">도면 이동</span>
+                              </a>
                             </td>
                         `;
-                        // tableBody.appendChild(eventRow);
-                        frag.appendChild(eventRow);
-                        taggedPoiMap.set(taggedPoi.id, taggedPoi);
-                    }
+                    // tableBody.appendChild(eventRow);
+                    frag.appendChild(eventRow);
+
+                    if (taggedPoi) taggedPoiMap.set(taggedPoi.id, taggedPoi);
                 });
                 tableBody.textContent = '';
                 tableBody.appendChild(frag);
@@ -3700,8 +3732,9 @@ const layerPopup = (function () {
                 const keySet = new Set(selectedEventKeys);
 
                 const filteredAlarmList = selectedEventKeys.length === 0
-                    ? []
+                    ? baseAlarms.slice()
                     : baseAlarms.filter(a => {
+                        if (isEHP(a)) return true;
                         const evKey = toKey(a.event);
                         return evKey && keySet.has(evKey);
                     });
@@ -3816,26 +3849,6 @@ const layerPopup = (function () {
             }
         }
     })
-
-    function closePopup2(target) {
-        if (!target) return;
-        target.style.display = 'none';
-        const popupParent = target.closest('#layerPopup.popup-basic, #mapLayerPopup.popup-basic');
-        if (popupParent) {
-            const container = popupParent.parentElement;
-            if (container) {
-                const poiMenu = container.querySelector('.poi-menu');
-                if (poiMenu) {
-                    const menuDiv = poiMenu.querySelector('#poiMenuList, #poiMenuListMap');
-                    if (menuDiv) {
-                        menuDiv.querySelectorAll('ul li.active').forEach(li => {
-                            li.classList.remove('active');
-                        });
-                    }
-                }
-            }
-        }
-    }
 
     function closePopup(target) {
         if (!target) return;

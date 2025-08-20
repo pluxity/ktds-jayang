@@ -1279,7 +1279,7 @@ $base-img-path:"/static/images/viewer/";
             }
         }
         &__list{
-            background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); box-shadow:0 -8px 13px 0 rgba(3, 61, 170, 0.60) inset;
+            background:linear-gradient(178deg, #00F5BF 89.9%, #15B9FF 99.49%); box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, 0.70), 0 -8px 13px 0 rgba(3, 61, 170, 0.60) inset;
             filter:drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.70)); padding:10px; border-radius:10px;
             width:95px; box-sizing:border-box;
 
@@ -1288,7 +1288,13 @@ $base-img-path:"/static/images/viewer/";
                 &__text{top:12px; left:-17px; transform:translateX(-50%);}
             }
             ul{
-                display:grid; grid-template-columns:1fr 1fr; grid-gap:5px;}
+                display:grid; grid-template-columns:1fr 1fr; grid-gap:5px;
+                + ul{
+                    margin-top:0.6rem;
+                    padding-top:0.6rem;
+                    border-top:1px solid #00CC9E;
+                }
+            }
             li{
                 position:relative;
                 display:flex; align-items:center; justify-content:center; 
@@ -1330,9 +1336,10 @@ $base-img-path:"/static/images/viewer/";
             }
             // 3d view에서 사용되는 poi menu 리스트 
             &--map{
-                margin-top:3px; border-top-left-radius:0; border-top-right-radius:0;
+                margin-top:3px; 
+                background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); 
                 li{
-                    > a{-webkit-mask-image:url('#{$base-img-path}icon_poi_3d.svg'); mask-image:url('#{$base-img-path}icon_poi_3d.svg');}
+                    > a{-webkit-mask-image:url('../../dashboard/img/icon_poi_3d.svg'); mask-image:url('../../dashboard/img/icon_poi_3d.svg');}
                     &.patrol a {-webkit-mask-position:-52px -12px; mask-position:-52px -12px;}
                     &.sop a {-webkit-mask-position:-92px -12px; mask-position:-92px -12px;}
                     &.shelter a {-webkit-mask-position:-132px -12px; mask-position:-132px -12px;}
@@ -1534,7 +1541,7 @@ $base-img-path:"/static/images/viewer/";
                     position:absolute;
                     display:flex; align-items:center; justify-content:center;
                     width:20px; height:20px;
-                    -webkit-mask-image:url('#{$base-img-path}icon20/Icon_ptz.svg'); mask-image:url('#{$base-img-path}icon20/Icon_ptz.svg'); 
+                    -webkit-mask-image:url('#{$base-img-path}icon20/icon_ptz.svg'); mask-image:url('#{$base-img-path}icon20/icon_ptz.svg'); 
                     -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     background-color:var(--color-black-key);
             
@@ -1641,26 +1648,14 @@ $base-img-path:"/static/images/viewer/";
                 &__btn {
                     display:flex; align-items:center; justify-content: center;
                     width:20px; height:20px;
-                    -webkit-mask-image:url('#{$base-img-path}icon20/icon_ptz.svg'); mask-image:url('#{$base-img-path}icon20/icon_ptz.svg'); 
+                    -webkit-mask-image:url('#{$base-img-path}icon20/Icon_ptz.svg'); mask-image:url('#{$base-img-path}icon20/Icon_ptz.svg'); 
                     -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
                     background-color:var(--color-grayscale03);
                     &--zoom-in{
-                        -webkit-mask-position:-90px -50px; mask-position:-90px -50px;
-                    }
-                    &--zoom-out{
-                        -webkit-mask-position:-130px -50px; mask-position:-130px -50px;
-                    }
-                    &--focus-in{
-                        -webkit-mask-position:-10px -50px; mask-position:-10px -50px;
-                    }
-                    &--focus-out{
                         -webkit-mask-position:-50px -50px; mask-position:-50px -50px;
                     }
-                    &--iris-in{
-                        -webkit-mask-position:-170px -50px; mask-position:-170px -50px;
-                    }
-                    &--iris-out{
-                        -webkit-mask-position:-210px -50px; mask-position:-210px -50px;
+                    &--zoom-out{
+                        -webkit-mask-position:-10px -50px; mask-position:-10px -50px;
                     }
                 }
             }

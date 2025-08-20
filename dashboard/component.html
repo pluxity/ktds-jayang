@@ -3548,36 +3548,14 @@
             <!-- 슬라이더 컨트롤 -->
             <div class="controls">
                 <div class="controls__group">
-                    <span class="controls__label">회전/속도</span>
-                    <button class="controls__btn controls__btn--zoom-in" data-target="rotation"><span class="hide">회전/속도 감소</span></button>
+                    <span class="controls__label">확대/축소</span>
+                    <button class="controls__btn controls__btn--zoom-in" data-target="rotation"><span class="hide">확대</span></button>
                     <div class="controls__slider">
                         <div class="controls__track"></div>
                         <div class="controls__progress" data-progress="0"></div>
                         <input type="range" class="controls__input" min="0" max="100" value="0" data-type="rotation">
                     </div>
-                    <button class="controls__btn controls__btn--zoom-out" data-target="rotation"><span class="hide">회전/속도 증가</span></button>
-                </div>
-                
-                <div class="controls__group">
-                    <span class="controls__label">포커스</span>
-                    <button class="controls__btn controls__btn--focus-in" data-target="focus"><span class="hide">포커스 감소</span></button>
-                    <div class="controls__slider">
-                        <div class="controls__track"></div>
-                        <div class="controls__progress" data-progress="0"></div>
-                        <input type="range" class="controls__input" min="0" max="100" value="0" data-type="focus">
-                    </div>
-                    <button class="controls__btn controls__btn--focus-out" data-target="focus"><span class="hide">포커스 증가</span></button>
-                </div>
-                
-                <div class="controls__group">
-                    <span class="controls__label">조리개</span>
-                    <button class="controls__btn controls__btn--iris-in" data-target="iris"><span class="hide">조리개 감소</span></button>
-                    <div class="controls__slider">
-                        <div class="controls__track"></div>
-                        <div class="controls__progress" data-progress="0"></div>
-                        <input type="range" class="controls__input" min="0" max="100" value="0" data-type="iris">
-                    </div>
-                    <button class="controls__btn controls__btn--iris-out" data-target="iris"><span class="hide">조리개 증가</span></button>
+                    <button class="controls__btn controls__btn--zoom-out" data-target="rotation"><span class="hide">축소</span></button>
                 </div>
             </div>
         </div>
@@ -3722,24 +3700,13 @@
                     <span class="tool-tip__text tool-tip__text--bottom">소방</span>
                 </div>
             </li>
-            <li class="elevator">
-                <a href="#none"><span class="hide">승강기</span></a>
-                <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
-                </div>
-            </li>
             <li class="solar">
                 <a href="#none"><span class="hide">태양광</span></a>
                 <div class="tool-tip">
                     <span class="tool-tip__text tool-tip__text--bottom">태양광</span>
                 </div>
             </li>
-            <li class="parking">
-                <a href="#none"><span class="hide">주차관제</span></a>
-                <div class="tool-tip">
-                    <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
-                </div>
-            </li>
+           
             <li class="air">
                 <a href="#none"><span class="hide">공기질</span></a>
                 <div class="tool-tip">
@@ -3780,6 +3747,20 @@
                 <a href="#none"><span class="hide">지열</span></a>
                 <div class="tool-tip">
                     <span class="tool-tip__text tool-tip__text--bottom">지열</span>
+                </div>
+            </li>
+        </ul>
+        <ul>
+            <li class="parking">
+                <a href="#none"><span class="hide">주차관제</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
+                </div>
+            </li>
+            <li class="elevator">
+                <a href="#none"><span class="hide">승강기</span></a>
+                <div class="tool-tip">
+                    <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
                 </div>
             </li>
             <li class="ac">

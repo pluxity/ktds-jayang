@@ -169,55 +169,8 @@ html {
 }
 
 .kiosk-3d__control button.home::after {
-  background: url("/static/img/kiosk/kiosk_home.svg") no-repeat center;
-  background-size: contain;
-  display: block;
-  content: "";
-  order: 1;
+  background-position: -40px -40px;
 }
-
-.kiosk-3d__control button.change::after {
-  background: url("/static/img/kiosk/kiosk_change.svg") no-repeat center;
-  background-size: contain;
-  display: block;
-  content: "";
-  order: 1;
-}
-
-.kiosk-3d__control button.home {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  text-align: center;
-}
-
-.kiosk-3d__control button.home .button-text {
-  display: block;
-  font-size: 1.4rem;
-  color: #FFFFFF;
-  margin-top: 2px;
-  order: 2;
-}
-
-.kiosk-3d__control button.change {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  text-align: center;
-}
-
-.kiosk-3d__control button.change .button-text {
-  display: block;
-  font-size: 1.4rem;
-  color: #FFFFFF;
-  margin-top: 2px;
-  order: 2;
-}
-
 
 .kiosk-3d__control button.minus::after {
   background-position: -278px -40px;

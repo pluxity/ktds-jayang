@@ -20,7 +20,6 @@ const layerPopup = (function () {
         fireContent.style.display = '';
         tmsContent.style.display = 'none';
 
-
         const displayElements = ['.event-name', '.state-name'];
         displayElements.forEach((element) => { document.querySelector(element).closest('tr').style.display = ''; });
         document.querySelector('.popup-table.event').style.height = ``;
@@ -2468,16 +2467,24 @@ const layerPopup = (function () {
         const txt = sel => (document.querySelector(sel)?.textContent || '').trim();
 
         const building = txt('#eventBuildingSelect .select-box__btn');
-        const device   = txt('#eventPoiSelect .select-box__btn');
+        const device = txt('#eventPoiSelect .select-box__btn');
+
+        const allEventChecked = document.getElementById('allEventCheck')?.checked === true;
+        const checked = document.querySelectorAll('#eventCheckBoxList input[type="checkbox"]:not(#allEventCheck):checked');
+        const labelFromCb = cb => (cb.dataset.label?.trim()) || (cb.nextElementSibling?.textContent?.trim() || '');
+        const eventLabel = (allEventChecked || checked.length === 0)
+            ? '전체'
+            : Array.from(new Set(Array.from(checked, labelFromCb))).filter(Boolean).join(', ');
 
         let mode = 'all', B = null, D = null;
         if (device && device !== '전체') { mode = 'device';   D = device; }
         else if (building && building !== '전체') { mode = 'building'; B = building; }
 
-        downloadEventReportPdf({ mode, building: B, device: D });
+        downloadEventReportPdf({ mode, building: B, device: D, event: eventLabel });
+
     });
 
-    async function downloadEventReportPdf({ mode = 'all', building = null, device = null } = {}) {
+    async function downloadEventReportPdf({ mode = 'all', building = null, device = null, event = null } = {}) {
         // 데이터 소스
         const list = (window._eventExport?.list && Array.isArray(window._eventExport.list))
             ? window._eventExport.list
@@ -2485,10 +2492,18 @@ const layerPopup = (function () {
         const pois = (window._eventExport?.poiList && Array.isArray(window._eventExport.poiList))
             ? window._eventExport.poiList
             : (Array.isArray(poiList) ? poiList : []);
-        if (!list.length) return;
+
+        const norm = v => String(v ?? '').trim().toLowerCase();
+        const checked = document.querySelectorAll('#eventCheckBoxList input[type="checkbox"]:not(#allEventCheck):checked');
+        const selectedEvents = Array.from(checked).map(cb =>
+            cb.dataset.type ? norm(cb.dataset.type) : norm(cb.nextElementSibling?.textContent)
+        );
+        const filteredList = selectedEvents.length
+            ? list.filter(a => selectedEvents.includes(norm(a.event)))
+            : list;
 
         // 피벗 생성
-        const pivot = buildEventPivot(list, pois, { mode, building, device });
+        const pivot = buildEventPivot(filteredList, pois, { mode, building, device, event });
 
         // 오프스크린 DOM 생성
         const el = document.createElement('div');
@@ -2511,12 +2526,12 @@ const layerPopup = (function () {
         
           <table class="meta">
             <tr>
-              <th style="width:10%">건물</th><td style="width:40%">${pivot.meta.buildingLabel}</td>
-              <th style="width:10%">이벤트</th><td style="width:40%">${pivot.meta.eventLabel}</td>
+              <th style="width:10%;background:#f4f4f4;">건물</th><td style="width:40%">${pivot.meta.buildingLabel}</td>
+              <th style="width:10%;background:#f4f4f4;">이벤트</th><td style="width:40%">${pivot.meta.eventLabel}</td>
             </tr>
             <tr>
-              <th>장비</th><td>${pivot.meta.deviceLabel}</td>
-              <th>기간</th><td>${pivot.meta.periodLabel}</td>
+              <th style="background:#f4f4f4;">장비</th><td>${pivot.meta.deviceLabel}</td>
+              <th style="background:#f4f4f4;">기간</th><td>${pivot.meta.periodLabel}</td>
             </tr>
           </table>
         
@@ -2556,7 +2571,7 @@ const layerPopup = (function () {
         const rangeStr = (s === 'all' && e === 'all') ? 'all' : `${s}_${e}`;
         const namePart =
             mode === 'building' ? `building_${pivot.meta.buildingLabel}` :
-                mode === 'device'   ? `device_${pivot.meta.deviceLabel}`   : 'all';
+                mode === 'device' ? `device_${pivot.meta.deviceLabel}` : 'all';
 
         await html2pdf().set({
             margin: [10, 10, 14, 10],
@@ -2570,8 +2585,7 @@ const layerPopup = (function () {
     }
 
     // 피벗 생성기
-    function buildEventPivot(list, pois, { mode, building, device }) {
-        const fmt = d => (typeof formatDateTime === 'function' ? formatDateTime(d) : (d ?? ''));
+    function buildEventPivot(list, pois, { mode, building, device, event }) {
 
         // tagName → poi
         const findPoiByTag = (tag) => (pois || []).find(p =>
@@ -2597,7 +2611,7 @@ const layerPopup = (function () {
 
         // 2) 행 헤더 = poiList의 "모든 장비 분류" ∪ 이벤트에 등장한 분류
         const deviceFromPois   = (pois || []).map(p => p?.property?.poiMiddleCategoryName).filter(Boolean);
-        const deviceFromEvents = rows.map(r => r.deviceCat);
+        const deviceFromEvents = rows.map(r => r.deviceCat).filter(Boolean);
         let deviceRows = Array.from(new Set([...deviceFromPois, ...deviceFromEvents]))
             .sort((a, b) => a.localeCompare(b, 'ko'));
         if (device && mode === 'device') deviceRows = [device];
@@ -2606,7 +2620,7 @@ const layerPopup = (function () {
         const counts = {};
         rows.forEach(r => {
             if (mode === 'building' && building && r.building !== building) return;
-            if (mode === 'device'   && device   && r.deviceCat !== device)   return;
+            if (mode === 'device' && device && r.deviceCat !== device)   return;
             counts[r.deviceCat] ??= {};
             counts[r.deviceCat][r.building] = (counts[r.deviceCat][r.building] || 0) + 1;
         });
@@ -2638,8 +2652,8 @@ const layerPopup = (function () {
             grandTotal,
             meta: {
                 buildingLabel: building ? building : '전체',
-                deviceLabel:   device   ? device   : '전체',
-                eventLabel: '전체',
+                deviceLabel: device ? device : '전체',
+                eventLabel: event ? event : '전체',
                 periodLabel: (s === '전체' && e === '전체') ? '전체' : `${s}~${e}`
             }
         };

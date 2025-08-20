@@ -2,12 +2,10 @@
 (async function () {
     const cookieMatch = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)');
     const USER_ID = cookieMatch ? cookieMatch[2] : null;
-    if (!USER_ID) {
+    if (!USER_ID || USER_ID.toLowerCase() === 'kiosk') {
         window.location.href = '/login';
     }
-    if(USER_ID === 'kiosk'){
-        window.location.href = '/login';
-    }
+
     api.get(`/users/userid/${USER_ID}`).then((result) => {
         const {result: data} = result.data;
 
@@ -687,7 +685,7 @@ const Init = (function () {
 
         popup.closeAllPopup();
         BUILDING_ID = building.id;
-        await initializeIndoorBuilding();
+        // await initializeIndoorBuilding();
         setBuildingNameAndFloors();
     }
 
@@ -919,7 +917,7 @@ const Init = (function () {
     }
 
     return {
-        initializeIndoorBuilding,
+        // initializeIndoorBuilding,
         initializeOutdoorBuilding,
         initCategoryId,
         poiDblclick,

@@ -224,22 +224,26 @@
                 lightPop.style.display = 'block';
             },
             elevatorTab: () => {
-                console.log("elevatorTab");
-                layerPopup.setElevator();
+                // 여기서 elevator 태그 add
+                api.get('/api/tags/elevator/add').then(res => {
+                    console.log("res : ", res);
+                    layerPopup.setElevator();
 
-                const elevatorTab = document.querySelector('.elevator-tab');
-                const escalatorTab = document.querySelector('.escalator-tab');
-                const elevatorContent = document.getElementById('elevatorContent');
-                const escalatorContent = document.getElementById('escalatorContent');
+                    const elevatorTab = document.querySelector('.elevator-tab');
+                    const escalatorTab = document.querySelector('.escalator-tab');
+                    const elevatorContent = document.getElementById('elevatorContent');
+                    const escalatorContent = document.getElementById('escalatorContent');
 
-                initPopup(elevatorPop, clickedItem);
-                registerTabHandlers({
-                    firstTab: elevatorTab,
-                    secondTab: escalatorTab,
-                    firstContent: elevatorContent,
-                    secondContent: escalatorContent,
-                });
-
+                    initPopup(elevatorPop, clickedItem);
+                    registerTabHandlers({
+                        firstTab: elevatorTab,
+                        secondTab: escalatorTab,
+                        firstContent: elevatorContent,
+                        secondContent: escalatorContent,
+                    });
+                }).catch(err => {
+                    console.error(err);
+                })
             },
             parkingTab: () => {
 
@@ -255,43 +259,8 @@
                 //     firstContent: guideContent,
                 //     secondContent: monitorContent
                 // });
-                api.get('/parking/search', {
-                    params: {
-                        // startTime: '2025-06-02 03:00:00.000',
-                        // endTime: '2025-06-02 10:00:00.000',
-                        // deviceId: 'DEV001'
-                    }
-                }).then(res => {
-                    const result = res.data;
-
-                    // 이거 layerPopup.setParking에서 해야함
-                    const tbody = document.querySelector('#parkingList tbody');
-                    tbody.innerHTML = '';
-                    document.getElementById('parkingTotalCnt').textContent = result?.length;
-                    result?.forEach((item, index) => {
-                        const tr = document.createElement('tr');
-                        const formatDateTime = (dt) => {
-                            if (!dt) return '';
-                            const date = new Date(dt);
-                            return date.toLocaleDateString('ko-KR', {hour12: false});
-                        };
-                        tr.innerHTML = `
-                          <td>${index + 1}</td>
-                          <td>${item.deviceId || ''}</td>
-                          <td>${item.deviceName || ''}</td>
-                          <td>${item.inoutType === 0 ? '입차' : '출차'}</td>
-                          <td>${item.gateDatetime}</td>
-                          <td>${item.carNo || ''}</td>
-                          <td>${item.inoutCarId || ''}</td>
-                          <td>${item.parkingFee ?? 0}</td>
-                          <td>${item.regularType === 'T' ? '정기' : '일반'}</td>
-                        `;
-
-                        tbody.appendChild(tr);
-                    })
-                }).catch((err) => {
-                    console.error(err);
-                })
+                layerPopup.resetParkingFilterUI();
+                layerPopup.setParking();
             },
             airTab: () => {
                 layerPopup.setAirTab();
@@ -412,8 +381,7 @@
             systemPopup.style.display = 'none';
             eventLayerPopup.style.display = 'none';
             Px.VirtualPatrol.Clear();
-            // 이거 왜?
-            // Px.Poi.ShowAll();
+            
             const sopPopup = document.querySelector("#sopLayerPopup");
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
@@ -1288,13 +1256,13 @@
         container.innerHTML = '';
         Px.Core.Initialize(container, async () => {
 
-            const { buildingFile, floors } = await BuildingManager.findById(buildingId);
+            const building = await BuildingManager.findById(buildingId);
+            const { buildingFile, floors } = building;
             const { directory } = buildingFile;
-
             const sbmDataArray = floors
                 .flatMap(floor =>
                     floor.sbmFloor.map(sbm => ({
-                        url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
+                        url: `/Building/${directory}/${building.getVersion()}/${sbm.sbmFileName}`,
                         id: floor.id,
                         displayName: sbm.sbmFileName,
                         baseFloor: sbm.sbmFloorBase,

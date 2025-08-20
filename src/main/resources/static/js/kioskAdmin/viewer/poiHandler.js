@@ -90,8 +90,8 @@ function appendFloorOptionsToSelect(floors, selectElement) {
 
     const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
     const nameMap = {
-        B2: 'B1',
-        B1: 'G1'
+        B2: 'B1F',
+        B1: 'GF'
     };
     floors
         .filter(floor => kioskSet.has(floor.name))
@@ -649,7 +649,7 @@ const getKioskPoiDisplayRendering = async () => {
     let filteredList = displayList;
 
     const selectedFloorNo = document.querySelector('#floorNo').value;
-    const selectedType = document.querySelector('#poiSelect').value;
+    const selectedType = document.querySelector('#kioskPoiSelect').value;
     const leftFloorSelect = document.querySelector('#leftFloorSelect');
     const leftPoiCategorySelect = document.querySelector('#leftPoiCategorySelect')
 
@@ -755,7 +755,7 @@ document.querySelector('#floorNo').addEventListener('change', () => {
     getKioskPoiDisplayRendering();
 });
 
-document.querySelector('#poiSelect').addEventListener('change', () => {
+document.querySelector('#kioskPoiSelect').addEventListener('change', () => {
     getKioskPoiDisplayRendering();
 });
 

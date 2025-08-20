@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -14,9 +15,10 @@ public class ParkingDataService {
 
     private final JdbcTemplate secondaryJdbcTemplate;
     private static final String COLUMN_LIST =
-            "parkingLotName, parkingLotId, deviceId, deviceName, inoutType, gateDatetime, carNo, inoutCarId, parkingFee, regularType";
+            "parkingLotName, parkingLotId, deviceId, deviceName, inoutType, " +
+                    "CONVERT(varchar(50), gateDatetime, 120) AS gateDatetime, " +
+                    "carNo, inoutCarId, parkingFee, regularType";
     private static final String BASE_QUERY = "SELECT " + COLUMN_LIST + " FROM dbo.INOUT";
-
 
     public List<Map<String, Object>> getAllColumn() {
         return secondaryJdbcTemplate.queryForList(BASE_QUERY);
@@ -29,9 +31,9 @@ public class ParkingDataService {
             String inoutType,
             String exitId,
             String regularType,
-            String carNo,
+            String searchType,
             String parkingLotName,
-            String deviceName
+            String parkSearchInput
     ) {
 
         StringBuilder sql = new StringBuilder(BASE_QUERY);
@@ -42,6 +44,12 @@ public class ParkingDataService {
         if (startTime != null && !startTime.isEmpty() && endTime != null && !endTime.isEmpty()) {
             conditions.add("gateDatetime BETWEEN ? AND ?");
             params.add(startTime);
+            params.add(endTime);
+        }  else if (startTime != null && !startTime.isEmpty()) {
+            conditions.add("gateDatetime >= ?");
+            params.add(startTime);
+        } else if (endTime != null && !endTime.isEmpty()) {
+            conditions.add("gateDatetime <= ?");
             params.add(endTime);
         }
         if (deviceId != null && !deviceId.isEmpty()) {
@@ -60,23 +68,29 @@ public class ParkingDataService {
             conditions.add("regularType = ?");
             params.add(regularType);
         }
-        if (carNo != null && !carNo.isEmpty()) {
-            conditions.add("carNo = ?");
-            params.add(carNo);
-        }
         if (parkingLotName != null && !parkingLotName.isEmpty()) {
             conditions.add("parkingLotName LIKE ?");
             params.add("%" + parkingLotName + "%");
         }
-        if (deviceName != null && !deviceName.isEmpty()) {
-            conditions.add("deviceName LIKE ?");
-            params.add("%" + deviceName + "%");
+        if (parkSearchInput != null && !parkSearchInput.isEmpty()) {
+            if (Objects.equals(searchType, "carNo")) {
+                conditions.add("carNo LIKE ?");
+                params.add("%" + parkSearchInput + "%");
+            } else {
+                conditions.add("deviceName LIKE ?");
+                params.add("%" + parkSearchInput + "%");
+            }
         }
 
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", conditions));
         }
+        List<Map<String, Object>> rows = secondaryJdbcTemplate.queryForList(sql.toString(), params.toArray());
 
-        return secondaryJdbcTemplate.queryForList(sql.toString(), params.toArray());
+        System.out.println("sql : " + sql);
+        System.out.println("params : " + params);
+        System.out.println("rows : " + rows);
+
+        return rows;
     }
 }

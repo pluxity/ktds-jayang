@@ -348,13 +348,13 @@ modifyModal.addEventListener('show.bs.modal', async (event) => {
         });
         const cctvList = modifyPoiData.cctvList || [];
         const mainCctv = cctvList.find(c => c.isMain === "Y");
-        modifyModal.querySelector("#mainCctvModify").value = mainCctv ? mainCctv.code : "";
+        modifyModal.querySelector("#mainCctvModify").value = mainCctv ? mainCctv.cctvName : "";
 
         const subCctvs = cctvList.filter(c => c.isMain !== "Y");
         const subCctvInputs = modifyModal.querySelectorAll('.sub-cctv');
 
         subCctvInputs.forEach((input, index) => {
-            input.value = subCctvs[index] ? subCctvs[index].code : "";
+            input.value = subCctvs[index] ? subCctvs[index].cctvName : "";
         });
     } else {
         if (cameraIpRow.classList.contains('hidden')) {
@@ -425,6 +425,32 @@ function getCameraId(cameraIp) {
     });
 }
 
+// cctv name 중복 검증
+function validateCctvDuplicates(mainCctvValue, subCctvFields) {
+    const cctvNames = new Set();
+
+    // 메인 CCTV 추가
+    if (mainCctvValue.trim() !== "") {
+        cctvNames.add(mainCctvValue.trim());
+    }
+
+    // 서브 CCTV 중복 검증
+    for (let field of subCctvFields) {
+        const val = field.value.trim();
+        if (val !== "") {
+            if (cctvNames.has(val)) {
+                return {
+                    isValid: false,
+                    message: `CCTV 이름 "${val}"이(가) 이미 사용되었습니다.`
+                };
+            }
+            cctvNames.add(val);
+        }
+    }
+
+    return { isValid: true };
+}
+
 // POST and modify
 [
     document.querySelector('#btnPoiRegister'),
@@ -464,20 +490,29 @@ function getCameraId(cameraIp) {
         params.isLight = document.getElementById(`isLightPoi${type}`).checked;
         params.lightGroup = document.getElementById(`lightGroup${type}`).value;
         if (!poiCategory.name.toLowerCase().includes('cctv')) {
-            params.cctvList = [];
+
             const mainCctvValue = document.querySelector(`#mainCctv${type}`).value;
+            const subCctvFields = document.querySelectorAll('.sub-cctv');
+
+            // 중복 검증
+            const validation = validateCctvDuplicates(mainCctvValue, subCctvFields);
+            if (!validation.isValid) {
+                alertSwal(validation.message);
+                return;
+            }
+
+            params.cctvList = [];
             if (mainCctvValue.trim() !== "") {
                 params.cctvList.push({
-                    code: mainCctvValue,
+                    cctvName: mainCctvValue,
                     isMain: "Y"
                 });
             }
-            const subCctvFields = document.querySelectorAll('.sub-cctv');
             subCctvFields.forEach(field => {
                 const val = field.value;
                 if (val.trim() !== "") {
                     params.cctvList.push({
-                        code: val,
+                        cctvName: val,
                         isMain: "N"
                     });
                 }

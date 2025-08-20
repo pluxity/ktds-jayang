@@ -20,7 +20,7 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             SELECT new com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO(a.process, COUNT(a.id))
             FROM Alarm a
             WHERE a.occurrenceDate >= :sevenDays
-            GROUP BY a.process
+            GROUP BY a.event
          """)
     List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days(@Param("sevenDays") LocalDateTime sevenDays);
     
@@ -38,16 +38,18 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
 
     @Query("""
             SELECT new com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO(
-                a.buildingNm,
-                a.floorNm,
-                a.alarmType,
-                a.deviceNm,
+                p.building.name,
+                p.floorNo,
+                a.event,
+                p.name,
                 a.occurrenceDate
             )
             FROM Alarm a
+            JOIN PoiTag pt ON a.tagName = pt.tagName
+            JOIN Poi p ON pt.poi.id = p.id
             WHERE a.occurrenceDate >= :last24Hours
             ORDER BY a.occurrenceDate DESC
-        """)
+       """)
     List<Last24HoursEventDTO> findLatest24HoursEventList(@Param("last24Hours") LocalDateTime last24Hours);
 
     @Query("SELECT a FROM Alarm a WHERE (:startDate IS NULL OR a.occurrenceDate >= :startDate) AND (:endDate IS NULL OR a.occurrenceDate <= :endDate)")
@@ -71,7 +73,7 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             "WHERE a.occurrenceDate BETWEEN :startDate AND :endDate " +
             "AND (:buildingNm IS NULL OR a.buildingNm = :buildingNm) " +
             "AND (:floorNm IS NULL OR a.floorNm = :floorNm) " +
-            "AND (:deviceType IS NULL OR a.deviceNm LIKE CONCAT(:deviceType, '-%')) " +
+            "AND (:deviceType IS NULL OR a.equipment = :deviceType) " +
             "AND (:searchValue IS NULL OR (a.deviceNm LIKE CONCAT('%', :searchValue, '%') " +
             "     OR CONCAT('', a.alarmType) LIKE CONCAT('%', :searchValue, '%')))")
     List<Alarm> findAlarms(

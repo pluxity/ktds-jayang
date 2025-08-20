@@ -3,6 +3,7 @@ package com.pluxity.ktds.domains.event.service;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.event.constant.DeviceType;
 import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
@@ -135,7 +136,14 @@ public class EventService {
 
         buildingNm = (buildingNm != null && !buildingNm.isEmpty()) ? buildingNm : null;
         floorNm = (floorNm != null && !floorNm.isEmpty()) ? floorNm : null;
-        deviceType = (deviceType != null && !deviceType.isEmpty()) ? deviceType : null;
+        String equipment = null;
+        if (deviceType != null && !deviceType.isEmpty()) {
+            String code = DeviceType.getCodeByDescription(deviceType);
+            equipment = (code != null) ? code : deviceType;
+        }
+
+        log.info("deviceType(original): {}, equipment(converted): {}", deviceType, equipment);
+
         searchValue = (searchValue != null && !searchValue.isEmpty()) ? searchValue : null;
 //        String finalSearchValue = (searchValue != null && !searchValue.isEmpty()) ? searchValue : null;
 
@@ -147,8 +155,7 @@ public class EventService {
             }
         }
 
-
-        return eventRepository.findAlarms(startDate, endDate, buildingNm, floorNm, deviceType, searchValue).stream()
+        return eventRepository.findAlarms(startDate, endDate, buildingNm, floorNm, equipment, searchValue).stream()
                 .map(Alarm::toResponseDTO)
                 .toList();
     }

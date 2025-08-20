@@ -6,13 +6,17 @@ import lombok.Builder;
 @Builder
 public record PoiCctvDTO(
         Long id,
-        String code,
+        String cctvName,
         String isMain
 ) {
+    public PoiCctvDTO(String cctvName, String isMain) {
+        this(null, cctvName, isMain);
+    }
+
     public static PoiCctvDTO from(PoiCctv poiCctv) {
         return PoiCctvDTO.builder()
                 .id(poiCctv.getId())
-                .code(poiCctv.getCode())
+                .cctvName(poiCctv.getCctvName())
                 .isMain(poiCctv.getIsMain())
                 .build();
     }

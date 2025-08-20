@@ -4,6 +4,14 @@
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
       });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
 
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.kiosk-footer .kiosk-footer__date');
@@ -84,6 +92,9 @@
                     center: "",
                     onLoad: async function() {
                         await initPoi();
+                        // Px.Camera.SetOrthographic(() => {
+                        //     Init.moveToKiosk(kioskPoi);
+                        // });
                         Init.moveToKiosk(kioskPoi);
                         Px.Event.On();
                         Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
@@ -147,13 +158,30 @@
         }
     });
 
+    const changeButton = document.querySelector('.kiosk-3d__control .change');
+    changeButton.addEventListener('click', async () => {
+        const state = Px.Camera.GetState();
+        if (!state) return;
+
+        const { position, target, rotation } = state;
+        const dx = position.x - target.x;
+        const dy = position.y - target.y;
+        const dz = position.z - target.z;
+        const distance = Math.hypot(dx, dy, dz) || 1;
+        Px.Camera.SetState({
+            position: { x: target.x, y: target.y + distance, z: target.z },
+            target: target,
+            rotation: rotation
+        });
+    });
+
     const setFloorList = (storeBuilding, kioskPoi) => {
         const floorTabList = document.getElementById('storeFloorList');
         const kioskInfo    = document.querySelector('.kiosk-info');
         const kioskSet = new Set(['B2', 'B1', '1F', '2F']);
         const nameMap = {
-            B2: 'B1',
-            B1: 'G1'
+            B2: 'B1F',
+            B1: 'GF'
         };
         storeBuilding.floors
             .filter(floor => kioskSet.has(floor.name))
@@ -240,13 +268,17 @@ const Init = (function () {
         Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(floor.id);
         Px.Poi.HideAll();
+
         // Px.Poi.ShowByProperty("floorId", floor.id);
         Px.Poi.ShowByProperty("floorNo", kioskPoi.floorNo);
+
         Px.Camera.MoveToPoi({
             id: kioskPoi.id,
             isAnimation: true,
-            duration: 500,
-            distanceOffset: 500,
+            isTopView: true,
+            topViewDistance: 500,
+            duration: 0,
+            // distanceOffset: 500,
             heightOffset:200
         });
     }

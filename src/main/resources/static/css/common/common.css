@@ -195,12 +195,10 @@ body {
 
 /* GNB */
 .header {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 9999;
-  display: -webkit-box;
-  display: -ms-flexbox;
+  z-index: 997;
   display: flex;
   -webkit-box-align: center;
       -ms-flex-align: center;

@@ -1,17 +1,14 @@
 package com.pluxity.ktds.domains.building.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pluxity.ktds.domains.building.dto.*;
+import com.pluxity.ktds.domains.building.service.PoiTagSyncService;
 import com.pluxity.ktds.domains.tag.ElevatorTagManager;
 import java.util.*;
-import com.pluxity.ktds.domains.building.dto.CreatePoiDTO;
-import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
-import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
-import com.pluxity.ktds.domains.building.dto.UpdatePoiDTO;
-import com.pluxity.ktds.domains.building.entity.Poi;
+
 import com.pluxity.ktds.domains.building.entity.Spatial;
 import com.pluxity.ktds.domains.building.service.PoiService;
 import com.pluxity.ktds.domains.tag.TagClientService;
@@ -19,11 +16,9 @@ import com.pluxity.ktds.global.constant.SuccessCode;
 import com.pluxity.ktds.global.response.ResponseBody;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +26,7 @@ import java.util.List;
 
 import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_DELETE;
 import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_PATCH;
+import static com.pluxity.ktds.global.constant.SuccessCode.SUCCESS_CREATE;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +35,7 @@ public class PoiController {
     private final PoiService service;
     private final TagClientService tagClientService;
     private final ObjectMapper objectMapper;
+    private final PoiTagSyncService poiTagSyncService;
 
 //    @GetMapping
 //    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
@@ -84,14 +81,32 @@ public class PoiController {
     }
 
     @GetMapping("/tagNames/{tagName}")
-    public DataResponseBody<Poi> findPoiByTagName(@PathVariable String tagName) {
-        return DataResponseBody.of(service.findPoiIdsByTagName(tagName));
+    public DataResponseBody<Long> findPoiIdByTagName(@PathVariable String tagName) {
+        return DataResponseBody.of(service.findPoiIdsByTagName(tagName).getPoi().getId());
+    }
+
+    @GetMapping("/cctvs/poi-ids")
+    public DataResponseBody<Map<Long, Set<Long>>> getPoiIdsGroupedByCctvPoiId(
+            @RequestParam Long buildingId,
+            @RequestParam Integer floorNo) {
+        return DataResponseBody.of(service.getPoiIdsGroupedByCctvPoiId(buildingId, floorNo));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseBody<Long> postPoi(@Valid @RequestBody CreatePoiDTO dto) {
         return DataResponseBody.of(service.save(dto));
+    }
+
+    @PostMapping("/cctv")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseBody addCctvToPois(
+            @RequestBody List<AddCctvToPoisDTO> dtoList,
+            @RequestParam(value = "buildingId") Long buildingId,
+            @RequestParam(value = "floorNo") Integer floorNo
+    ) {
+        service.addCctvToPois(dtoList, buildingId, floorNo);
+        return ResponseBody.of(SUCCESS_CREATE);
     }
 
 
@@ -162,6 +177,18 @@ public class PoiController {
     public ResponseEntity<String> getTestPoiStatus(@RequestBody List<String> tags) throws JsonProcessingException {
         return tagClientService.testReadTags(tags);
     }
+
+    @PostMapping("/add-tags")
+    public DataResponseBody<Boolean> syncPoiTags(@RequestBody Long poiId) {
+        return DataResponseBody.of(poiTagSyncService.syncPoiTags(poiId));
+    }
+
+    @DeleteMapping("/clear-tags")
+    public ResponseEntity<String> clearPoiTags() {
+        return tagClientService.clearTags();
+    }
+
+
 
     private Map<String, Object> getPoiTagData(List<String> tags) {
         String tagDataStr = tagClientService.readTags(tags).getBody();

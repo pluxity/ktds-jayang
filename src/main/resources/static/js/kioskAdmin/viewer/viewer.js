@@ -26,8 +26,8 @@
             document.getElementById('buildingId').value = buildingId;
 
             const nameMap = {
-                B2: 'B1',
-                B1: 'G1'
+                B2: 'B1F',
+                B1: 'GF'
             };
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
@@ -294,8 +294,8 @@
         const initLeftFloorSelect = () => {
             let floors = BuildingManager.findStore().floors;
             const nameMap = {
-                B2: 'B1',
-                B1: 'G1'
+                B2: 'B1F',
+                B1: 'GF'
             };
             floors
                 .filter(floor => kioskSet.has(floor.name))
@@ -321,13 +321,13 @@
     const initDropUpMenu = () => {
 
         VirtualSelect.init({
-            ele: '#poiSelect',
+            ele: '#kioskPoiSelect',
             options: categoryList,
             selectedValue: categoryList.map((category) => category.value),
             multiple: true,
             silentInitialValueSet: true,
             search: false,
-            name: 'poiSelect',
+            name: 'kioskPoiSelect',
             placeholder: 'POI 카테고리',
             selectAllText: '전체 선택',
             allOptionsSelectedText: '모두 선택됨',

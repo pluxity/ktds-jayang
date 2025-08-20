@@ -216,6 +216,7 @@
                         if (poiInfo.property.floorNo !== Number(floorNo)) {
                             popup.remove();
                             layerPopup.closePlayers();
+                            TagManager.clearTags();
                         }
                     })
                 }
@@ -328,7 +329,6 @@
     initBuilding();
     setDateTime();
     setInterval(updateCurrentTime, 1000);
-
 })();
 
 const Init = (function () {
@@ -435,7 +435,7 @@ const Init = (function () {
 
     const initPoi = async (buildingId) => {
         await getPoiRenderingAndList(buildingId);
-        PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
+        await PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
     };
 
     const getPoiRenderingAndList = async (buildingId) => {
@@ -492,7 +492,26 @@ const Init = (function () {
                 urlDataList: sbmDataArray,
                 center: "",
                 onLoad: function() {
-                    initPoi(buildingId);
+                    initPoi(buildingId).then(() => {
+                        // initPoi 완료 후 실행
+                        moveToPoiFromSession();
+
+                        // 세션 처리
+                        const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
+                        const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
+
+                        if (mainCctv) {
+                            const mainCCTVTemplate = EventManager.createMainCCTVPopup(mainCctv);
+                            mainCCTVTemplate.style.position = 'fixed';
+                            mainCCTVTemplate.style.top = '50%';
+                            mainCCTVTemplate.style.transform = 'translateY(-50%)';
+                            mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
+                        }
+
+                        // 세션 스토리지 정리
+                        sessionStorage.removeItem('mainCctv');
+                        sessionStorage.removeItem('selectedPoiId');
+                    });
                     Px.Util.SetBackgroundColor('#333333');
                     Px.Camera.FPS.SetHeightOffset(15);
                     Px.Camera.FPS.SetMoveSpeed(500);
@@ -500,10 +519,6 @@ const Init = (function () {
                     // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
                     Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                        moveToPoi(poiInfo.id);
-                    });
-
-                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) =>{
                         const clickedPoiId = String(poiInfo.id);
                         const allPopups = document.querySelectorAll('.popup-info');
                         let samePopupOpen = false;
@@ -513,11 +528,13 @@ const Init = (function () {
 
                             if (popupPoiId === clickedPoiId) {
                                 popup.remove();
+                                TagManager.clearTags();
                                 layerPopup.closePlayers();
                                 samePopupOpen = true;
                             } else {
                                 layerPopup.closePlayers();
                                 popup.remove();
+                                TagManager.clearTags();
                             }
                         });
                         if (poiInfo.property.isLight) {
@@ -546,48 +563,14 @@ const Init = (function () {
                         } else {
                             renderPoiInfo(poiInfo);
                         }
-
-
                     });
-                    Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
-                        console.log("event : ", event);
-                    })
 
                     Px.Effect.Outline.HoverEventOn('area_no');
-                    Px.Effect.Outline.AddHoverEventCallback(
-                        throttle((event) => {
-
-                        }, 1000)
-                    );
                     if(building?.camera3d)
                         Px.Camera.SetState(JSON.parse(building.camera3d));
 
                     contents.style.position = 'static';
                     initializeTexture();
-
-                    setTimeout(() =>{
-                        moveToPoiFromSession();
-                        // 세션에 저장된 POI 데이터와 CCTV 정보 확인
-                        const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
-                        const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
-                        // 임시 제거
-                        // if (selectedPoiId) {
-                        //     renderPoiInfo(Px.Poi.GetData(selectedPoiId));
-                        // }
-
-                        if (mainCctv) {
-                            const mainCCTVTemplate = EventManager.createMainCCTVPopup(mainCctv);
-                            mainCCTVTemplate.style.position = 'fixed';
-                            mainCCTVTemplate.style.top = '50%';
-                            mainCCTVTemplate.style.transform = 'translateY(-50%)';
-                            mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
-                        }
-
-                        // 세션 스토리지 정리
-                        sessionStorage.removeItem('mainCctv');
-                        sessionStorage.removeItem('selectedPoiId');
-                    },500);
-
                 }
             });
         });
@@ -617,6 +600,7 @@ const Init = (function () {
     };
 
     const moveToPoiFromSession = () => {
+
         const selectedPoiId = sessionStorage.getItem('selectedPoiId');
         if(selectedPoiId){
             moveToPoi(selectedPoiId);
@@ -650,6 +634,7 @@ const Init = (function () {
                 duration: 500,
             });
         } else {
+            console.warn("POI 데이터가 없습니다. ID:", poiId);
             alertSwal('POI를 배치해주세요');
         }
     };
@@ -690,55 +675,23 @@ const Init = (function () {
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
-        console.log("renderPoiInfo poiInfo : ", poiInfo);
         if (poiInfo.group.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
-            const popupInfo = document.createElement('div');
-
-            popupInfo.className = 'main-cctv-container';
-            popupInfo.classList.add('popup-info');
+            const cctvTemplate = document.getElementById('cctv-popup-template');
+            const popupInfo = cctvTemplate.content.cloneNode(true).querySelector('.popup-info');
             const canvasId = `cctv-${poiInfo.id}`;
-            popupInfo.innerHTML =
-                `<div class="main-cctv-item" data-cctv-id="${poiInfo.id}">
-                    <div class="cctv-header">
-                        <span class="cctv-title">${poiInfo.displayText}</span>
-                        <button type="button" class="cctv-close">×</button>
-                    </div>
-                    <div class="cctv-content">
-                        <input type="hidden" class="poi-id" value="${poiInfo.id}">
-                        <canvas id="cctv-${poiInfo.id}" width="800" height="450"></canvas>
-<!--                        <video id="cctv-${poiInfo.id}" width="100%" height="100%"></video>-->                    
-                    </div>
-                     <div class="cctv-bottom">
-                        <div class="cctv-mode-switch">
-                            <label style="display:flex; align-items:center; gap:2px; cursor:pointer;">
-                                <input type="radio" name="cctv-mode-${poiInfo.id}" value="live" checked style="accent-color:#007bff;"> Live
-                            </label>
-                            <label style="display:flex; align-items:center; gap:2px; cursor:pointer;">
-                                <input type="radio" name="cctv-mode-${poiInfo.id}" value="playback" style="accent-color:#007bff;"> Playback
-                            </label>
-                        </div>                          
-                        <div class="cctv-controls">
-                            <button class="cctv-controls-btn play" type="button" data-btn-type="play">
-                                <span class="hide">play</span>
-                            </button>
-                            <button class="cctv-controls-btn pause" type="button" data-btn-type="pause">
-                                <span class="hide">pause</span>
-                            </button>
-                            <button class="cctv-controls-btn stop" type="button" data-btn-type="stop">
-                                <span class="hide">stop</span>
-                            </button>
-                        </div>
-                     </div>
-                    <div class="cctv-footer" style="display: none;">
-                        <div class="date-picker" >
-                            <input type="date">
-                        </div>
-                        <div class="time-picker">
-                            <input type="time">
-                        </div>
-                    </div>
-                </div>`;
+
+            // 데이터 바인딩
+            popupInfo.querySelector(`[data-camera-name]`).textContent = poiProperty.name;
+            popupInfo.querySelector('.video__container canvas').id = canvasId;
+
+            const cameraNameEl = popupInfo.querySelector(`[data-camera-name]`);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.className = 'poi-id';
+            hiddenInput.value = poiInfo.id;
+            cameraNameEl.parentNode.insertBefore(hiddenInput, cameraNameEl.nextSibling);
+
             const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
             popupInfo.style.position = 'fixed';
             popupInfo.style.zIndex = '999';
@@ -746,6 +699,7 @@ const Init = (function () {
             popupInfo.style.top = `${y}px`;
 
             document.body.appendChild(popupInfo);
+            setupCctvControls(popupInfo, poiProperty);
 
             const updatePosition = () => {
                 const { x, y } = Px.Poi.Get2DPosition(poiInfo.id);
@@ -758,8 +712,6 @@ const Init = (function () {
 
             activePopups.set(poiInfo.id, { dom: popupInfo });
             updatePosition();
-            await EventManager.playLiveStream(canvasId,poiInfo.property.cameraIp);
-
 
             const closeBtn = popupInfo.querySelector('.cctv-close');
             closeBtn.addEventListener('click', () => {
@@ -772,8 +724,10 @@ const Init = (function () {
             const poiProperty = poiInfo.property;
             const popupInfo = document.createElement('div');
 
+            console.log("poiProperty : ", poiProperty);
+
             popupInfo.className = 'popup-info';
-            const statusCell = poiProperty.poiCategoryName === '공기질센서'
+            const statusCell = poiProperty.poiCategoryName === '공기질'
                 ? `<th>단계</th>`
                 : '';
             popupInfo.innerHTML =
@@ -804,675 +758,18 @@ const Init = (function () {
                     </table>
                 </div>`;
 
-            // poi 상태 가져오기
-            const updateTagData = async () => {
-                try {
+            if (poiProperty.poiCategoryName == "조명") {
+                const head = popupInfo.querySelector('.popup-info__head');
+                head.querySelectorAll('h2').forEach(h => h.remove());
 
-                    const response = await api.post('/poi/test-status', poiProperty.tagNames);
-                    // const response = await fetch(`/poi/test-status`, {
-                    //     method: 'POST',
-                    //     headers: {
-                    //         'Content-Type': 'application/json'
-                    //     },
-                    //     body: JSON.stringify(poiProperty)
-                    // });
-                    // const data = await response.json();
+                const h2 = document.createElement('h2');
+                h2.append(document.createTextNode(`${poiProperty.lightGroup || ''}`));
+                h2.append(document.createElement('br'));
+                h2.append(document.createTextNode(poiProperty.name));
 
-                    const data = response.data;
-                    const tbody = popupInfo.querySelector('tbody');
-                    if (data.TAGCNT > 0) {
-                        if (poiProperty.poiMiddleCategoryName == '에스컬레이터') {
-                            const esclNumMatch = data.TAGs[0].tagName.match(/ESCL-(\d+)/);
-                            const esclNum = esclNumMatch ? parseInt(esclNumMatch[1], 10) : null;
-                            const esclBaseMap = {
-                                1: 'B2F-B1F',
-                                3: 'B1F-1F',
-                                5: '1F-2F',
-                                7: 'B4F-B3F',
-                                9: 'B3F-B2F',
-                                11: 'B7F-B6F',
-                                13: 'B6F-B5F',
-                                15: 'B5F-B4F',
-                                17: 'B4F-B3F',
-                                19: 'B3F-B2F',
-                                21: 'B2F-B1F',
-                                23: 'B1F-1F',
-                                25: '1F-2F',
-                                27: 'B4F-B3F',
-                                29: 'B3F-B2F',
-                                31: 'B2F-B1F',
-                                33: 'B1F-1F',
-                                35: '1F-2F',
-                                37: '2F-3F',
-                                39: '3F-4F',
-                                41: 'B1F-1F',
-                                43: 'B1F-1F',
-                            };
-
-                            let section = '-';
-                            if (esclNum && esclBaseMap[esclNum % 2 === 0 ? esclNum - 1 : esclNum]) {
-                                const base = esclBaseMap[esclNum % 2 === 0 ? esclNum - 1 : esclNum];
-                                section = (esclNum % 2 === 0) ? `${base.split('-')[0]}->${base.split('-')[1]}`
-                                    : `${base.split('-')[1]}<-${base.split('-')[0]}`;
-                            }
-
-                            const tagMap = Object.fromEntries(data.TAGs.map(t => [t.tagName.split('-').pop(), t.currentValue]));
-                            const direction = (tagMap['UpDir'] === 'OFF') ? '하향'
-                                : (tagMap['UpDir'] ? '상향' : '-');
-
-                            let runState = '-';
-                            if (tagMap['Run'] && tagMap['Run'] !== '0' && tagMap['Run'] !== 'OFF') {
-                                runState = '운행';
-                            } else if (tagMap['Stop'] && tagMap['Stop'] !== '0' && tagMap['Stop'] !== 'OFF') {
-                                runState = '정지';
-                            } else if (tagMap['Fault'] && tagMap['Fault'] !== '0' && tagMap['Fault'] !== 'OFF') {
-                                runState = tagMap['Fault'];
-                            }
-
-                            tbody.innerHTML = `
-                                  <tr>
-                                    <td>운행 구간</td>
-                                    <td>${section}</td>
-                                  </tr>
-                                  <tr>
-                                    <td>운행 상태</td>
-                                    <td>${runState}</td>
-                                  </tr>
-                                  <tr>
-                                    <td>운행 방향</td>
-                                    <td>${direction}</td>
-                                  </tr>
-                                `;
-                        } else if (poiProperty.poiMiddleCategoryName === '승강기') {
-                            let addedGroup1 = false;
-                            let addedGroup2 = false;
-                            tbody.innerHTML = data.TAGs
-                                .map(tag => {
-                                    const prefix = tag.tagName.charAt(0);
-                                    const suffix = tag.tagName.substring(tag.tagName.lastIndexOf('-') + 1);
-                                    let label = '';
-                                    let displayValue = tag.currentValue;
-                                    if (prefix === 'A' || prefix === 'B') {
-                                        // A, B 건물
-                                        switch (suffix) {
-                                            case 'CurrentFloor':
-                                                if (tag.currentValue == '0G') {
-                                                    displayValue = 'G';
-                                                }
-                                                label = '현재 층';
-                                                break;
-                                            case 'DrivingState':
-                                                label = '운행 상태';
-                                                break;
-                                            case 'Door':
-                                                label = '도어';
-                                                break;
-                                            case 'Direction':
-                                                label = '운행 방향';
-                                                break;
-                                            default:
-                                                label = suffix;
-                                                break;
-                                        }
-                                    } else {
-
-                                        if (suffix === 'UpDir') {
-                                            label = '운행 방향';
-                                            displayValue = (tag.currentValue === '상향') ? '상향' : '하향';
-                                        }
-                                        else if (suffix === 'Door opened') {
-                                            label = '도어';
-                                            displayValue = (tag.currentValue === 'OFF') ? '문닫힘' : '문열림';
-                                        }
-                                        else if (suffix === 'CurrentFloor') {
-                                            label = '현재 층';
-                                        }
-                                        else if ([
-                                            'AUTO', 'Fault', 'Checking', 'Parking', 'Independent driving',
-                                            'Overweight', '1st fire driving', 'Second fire driving',
-                                            'Fire control driving', 'Fire control driving results'
-                                        ].includes(suffix)) {
-                                            if (tag.currentValue === 'OFF' || tag.currentValue === '0') {
-                                                return '';
-                                            }
-
-                                            if (['1st fire driving', 'Fire control driving results'].includes(suffix)) {
-                                                if (addedGroup1) {
-                                                    return '';
-                                                } else {
-                                                    addedGroup1 = true;
-                                                    label = '운행 상태';
-                                                }
-                                            }
-                                            else if (['Second fire driving', 'Fire control driving'].includes(suffix)) {
-                                                if (addedGroup2) {
-                                                    return '';
-                                                } else {
-                                                    addedGroup2 = true;
-                                                    label = '운행 상태';
-                                                }
-                                            }
-                                            else {
-                                                label = '운행 상태';
-                                            }
-                                        }
-                                        else {
-                                            return '';
-                                        }
-                                    }
-
-                                    return `
-                                        <tr>
-                                            <td>${label}</td>
-                                            <td>${displayValue}</td>
-                                            ${statusCell}
-                                        </tr>
-                                    `;
-                                })
-                                .filter(row => row.trim() !== '')
-                                .join('');
-                        } else if (['소방', '출입통제', '누수', '비상벨'].includes(poiProperty.poiCategoryName)) {
-                            tbody.innerHTML = data.TAGs.map(tag => {
-                                const statusText = { 0: '정상', 1: '경보' }[tag.currentValue];
-                                return `
-                                    <tr>
-                                        <td>상태</td>
-                                        <td>${statusText}</td>
-                                    </tr>
-                                `;
-                            }).join('');
-                        } else if (['비상발전기', '저압 배전반', '특고압 배전반', '특고압 변압기'].includes(poiProperty.poiMiddleCategoryName)) {
-
-                            console.log("poiProperty.poiMiddleCategoryName : ", poiProperty.poiMiddleCategoryName);
-
-                            // GEN일 때도 따로 처리해야됨.
-                            // 충전기 전압, 배터리 전압, 주파수, 역률 등등 추가 정보
-                            if (poiProperty.poiMiddleCategoryName === '특고압 변압기') {
-                                tbody.innerHTML = data.TAGs.map(tag => {
-                                    const statusText = { 0: '정상', 1: '경보' }[tag.currentValue];
-                                    return `
-                                    <tr>
-                                        <td>상태</td>
-                                        <td>${statusText}</td>
-                                    </tr>
-                                `;
-                                }).join('');
-                                return;
-                            }
-                            const TAG_LABEL_MAP = {
-                                "충전기_전압": "충전기 전압",
-                                "배터리_전압": "배터리 전압",
-                                "주파수": "주파수",
-                                "역률": "역률",
-                                "R상_전압": "R상 전압",
-                                "S상_전압": "S상 전압",
-                                "T상_전압": "T상 전압",
-                                "R_S_선간전압": "R-S 선간전압",
-                                "S_T_선간전압": "S-T 선간전압",
-                                "T_R_선간전압": "T-R 선간전압",
-                                "R상_전류": "R상 전류",
-                                "S상_전류": "S상 전류",
-                                "T상_전류": "T상 전류",
-                                "3상_유효전력": "유효전력",
-                                "3상_무효전력": "무효전력",
-                                "유효전력량": "유효 전력량",
-                                "무효전력량": "무효 전력량"
-                            };
-
-                            const unmatchedTags = [];
-                            const unmatchedGroups = {
-                                OCR: [],
-                                OCGR: [],
-                                UVR: [],
-                                CB_ON: [],
-                                ATS: [],
-                                NVR: [],
-                                ELD: [],
-                                ETC: []
-                            };
-
-                            const rowList = data.TAGs.map(tag => {
-                                const tagNamePart = tag.tagName.split('-').pop();
-                                const parts = tagNamePart.split('_');
-                                let key = '';
-                                if (parts.length >= 3 && ['R', 'S', 'T', '3상'].includes(parts[parts.length - 3])) {
-                                    key = parts.slice(-3).join('_');
-                                }
-                                else if (parts.length >= 2 && TAG_LABEL_MAP[parts.slice(-2).join('_')]) {
-                                    key = parts.slice(-2).join('_');
-                                }
-                                else if (TAG_LABEL_MAP[parts.slice(-1)[0]]) {
-                                    key = parts.slice(-1)[0];
-                                }
-                                else {
-                                    key = '';
-                                }
-
-                                if (TAG_LABEL_MAP[key]) {
-                                    let unit = '';
-                                    switch (true) {
-                                        case key.includes('전력량'):
-                                            unit = 'kWH';
-                                            break;
-                                        case key.includes('전류'):
-                                            unit = 'A';
-                                            break;
-                                        case key.includes('전압'):
-                                            unit = 'KV';
-                                            break;
-                                        case key.includes('전력'):
-                                            unit = 'kW';
-                                            break;
-                                        default:
-                                            unit = '';
-                                    }
-
-                                    return {
-                                        label: TAG_LABEL_MAP[key],
-                                        value: `${tag.currentValue}${unit}`
-                                    };
-                                } else {
-                                    unmatchedTags.push({
-                                        tagName: tag.tagName,
-                                        currentValue: tag.currentValue
-                                    });
-                                    if (tag.tagName.includes('OCR_OCGR')) {
-                                        unmatchedGroups.OCR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                        unmatchedGroups.OCGR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('OCGR')) {
-                                        unmatchedGroups.OCGR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('OCR')) {
-                                        unmatchedGroups.OCR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('UVR')) {
-                                        unmatchedGroups.UVR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('ATS')) {
-                                        unmatchedGroups.ATS.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('NVR')) {
-                                        unmatchedGroups.NVR.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('ELD')) {
-                                        unmatchedGroups.ELD.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else if (tag.tagName.includes('ACB_ON') || tag.tagName.includes('VCB_ON')) {
-                                        unmatchedGroups.CB_ON.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    } else {
-                                        unmatchedGroups.ETC.push({
-                                            tagName: tag.tagName,
-                                            currentValue: tag.currentValue
-                                        });
-                                    }
-
-                                    return null;
-                                }
-                            }).filter(Boolean);
-
-                            if (rowList.length <= 10) {
-                                tbody.innerHTML = rowList.map(row => `
-                                    <tr>
-                                        <td>${row.label}</td>
-                                        <td>${row.value}</td>
-                                    </tr>
-                                `).join('');
-                            } else {
-                                const thead = popupInfo.querySelector('table thead');
-                                thead.innerHTML = `
-                                    <tr>
-                                        <th>수집정보</th>
-                                        <th>측정값</th>
-                                        <th style="border-left: 1px solid;">수집정보</th>
-                                        <th>측정값</th>
-                                    </tr>
-                                `;
-
-                                let html = '';
-                                for (let i = 0; i < 10; i++) {
-                                    const left = rowList[i]
-                                        ? `<td>${rowList[i].label}</td><td>${rowList[i].value}</td>`
-                                        : `<td>-</td><td>-</td>`;
-                                    const right = rowList[i + 10]
-                                        ? `<td style="border-left: 1px solid;">${rowList[i + 10].label}</td><td>${rowList[i + 10].value}</td>`
-                                        : `<td style="border-left: 1px solid;">-</td><td>-</td>`;
-
-                                    html += `<tr>${left}${right}</tr>`;
-                                }
-
-                                tbody.innerHTML = html;
-
-                            }
-
-                            const content = popupInfo.querySelector('.popup-info__content');
-                            const oldButtons = content.querySelector('.alert-buttons');
-                            if (oldButtons) oldButtons.remove();
-
-                            const buttonWrapper = document.createElement('div');
-                            buttonWrapper.className = 'alert-buttons';
-                            buttonWrapper.style.marginTop = '12px';
-                            buttonWrapper.style.display = 'flex';
-                            buttonWrapper.style.flexDirection = 'column';
-                            buttonWrapper.style.alignItems = 'center';
-
-                            const row1 = document.createElement('div');
-                            row1.style.display = 'flex';
-                            row1.style.gap = '8px';
-                            row1.style.marginBottom = '8px';
-
-                            const row2 = document.createElement('div');
-                            row2.style.display = 'flex';
-                            row2.style.gap = '8px';
-
-                            const alertGroups = ['CB_ON', 'OCR', 'OCGR', 'UVR', 'NVR', 'ELD', 'ATS'];
-                            alertGroups.forEach((group, i) => {
-                                // tag에 있는거만 버튼만듬
-                                const groupData = unmatchedGroups[group];
-                                const filtered = groupData.filter(tag => tag.tagName.includes(group));
-                                if (filtered.length === 0) return;
-                                const isActive = unmatchedGroups[group]?.some(tag => tag.currentValue === '1');
-
-                                const btn = document.createElement('button');
-                                btn.type = 'button';
-                                btn.textContent = group;
-                                btn.style.width = '5rem';
-                                btn.style.height = '1.8rem';
-                                btn.className = 'button button--solid-middle';
-                                if (isActive) {
-                                    btn.style.backgroundColor = 'red';
-                                    btn.style.color = 'white';
-                                }
-
-                                if (i < 4) {
-                                    row1.appendChild(btn);
-                                } else {
-                                    row2.appendChild(btn);
-                                }
-                            });
-
-                            buttonWrapper.appendChild(row1);
-                            buttonWrapper.appendChild(row2);
-                            content.appendChild(buttonWrapper);
-
-                            // label 색깔 처리 테스트중
-                            ['OCR', 'OCGR', 'UVR', 'CB_ON', 'ATS', 'NVR', 'ELD'].forEach(group => {
-                                const found = unmatchedGroups[group].find(tag => tag.currentValue == '1');
-                                if (found) {
-                                    console.log(`${group} group has active tag:`, found);
-                                }
-                            });
-
-                        }  else if (poiProperty.poiMiddleCategoryName === '무정전전원장치') {
-
-                            const { lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns } = processUPSData(data.TAGs);
-                            const tableHTML = generateUPSTables(lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns);
-
-                            // 기존 테이블과 버튼들을 제거하고 새로운 테이블들을 추가 (이벤트 리스너 보존)
-                            const contentDiv = popupInfo.querySelector('.popup-info__content');
-                            const existingTables = contentDiv.querySelectorAll('table');
-                            const existingButtons = contentDiv.querySelectorAll('.alert-buttons');
-                            existingTables.forEach(table => table.remove());
-                            existingButtons.forEach(buttons => buttons.remove());
-
-                            // 새로운 테이블들을 contentDiv에 직접 추가
-                            const tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = tableHTML;
-                            while (tempDiv.firstChild) {
-                                contentDiv.appendChild(tempDiv.firstChild);
-                            }
-
-                        } else if (poiProperty.poiMiddleCategoryName === 'FPU') {
-                            tbody.innerHTML  = data.TAGs.map(tag => {
-                                // "A-4-VAV-FPU-104105-4F_FPU_104105_PRI_ACTUAL_FLOW" -> "PRI_ACTUAL_FLOW"
-                                const parts = tag.tagName.split('_');
-                                const suffix = parts.slice(3).join('_'); // 처음 3개 부분 제거 후 나머지 조인
-                                let label = '';
-                                let unit = '';
-                                switch (suffix) {
-                                    case 'SPACE_TEMP':
-                                        label = '현재온도';
-                                        unit = '℃';
-                                        break;
-                                    case 'PRI_FLOW_STPT':
-                                        label = '요구풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'PRI_ACTUAL_FLOW':
-                                        label = '현재풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'ACT_ROOM_STPT':
-                                        label = '설정온도';
-                                        unit = '℃';
-                                        break;
-                                    case 'MIN_VOLUME':
-                                        label = '최소풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'MAX_VOLUME':
-                                        label = '최대풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'POSITION':
-                                        label = '댐퍼개도';
-                                        unit = '%';
-                                        break;
-                                    case 'COOL_HEAT':
-                                        label = '냉/난방';
-                                        break;
-                                    case 'MANUAL_DMP_OPEN':
-                                        label = '운전모드';
-                                        break;
-                                    case 'FAN':
-                                        label = '팬운전';
-                                        break;
-                                    case 'VLV_24V_ON_OFF':
-                                        label = '밸브운전';
-                                        break;
-                                    default:
-                                        label = suffix;
-                                        break;
-                                }
-
-                                return `
-                                       <tr>
-                                           <td>${label}</td>
-                                           <td>${tag.currentValue || '-'}${unit}</td>
-                                       </tr>
-                                   `;
-                            }).join('');
-                        }else if(poiProperty.poiMiddleCategoryName === 'VAV'){
-                            tbody.innerHTML = data.TAGs.map(tag => {
-                                // "A-8-VAV-VAV-108121-8F_VAV_108121_SPACE_TEMP" -> "SPACE_TEMP"
-                                const parts = tag.tagName.split('_');
-                                const suffix = parts.slice(3).join('_'); // 처음 3개 부분 제거 후 나머지 조인
-                                let label = '';
-                                let unit = '';
-
-                                switch (suffix) {
-                                    case 'SPACE_TEMP':
-                                        label = '현재온도';
-                                        unit = '℃';
-                                        break;
-                                    case 'PRI_FLOW_STPT':
-                                        label = '요구풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'PRI_ACTUAL_FLOW':
-                                        label = '현재풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'ACT_ROOM_STPT':
-                                        label = '설정온도';
-                                        unit = '℃';
-                                        break;
-                                    case 'MIN_VOLUME':
-                                        label = '최소풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'MAX_VOLUME':
-                                        label = '최대풍량';
-                                        unit = 'm²/s';
-                                        break;
-                                    case 'POSITION':
-                                        label = '댐퍼개도';
-                                        unit = '%';
-                                        break;
-                                    case 'COOL_HEAT':
-                                        label = '냉/난방';
-                                        break;
-                                    case 'MANUAL_DMP_OPEN':
-                                        label = '운전모드';
-                                        break;
-                                    default:
-                                        label = suffix;
-                                        break;
-                                }
-
-                                return `
-                                          <tr>
-                                              <td>${label}</td>
-                                              <td>${tag.currentValue || '-'}${unit}</td>
-                                          </tr>
-                                      `;
-                            }).join('');
-                        } else if(poiProperty.poiMiddleCategoryName === 'PV') {
-                            tbody.innerHTML = data.TAGs.map(tag => {
-                                // "C-RF-SU-PV-null-현재발전량" -> "현재발전량"
-                                const label = tag.tagName.substring(tag.tagName.lastIndexOf('-') + 1);
-
-                                return `
-                                          <tr>
-                                              <td>${label || '-'}</td>
-                                              <td>${tag.currentValue || '-'}</td>
-                                          </tr>
-                                      `;
-                            }).join('');
-                        }else if(poiProperty.poiMiddleCategoryName === 'BIPV'){
-                            // 태그를 두 그룹으로 분리
-                            const regularTags = data.TAGs.filter(tag => !tag.tagName.includes('-G-'));
-                            const comprehensiveTags = data.TAGs.filter(tag => tag.tagName.includes('-G-'));
-
-                            const tableHTML = generateBIPVTable(regularTags);
-                            const comprehensiveTableHTML = generateBIPVTable(comprehensiveTags);
-                            console.log("comprehensiveTableHTML", comprehensiveTableHTML);
-
-                            const contentDiv = popupInfo.querySelector('.popup-info__content');
-                            const existingTables = contentDiv.querySelectorAll('table');
-                            existingTables.forEach(table => table.remove());
-
-                            // 새로운 테이블들을 contentDiv에 직접 추가
-                            const tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = tableHTML;
-                            tempDiv.innerHTML += comprehensiveTableHTML;
-                            contentDiv.appendChild(tempDiv.firstChild);
-                            contentDiv.appendChild(tempDiv.firstChild);
-                        } else if(poiProperty.poiMiddleCategoryName == "연료전지") {
-                            tbody.innerHTML = data.TAGs.map(tag => {
-                                const parts = tag.tagName.split('-');
-                                const suffix = parts[parts.length - 1];
-                                let label = '';
-                                let unit = '';
-
-                                switch (suffix) {
-                                    case 'LNGConsum':
-                                        label = 'LNG소비량';
-                                        unit = 'Nm³';
-                                        break;
-                                    case 'GenKwh':
-                                        label = '발전량';
-                                        unit = 'kWh';
-                                        break;
-                                    case 'GenKCal':
-                                        label = '생산열량';
-                                        unit = 'Kcal';
-                                        break;
-                                    default:
-                                        label = suffix;
-                                        break;
-                                }
-
-                                return `
-                                          <tr>
-                                              <td>${label}</td>
-                                              <td>${tag.currentValue || '-'}${unit}</td>
-                                          </tr>
-                                      `;
-                            }).join('');
-                        }
-
-                        else {
-                            tbody.innerHTML = data.TAGs.map(tag => {
-                                const statusCell = poiProperty.poiCategoryName === '공기질센서'
-                                    ? `<td>${getStatusText(tag.S)}</td>`
-                                    : '';
-                                return `
-                                    <tr>
-                                        <td>${tag.label}</td>
-                                        <td>${tag.desc}</td>
-                                        ${statusCell}
-                                    </tr>
-                                `;
-                            }).join('');
-                        }
-                    } else {
-                        tbody.innerHTML = `
-                                <tr>
-                                    <td colspan="3">태그 데이터가 없습니다.</td>
-                                </tr>
-                            `;
-                    }
-
-                    // 업데이트 시간 갱신
-                    popupInfo.querySelector('.date .timestamp').textContent =
-                        `업데이트 일시 : ${new Date().toLocaleString()}`;
-                } catch (error) {
-                    console.error('태그 데이터 조회 실패:', error);
-                    const tbody = popupInfo.querySelector('tbody');
-                    tbody.innerHTML = `
-                <tr>
-                    <td colspan="3">데이터 조회에 실패했습니다.</td>
-                </tr>
-            `;
-                }
-            };
-
-            // 초기 데이터 로드
-            await updateTagData();
-
-            // 새로고침 이벤트
-            const refreshBtn = popupInfo.querySelector('.date__refresh');
-            refreshBtn.addEventListener('click', updateTagData);
-
-            // 닫기 이벤트
-            const closeBtn = popupInfo.querySelector('.close');
-            closeBtn.addEventListener('click', () => {
-                // 이벤트 리스너 제거
-                refreshBtn.removeEventListener('click', updateTagData);
-                // 팝업 제거
-                popupInfo.remove();
-            });
+                const hidden = head.querySelector('input.poi-id');
+                hidden.after(h2);
+            }
 
             // 위치 설정
             const {x, y} = Px.Poi.Get2DPosition(poiInfo.id);
@@ -1494,53 +791,438 @@ const Init = (function () {
 
             activePopups.set(poiInfo.id, { dom: popupInfo });
             updatePosition();
+
+            // 태그 등록 및 조회
+            const result = await TagManager.addTagsAndShowTagData(poiProperty, popupInfo, statusCell);
+            if (!result.success) {
+                // 에러 처리
+                const tbody = popupInfo.querySelector('tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3">데이터 조회에 실패했습니다.</td>
+                    </tr>
+                `;
+            }
+
+            // 새로고침 이벤트
+            const refreshBtn = popupInfo.querySelector('.date__refresh');
+            refreshBtn.addEventListener('click', () => {
+                TagManager.mapTagDataToPopup(poiProperty, popupInfo);
+            });
+
+            // 닫기 이벤트
+            const closeBtn = popupInfo.querySelector('.close');
+            closeBtn.addEventListener('click', (event) => {
+
+                // 조명 poi일 때는 선택도 풀리게
+                const poiId = document.querySelector('.popup-info .poi-id')?.value || null;
+                const poiData = Px.Poi.GetData(Number(poiId));
+                if (poiData.group == '조명') {
+                    Px.Poi.RestoreColorAll();
+                    selectedGroup = null;
+                    selectedId = null;
+                }
+                // 이벤트 리스너 제거
+                refreshBtn.removeEventListener('click', () => {
+                    TagManager.mapTagDataToPopup(poiProperty, popupInfo);
+                });
+                // 팝업 제거
+                popupInfo.remove();
+                TagManager.clearTags();
+            });
         }
     }
 
-    document.addEventListener('change', async function (e) {
-        // CCTV 모드 라디오 버튼 변경 시
-        if (e.target.matches('input[name^="cctv-mode-"]')) {
-            const selectedValue = e.target.value;
-            const poiId = e.target.name.replace('cctv-mode-', '');
-            const poiInfo = Px.Poi.GetData(poiId);
-            const cameraIp = poiInfo.property.cameraIp;
-            const canvasId = `cctv-${poiId}`;
-            const player = window.livePlayers[canvasId];
-            const cctvContainer = document.querySelector('.main-cctv-item');
-            const controlButtons = cctvContainer.querySelectorAll('.cctv-controls-btn');
+    // 재생 버튼 색상과 날짜 초기화 함수
+    function resetPlaybackControls(popupInfo) {
+        // 재생 버튼 색상 초기화
+        popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+            btn.style.backgroundColor = '';
+        });
 
-            // 모드에 따른 처리
-            if (selectedValue === 'live') {
+        // 날짜/시간 입력값 초기화
+        popupInfo.querySelector('#startDate').value = '';
+        popupInfo.querySelector('#startTime').value = '';
+        popupInfo.querySelector('#endHours').value = '0';
+        popupInfo.querySelector('#endMinutes').value = '30';
+        popupInfo.querySelector('#endSeconds').value = '0';
+    }
+
+    async function setupCctvControls(popupInfo, poiInfo) {
+        resetPlaybackControls(popupInfo);
+
+        // LIVE/PLAYBACK 모드 전환
+        const liveBtn = popupInfo.querySelector('.button--solid-middle');
+        const playbackBtn = popupInfo.querySelector('.button--ghost-lower');
+        const canvasId = `cctv-${poiInfo.id}`;
+        const cameraIp = poiInfo.cameraIp;
+
+        liveBtn.addEventListener('click', async () => {
+            resetPlaybackControls(popupInfo);
+
+            const player = window.livePlayers[canvasId];
+            if (player) {
+                player.cameraIp = cameraIp; // player에 카메라 IP 설정
+
+                // player 상태 초기화
+                if (player.isPaused === undefined) {
+                    player.isPaused = false;
+                }
+            }
+
+            if(player){
                 player.stopPlayback(); // playback 정지
                 player.isLive = true; // player live 상태
-                document.querySelector('.cctv-footer').style.display = 'none'; // 하단 playback 메뉴 비활성화
+            }
+            liveBtn.classList.add('button--solid-middle');
+            liveBtn.classList.remove('button--ghost-lower');
+            playbackBtn.classList.add('button--ghost-lower');
+            playbackBtn.classList.remove('button--solid-middle');
 
-                controlButtons.forEach(btn => {
-                    btn.disabled = true;
-                });
+            // LIVE 모드 활성화
+            await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+        });
 
-                await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+        playbackBtn.addEventListener('click', () => {
+            const player = window.livePlayers[canvasId];
+            if (player) {
+                player.cameraIp = cameraIp; // player에 카메라 IP 설정
 
-            } else if (selectedValue === 'playback') {
+                player.onPlaybackError = (errorType, message) => {
+                    console.log("Playback Error:", errorType, message);
+
+                    popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+                        btn.style.backgroundColor = '';
+                    });
+
+                    // 재생 상태 초기화
+                    if (player.isPaused !== undefined) {
+                        player.isPaused = false;
+                    }
+
+                    // 에러 타입별 처리
+                    switch (errorType) {
+                        case "NO_DATA":
+                            console.log("해당 시간에 데이터가 없음");
+                            break;
+                        case "NETWORK_ERROR":
+                            console.log("네트워크 오류");
+                            break;
+                        default:
+                            console.log("알 수 없는 오류");
+                    }
+                };
+            }
+            playbackBtn.classList.add('button--solid-middle');
+            playbackBtn.classList.remove('button--ghost-lower');
+            liveBtn.classList.add('button--ghost-lower');
+            liveBtn.classList.remove('button--solid-middle');
+
+            resetPlaybackControls(popupInfo); // 재생 버튼 색상과 날짜 초기화
+
+            // PLAYBACK 모드 활성화
+            if(player) {
                 player.cancelDraw && player.cancelDraw(); // live 정지
                 player.isLive = false; // player playback 상태
-                controlButtons.forEach(btn => {
-                    btn.disabled = false;
-                });
-
-                // 하단 활성화
-                document.querySelector('.cctv-footer').style.display = 'flex'; // 하단 playback 메뉴 활성화
             }
-        }
-    });
+        });
 
-    document.addEventListener('click', function(e) {
-        if (e.target.matches('.cctv-controls-btn')) {
-            const button = e.target.closest('.cctv-controls-btn');
-            handlePlayButton(button);
-        }
-    });
+        // PTZ 컨트롤 설정
+        setUpPtzControls(popupInfo);
 
+
+        let joystick = new JOYSTICK(document.getElementById('joystick-area'));
+
+        const throttledLivePlayMove = throttle(async (canvasId, x, y) => {
+            await EventManager.livePlayMove(canvasId, x, y);
+        }, 100);
+
+        joystick.stick.addEventListener('moveStick', async (e) => {
+            await throttledLivePlayMove(canvasId, e.detail.x, e.detail.y);
+        })
+
+
+        await EventManager.playLiveStream(canvasId, cameraIp); // live 실행
+    }
+
+    function setUpPtzControls(popupInfo) {
+        // PTZ 요소들이 있는지 확인 (특정 팝업 내에서만)
+        const ptzViewer = popupInfo.querySelector('.ptz-viewer');
+        if (!ptzViewer) return;
+
+        // PTZ 제어 패널 토글
+        const handleToggleControlPanel = () => {
+            const panel = popupInfo.querySelector('#slidePanel');
+            const isActive = panel.classList.contains('ptz-viewer__panel--active');
+
+            if (isActive) {
+                panel.classList.remove('ptz-viewer__panel--active');
+            } else {
+                panel.classList.add('ptz-viewer__panel--active');
+            }
+        };
+
+        const handleModeSwitch = async (mode) => {
+            const playbackContainer = popupInfo.querySelector('.playback');
+            const modeBtns = popupInfo.querySelectorAll('.playback__mode .button');
+            const actionGroup = popupInfo.querySelector('.playback__action');
+            const actionButtons = actionGroup?.querySelectorAll('.playback__button');
+
+            // 시간 설정 컨트롤
+            const timeControls = popupInfo.querySelector('#timeControls');
+
+            // PTZ 컨트롤
+            const joystick = popupInfo.querySelector('.joystick');
+            const ptzControls = popupInfo.querySelector('.controls');
+            const resetBtn = popupInfo.querySelector('.controls__reset');
+
+            const panel = popupInfo.querySelector('#slidePanel');
+
+            // 모든 모드 버튼 스타일 초기화
+            modeBtns.forEach(btn => {
+                btn.classList.remove('button--solid-middle', 'button--ghost-lower');
+                const btnText = btn.textContent.trim().toLowerCase();
+                if ((mode === 'live' && btnText === 'live') ||
+                    (mode === 'playback' && (btnText === 'play back' || btnText === 'playback'))) {
+                    btn.classList.add('button--solid-middle');
+                } else {
+                    btn.classList.add('button--ghost-lower');
+                }
+            });
+
+            // 컨테이너 클래스 변경
+            if (playbackContainer) {
+                playbackContainer.classList.remove('playback--live', 'playback--playback');
+                playbackContainer.classList.add(`playback--${mode}`);
+            }
+
+            // 재생 컨트롤 버튼 활성화 상태 관리
+            if (actionGroup) {
+                if (mode === 'playback') {
+                    actionGroup.classList.add('playback__action--active');
+                    actionButtons?.forEach(btn => btn.removeAttribute('disabled'));
+                } else {
+                    actionGroup.classList.remove('playback__action--active');
+                    actionButtons?.forEach(btn => btn.setAttribute('disabled', 'disabled'));
+                }
+            }
+
+            // PTZ 컨트롤 표시/숨김 관리 (하나로 묶어서)
+            if (ptzControls) {
+                const canvasId = popupInfo.querySelector('canvas').id;
+                const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                const isPTZ = poiInfo?.property?.poiMiddleCategoryName === 'PTZ';
+
+                if (mode === 'live' && isPTZ) {
+                    // LIVE 모드이면서 PTZ 카메라: PTZ 컨트롤 표시
+                    ptzControls.style.display = 'flex';
+                    joystick.style.display = 'flex';
+                    resetBtn.style.display = 'flex';
+                    timeControls.style.display = 'none';
+                    panel.style.padding = '20px 20px';
+                } else if (mode === 'playback') {
+                    // 그 외: PTZ 컨트롤 숨김
+                    ptzControls.style.display = 'none';
+                    joystick.style.display = 'none';
+                    resetBtn.style.display = 'none';
+                    panel.style.padding = '20px 20px';
+                    timeControls.style.display = 'flex';
+                } else {
+                    ptzControls.style.display = 'none';
+                    joystick.style.display = 'none';
+                    resetBtn.style.display = 'none';
+                    timeControls.style.display = 'none';
+                    panel.style.padding = 0;
+                }
+            }
+
+            console.log(`Mode switched to: ${mode.toUpperCase()}`);
+        };
+
+
+        // 슬라이더 진행도 업데이트 함수
+        const updateSliderProgress = (slider) => {
+            const progress = slider.parentElement.querySelector('.controls__progress');
+            const value = slider.value;
+            const max = slider.max;
+            const percentage = (value / max) * 100;
+            progress.style.width = percentage + '%';
+            progress.setAttribute('data-progress', value);
+        };
+
+        // 슬라이더 값 변경 함수
+        const changeSliderValue = (type, change) => {
+            const slider = popupInfo.querySelector(`[data-type="${type}"]`);
+            if (!slider) return;
+
+            const currentValue = parseInt(slider.value);
+            const newValue = Math.max(0, Math.min(100, currentValue + change));
+
+            slider.value = newValue;
+            updateSliderProgress(slider);
+
+            const label = slider.closest('.controls__group')?.querySelector('.controls__label')?.textContent;
+            console.log(`${label}: ${newValue}`);
+        };
+
+
+
+        // 이벤트 리스너 설정
+        const initEventListeners = () => {
+            // 토글 버튼 이벤트
+            const toggleBtn = popupInfo.querySelector('#toggleControl');
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', handleToggleControlPanel);
+
+                // 토글 버튼 상태 업데이트
+                const updateToggleButton = () => {
+                    const panel = popupInfo.querySelector('#slidePanel');
+                    if (panel && panel.classList.contains('ptz-viewer__panel--active')) {
+                        toggleBtn.classList.add('playback__toggle--active');
+                    } else {
+                        toggleBtn.classList.remove('playback__toggle--active');
+                    }
+                };
+
+                toggleBtn.addEventListener('click', () => {
+                    setTimeout(updateToggleButton, 10);
+                });
+            }
+
+            // 모드 버튼 이벤트 리스너
+            popupInfo.querySelectorAll('.playback__mode .button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const btnText = this.textContent.trim().toLowerCase();
+                    const mode = btnText === 'live' ? 'live' : 'playback';
+                    handleModeSwitch(mode);
+                });
+            });
+
+            // 초기 상태 설정 (LIVE 모드로 시작)
+            handleModeSwitch('live');
+
+                    // 재생 버튼 색상 변경 함수
+            const updatePlaybackButtonColor = (activeButton) => {
+                // 모든 재생 버튼 색상 초기화
+                popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+                    btn.style.backgroundColor = '';
+                });
+                // 활성화된 버튼만 색상 적용
+                if (activeButton) {
+                    activeButton.style.backgroundColor = '#00f5bf';
+                }
+            };
+
+            // 재생 컨트롤 버튼 이벤트 리스너
+            popupInfo.querySelectorAll('.playback__button').forEach(btn => {
+                btn.addEventListener('click', async function () {
+
+                    const canvasId = popupInfo.querySelector('canvas').id;
+                    const player = window.livePlayers[canvasId];
+                    let cameraIp = null;
+                    if(player){
+                        cameraIp = player.cameraIp;
+                    }else{
+                        const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                        cameraIp = poiInfo.property.cameraIp;
+                    }
+
+                    const dateValue = document.querySelector('.ptz-viewer__panel input[type="date"]').value;
+                    const timeValue = document.querySelector('.ptz-viewer__panel input[type="time"]').value;
+
+                    if (!dateValue || !timeValue) {
+                        alertSwal("재생할 날짜와 시간을 선택해주세요.");
+                        return;
+                    }
+
+                    if (this.hasAttribute('disabled')) return;
+
+                    const btnClass = this.className;
+                    if (btnClass.includes('playback__button--play')) {
+                        console.log('Playback: Play');
+                        if (player && player.isPaused) {
+                            player.isPaused = false;
+                            player.resumePlayback();
+                        } else {
+
+                            const endHours = parseInt(popupInfo.querySelector('#endHours').value) || 0;
+                            const endMinutes = parseInt(popupInfo.querySelector('#endMinutes').value) || 0;
+                            const endSeconds = parseInt(popupInfo.querySelector('#endSeconds').value) || 0;
+
+                            const startDate = new Date(`${dateValue}T${timeValue}`);
+                            const endTime = {
+                                hour: endHours,
+                                minutes: endMinutes,
+                                second: endSeconds
+                            };
+
+                            await EventManager.playPlaybackStream(canvasId, cameraIp, startDate, endTime);
+                        }
+                        updatePlaybackButtonColor(this);
+
+                    } else if (btnClass.includes('playback__button--pause')) {
+                        player.isPaused = true; // 일시정지 상태로 변경
+                        player.pausePlayback();
+                        updatePlaybackButtonColor(this);
+                    } else if (btnClass.includes('playback__button--stop')) {
+                        player.isPaused = false; // 일시정지 상태 해제
+                        player.stopPlayback();
+                        updatePlaybackButtonColor(this);
+                    }
+                });
+            });
+
+            // PTZ 컨트롤 버튼들
+            const ptzButtons = [
+                { btn: popupInfo.querySelector('.controls__btn--zoom-in[data-target="zoomIn"]'), type: 'zoom', direction: 0.3, startMethod: 'continuousZoom', stopMethod: 'stopZoom' },
+                { btn: popupInfo.querySelector('.controls__btn--zoom-out[data-target="zoomOut"]'), type: 'zoom', direction: -0.3, startMethod: 'continuousZoom', stopMethod: 'stopZoom' },
+                { btn: popupInfo.querySelector('.controls__btn--focus-in[data-target="focusIn"]'), type: 'focus', direction: 0.3, startMethod: 'continuousFocus', stopMethod: 'stopFocus' },
+                { btn: popupInfo.querySelector('.controls__btn--focus-out[data-target="focusOut"]'), type: 'focus', direction: -0.3, startMethod: 'continuousFocus', stopMethod: 'stopFocus' },
+                { btn: popupInfo.querySelector('.controls__btn--iris-in[data-target="irisIn"]'), type: 'iris', direction: 0.3, startMethod: 'continuousIris', stopMethod: 'stopIris' },
+                { btn: popupInfo.querySelector('.controls__btn--iris-out[data-target="irisOut"]'), type: 'iris', direction: -0.3, startMethod: 'continuousIris', stopMethod: 'stopIris' }
+            ];
+
+            // PTZ 버튼 이벤트 설정
+            ptzButtons.forEach(({ btn, type, direction, startMethod, stopMethod }) => {
+                if (btn) {
+                    btn.addEventListener('mousedown', async () => {
+                        const canvasId = popupInfo.querySelector('canvas').id;
+                        const player = window.livePlayers[canvasId];
+                        if (player) {
+                            await EventManager[startMethod](canvasId, direction);
+                        }
+                    });
+
+                    btn.addEventListener('mouseup', async () => {
+                        const canvasId = popupInfo.querySelector('canvas').id;
+                        const player = window.livePlayers[canvasId];
+                        if (player) {
+                            await EventManager[stopMethod](canvasId);
+                        }
+                    });
+                }
+            });
+
+            // 리셋 버튼
+            const resetBtn = popupInfo.querySelector('#resetCamera');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', async () => {
+                    const canvasId = popupInfo.querySelector('canvas').id;
+                    const player = window.livePlayers[canvasId];
+                    if (player) {
+                        await EventManager.resetCamera(canvasId);
+                    }
+                });
+            }
+        };
+
+        initEventListeners();
+
+        setTimeout(() => {
+            handleModeSwitch('live');
+        }, 100);
+    }
 
     async function handlePlayButton(button) {
         console.log(button.getAttribute('data-btn-type'));
@@ -1607,7 +1289,7 @@ const Init = (function () {
     }
 
     document.addEventListener('change', function(e) {
-        if (e.target.matches('.cctv-bottom input[type="date"], .cctv-bottom input[type="time"]')) {
+        if (e.target.matches('.ptz-viewer__panel input[type="date"], .ptz-viewer__panel input[type="time"]')) {
             const cctvContainer = e.target.closest('.main-cctv-item, .cctv-item');
             if (!cctvContainer) return;
             const canvas = cctvContainer.querySelector('canvas');
@@ -1616,251 +1298,6 @@ const Init = (function () {
             resetPlaybackState(canvasId);
         }
     });
-
-    function processUPSData(apiData) {
-        const lineVoltageData = { input: {}, output: {} };  // 선간전압
-        const phaseVoltageData = { input: {}, output: {} }; // 상간전압
-        const currentData = { input: {}, output: {} };      // 전류
-        const batteryData = {}; // 축전지 및 기타 단일 데이터
-        const statusBtns = {};
-
-
-        apiData.forEach(item => {
-            const { tagName, currentValue } = item;
-            const type = tagName.includes('입력') ? 'input' : 'output';
-
-            if (tagName.includes('선간전압')) {
-                // 선간전압: L1_L2, L2_L3, L3_L1
-                const phase = tagName.split('_').slice(-2).join('_');
-                lineVoltageData[type][phase] = currentValue;
-            } else if (tagName.includes('상간전압')) {
-                // 상간전압: L1_N, L2_N, L3_N
-                const phase = tagName.split('_').slice(-2).join('_');
-                phaseVoltageData[type][phase] = currentValue;
-            } else if (tagName.includes('전류') && (tagName.includes('입력전류') || tagName.includes('출력전류'))) {
-                // 전류: L1, L2, L3
-                const phase = tagName.split('_').pop();
-                currentData[type][phase] = currentValue;
-            } else if (tagName.includes('축전지전압')) {
-                batteryData.voltage = currentValue;
-            } else if (tagName.includes('축전지전류')) {
-                batteryData.current = currentValue;
-            } else if (tagName.includes('출력주파수')) {
-                batteryData.frequency = currentValue;
-            } else if(tagName.includes('BYPASSMODE_OFF')) {
-                statusBtns.BYPASSMODE_OFF = currentValue;
-            } else if(tagName.includes('배터리방전')) {
-                statusBtns.배터리방전 = currentValue;
-            } else if(tagName.includes('정류부불량')) {
-                statusBtns.정류부불량 = currentValue;
-            } else if(tagName.includes('인버터이상')) {
-                statusBtns.인버터이상 = currentValue;
-            } else if(tagName.includes('온도이상')) {
-                statusBtns.온도이상 = currentValue;
-            }
-        });
-
-        return { lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns };
-    }
-
-    function generateUPSTables(lineVoltageData, phaseVoltageData, currentData, batteryData, statusBtns) {
-        // 표1: 선간전압
-        const lineVoltageTable = `
-            
-                <table style="width: 100%; margin-bottom: 1rem;">
-                    <thead>
-                        <tr>
-                            <th>PHASE</th>
-                            <th>입력선간전압</th>
-                            <th>출력선간전압</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${['L1_L2', 'L2_L3', 'L3_L1'].map(phase => `
-                            <tr>
-                                <td>V ${phase}</td>
-                                <td>${lineVoltageData.input[phase] || '-'}V</td>
-                                <td>${lineVoltageData.output[phase] || '-'}V</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-          
-        `;
-
-        // 표2: 상간전압
-        const phaseVoltageTable = `
-           
-                <table style="width: 100%; margin-bottom: 1rem;">
-                    <thead>
-                        <tr>
-                            <th>PHASE</th>
-                            <th>입력상간전압</th>
-                            <th>출력상간전압</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${['L1_N', 'L2_N', 'L3_N'].map(phase => `
-                            <tr>
-                                <td>V ${phase}</td>
-                                <td>${phaseVoltageData.input[phase] || '-'}V</td>
-                                <td>${phaseVoltageData.output[phase] || '-'}V</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-           
-        `;
-
-        // 표3: 전류
-        const currentTable = `
-           
-                <table style="width: 100%;margin-bottom: 1rem;">
-                    <thead>
-                        <tr>
-                            <th>PHASE</th>
-                            <th>입력전류</th>
-                            <th>출력전류</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${['L1', 'L2', 'L3'].map(phase => `
-                            <tr>
-                                <td>A ${phase}</td>
-                                <td>${currentData.input[phase] || '-'}A</td> 
-                                <td>${currentData.output[phase] || '-'}A</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            
-        `;
-
-        // 표4: 축전지 및 주파수
-        const batteryTable = `
-           
-                <table style="width: 100%; margin-bottom: 1rem;">
-                    <thead>
-                        <tr>
-                            <th>축전지전압</th>
-                            <th>축전지전류</th>
-                            <th>출력주파수</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>${batteryData.voltage || '-'}V</td>
-                            <td>${batteryData.current || '-'}A</td>
-                            <td>${batteryData.frequency || '-'}Hz</td>
-                        </tr>
-                    </tbody>
-                </table>
-          
-        `;
-
-        // UPS 상태 버튼들
-        const statusButtons = `
-            <div class="alert-buttons" style="margin-top: 12px; display: flex; flex-direction: column; align-items: center;">
-                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                    ${statusBtns.BYPASSMODE_OFF !== undefined ? `
-                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.BYPASSMODE_OFF === '1' ? 'background-color: red; color: white;' : ''}">
-                            인버터
-                        </button>
-                    ` : ''}
-                    ${statusBtns.배터리방전 !== undefined ? `
-                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.배터리방전 === '1' ? 'background-color: red; color: white;' : ''}">
-                            배터리방전
-                        </button>
-                    ` : ''}
-                    ${statusBtns.정류부불량 !== undefined ? `
-                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.정류부불량 === '1' ? 'background-color: red; color: white;' : ''}">
-                            정류부불량
-                        </button>
-                    ` : ''}
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    ${statusBtns.인버터이상 !== undefined ? `
-                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.인버터이상 === '1' ? 'background-color: red; color: white;' : ''}">
-                            인버터이상
-                        </button>
-                    ` : ''}
-                    ${statusBtns.온도이상 !== undefined ? `
-                        <button type="button" class="button button--solid-middle" style="width: 5rem; height: 1.8rem; ${statusBtns.온도이상 === '1' ? 'background-color: red; color: white;' : ''}">
-                            온도이상
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-
-        return lineVoltageTable + phaseVoltageTable + currentTable + batteryTable + statusButtons;
-    }
-
-    function generateBIPVTable(data) {
-        const tbody = data.map(tag => {
-            const tagName = tag.tagName.substring(tag.tagName.lastIndexOf('-') + 1);
-            let label = '';
-
-            switch (tagName) {
-                case 'KW':
-                    label = '현재 발전량';
-                    break;
-                case 'Today_GEN':
-                    label = '금일 발전량';
-                    break;
-                case 'Total_GEN':
-                    label = '누적 발전량';
-                    break;
-                case '현재발전량':
-                    label = '종합 현재발전량';
-                    break;
-                case '금일발전량':
-                    label = '종합 금일발전량';
-                    break;
-                case '급일발전량':
-                    label = '종합 급일발전량';
-                    break;
-                case '누적발전량':
-                    label = '종합 누적발전량';
-                    break;
-                default:
-                    label = tagName;
-                    break;
-            }
-
-            return `
-                <tr>
-                    <td>${label}</td>
-                    <td>${tag.currentValue || '-'}</td>
-                </tr>
-            `;
-        }).join('');
-
-        return `<table style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>수집정보</th>
-                            <th>측정값</th>
-                        </tr>
-                    </thead>
-                <tbody>
-                    ${tbody}
-                </tbody>
-        </table>`;
-    }
-
-    // poi 상태
-    const getStatusText = (code) => {
-        const STATUS = {
-            0: 'Normal',
-            1: 'Failed',
-            2: 'OutOfService',
-            4: 'SystemAlarm',
-            128: 'Unload'
-        };
-        return STATUS[code];
-    }
-
 
     function throttle(callback, interval) {
         let lastCall = 0;

@@ -210,6 +210,7 @@ public class KioskPoi {
                 .isKiosk(this.isKiosk)
                 .buildingId(this.building.getId())
                 .floorNo(this.floorNo)
+                .category((this.category != null) ? category.getValue() : "kiosk")
                 .scale(this.scale)
                 .rotation(this.rotation)
                 .position(this.position)

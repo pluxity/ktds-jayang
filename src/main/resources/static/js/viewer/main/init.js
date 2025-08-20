@@ -247,47 +247,39 @@ const Init = (function () {
         setCategoryId(equipmentGroup, categoryList);
     };
 
-    // init floor
-    const initFloors = (buildingId) => {
-        const { floors } = BuildingManager.findById(buildingId);
-        // floor setting
-        const floorUl = document.querySelector('#floor-info .floor-info__detail ul')
-        floors.forEach(floor => {
-            const floorLi = document.createElement('li');
-            floorLi.setAttribute('floor-id', floor.id);
-            floorLi.textContent = floor.name
-            floorUl.appendChild(floorLi);
+    const initBuildingList = () => {
+        const buildingList = BuildingManager.findAll();
+        const buildingUi = document.querySelector('#floor-info .floor-info__detail ul');
+
+        buildingList.forEach(building => {
+            const buildingLi = document.createElement('li');
+            buildingLi.setAttribute('building-id', building.id);
+            buildingLi.textContent = building.name
+            buildingUi.appendChild(buildingLi);
         })
-        clickFloor();
+        clickBuilding();
     }
-    const clickFloor = () => {
-        const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
+
+    const clickBuilding = () => {
+        const buildingBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
         // btnClick
-        floorBtns.forEach(floorBtn => {
-            floorBtn.style.cursor = 'pointer';
-            floorBtn.addEventListener('click', event => {
-                Px.Model.Visible.HideAll();
-                Px.Poi.HideAll();
-                let floorId = floorBtn.getAttribute('floor-id')
-                Px.Model.Visible.Show(Number(floorId));
-                const poiList = PoiManager.findAll();
-                const filteredPois = poiList.filter(poi => poi.floorNo === Number(floorId));
-                filteredPois.forEach(poi => {
-                    Px.Poi.Show(Number(poi.id));
-                });
-                Px.Camera.ExtendView();
-                // PoiManager.getPoisByFloorId(floorId).then(pois => {
-                //     pois.forEach(poi => {
-                //         Px.Poi.Show(Number(poi.id));
-                //     })
-                // })
-            })
-        })
-        // allFloor
-        const allFloor = document.querySelector('.floor-info__ctrl');
-        allFloor.addEventListener('click', event => {
-            Px.Model.Visible.ShowAll();
-            Px.Camera.ExtendView();
+        buildingBtns.forEach(buildingBtn => {
+            buildingBtn.style.cursor = 'pointer';
+            buildingBtn.addEventListener('click', event => {
+
+                    const buildingList = BuildingManager.findAll();
+                    const display = buildingBtn.textContent;
+                    const matched = buildingList.find(b =>
+                        typeof b.name === 'string' && (display.includes(b.name) || b.name.includes(display))
+                    );
+                    console.log("matched : ", matched)
+                    if (!matched) {
+                        return;
+                    }
+
+                    window.location.href = `/map?buildingId=${matched.id}`;
+
+            });
         })
     }
 
@@ -317,7 +309,8 @@ const Init = (function () {
             await BuildingManager.getFloorsByHistoryVersion(version);
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
             let buildingId = outdoorBuilding ? outdoorBuilding.id : null;
-            initFloors(buildingId);
+            //initFloors(buildingId);
+            initBuildingList();
             document.getElementById("buildingName").setAttribute("building-id", buildingId);
             document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
 
@@ -328,28 +321,22 @@ const Init = (function () {
                     const { buildingFile, floors } = outdoorBuilding;
                     const version = outdoorBuilding.getVersion();
                     const { directory } = buildingFile;
-                    // sbmDataArray = floors.map((floor) => {
-                    //     const url = `/Building/${directory}/${version}/${floor.sbmFloor[0].sbmFileName}`;
-                    //     const sbmData = {
-                    //         url,
-                    //         id: floor.sbmFloor[0].id,
-                    //         displayName: floor.sbmFloor[0].sbmFileName,
-                    //         baseFloor: floor.sbmFloor[0].sbmFloorBase,
-                    //         groupId: floor.sbmFloor[0].sbmFloorGroup,
-                    //     };
-                    //     return sbmData;
-                    // });
                     sbmDataArray = floors.flatMap(floor =>
-                        floor.sbmFloor.map(sbm => ({
-                            url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
-                            id: floor.id,
-                            displayName: sbm.sbmFileName,
-                            baseFloor: sbm.sbmFloorBase,
-                            groupId: sbm.sbmFloorGroup,
-                            property: 'sbm'
-                        }))
+                        floor.sbmFloor.map(sbm => {
+                            const parts = sbm.sbmFileName.split('_');
+                            const alias = parts.length >= 2 ? parts[parts.length - 2] : '';
+                            return {
+                                url: `/Building/${directory}/${version}/${sbm.sbmFileName}`,
+                                id: floor.id,
+                                displayName: alias,
+                                baseFloor: sbm.sbmFloorBase,
+                                groupId: sbm.sbmFloorGroup,
+                                isSelectable: alias !== '기타시설',
+                                property: sbm.sbmFloorBase
+                            };
+                        })
                     );
-
+                    console.log("sbmDataArray : ", sbmDataArray);
                 } else {
                     sbmDataArray.push({
                         url: "/static/assets/modeling/outside/KTDS_Out_All_250109/KTDS_Out_All_250109_1F_0.sbm",
@@ -357,6 +344,7 @@ const Init = (function () {
                         displayName: "외부 전경",
                         baseFloor: 1,
                         groupId: 0,
+                        property: 'sbm'
                     });
                 }
 
@@ -383,32 +371,51 @@ const Init = (function () {
                                 z: -541.8192260742188
                             }
                         });
+
                         Px.Model.Visible.ShowAll();
+                        Px.Camera.EnableScreenPanning()
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
-                        Px.Event.On();
                         Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
                             moveToPoi(poiInfo.id)
                         });
-                        Px.Effect.Outline.HoverEventOn('area_no');
-                        Px.Effect.Outline.AddHoverEventCallback(
-                            throttle(async (event) => {
 
-                                if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
-                                    const firstFloorId = outdoorBuilding.floors[0].id;
-                                    Px.Effect.Outline.Add(firstFloorId);
-                                }
-                            }, 10)
-                        );
+                        // Px.Effect.Outline.HoverEventOn('area_no');
 
+                        // Px.Event.AddEventListener('pointerup', 'sbm', (data)=>{
+                        //     Px.Effect.Outline.Add(data.floorId);
+                        // });
+                        // Px.Effect.Outline.AddHoverEventCallback(
+                        //     throttle(async (event) => {
+                        //         if (outdoorBuilding.floors && outdoorBuilding.floors.length > 0) {
+                        //             const firstFloorId = outdoorBuilding.floors[0].id;
+                        //             Px.Effect.Outline.Add(firstFloorId);
+                        //         }
+                        //     }, 10)
+                        // );
+
+                        Px.Event.On();
+                        setTimeout(() => {
+                            Px.Event.On();
+                        }, 1000)
                         // Px.Effect.Outline.Add(sbmDataArray[0].baseFloor)
-                        Px.Event.AddEventListener('pointerup', 'sbm', (event) => {
-                            // Px.Effect.Outline 참고
-                            // Px.Effect.Outline.HoverEventOn('area_no');
-                            if (firstIndoorBuilding) {
-                                window.location.href = `/map?buildingId=${firstIndoorBuilding.id}`;
+                        Px.Event.AddEventListener('dblclick', 'sbm', (data) => {
+                            const buildingList = BuildingManager.findAll();
+
+                            console.log('마우 버튼 눌림', data);
+                            if (!data.displayName) return;
+
+                            const display = data.displayName;
+                            const matched = buildingList.find(b =>
+                                typeof b.name === 'string' && (display.includes(b.name) || b.name.includes(display))
+                            );
+                            console.log("matched : ", matched)
+                            if (!matched) {
+                                return;
                             }
+
+                            window.location.href = `/map?buildingId=${matched.id}`;
                         });
 
                         contents.style.position = 'static';

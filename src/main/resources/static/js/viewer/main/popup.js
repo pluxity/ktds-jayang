@@ -20,7 +20,6 @@ const layerPopup = (function () {
         fireContent.style.display = '';
         tmsContent.style.display = 'none';
 
-
         const displayElements = ['.event-name', '.state-name'];
         displayElements.forEach((element) => { document.querySelector(element).closest('tr').style.display = ''; });
         document.querySelector('.popup-table.event').style.height = ``;
@@ -727,9 +726,17 @@ const layerPopup = (function () {
         const buildingSet = new Set();
         const floorSet = new Set();
 
+        const lightGroupCount = new Set(
+            pois
+                .filter(poi => poi.poiMiddleCategoryDetail?.name === '전등')
+                .map(poi => poi.property.lightGroup)
+        ).size;
+
         const categoryCounts = pois.reduce((acc, poi) => {
             const category = poi.poiMiddleCategoryDetail?.name || '기타';
-            acc[category] = (acc[category] || 0) + 1;
+            if (category !== '전등') {
+                acc[category] = (acc[category] || 0) + 1;
+            }
             return acc;
         }, {});
 
@@ -744,10 +751,20 @@ const layerPopup = (function () {
             }
         });
 
+        const seenLightGroups = new Set();
         // accordion data set
         pois.forEach(poi => {
             const category = poi.poiMiddleCategoryDetail?.name || '기타';
-            createAccordion(poi, categoryCounts[category]);
+            if (category === '전등') {
+                const groupKey = poi.property.lightGroup;
+                if (!seenLightGroups.has(groupKey)) {
+                    seenLightGroups.add(groupKey);
+
+                    createAccordion(poi, lightGroupCount);
+                }
+            } else {
+                createAccordion(poi, categoryCounts[category]);
+            }
         })
 
         // select
@@ -797,7 +814,12 @@ const layerPopup = (function () {
         // popup.style.zIndex = '50';
         // total count
         // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
-        document.getElementById("totalEqCount").textContent = pois.length.toLocaleString();
+        if (newTitle == '조명') {
+            document.getElementById("totalEqCount").textContent =
+                new Set(pois.map(poi => poi.property.lightGroup)).size.toLocaleString();
+        } else {
+            document.getElementById("totalEqCount").textContent = pois.length.toLocaleString();
+        }
     }
 
     function createAccordion2(poi, categoryCount) {
@@ -839,7 +861,6 @@ const layerPopup = (function () {
             ['건물', '층', '장비명'].forEach(text => {
                 const th = document.createElement('th');
                 th.setAttribute('scope', 'col');
-                th.textContent = text;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
@@ -893,13 +914,7 @@ const layerPopup = (function () {
             accordionBtn.textContent = `${categoryName} (${categoryCount})`;
 
             accordionBtn.addEventListener('click', () => {
-                // const allBtns = accordionElement.querySelectorAll('.accordion__btn');
-                // if (accordionBtn.classList.contains('accordion__btn--active')) {
-                //     accordionBtn.classList.remove('accordion__btn--active');
-                // } else {
-                //     allBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
-                //     accordionBtn.classList.add('accordion__btn--active');
-                // }
+
                 if (accordionBtn.classList.contains('accordion__btn--active')) {
                     accordionBtn.classList.remove('accordion__btn--active');
                 } else {
@@ -954,8 +969,13 @@ const layerPopup = (function () {
         const tdEquipment = document.createElement('td');
         tdEquipment.classList.add('align-left');
         tdEquipment.setAttribute('data-poi-id', poi.id);
-        tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
-        // tdEquipment.innerHTML = `${poi.name} <em class="text-accent">${poi.code}</em>`;
+
+        if (poi.property.poiCategoryName == '조명') {
+            tdEquipment.innerHTML = `${poi.property.lightGroup}`;
+        } else {
+            tdEquipment.innerHTML = `${poi.name}`;
+        }
+        // tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
         tr.appendChild(tdBuilding);
         tr.appendChild(tdFloor);
         tr.appendChild(tdEquipment);
@@ -963,7 +983,6 @@ const layerPopup = (function () {
         tdEquipment.addEventListener('click', function() {
             // popup close추가
 
-            console.log("poi : ", poi);
             if (!poi.position) {
                 alertSwal('POI를 배치해주세요');
                 return;
@@ -1409,7 +1428,6 @@ const layerPopup = (function () {
             onFloorChange: (building, floor) => {
 
                 const floorPois = PoiManager.findByFloor(floor.id);
-                console.log("floorPoi :", floorPois);
                 const win = lightIframe.contentWindow;
                 win.Px.Model.Visible.HideAll();
                 win.Px.Model.Visible.Show(Number(floor.id));
@@ -1497,7 +1515,6 @@ const layerPopup = (function () {
         const validEntries = entries.filter(([idStr]) =>
             PoiManager.findById(Number(idStr))
         );
-        console.log("validEntries : ", validEntries);
         const slice = validEntries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
         const pageData = Object.fromEntries(slice);
 
@@ -1692,15 +1709,12 @@ const layerPopup = (function () {
                 }
             }
 
-            console.log("filterStatus : ", filterStatus);
-            console.log("stateText : ", stateText);
             if (filterStatus !== '상태 전체' && stateText !== filterStatus) {
                 return;
             }
 
             // DOM 렌더링
             const elevatorLi = document.createElement('li');
-            console.log("poiInfo : ", poiInfo);
             const buildingLabel = `[${poiInfo.property.buildingName}]`;
 
             const formattedStateText = stateText.match(/.{1,4}/g).join('<br>');
@@ -1759,7 +1773,6 @@ const layerPopup = (function () {
         renderPagedPage('elevator');
     };
     const filterEscalator = (direction, state) => {
-        console.log('[DEBUG] filterEscalator called', { direction, state });
         escalatorFilterDirection = direction;
         escalatorFilterState = state;
         renderPagedPage('escalator');
@@ -1831,7 +1844,6 @@ const layerPopup = (function () {
 
         Object.entries(dataById).forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
-            console.log("poiInfo : ", poiInfo);
             if (!poiInfo) return;
             const tagMap = dto.TAGs.reduce((map, t) => {
                 const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
@@ -1913,80 +1925,738 @@ const layerPopup = (function () {
 
     const elevatorPopup = document.getElementById('elevatorPop');
 
-    const setElevatorTab_old = () => {
-        const popupUl = elevatorPopup.querySelector('.section--contents ul')
-        // popupUl.innerHTML = '';
-        popupUl.replaceChildren()
+    // 주차 popup start
+    let parkingResult = [];
+    let parkCurrentPage = 1;
+    const PARK_PAGE_SIZE = 15;
 
-        // 전체 탭
-        const allTabLi = document.createElement('li');
-        allTabLi.setAttribute('role', 'tab');
-        allTabLi.setAttribute('aria-controls', 'tabpanelAll');
-        allTabLi.setAttribute('id', 'elevTabAll');
-        allTabLi.setAttribute('aria-selected', 'false');
-        allTabLi.setAttribute('tabindex', '0');
-        allTabLi.classList.add("active");
+    function renderParkingTable() {
+        const tbody = document.querySelector('#parkingContentList tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
-        const allTabA = document.createElement('a');
-        allTabA.setAttribute('href', 'javascript:void(0);');
-        allTabA.textContent = '전체';
+        const start = (parkCurrentPage - 1) * PARK_PAGE_SIZE;
+        const slice = parkingResult.slice(start, start + PARK_PAGE_SIZE);
 
-        allTabLi.appendChild(allTabA);
-        // all tab은 default로 맨앞에
-        popupUl.prepend(allTabLi);
+        const formatDateTime = (dt) => {
+            if (!dt) return '';
+            return new Date(dt).toLocaleString('ko-KR', { hour12: false });
+        };
 
-        const handleTabClick = (event) => {
-            const clickedTab = event.currentTarget;
-            const parentUl = clickedTab.closest('ul');
-            if (parentUl) {
-                parentUl.querySelectorAll('li').forEach(tab => {
-                    tab.classList.remove("active");
-                });
-                clickedTab.classList.add("active");
+        slice.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${start + idx + 1}</td>
+              <td>${item.deviceId || ''}</td>
+              <td>${item.deviceName || ''}</td>
+              <td>${item.inoutType === 0 ? '입구' : '출구'}</td>
+              <td>${item.gateDatetime}</td>
+              <td>${item.carNo || ''}</td>
+              <td>${item.inoutCarId || ''}</td>
+              <td>${item.parkingFee ?? 0}</td>
+              <td>${item.regularType === 'R' ? '정기권' : '일반권'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderParkingPaging() {
+        const pagingWrap = document.querySelector('#parkingPaging');
+        if (!pagingWrap) return;
+
+        const numEl = pagingWrap.querySelector('.number');
+        const leftBtn = pagingWrap.querySelector('button.left');
+        const rightBtn= pagingWrap.querySelector('button.right');
+        if (!numEl) return;
+
+        const totalPages = Math.ceil(parkingResult.length / PARK_PAGE_SIZE);
+        numEl.innerHTML = '';
+
+        if (totalPages <= 1) {
+            leftBtn  && (leftBtn.disabled  = true);
+            rightBtn && (rightBtn.disabled = true);
+            return;
+        }
+
+        const maxWindow = 5;
+        let start = Math.max(1, parkCurrentPage - Math.floor(maxWindow / 2));
+        let end   = Math.min(totalPages, start + maxWindow - 1);
+        if (end - start + 1 < maxWindow) {
+            start = Math.max(1, end - (maxWindow - 1));
+        }
+
+        const createPage = (page, text = page) => {
+            const span = document.createElement('span');
+            span.textContent = text;
+            if (page === parkCurrentPage) span.classList.add('active');
+            numEl.appendChild(span);
+        };
+
+        if (start > 1) {
+            createPage(1);
+            if (start > 2) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.classList.add('dots');
+                numEl.appendChild(dots);
             }
         }
 
-        allTabLi.addEventListener('click', (event) => {
-            handleTabClick(event);
-            const poiList = PoiManager.findAll();
-            PoiManager.getFilteredPoiList().then(poiList => {
-                // cctv중에 중분류가 엘리베이터인거(?)
-                const filteredPoiList = poiList.filter(poi =>
-                    poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
-                    poi.property.poiMiddleCategoryName.toLowerCase() === '승강기');
-                addElevators(filteredPoiList);
-            })
+        for (let p = start; p <= end; p++) {
+            createPage(p);
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.classList.add('dots');
+                numEl.appendChild(dots);
+            }
+            createPage(totalPages);
+        }
+
+        leftBtn  && (leftBtn.disabled  = parkCurrentPage === 1);
+        rightBtn && (rightBtn.disabled = parkCurrentPage === totalPages);
+    }
+
+    let pagingBound = false;
+    function bindPagingEvents() {
+        if (pagingBound) return;
+        pagingBound = true;
+
+        const pagingWrap = document.querySelector('#parkingPaging');
+        if (!pagingWrap) return;
+
+        pagingWrap.addEventListener('click', (e) => {
+            const left = e.target.closest('button.left');
+            const right = e.target.closest('button.right');
+            const num = e.target.closest('.number > span');
+
+            const totalPages = Math.ceil(parkingResult.length / PARK_PAGE_SIZE);
+
+            if (left && parkCurrentPage > 1) {
+                parkCurrentPage--;
+            } else if (right && parkCurrentPage < totalPages) {
+                parkCurrentPage++;
+            } else if (num) {
+                const p = Number(num.textContent);
+                if (!isNaN(p)) parkCurrentPage = p;
+            } else {
+                return;
+            }
+
+            renderParkingTable();
+            renderParkingPaging();
+        });
+    }
+
+    const uniq = arr => [...new Set(arr.filter(v => v != null && v !== ''))];
+
+    function populateUl(ul, list) {
+
+        if (!ul) return;
+        ul.innerHTML = '';
+        // "전체"
+        const isInParkSearchSelect = ul.closest('#parkSearchSelect') !== null;
+        if (!isInParkSearchSelect) {
+            const liAll = document.createElement('li');
+            liAll.textContent = '전체';
+            liAll.dataset.value = '';
+            ul.appendChild(liAll);
+        }
+
+        list.forEach(v => {
+            const li = document.createElement('li');
+            li.textContent = v.label;
+            li.dataset.value = v.value;
+            ul.appendChild(li);
+        });
+    }
+
+    function fillSelectOptions(data) {
+        const deviceIdUl = document.querySelector('#deviceIdSelect .select-box__content ul');
+        const inoutTypeUl = document.querySelector('#inoutTypeSelect .select-box__content ul');
+        const inoutCarIdUl = document.querySelector('#inoutCarIdSelect .select-box__content ul');
+        const regularTypeUl= document.querySelector('#regularTypeSelect .select-box__content ul');
+        const searchSelectUl = document.querySelector('#parkSearchSelect .select-box__content ul');
+
+        const carIds = uniq(data.map(v => v.inoutCarId));
+
+        populateUl(deviceIdUl, [
+            { label: 'IN01', value: '1' },
+            { label: 'IN02', value: '2' },
+            { label: 'IN04', value: '3' },
+            { label: 'IN05', value: '4' },
+            { label: 'IN06', value: '5' },
+            { label: 'IN07', value: '6' },
+            { label: 'OT01', value: '7' },
+            { label: 'OT02', value: '8' },
+            { label: 'OT03', value: '9' },
+            { label: 'OT05', value: '10' },
+            { label: 'OT06', value: '11' },
+            { label: 'OT07', value: '12' },
+            { label: 'OT08', value: '13' }
+        ]);
+        populateUl(inoutTypeUl, [
+            { label: '입구', value: '0' },
+            { label: '출구', value: '1' }
+        ]);
+        populateUl(inoutCarIdUl, carIds.map(v => ({ label: v, value: v })));
+        populateUl(regularTypeUl, [
+            { label: '정기권', value: 'R' },
+            { label: '일반권', value: 'T' }
+        ]);
+        populateUl(searchSelectUl, [
+            { label: '차량번호', value: 'carNo' },
+            { label: '입차장비명', value: 'deviceNm' }
+        ]);
+        // populateUl(carNoUl, carNos.map(v => ({ label: v, value: v })));
+    }
+
+    let optionsFilled = false;
+    const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    function resetParkingFilterUI() {
+
+        const startInput = document.getElementById('parkStartDate');
+        const endInput   = document.getElementById('parkEndDate');
+
+        // if(startInput) startInput.value = '';
+        // if(endInput) endInput.value = '';
+        if (startInput && !startInput.value) {
+            const now = new Date();
+            const first = new Date(now.getFullYear(), now.getMonth(), 1);
+            startInput.value = ymd(first);
+        }
+        if (endInput && !endInput.value) {
+            endInput.value = ymd(new Date());
+        }
+
+        ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#parkSearchSelect']
+            .forEach(id => {
+                const btn = document.querySelector(`${id} .select-box__btn`);
+                if (btn) {
+                    if (id === '#parkSearchSelect') {
+                        btn.textContent = '차량번호';
+                        btn.dataset.value = 'carNo';
+                    } else {
+                        btn.textContent = '전체';
+                        btn.dataset.value = '';
+                    }
+                }
+            });
+
+        const parkSearchInput = document.getElementById('parkSearchInput');
+        if (parkSearchInput) parkSearchInput.value = '';
+    }
+
+
+    const getParkingTags = () => {
+        return api.get('/api/tags/parking').then(res => res.data?.TAGs ?? []);
+    }
+    const getParkingSearch = (params = {}) => {
+        return api.get('/parking/search', { params }).then(res => Array.isArray(res.data) ? res.data : []);
+    }
+
+    function renderTagSummaryAndList(parkingTagValue) {
+        const grouped = parkingTagValue.reduce((acc, { tagName, ...rest }) => {
+            const parts = tagName.split('-');
+            const key = parts[1];
+            if (!acc[key]) acc[key] = [];
+            acc[key].push({ tagName, ...rest });
+            return acc;
+        }, {});
+
+        const listEl = document.querySelector('#parkingInfo .parking-area__list');
+        listEl.innerHTML = '';
+        let summaryEl = null;
+
+        Object.entries(grouped).forEach(([key, items]) => {
+            const totalObj = items.find(i => i.tagName.endsWith('Total'));
+            const parkingObj = items.find(i => i.tagName.endsWith('Parking'));
+            const total = totalObj   ? Number(totalObj.currentValue)   : 0;
+            const parking = parkingObj ? Number(parkingObj.currentValue) : 0;
+            const label = key === 'null' ? 'Total' : `${key}`;
+
+            const div = document.createElement('div');
+            if (label === 'Total') {
+                div.className = 'parking-area__summary';
+                div.innerHTML = `
+                    <div class="title"><strong>${parking}</strong>/${total}</div>
+                    <button id="parkSummaryRefresh" type="button" class="refresh"><span class="hide">새로고침</span></button>
+                  `;
+                summaryEl = div;
+            } else {
+                div.className = 'item';
+                div.innerHTML = `
+                    <span class="item__level">${label}</span>
+                    <div class="item__count"><strong>${parking}</strong>/${total}</div>
+                    <button id="parkSummaryDetail_${label}" type="button" class="item__link" data-label="${label}"><span class="hide">자세히보기</span></button>
+                  `;
+                listEl.appendChild(div);
+            }
         });
 
-        // 건물 탭
-        BuildingManager.getBuildingList().then(buildings => {
-            buildings.forEach(building => {
-                const popupLi = document.createElement('li')
-                popupLi.setAttribute('role', 'tab');
-                popupLi.setAttribute('aria-controls', `tabpanel${building.id}`);
-                popupLi.setAttribute('id', `elevTab${building.id}`);
-                popupLi.setAttribute('building-id', `${building.id}`);
-                popupLi.setAttribute('aria-selected', 'false');
-                popupLi.setAttribute('tabindex', '0');
-                const popupAtag = document.createElement('a')
-                popupAtag.setAttribute('href', 'javascript:void(0);');
-                popupAtag.textContent = building.name;
-                popupLi.appendChild(popupAtag);
-                popupUl.appendChild(popupLi);
-                popupLi.addEventListener('click', (event) => {
-                    handleTabClick(event);
-                    const allPois = PoiManager.findAll();
-                    const filteredPoiList = allPois.filter(poi =>
-                        poi.buildingId === Number(building.id) &&
-                        poi.property.poiCategoryName.toLowerCase() === 'cctv' &&
-                        poi.property.poiMiddleCategoryName.toLowerCase() === '승강기'
-                    );
-                    console.log("filteredPoiList : ", filteredPoiList);
-                    addElevators(filteredPoiList);
-                });
-            })
+        if (summaryEl) {
+            listEl.prepend(summaryEl);
+        }
+        bindParkSummaryRefresh();
+        bindParkSummaryDetail();
+    }
+
+    function renderResultHeader(result) {
+        const totalCnt = result.length.toLocaleString();
+        const titleEl = document.getElementById('parkingTotalCnt');
+        if (!titleEl) return;
+
+        const btn = titleEl.querySelector('button');
+        titleEl.innerHTML = `총 ${totalCnt}`;
+        if (btn) titleEl.appendChild(btn);
+    }
+
+    function renderResultTableAndPaging(result) {
+        parkingResult = result;
+        parkCurrentPage = 1;
+
+        const tbody = document.querySelector('#parkingContentList tbody');
+        if (tbody) tbody.innerHTML = '';
+
+        bindPagingEvents();
+        renderParkingPaging();
+        renderParkingTable();
+    }
+
+    const setParking = (searchParams = {}) => {
+        // if (!searchParams || Object.keys(searchParams).length === 0) {
+        //     const p = buildParams();
+        //     if (p) searchParams = p;
+        // }
+        const startInput = document.getElementById('parkStartDate');
+        const endInput = document.getElementById('parkEndDate');
+        const now = new Date();
+        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startDate = ymd(first)
+        const endDate = ymd(now)
+        // if (startInput && !startInput.value) startInput.value = startDate;
+        // if (endInput && !endInput.value) endInput.value = endDate;
+        const startTime = `${startDate} 00:00:00.000`;
+        const endTime = `${endDate} 23:59:59.999`;
+        const params = { ...searchParams, startTime, endTime };
+
+        Promise.all([
+            getParkingTags(),
+            getParkingSearch(params)
+        ]).then(([parkingTagValue, result]) => {
+
+            renderTagSummaryAndList(parkingTagValue);
+
+            if (!optionsFilled) {
+                fillSelectOptions(result);
+                optionsFilled = true;
+            }
+
+            renderResultHeader(result);
+            renderResultTableAndPaging(result);
+
+        }).catch(err => {
+            console.error('setParking error:', err);
         });
-        allTabLi.click();
+    }
+
+    function buildParams() {
+        const param = {};
+        const start = document.getElementById('parkStartDate')?.value || '';
+        const end   = document.getElementById('parkEndDate')?.value || '';
+
+        // if (!start || !end) {
+        //     const now = new Date();
+        //     if (!start) {
+        //         const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        //         start = `${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(first.getDate()).padStart(2,'0')}`;
+        //     }
+        //     if (!end) {
+        //         end = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        //     }
+        // }
+
+        if (start && end && new Date(start) > new Date(end)) {
+            alertSwal('종료일이 시작일보다 빠릅니다.')
+            return null;
+        }
+
+        if (start) {
+            param.startTime = `${start} 00:00:00.000`;
+        }
+        if (end){
+            param.endTime = `${end} 23:59:59.999`;
+        }
+
+        const getVal = sel => document.querySelector(`${sel} .select-box__btn`)?.dataset.value ?? '';
+
+        const deviceId = getVal('#deviceIdSelect');
+        const inoutType = getVal('#inoutTypeSelect');
+        const exitId = getVal('#inoutCarIdSelect');
+        const regularType = getVal('#regularTypeSelect');
+        const searchType = getVal('#parkSearchSelect');
+
+        const parkSearchInput  = document.getElementById('parkSearchInput')?.value.trim() ?? '';
+
+        const setIf = (k, v) => { if (v !== '' && v != null) param[k] = v; };
+
+        setIf('deviceId', deviceId);
+        setIf('inoutType', inoutType);
+        setIf('exitId', exitId);
+        setIf('regularType', regularType);
+        setIf('searchType', searchType);
+        setIf('parkSearchInput', parkSearchInput);
+
+        return param;
+    }
+
+    const parkSearchBtn = document.getElementById('parkSearchBtn');
+    if (parkSearchBtn) {
+        parkSearchBtn.addEventListener('click', async () => {
+            const params = buildParams();
+            try {
+                const result = await getParkingSearch(params);
+                renderResultHeader(result);
+                renderResultTableAndPaging(result);
+            } catch (e) {
+                console.error('parkSearchBtn click error:', e);
+            }
+        });
+    }
+
+    ['#deviceIdSelect','#inoutTypeSelect','#inoutCarIdSelect','#regularTypeSelect','#parkSearchSelect']
+        .forEach(id => {
+            const box = document.querySelector(id);
+            if (box && !box.dataset.bound) {
+                initSelectBox(box);
+                box.dataset.bound = '1';
+            }
+        });
+
+    const parkRefreshBtn = document.getElementById('parkRefresh');
+    if (parkRefreshBtn) {
+        parkRefreshBtn.addEventListener('click', async (event) => {
+            try {
+                resetParkingFilterUI();
+                const params = buildParams() || {};
+                const result = await getParkingSearch(params);
+                renderResultHeader(result);
+                renderResultTableAndPaging(result);
+            } catch (err) {
+                console.error('parkRefresh error:', err);
+            }
+        })
+    }
+
+    // const parkSummaryRefreshBtn = document.getElementById('parkSummaryRefresh');
+    // if (parkSummaryRefreshBtn) {
+    //     parkSummaryRefreshBtn.addEventListener('click', async (e) => {
+    //         try {
+    //             const parkingTagValue = await getParkingTags();
+    //             renderTagSummaryAndList(parkingTagValue);
+    //         } catch (err) {
+    //             console.error('tags refresh error:', err);
+    //         }
+    //     })
+    // }
+
+    function bindParkSummaryRefresh() {
+        const btn = document.getElementById('parkSummaryRefresh');
+        if (!btn) return;
+        btn.onclick = null;
+        btn.addEventListener('click', async () => {
+            try {
+                const parkingTagValue = await getParkingTags();
+                renderTagSummaryAndList(parkingTagValue);
+            } catch (err) {
+                console.error('tags refresh error:', err);
+            }
+        });
+    }
+
+    function bindParkSummaryDetail() {
+
+        const buildingList = BuildingManager.findAll();
+        const parkingMap = (buildingList || []).find(building => building?.name?.includes('주차장'));
+        const currentId = new URLSearchParams(location.search).get('buildingId');
+        document.querySelectorAll('.item__link').forEach(item => {
+            item.addEventListener('click', () => {
+                document.getElementById('systemPopup').style.display = 'none';
+                document.getElementById('parkingPop').style.display = 'none';
+                document.getElementById('parkingTab').classList.remove = 'active'
+
+                const label = item.dataset.label;
+                if (String(currentId) !== String(parkingMap.id)) {
+                    sessionStorage.setItem('parkingFloor', label);
+                    window.location.href = `/map?buildingId=${parkingMap.id}`;
+                }
+                const floor = (parkingMap?.floors || []).find(f => f?.name === label);
+                Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(floor.id);
+            })
+        })
+    }
+
+    function initSelectBox(box) {
+        const btn = box.querySelector('.select-box__btn');
+        const content = box.querySelector('.select-box__content');
+        if (!btn || !content) return;
+
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('select-box__btn--active');
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+
+        content.addEventListener('click', e => {
+            const li = e.target.closest('li');
+            if (!li) return;
+
+            btn.textContent   = li.textContent;
+            btn.dataset.value = li.dataset.value ?? '';
+            btn.classList.remove('select-box__btn--active');
+            content.style.display = 'none';
+        });
+    }
+
+    function downloadParkingExcel() {
+        if (!Array.isArray(parkingResult) || parkingResult.length === 0) return;
+
+        const header = [
+            'No', '입차장비 ID', '입차 장비명', '입출구',
+            '입출차 시각', '차량 번호', '출차 ID', '주차 요금', '구분'
+        ];
+
+        const rows = parkingResult.map((item, idx) => ([
+            idx + 1,
+            item.deviceId || '',
+            item.deviceName || '',
+            (item.inoutType === 0 || item.inoutType === '0') ? '입구' : '출구',
+            item.gateDatetime || '',
+            item.carNo || '',
+            item.inoutCarId || '',
+            item.parkingFee ?? 0,
+            item.regularType === 'R' ? '정기권' : '일반권'
+        ]));
+
+        const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'parking');
+
+        const startVal = document.getElementById('parkStartDate')?.value || 'all';
+        const endVal   = document.getElementById('parkEndDate')?.value   || 'all';
+        const rangeStr = (startVal === 'all' && endVal === 'all') ? 'all' : `${startVal}_${endVal}`;
+
+        XLSX.writeFile(wb, `parking_${rangeStr}.xlsx`);
+    }
+
+    const btn = document.querySelector('#parkingFooter .download');
+    if (btn && !btn.dataset.bound) {
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', downloadParkingExcel);
+    }
+    // 주차 popup end
+
+    const eventExcelBtn = document.querySelector('#eventDownload');
+    eventExcelBtn.addEventListener('click', downloadEventExcel);
+
+    const eventPdfBtn = document.querySelector('#eventPdfDownload');
+    eventPdfBtn?.addEventListener('click', () => {
+        const txt = sel => (document.querySelector(sel)?.textContent || '').trim();
+
+        const building = txt('#eventBuildingSelect .select-box__btn');
+        const device = txt('#eventPoiSelect .select-box__btn');
+
+        const allEventChecked = document.getElementById('allEventCheck')?.checked === true;
+        const checked = document.querySelectorAll('#eventCheckBoxList input[type="checkbox"]:not(#allEventCheck):checked');
+        const labelFromCb = cb => (cb.dataset.label?.trim()) || (cb.nextElementSibling?.textContent?.trim() || '');
+        const eventLabel = (allEventChecked || checked.length === 0)
+            ? '전체'
+            : Array.from(new Set(Array.from(checked, labelFromCb))).filter(Boolean).join(', ');
+
+        let mode = 'all', B = null, D = null;
+        if (device && device !== '전체') { mode = 'device';   D = device; }
+        else if (building && building !== '전체') { mode = 'building'; B = building; }
+
+        downloadEventReportPdf({ mode, building: B, device: D, event: eventLabel });
+
+    });
+
+    async function downloadEventReportPdf({ mode = 'all', building = null, device = null, event = null } = {}) {
+        // 데이터 소스
+        const list = (window._eventExport?.list && Array.isArray(window._eventExport.list))
+            ? window._eventExport.list
+            : (typeof matchedAlarms !== 'undefined' && Array.isArray(matchedAlarms) ? matchedAlarms : []);
+        const pois = (window._eventExport?.poiList && Array.isArray(window._eventExport.poiList))
+            ? window._eventExport.poiList
+            : (Array.isArray(poiList) ? poiList : []);
+
+        const norm = v => String(v ?? '').trim().toLowerCase();
+        const checked = document.querySelectorAll('#eventCheckBoxList input[type="checkbox"]:not(#allEventCheck):checked');
+        const selectedEvents = Array.from(checked).map(cb =>
+            cb.dataset.type ? norm(cb.dataset.type) : norm(cb.nextElementSibling?.textContent)
+        );
+        const filteredList = selectedEvents.length
+            ? list.filter(a => selectedEvents.includes(norm(a.event)))
+            : list;
+
+        // 피벗 생성
+        const pivot = buildEventPivot(filteredList, pois, { mode, building, device, event });
+
+        // 오프스크린 DOM 생성
+        const el = document.createElement('div');
+        el.id = 'event-report-pdf';
+        el.style.padding = '24px';
+        el.style.fontFamily = 'Malgun Gothic, Apple SD Gothic Neo, NanumGothic, sans-serif';
+        el.innerHTML = `
+          <style>
+            .title { font-size:20px; font-weight:700; text-align:center; margin-bottom:14px; }
+            .meta { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:10px; }
+            .meta th, .meta td { border:1px solid #aaa; padding:6px 8px; text-align:center; }
+            .data { width:100%; border-collapse:collapse; font-size:12px; }
+            .data th, .data td { border:1px solid #aaa; padding:6px 6px; text-align:center; }
+            .data thead th { background:#efefef; font-weight:700; }
+            .data tfoot td { background:#f4f4f4; font-weight:700; }
+            .left { text-align:left; }
+          </style>
+        
+          <div class="title">이벤트 통계 리포트</div>
+        
+          <table class="meta">
+            <tr>
+              <th style="width:10%;background:#f4f4f4;">건물</th><td style="width:40%">${pivot.meta.buildingLabel}</td>
+              <th style="width:10%;background:#f4f4f4;">이벤트</th><td style="width:40%">${pivot.meta.eventLabel}</td>
+            </tr>
+            <tr>
+              <th style="background:#f4f4f4;">장비</th><td>${pivot.meta.deviceLabel}</td>
+              <th style="background:#f4f4f4;">기간</th><td>${pivot.meta.periodLabel}</td>
+            </tr>
+          </table>
+        
+          <div class="section-title" style="margin:8px 0 12px">■ 이벤트 발생 횟수</div>
+          
+          <table class="data">
+            <thead>
+              <tr>
+                <th class="left">장비</th>
+                ${pivot.headers.map(h => `<th>${h}</th>`).join('')}
+                <th>소계</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pivot.rows.map(r => `
+                <tr>
+                  <td class="left">${r.name}</td>
+                  ${r.counts.map(c => `<td>${c === '' ? '' : (c ?? 0)}</td>`).join('')}
+                  <td>${r.subtotal}</td>
+                </tr>`).join('')}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>합계</td>
+                ${pivot.colTotals.map(t => `<td>${t}</td>`).join('')}
+                <td>${pivot.grandTotal}</td>
+              </tr>
+            </tfoot>
+          </table>
+          `;
+
+        document.body.appendChild(el);
+
+        // PDF 저장
+        const s = document.getElementById('start-date')?.value || 'all';
+        const e = document.getElementById('end-date')?.value || 'all';
+        const rangeStr = (s === 'all' && e === 'all') ? 'all' : `${s}_${e}`;
+        const namePart =
+            mode === 'building' ? `building_${pivot.meta.buildingLabel}` :
+                mode === 'device' ? `device_${pivot.meta.deviceLabel}` : 'all';
+
+        await html2pdf().set({
+            margin: [10, 10, 14, 10],
+            filename: `event_report_${namePart}_${rangeStr}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(el).save();
+
+        el.remove();
+    }
+
+    // 피벗 생성기
+    function buildEventPivot(list, pois, { mode, building, device, event }) {
+
+        // tagName → poi
+        const findPoiByTag = (tag) => (pois || []).find(p =>
+            Array.isArray(p.tagNames) &&
+            p.tagNames.some(t => String(t).toLowerCase() === String(tag || '').toLowerCase())
+        );
+
+        // 이벤트 레코드 확장
+        const rows = list.map(it => {
+            const poi = findPoiByTag(it.tagName);
+            return {
+                building: poi?.property?.buildingName ?? '',
+                deviceCat: poi?.property?.poiMiddleCategoryName ?? '기타',
+                eventName: it.event ?? ''
+            };
+        });
+
+        // 1) 컬럼 헤더 = poiList의 "모든 건물"
+        let headers = Array.from(new Set(
+            (pois || []).map(p => p?.property?.buildingName).filter(Boolean)
+        )).sort((a, b) => a.localeCompare(b, 'ko'));
+        if (headers.length === 0) headers = ['전체'];
+
+        // 2) 행 헤더 = poiList의 "모든 장비 분류" ∪ 이벤트에 등장한 분류
+        const deviceFromPois   = (pois || []).map(p => p?.property?.poiMiddleCategoryName).filter(Boolean);
+        const deviceFromEvents = rows.map(r => r.deviceCat).filter(Boolean);
+        let deviceRows = Array.from(new Set([...deviceFromPois, ...deviceFromEvents]))
+            .sort((a, b) => a.localeCompare(b, 'ko'));
+        if (device && mode === 'device') deviceRows = [device];
+
+        // 3) 카운팅
+        const counts = {};
+        rows.forEach(r => {
+            if (mode === 'building' && building && r.building !== building) return;
+            if (mode === 'device' && device && r.deviceCat !== device)   return;
+            counts[r.deviceCat] ??= {};
+            counts[r.deviceCat][r.building] = (counts[r.deviceCat][r.building] || 0) + 1;
+        });
+
+        // 4) 표 본문: 모든 건물 컬럼을 항상 생성
+        const body = deviceRows.map(name => {
+            const perCols = headers.map(h => {
+                const v = counts[name]?.[h] || 0;
+                return (mode === 'building' && building && h !== building) ? '' : v;
+            });
+            const subtotal = perCols.reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
+            return { name, counts: perCols, subtotal };
+        });
+
+        // 5) 합계
+        const colTotals = headers.map((h, i) =>
+            body.reduce((s, r) => s + (typeof r.counts[i] === 'number' ? r.counts[i] : 0), 0)
+        );
+        const grandTotal = body.reduce((s, r) => s + r.subtotal, 0);
+
+        // 6) 메타
+        const s = document.getElementById('start-date')?.value || '전체';
+        const e = document.getElementById('end-date')?.value   || '전체';
+
+        return {
+            headers,
+            rows: body,
+            colTotals,
+            grandTotal,
+            meta: {
+                buildingLabel: building ? building : '전체',
+                deviceLabel: device ? device : '전체',
+                eventLabel: event ? event : '전체',
+                periodLabel: (s === '전체' && e === '전체') ? '전체' : `${s}~${e}`
+            }
+        };
     }
 
     const setAirTab = () => {
@@ -2044,7 +2714,7 @@ const layerPopup = (function () {
             const firstFloor = defaultBuilding.floors[0];
             if (firstFloor) {
                 floorBtn.textContent = firstFloor.name;
-                lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+                // lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
             }
             floorUl.innerText = '';
             defaultBuilding.floors.forEach(floor => {
@@ -2171,7 +2841,7 @@ const layerPopup = (function () {
     // 설비 popup
     const equipmentPopup = document.getElementById('equipmentPop');
     const setEquipmentTab = () => {
-        const popupUl = equipmentPopup.querySelector('.section--select ul')
+        const popupUl = equipmentPopup.querySelector('.section--info ul')
         popupUl.replaceChildren()
         const eqAccordion = document.getElementById("eqAccordion");
         eqAccordion.replaceChildren();
@@ -2317,7 +2987,7 @@ const layerPopup = (function () {
     };
 
     const updateActiveTab = (selectedTab) => {
-        document.querySelectorAll(".section--select ul li").forEach(tab => {
+        document.querySelectorAll(".section--info ul li").forEach(tab => {
             tab.classList.remove("active");
             tab.setAttribute("aria-selected", "false");
         });
@@ -2355,6 +3025,8 @@ const layerPopup = (function () {
         })
     }
 
+    let selectedLightGroup = null;
+    let selectedLightId = null;
     const movePoi = async (id) => {
         let poiId;
         if (id.constructor.name === 'PointerEvent') {
@@ -2385,16 +3057,39 @@ const layerPopup = (function () {
     
         // 같은 building 내에서의 이동
         Px.Model.Visible.HideAll();
-        Px.Model.Visible.Show(Number(floor.id));
-        Px.Poi.HideAll();
-        console.log("poiData : ", poiData);
-        Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
+        const building = BuildingManager.findById(poiData.property.buildingId);
+        if (building.isIndoor === 'N') {
+            Px.Model.Visible.ShowAll();
+            Px.Poi.HideAll();
+        } else {
+            Px.Model.Visible.Show(Number(floor.id));
+            Px.Poi.HideAll();
+            Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
+        }
+
 
         Px.Camera.MoveToPoi({
             id: poiId,
             isAnimation: true,
             duration: 500,
         });
+
+        if (poiData.property.lightGroup) {
+            if (selectedLightGroup === poiData.property.lightGroup) {
+                if (selectedLightId === poiData.id) {
+                    Px.Poi.RestoreColorAll();
+                    selectedLightGroup = null;
+                    selectedLightId = null;
+                } else {
+                    selectedLightId = poiData.id;
+                }
+            } else {
+                Px.Poi.RestoreColorAll();
+                Px.Poi.SetColorByProperty('lightGroup', poiData.property.lightGroup, '#f80606');
+                selectedLightGroup = poiData.property.lightGroup;
+                selectedLightId = poiData.id;
+            }
+        }
     };
 
     const closePlayers = () => {
@@ -2453,8 +3148,8 @@ const layerPopup = (function () {
             console.log("Stopping playback player for canvasId:", canvasId);
             player.stopPlayback();
         }
-
         delete window.livePlayers[canvasId];
+        console.log(`Player for canvasId ${canvasId} closed.`);
     }
 
     // date picker default setting
@@ -2525,21 +3220,23 @@ const layerPopup = (function () {
         const floorBtn = floorSelect.querySelector(".select-box__btn");
         const floorContent = floorSelect.querySelector(".select-box__content ul");
         floorContent.innerHTML = '';
-
+        const allPois = PoiManager.findAll();
         const liAll = document.createElement('li');
         liAll.textContent = "전체";
         liAll.onclick = () => {
             floorBtn.textContent = "전체";
             floorBtn.classList.remove("select-box__btn--active");
             floorSelect.querySelector(".select-box__content").classList.remove("active");
+            const allPois = PoiManager.findAll();
             if (buildingId) {
-                const allPois = PoiManager.findAll();
+                // const allPois = PoiManager.findAll();
                 const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
                 updatePoiSelectBox(filteredPois);
             } else {
-                PoiManager.getFilteredPoiList().then((pois) => {
-                    updatePoiSelectBox(pois);
-                })
+                updatePoiSelectBox(allPois);
+                // PoiManager.getFilteredPoiList().then((pois) => {
+                //     updatePoiSelectBox(pois);
+                // })
             }
         };
         floorContent.appendChild(liAll);
@@ -2553,7 +3250,7 @@ const layerPopup = (function () {
                 floorBtn.classList.remove("select-box__btn--active");
                 floorSelect.querySelector(".select-box__content").classList.remove("active");
 
-                const allPois = PoiManager.findAll();
+                // const allPois = PoiManager.findAll();
                 const filteredPois = allPois.filter(poi => poi.floorNo === Number(floor.no));
                 updatePoiSelectBox(filteredPois);
             }
@@ -2563,9 +3260,7 @@ const layerPopup = (function () {
         if (floorList.length > 0) {
             // floorBtn.textContent = floorList[0].name;
             floorBtn.textContent = "전체";
-            PoiManager.getFilteredPoiList().then((pois) => {
-                updatePoiSelectBox(pois);
-            })
+            updatePoiSelectBox(allPois);
             // PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
             //     updatePoiSelectBox(pois);
             // });
@@ -2580,7 +3275,6 @@ const layerPopup = (function () {
         const poiBtn = poiSelect.querySelector(".select-box__btn");
         const poiContent = poiSelect.querySelector(".select-box__content ul");
         poiContent.innerHTML = '';
-        console.log("poiList : ", poiList);
         if (poiList.length == 0) {
             poiBtn.textContent = "없음";
             poiBtn.classList.add("select__btn--disabled");
@@ -2678,7 +3372,7 @@ const layerPopup = (function () {
         const defaultLi = document.createElement("li");
         defaultLi.innerHTML = `
             <span class="checkbox-wrap">
-              <input type="checkbox" id="allEventCheck">
+              <input type="checkbox" id="allEventCheck" checked>
               <label for="allEventCheck">이벤트 전체</label>
             </span>
           `;
@@ -2693,6 +3387,7 @@ const layerPopup = (function () {
                     checkbox.checked = checked;
                 }
             });
+            listEl.dispatchEvent(new Event("filterchange"));
         });
 
         alarmTypes.forEach((alarm, index) => {
@@ -2700,7 +3395,7 @@ const layerPopup = (function () {
             const li = document.createElement("li");
             li.innerHTML = `
               <span class="checkbox-wrap">
-                <input type="checkbox" id="${checkId}">
+                <input type="checkbox" id="${checkId}" checked data-type="${alarm.label.toLowerCase()}">
                 <label for="${checkId}">${alarm.label}</label>
               </span>
             `;
@@ -2716,8 +3411,10 @@ const layerPopup = (function () {
                     const allChecked = Array.from(individualCheckboxes).every(cb => cb.checked);
                     allCheckbox.checked = allChecked;
                 }
+                listEl.dispatchEvent(new Event("filterchange"));
             });
         });
+        listEl.dispatchEvent(new Event("filterchange"));
     }
 
     document.getElementById("eventOpenBtn").addEventListener("click", function() {
@@ -2729,27 +3426,37 @@ const layerPopup = (function () {
 
     let globalAlarmList = [];
     let poiList = [];
-
+    let matchedAlarms = [];
     const taggedPoiMap = new Map();
     const createEventPopup = async (reinitializeSelectBoxes = false) => {
-        // const buildingList = await BuildingManager.getBuildingList();
         if (reinitializeSelectBoxes) {
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
-            const poiListData = await PoiManager.getFilteredPoiList();
+            const poiListData = PoiManager.findAll();
             updatePoiSelectBox(poiListData);
             setDatePicker();
             const alarmTypes = [
-                { value: 0, label: "Normal" },
-                { value: 255, label: "복귀" },
-                { value: 1, label: "ON Alarm" },
-                { value: 2, label: "OFF Alarm" },
-                { value: 3, label: "Low-Low Alarm" },
-                { value: 4, label: "Low-High Alarm" },
-                { value: 5, label: "High-Low Alarm" },
-                { value: 6, label: "High-High Alarm" },
-                { value: 7, label: "Off State Alarm" },
-                { value: 8, label: "On State Alarm" }
+                { value: 0,  label: "경보" },
+                { value: 1,  label: "Alarm" },
+                { value: 2,  label: "강제문열림" },
+                { value: 3,  label: "장시간 문열림" },
+                { value: 4,  label: "1차폐쇄" },
+                { value: 5,  label: "2차폐쇄" },
+                { value: 6,  label: "고장" },
+                { value: 7,  label: "점검중" },
+                { value: 8,  label: "파킹" },
+                { value: 9,  label: "독립운전" },
+                { value: 10,  label: "중량초과" },
+                { value: 11,  label: "화재관제운전" },
+                { value: 12,  label: "화재관제운전 귀착" },
+                { value: 13,  label: "1차소방운전" },
+                { value: 14,  label: "2차소방운전" },
+                { value: 15,  label: "전용운전" },
+                { value: 16,  label: "보수운전" },
+                { value: 17,  label: "정전운전" },
+                { value: 18,  label: "화재운전" },
+                { value: 19,  label: "지진운전" },
+                { value: 20,  label: "배회이벤트" }
             ];
             createEventCheck(alarmTypes, "eventCheckBoxList");
         }
@@ -2762,9 +3469,10 @@ const layerPopup = (function () {
         const selectedFloor = floorBtn.textContent.trim();
         const selectedDeviceType = poiBtn.textContent.trim();
         const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
-
-        poiList = await PoiManager.getFilteredPoiList();
-        const tableBody = document.querySelector('.event-info table tbody');
+        // poiList = await PoiManager.getFilteredPoiList();
+        poiList = PoiManager.findAll();
+        const eventLayerPopup = document.getElementById('eventLayerPopup');
+        const tableBody  = eventLayerPopup.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
         tableBody.innerHTML = "";
 
@@ -2774,6 +3482,13 @@ const layerPopup = (function () {
         const params = new URLSearchParams();
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
+
+        if (selectedDeviceType && selectedDeviceType !== '전체') {
+            params.append('deviceType', selectedDeviceType);
+        }
+        if (alarmTypeInput) {
+            params.append('searchValue', alarmTypeInput);
+        }
 
         api.get(`/events/alarms?${params.toString()}`).then((res) => {
             const { result: data } = res.data;
@@ -2785,13 +3500,15 @@ const layerPopup = (function () {
                 )
             );
 
-            let searchedAlarms = filteredAlarms.slice();
+            // let searchedAlarms = filteredAlarms.slice();
+            let searchedAlarms = data.slice();
 
             if (selectedBuilding !== '전체' && selectedBuilding !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
+
                     return taggedPoi && taggedPoi.property.buildingName === selectedBuilding;
                 });
             }
@@ -2825,43 +3542,57 @@ const layerPopup = (function () {
                 });
             }
 
-            const checkedBoxes = document.querySelectorAll("#eventCheckBoxList input[type='checkbox']:checked");
+            const checkedBoxes = document.querySelectorAll("#eventCheckBoxList input[type='checkbox']:not(#allEventCheck):checked");
             if (checkedBoxes.length > 0) {
-                // 체크된 체크박스의 레이블 텍스트를 소문자 배열로 생성
-                const checkedAlarmTypes = Array.from(checkedBoxes).map(box => {
-                    const labelEl = box.nextElementSibling;
-                    return labelEl ? labelEl.textContent.trim().toLowerCase() : "";
-                });
+                const norm = s => String(s || "").trim().toLowerCase();
+                const checkedEvents = Array.from(checkedBoxes).map(box =>
+                    box.dataset.type ? norm(box.dataset.type) : norm(box.nextElementSibling?.textContent)
+                );
                 searchedAlarms = searchedAlarms.filter((alarm) => {
-                    // alarm.alarmType가 enum이거나 문자열일 때, 체크된 항목 중 하나와 정확히 일치하는 경우만 필터링
-                    return alarm.alarmType && checkedAlarmTypes.includes(alarm.alarmType.toLowerCase());
+                    const ev = norm(alarm.event);
+                    return ev && checkedEvents.includes(ev);
                 });
             }
 
-            const eventPopup = document.querySelector('#eventLayerPopup');
-            eventPopup.style.position = 'absolute';
-            eventPopup.style.top = '50%';
-            eventPopup.style.left = '50%';
-            eventPopup.style.transform = 'translate(-50%, -50%)';
-            eventPopup.style.display = 'inline-block';
-            alarmCountEl.textContent = searchedAlarms.length.toLocaleString();
+            eventLayerPopup.style.position = 'absolute';
+            eventLayerPopup.style.top = '50%';
+            eventLayerPopup.style.left = '50%';
+            eventLayerPopup.style.transform = 'translate(-50%, -50%)';
+            eventLayerPopup.style.display = 'inline-block';
+
+            matchedAlarms = searchedAlarms
+                .filter(data =>
+                poiList.some(poi =>
+                    poi.tagNames.some(tag =>
+                        tag.toLowerCase() === data.tagName.toLowerCase()
+                    )
+                )
+            );
+
+            const baseAlarms = matchedAlarms.slice();
+
+            window._eventExport = { list: matchedAlarms, poiList: Array.isArray(poiList) ? poiList.slice() : [] };
+
+            alarmCountEl.textContent = matchedAlarms.length.toLocaleString();
             // 페이지당 10개씩
             const itemsPerPage = 10;
             let currentPage = 1;
-            const totalPages = Math.ceil(searchedAlarms.length / itemsPerPage);
-            const paginationContainer = document.querySelector(".search-result__paging .number");
+            let totalPages = Math.ceil(matchedAlarms.length / itemsPerPage);
+            const paginationContainer = eventLayerPopup.querySelector(".search-result__paging .number");
 
             const renderTable = (page) => {
-                tableBody.innerHTML = "";
+                // tableBody.innerHTML = "";
                 const startIndex = (page - 1) * itemsPerPage;
-                const pageAlarms = searchedAlarms.slice(startIndex, startIndex + itemsPerPage);
+                const pageAlarms = matchedAlarms.slice(startIndex, startIndex + itemsPerPage);
+
+                const frag = document.createDocumentFragment();
+                taggedPoiMap.clear();
+
                 pageAlarms.forEach((data) => {
 
                     const eventRow = document.createElement('tr');
                     const [formattedOccurrenceDate, formattedConfirmTime] =
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
-
-                    let deviceType = data.deviceNm.split("-")[0];
 
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === data.tagName.toLowerCase())
@@ -2870,49 +3601,86 @@ const layerPopup = (function () {
                     if (taggedPoi) {
                         eventRow.innerHTML = `
                             <td>${taggedPoi.property.buildingName || '-'}</td>
-                            <td>${taggedPoi.property.floorNo || '-'}</td>
-                            <td>${data.alarmType || '-'}</td>
+                            <td>${taggedPoi.property.floorName || '-'}</td>
+                            <td>${data.event || '-'}</td>
                             <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
                             <td>${taggedPoi.name || '-'}</td>
                             <td>${formatDateTime(data.occurrenceDate) || '-'}</td>
                             <td>${formatDateTime(data.confirmDate) || '-'}</td>
                             <td>
-                                <a href="javascript:void(0);" class="icon-move" id="moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
+                                <a href="javascript:void(0);" class="icon-move moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
                                     <span class="hide">도면 이동</span>
                                 </a>
                             </td>
                         `;
-                        tableBody.appendChild(eventRow);
+                        // tableBody.appendChild(eventRow);
+                        frag.appendChild(eventRow);
                         taggedPoiMap.set(taggedPoi.id, taggedPoi);
                     }
                 });
+                tableBody.textContent = '';
+                tableBody.appendChild(frag);
             };
 
             const renderPagination = () => {
                 paginationContainer.innerHTML = "";
-                for (let i = 1; i <= totalPages; i++) {
+                if (totalPages <= 1) return;
+
+                const maxWindow = 5;
+                let start = Math.max(1, currentPage - Math.floor(maxWindow / 2));
+                let end = Math.min(totalPages, start + maxWindow - 1);
+                if (end - start + 1 < maxWindow) {
+                    start = Math.max(1, end - (maxWindow - 1));
+                }
+
+                const createPage = (page, text = page) => {
                     const span = document.createElement('span');
-                    span.textContent = i;
-                    if (i === currentPage) {
+                    span.textContent = text;
+                    if (page === currentPage) {
                         span.classList.add("active");
                     }
                     span.addEventListener('click', () => {
-                        currentPage = i;
+                        if (page === currentPage) return;
+                        currentPage = page;
                         renderTable(currentPage);
                         renderPagination();
                     });
                     paginationContainer.appendChild(span);
+                };
+
+                if (start > 1) {
+                    createPage(1);
+                    if (start > 2) {
+                        const dots = document.createElement('span');
+                        dots.textContent = "...";
+                        dots.classList.add("dots");
+                        paginationContainer.appendChild(dots);
+                    }
+                }
+
+                for (let i = start; i <= end; i++) {
+                    createPage(i);
+                }
+
+                if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                        const dots = document.createElement('span');
+                        dots.textContent = "...";
+                        dots.classList.add("dots");
+                        paginationContainer.appendChild(dots);
+                    }
+                    createPage(totalPages);
                 }
             };
 
-            document.querySelector(".search-result__paging .left").onclick = () => {
+            eventLayerPopup.querySelector(".search-result__paging .left").onclick = () => {
                 if (currentPage > 1) {
                     currentPage--;
                     renderTable(currentPage);
                     renderPagination();
                 }
             };
-            document.querySelector(".search-result__paging .right").onclick = () => {
+            eventLayerPopup.querySelector(".search-result__paging .right").onclick = () => {
                 if (currentPage < totalPages) {
                     currentPage++;
                     renderTable(currentPage);
@@ -2920,10 +3688,106 @@ const layerPopup = (function () {
                 }
             };
 
-            renderTable(currentPage);
-            renderPagination();
+            // 필터 테스트
+            function onEventFilterChange() {
+                const toKey = v => String(v ?? "").trim().toLowerCase();
+                const eventCheckboxListEl = document.getElementById("eventCheckBoxList");
+
+                const selectedEventKeys = Array.from(
+                    eventCheckboxListEl.querySelectorAll("input[type='checkbox']:not(#allEventCheck):checked")
+                ).map(cb => cb.dataset.type ? toKey(cb.dataset.type) : toKey(cb.nextElementSibling?.textContent));
+
+                const keySet = new Set(selectedEventKeys);
+
+                const filteredAlarmList = selectedEventKeys.length === 0
+                    ? []
+                    : baseAlarms.filter(a => {
+                        const evKey = toKey(a.event);
+                        return evKey && keySet.has(evKey);
+                    });
+
+                matchedAlarms = filteredAlarmList;
+
+                window._eventExport = {
+                    list: matchedAlarms.slice(),
+                    poiList: Array.isArray(poiList) ? poiList : []
+                };
+
+                alarmCountEl.textContent = matchedAlarms.length.toLocaleString();
+                totalPages = Math.max(1, Math.ceil(matchedAlarms.length / itemsPerPage));
+                currentPage = 1;
+                renderTable(currentPage);
+                renderPagination();
+            }
+
+            const eventCheckboxListEl = document.getElementById("eventCheckBoxList");
+            if (eventCheckboxListEl) {
+                if (eventCheckboxListEl._onEventFilterChange) {
+                    eventCheckboxListEl.removeEventListener("filterchange", eventCheckboxListEl._onEventFilterChange);
+                }
+                eventCheckboxListEl._onEventFilterChange = onEventFilterChange;
+                eventCheckboxListEl.addEventListener("filterchange", onEventFilterChange);
+                eventCheckboxListEl.dispatchEvent(new Event("filterchange"));
+            } else {
+                renderTable(currentPage);
+                renderPagination();
+            }
         });
     }
+    // event excel download
+    function downloadEventExcel() {
+        const safe = (v) => (v == null ? '' : v);
+        const fmt = (d) => (typeof formatDateTime === 'function' ? safe(formatDateTime(d)) : safe(d));
+
+        const listCandidate =
+            (window._eventExport && Array.isArray(window._eventExport.list) && window._eventExport.list) ||
+            (typeof matchedAlarms !== 'undefined' && Array.isArray(matchedAlarms) && matchedAlarms) ||
+            (Array.isArray(globalAlarmList) && globalAlarmList) || [];
+
+        const poisSource =
+            (window._eventExport && Array.isArray(window._eventExport.poiList) && window._eventExport.poiList) ||
+            (Array.isArray(poiList) && poiList) || [];
+
+        if (listCandidate.length === 0) return;
+
+        const header = [
+            'No','건물','층','이벤트명','장비분류','장비명','발생일시','해제일시'
+        ];
+
+        const rows = listCandidate.map((item, idx) => {
+            const taggedPoi = poisSource.find(p =>
+                Array.isArray(p.tagNames) &&
+                p.tagNames.some(t => String(t).toLowerCase() === String(item.tagName || '').toLowerCase())
+            );
+
+            const building = taggedPoi?.property?.buildingName || '-';
+            const floor = taggedPoi?.property?.floorName || '-';
+            const category = taggedPoi?.property?.poiMiddleCategoryName || '-';
+            const deviceNm = taggedPoi?.name || '-';
+
+            return [
+                idx + 1,
+                building,
+                floor,
+                safe(item.event),
+                category,
+                deviceNm,
+                fmt(item.occurrenceDate),
+                fmt(item.confirmDate),
+            ];
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'events');
+
+        const startVal = document.getElementById('start-date')?.value || 'all';
+        const endVal   = document.getElementById('end-date')?.value || 'all';
+        const rangeStr = (startVal === 'all' && endVal === 'all') ? 'all' : `${startVal}_${endVal}`;
+
+        XLSX.writeFile(wb, `events_${rangeStr}.xlsx`);
+    }
+
     document.getElementById('eventSearchBtn').addEventListener('click', async () => {
         await createEventPopup(false);
     });
@@ -2936,8 +3800,8 @@ const layerPopup = (function () {
             await createEventPopup(false);
         });
     }
-    document.querySelector('.event-info').addEventListener('click', event => {
-        const moveLink = event.target.closest('#moveToMap');
+    eventLayerPopup.querySelector('.event-info').addEventListener('click', event => {
+        const moveLink = event.target.closest('.moveToMap');
         if (moveLink) {
             event.preventDefault();
             const poiId = moveLink.getAttribute('data-poi-id');
@@ -2977,8 +3841,7 @@ const layerPopup = (function () {
         if (!target) return;
         target.style.display = 'none';
         Px.VirtualPatrol.Clear();
-        Px.Poi.ShowAll();
-        Px.Model.Visible.ShowAll();
+        // Px.Model.Visible.ShowAll();
 
         if (target.id === 'mapLayerPopup') {
             document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));
@@ -3134,7 +3997,9 @@ const layerPopup = (function () {
         setLight,
         setAirTab,
         setEscalator,
-        clearAllIntervals
+        clearAllIntervals,
+        setParking,
+        resetParkingFilterUI
     }
 })();
 

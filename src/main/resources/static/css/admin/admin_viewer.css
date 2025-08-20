@@ -97,11 +97,25 @@ body {
     top: 4rem;
 }
 
-#poiSelect {
+#kioskPoiSelect {
     position: absolute;
     left: 26.5rem;
     bottom: 1rem;
     z-index: 9999;
+    display: flex;
+    width: 10rem;
+}
+
+#poiWrapper {
+    position: absolute;
+    left: 26.5rem;
+    bottom: 1rem;
+    z-index: 9999;
+    display: flex;
+    gap: 0.5rem;
+}
+
+#poiSelect, #registeredPoiSelect {
     display: flex;
     width: 10rem;
 }
@@ -700,4 +714,23 @@ div.input_autocomplete ul.input_autocomplete li:hover {
     z-index: 999;
     padding: 5px;
     background-color: #eee;
+}
+.cctv-list-wrapper{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.cctv-list {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 2rem;
+}
+#cctvListTable {
+    width: 100%;
+}
+#cctvListTable tbody tr:hover {
+    cursor: pointer;
 }

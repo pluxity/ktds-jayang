@@ -1,12 +1,22 @@
 package com.pluxity.ktds.domains.tag;
 
 import com.pluxity.ktds.domains.building.entity.Poi;
+import com.pluxity.ktds.domains.building.entity.PoiTag;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
+import com.pluxity.ktds.domains.building.repostiory.PoiTagRepository;
 import com.pluxity.ktds.domains.tag.dto.TagData;
 import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
+import com.pluxity.ktds.global.constant.ErrorCode;
+import com.pluxity.ktds.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -17,10 +27,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TagService {
 
     private final PoiRepository poiRepository;
     private final RestTemplate restTemplate;
+    private final PoiTagRepository poiTagRepository;
+    private final TagClientService tagClientService;
     @Value("${event.server.base-url}")
     private String baseUrl;
 
@@ -183,4 +196,43 @@ public class TagService {
         return poiTagResponseMap;
     }
 
+    // test
+    public TagResponseDTO processParkingTags() {
+
+        List<String> parkingTags = List.of(
+                "C-null-PK-GU-G-ParkTotal",
+                "C-null-PK-GU-G-ParkEmpty",
+                "C-null-PK-GU-G-Parking",
+                "C-P1-PK-GU-null-Total",
+                "C-P1-PK-GU-null-Empty",
+                "C-P1-PK-GU-null-Parking",
+                "C-P2-PK-GU-null-Total",
+                "C-P2-PK-GU-null-Empty",
+                "C-P2-PK-GU-null-Parking",
+                "C-P3-PK-GU-null-Total",
+                "C-P3-PK-GU-null-Empty",
+                "C-P3-PK-GU-null-Parking",
+                "C-P4-PK-GU-null-Total",
+                "C-P4-PK-GU-null-Empty",
+                "C-P4-PK-GU-null-Parking",
+                "C-P5-PK-GU-null-Total",
+                "C-P5-PK-GU-null-Empty",
+                "C-P5-PK-GU-null-Parking"
+        );
+
+        TagResponseDTO all = restTemplate.postForObject(
+                baseUrl + "/?ReadTags",
+                parkingTags,
+                TagResponseDTO.class
+        );
+        return all;
+    }
+
+    @Transactional
+    public String addAllElevatorTags() {
+        List<String> tagNames = poiTagRepository.findByTagNameContaining("-EV-")
+                .stream().map(PoiTag::getTagName).toList();
+        ResponseEntity<String> resp = tagClientService.addTags(tagNames);
+        return resp.getBody();
+    }
 }

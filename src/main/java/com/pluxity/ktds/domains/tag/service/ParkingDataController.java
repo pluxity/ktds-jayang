@@ -29,9 +29,9 @@ public class ParkingDataController {
             @RequestParam(required = false) String inoutType,
             @RequestParam(required = false) String exitId,
             @RequestParam(required = false) String regularType,
-            @RequestParam(required = false) String carNo,
+            @RequestParam(required = false) String searchType,
             @RequestParam(required = false) String parkingLotName,
-            @RequestParam(required = false) String deviceName
+            @RequestParam(required = false) String parkSearchInput
     ) {
         return parkingDataService.searchInput(
                 startTime,
@@ -40,9 +40,9 @@ public class ParkingDataController {
                 inoutType,
                 exitId,
                 regularType,
-                carNo,
+                searchType,
                 parkingLotName,
-                deviceName
+                parkSearchInput
         );
     }
 }

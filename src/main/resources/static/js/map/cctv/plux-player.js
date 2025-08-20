@@ -17,6 +17,41 @@ class PluxPlayer {
         this.decodeWorker = null
         this.streamServerIP = null;
         this.recordServerIP = null;
+
+        this.onPlaybackError = null;
+    }
+
+    async initProfileToken(time, deviceUrl, username, password) {
+        // 1) WS-Security 다이제스트 생성
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+        // 2) GetProfiles 요청 구성
+        const soap = this.createDirectCamSoapBody(
+            `<trt:GetProfiles xmlns:trt="http://www.onvif.org/ver10/media/wsdl"/>`,
+            username, passwordDigest, nonce, created
+        );
+        const endpoint = `http://${deviceUrl}:80/onvif/media_service`;
+
+        // 3) Relay 서버로 SOAP 요청, 문자열 응답 받기
+        const responseText = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`, endpoint, soap
+        );
+
+        // 4) DOMParser로 XML 파싱
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(responseText, 'application/xml');
+
+        // 5) 네임스페이스와 태그로 Profiles 요소 찾기
+        const profiles = xmlDoc.getElementsByTagNameNS(
+            'http://www.onvif.org/ver10/media/wsdl', 'Profiles'
+        );
+        if (profiles.length === 0) {
+            throw new Error('Media.GetProfiles 응답에 Profiles 요소가 없습니다');
+        }
+
+        const profile = profiles[0].getAttribute('token');
+        // 첫 번째 프로필 토큰 저장
+        this.profileToken = profile;
+        return profile;
     }
 
     async playBack(deviceId, startDate, endTime) {
@@ -51,6 +86,12 @@ class PluxPlayer {
 
                 this.ctx.drawImage(frame, 0, 0, this.canvasDom.width, this.canvasDom.height);
                 frame.close();
+            }else if (eventData.function == "error") {
+                alertSwal(eventData.message);
+                // 에러 콜백 호출
+                if (this.onPlaybackError) {
+                    this.onPlaybackError(eventData.errorType, eventData.message);
+                }
             }
         };
     }
@@ -92,28 +133,29 @@ class PluxPlayer {
         }
     }
 
-    async ptzControl(deviceUrl, devicePort, x, y, id, password) {
-        console.log(deviceUrl, devicePort, x, y, id, password);
+    async ptzControl(deviceUrl, x, y, id, password) {
+        const time = await this.getSystemDateAndTime(deviceUrl);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+        const profile = this.profileToken || await this.initProfileToken(time, deviceUrl, id, password);
 
         try {
-            const digest = await this.generatePasswordDigest(password);
             if (x == 0 && y == 0) {
-                await this.ptzStop(deviceUrl, devicePort, id, password);
+                await this.ptzStop(deviceUrl, id, password);
             } else {
                 let soap_message = this.createDirectCamSoapBody(
                     `<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
+                    <ProfileToken>${profile}</ProfileToken>
                     <Velocity>
-                        <PanTilt x="${x}" y="${y}"
+                        <PanTilt x="${-x}" y="${-y}"
                             space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace"
                             xmlns="http://www.onvif.org/ver10/schema" />
                     </Velocity>
                 </ContinuousMove>`,
-                    id, digest.passwordDigest, digest.nonce, digest.created
+                    id, passwordDigest, nonce, created
                 );
                 const response = await this.sendSoapRequest(
                     this.httpRelayUrl + ":" + this.httpRelayPort,
-                    "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service",
+                    "http://" + deviceUrl + ":80/onvif/ptz_service",
                     soap_message
                 );
                 console.log(response);
@@ -123,48 +165,75 @@ class PluxPlayer {
         }
     }
 
-
-    async zoom(deviceUrl, devicePort, id, password, zoom) {
+    async continuousZoom(deviceUrl, id, password, zoom) {
         try {
-            const digest = await this.generatePasswordDigest(password);
-            if (zoom > 2) { zoom = 2 }
-            else if (zoom < -2) { zoom = -2 }
+            const time = await this.getSystemDateAndTime(deviceUrl);
+            const profile = this.profileToken || await this.initProfileToken(time, deviceUrl, id, password);
+            const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
             let soap_message = this.createDirectCamSoapBody(
                 `<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
-                    <Velocity>
+                        <ProfileToken>${profile}</ProfileToken>
+                        <Velocity >
                         <Zoom x="${zoom}"
-                    space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace"
+                    space="http://www.onvif.org/ver10/tptz/ZoomSpaces/VelocityGenericSpace"
                     xmlns="http://www.onvif.org/ver10/schema" />
-                    </Velocity>
+                    </Velocity >
                 </ContinuousMove>`,
-                id, digest.passwordDigest, digest.nonce, digest.created
+                id, passwordDigest, nonce, created
             );
+            console.log("zoom = ",zoom);
             const response = await this.sendSoapRequest(
                 this.httpRelayUrl + ":" + this.httpRelayPort,
-                "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service",
+                "http://" + deviceUrl + ":80/onvif/ptz_service",
                 soap_message
             );
-            console.log(response);
         } catch (error) {
             console.error("Error in zoom:", error);
         }
     }
 
-    async ptzStop(deviceUrl, devicePort, id, password) {
+    async resetCamera(deviceUrl, id, password) {
+
         try {
-            const digest = await this.generatePasswordDigest(password);
+            const time = await this.getSystemDateAndTime(deviceUrl);
+            const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+            const profile = this.profileToken || await this.initProfileToken(time, deviceUrl, id, password);
+
             let soap_message = this.createDirectCamSoapBody(
-                `<Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl">
-                    <ProfileToken>DefaultProfile-01-0</ProfileToken>
-                    <PanTilt>true</PanTilt>
-                    <Zoom>true</Zoom>
-                </Stop>`,
-                id, digest.passwordDigest, digest.nonce, digest.created
+                `<GotoHomePosition>
+                            <ProfileToken>${profile}</ProfileToken>
+                     </GotoHomePosition>`,
+                id, passwordDigest, nonce, created
             );
             const response = await this.sendSoapRequest(
                 this.httpRelayUrl + ":" + this.httpRelayPort,
-                "http://" + deviceUrl + ":" + devicePort + "/onvif/ptz_service",
+                "http://" + deviceUrl + ":80/onvif/ptz_service",
+                soap_message
+            );
+        } catch (error) {
+            console.error("Error in reset:", error);
+        }
+    }
+
+    async ptzStop(deviceUrl, id, password) {
+
+        const time = await this.getSystemDateAndTime(deviceUrl);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+        const profile = this.profileToken || await this.initProfileToken(time, deviceUrl, id, password);
+
+        try {
+            let soap_message = this.createDirectCamSoapBody(
+                `<Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl">
+                    <ProfileToken>${profile}</ProfileToken>
+                    <PanTilt>true</PanTilt>
+                    <Zoom>true</Zoom>
+                </Stop>`,
+                id, passwordDigest, nonce, created
+            );
+            const response = await this.sendSoapRequest(
+                this.httpRelayUrl + ":" + this.httpRelayPort,
+                "http://" + deviceUrl + ":80/onvif/ptz_service",
                 soap_message
             );
             console.log(response);
@@ -235,10 +304,51 @@ class PluxPlayer {
         return hlsUrl;
     }
 
-    async getLiveStreamUri(cameraIp, username, password) {
-
+    async getProfiles(cameraIp, username, password) {
         const time = await this.getSystemDateAndTime(cameraIp);
         const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
+        const operationBody =  `<trt:GetProfiles xmlns:trt="http://www.onvif.org/ver10/media/wsdl"/>`;
+
+        const soapBody = this.createDirectCamSoapBody(
+            operationBody,
+            username,
+            passwordDigest,
+            nonce,
+            created
+        );
+
+        const response = await this.sendSoapRequest(
+            `${this.httpRelayUrl}:${this.httpRelayPort}`,
+            `http://${cameraIp}:80/onvif/media_service`,
+            soapBody
+        );
+
+        console.log("GetProfiles 응답:", response);
+    }
+
+    async getConfiguration(cameraIp, username, password) {
+        const time = await this.getSystemDateAndTime(cameraIp);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+
+        let getConfig = this.createDirectCamSoapBody(
+            `<GetConfigurations xmlns="http://www.onvif.org/ver20/ptz/wsdl" />`,
+            username, passwordDigest, nonce, created
+        );
+
+        const response = await this.sendSoapRequest(
+            this.httpRelayUrl + ":" + this.httpRelayPort,
+            `http://${cameraIp}:80/onvif/media_service`,
+            getConfig
+        );
+
+        console.log("getConfiguration response : ", response);
+    }
+
+    async getLiveStreamUri(cameraIp, username, password) {
+        const time = await this.getSystemDateAndTime(cameraIp);
+        const { nonce, created, passwordDigest } = await this.generatePasswordDigest(password, time);
+        const profile = this.profileToken || await this.initProfileToken(time, cameraIp,  username, password);
 
         const operationBody = `
             <GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">
@@ -247,8 +357,8 @@ class PluxPlayer {
                 <Transport xmlns="http://www.onvif.org/ver10/schema">
                   <Protocol>TCP</Protocol>
                 </Transport>
-              </StreamSetup>
-              <ProfileToken>DefaultProfile-02</ProfileToken>
+              </StreamSetup>             
+              <ProfileToken>${profile}</ProfileToken>
             </GetStreamUri>`.trim();
 
         const soapBody = this.createDirectCamSoapBody(
@@ -259,7 +369,6 @@ class PluxPlayer {
             created
         );
 
-        console.log("soapBody : ", soapBody);
 
         const response = await this.sendSoapRequest(
             `${this.httpRelayUrl}:${this.httpRelayPort}`,
@@ -568,7 +677,6 @@ class PluxPlayer {
                         <GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/>
                             </soap:Body>
                                 </soap:Envelope>`
-        console.log("soapBody : ", soapBody);
         const response = await this.sendSoapRequest(
             `${this.httpRelayUrl}:${this.httpRelayPort}`,
             `http://${cameraIp}:80/onvif/media_service`,

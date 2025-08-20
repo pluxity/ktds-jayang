@@ -31,6 +31,7 @@ public class TagController {
     private final ObjectMapper objectMapper;
 
     private final TagService tagService;
+
     @GetMapping("/elevator")
     public ResponseEntity<Map<Long, TagResponseDTO>> getElevatorTags(
             @RequestParam(value = "buildingId", required = false) Long buildingId,
@@ -50,4 +51,18 @@ public class TagController {
 
         return ResponseEntity.ok(poiTagResponseMap);
     }
+
+    @GetMapping("/parking")
+    public ResponseEntity<TagResponseDTO> getParkingTags() {
+        TagResponseDTO poiTagResponseMap = tagService.processParkingTags();
+
+        return ResponseEntity.ok(poiTagResponseMap);
+    }
+
+    @GetMapping("/elevator/add")
+    public ResponseEntity<String> addAllElevatorTags() {
+        String body = tagService.addAllElevatorTags();
+        return ResponseEntity.ok(body);
+    }
+
 }

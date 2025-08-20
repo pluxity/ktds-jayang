@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.cctv.controller;
 
 import com.pluxity.ktds.domains.building.entity.Poi;
+import com.pluxity.ktds.domains.building.entity.PoiTag;
 import com.pluxity.ktds.domains.building.service.PoiService;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
@@ -50,8 +51,8 @@ public class CctvController {
 
     @GetMapping("/tag/{tagName}")
     public DataResponseBody<List<PoiCctvDTO>> getPoiCctvListByTagName(@PathVariable String tagName){
-        Poi poi = poiService.findPoiIdsByTagName(tagName);
-        List<PoiCctv> poiCctvByPoi = cctvService.findPoiCctvByPoi(poi);
+        PoiTag poiTag = poiService.findPoiIdsByTagName(tagName);
+        List<PoiCctv> poiCctvByPoi = cctvService.findPoiCctvByPoi(poiTag.getPoi());
         List<PoiCctvDTO> dtoList = poiCctvByPoi.stream()
                 .map(PoiCctvDTO::from)
                 .toList();

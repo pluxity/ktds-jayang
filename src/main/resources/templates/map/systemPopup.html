@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-<div id="systemPopup" th:fragment="popup-template" style="z-index: 50;display: none">
+<div id="systemPopup" th:fragment="popup-template" style="z-index: 999;display: none">
     <div id="lightPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
@@ -15,7 +15,7 @@
         <!-- 설비 -->
         <div class="search-result search-result--space" style="display: block">
             <div class="search-result__space">
-                <div class="section section--select">
+                <div class="section section--info">
                     <div class="search-result__filter">
                         <div id="lightBuilding" class="select-box" style="width:50%;">
                             <!-- [D]
@@ -77,7 +77,7 @@
         </div>
     </div>
     <!-- 승강 -->
-    <div id="elevatorPop" class="popup-basic popup-basic--xwide"  style="display: none;z-index: 50">
+    <div id="elevatorPop" class="popup-basic popup-basic--xwide"  style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%);">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
 <!--            <ul class="header__tab system-pop-header-tab">-->
@@ -143,15 +143,16 @@
 
                         </ul>
                     </div>
+                    <div class="search-result__footer">
+                        <div id="elevatorPaging" class="search-result__paging" data-type="elevator">
+                            <button type="button" class="left"><span class="hide">left</span></button>
+                            <div class="number"></div>
+                            <button type="button" class="right"><span class="hide">right</span></button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="search-result__footer">
-                <div id="elevatorPaging" class="search-result__paging" data-type="elevator">
-                    <button type="button" class="left"><span class="hide">left</span></button>
-                    <div class="number"></div>
-                    <button type="button" class="right"><span class="hide">right</span></button>
-                </div>
-            </div>
+
         </div>
         <div id="escalatorContent" class="search-result search-result--space">
             <div class="search-result__space">
@@ -189,301 +190,181 @@
 
                         </ul>
                     </div>
-                </div>
-            </div>
-            <div class="search-result__footer">
-                <div id="escalatorPaging" class="search-result__paging" data-type="escalator">
-                    <button type="button" class="left"><span class="hide">left</span></button>
-                    <div class="number"></div>
-                    <button type="button" class="right"><span class="hide">right</span></button>
+                    <div class="search-result__footer">
+                        <div id="escalatorPaging" class="search-result__paging" data-type="escalator">
+                            <button type="button" class="left"><span class="hide">left</span></button>
+                            <div class="number"></div>
+                            <button type="button" class="right"><span class="hide">right</span></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- 주차 -->
-    <div id="parkingPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
-        <div class="popup-basic__head system-pop-header">
-            <h2 class="name"></h2>
-            <ul class="header__tab system-pop-header-tab">
-                <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
-                <li class="parking-guide-tab">주차 유도</li>
-                <li class="parking-monitor-tab">주차 관제</li>
-            </ul>
+    <!-- 주차 팝업 -->
+    <div id="parkingPop" class="popup-basic popup-basic--xwide" style="position:fixed;z-index:999;top:50%;left:50%;transform:translate(-50%,-50%);">
+        <div class="popup-basic__head">
+            <h2 class="name">주차</h2>
             <button type="button" class="close"><span class="hide">close</span></button>
         </div>
-        <div id="parkingGuideContent" class="search-result search-result--space ">
+        <div class="search-result search-result--space">
             <div class="search-result__space">
-                <div class="section section--select">
-                    <div class="parking-status-row">
-                        <span id="parkingCurrentCount">현재</span>
-                        <span style="color: gray">/</span>
-                        <span id="parkingTotalCount">전체</span>
-                        <button type="button" class="reflesh"><span class="hide">새로고침</span></button>
-                    </div>
-
-                    <div id="eqAccordion" class="accordion">
-                        <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
-                        <button class="accordion__btn accordion__btn--active" type="button">floor</button>
-                        <div class="accordion__detail">
-                            <div class="parkingStatus">혼잡</div>
-                            <div class="parking-">
-
+                <div id="parkingInfo" class="section section--info">
+                    <div class="parking-area">
+                        <div class="parking-area__head">주차 현황</div>
+                        <div class="parking-area__list">
+                            <div class="parking-area__summary">
+                                <div class="title"><strong>481</strong>/1200</div>
+                                <button id="parkSummaryRefresh" type="button" class="refresh"><span class="hide">새로고침</span></button>
+                            </div>
+                            <div class="item">
+                                <span class="item__level">B1</span>
+                                <div class="item__count"><strong>481</strong>/1200</div>
+                                <button type="button" class="item__link"><span class="hide">자세히보기</span></button>
+                            </div>
+                            <div class="item">
+                                <span class="item__level">B1</span>
+                                <div class="item__count"><strong>481</strong>/1200</div>
+                                <button type="button" class="item__link"><span class="hide">자세히보기</span></button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="section section--contents">
-                    <div class=section__head>
-                        <div class="parkingStatus">혼잡</div>
-                        <h3 class="title">동 | 층 </h3>
+                <div id="parkingContent" class="section section--contents">
+                    <div class="section__head">
+                        <h3 class="title">입출차 현황</h3>
                     </div>
-                    <div class="section__detail">
+                    <div class="search-result__filter">
+                        <div id="parkDatePicker" class="date-pickerwrap">
+                            <div class="date-picker">
+                                <input id="parkStartDate" type="date">
+                            </div>
+                            <span>~</span>
+                            <div class="date-picker">
+                                <input id="parkEndDate" type="date">
+                            </div>
+                        </div>
+                        <!-- select-box -->
+                        <!-- [D] width값 지정 -->
+                        <div id="deviceIdSelect" class="select-box" style="width:100px;">
+                            <!-- [D]
+                             select-box 클릭 시 select-box__btn--active 클래스 추가
+                             select-box 비활성화 시 select__btn--disabled 클래스 추가
+                             -->
+                            <span class="select-box__btn">입차장비ID</span>
+                            <div class="select-box__content">
+                                <ul>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="inoutTypeSelect" class="select-box" style="width:80px;">
+                            <!-- [D]
+                             select-box 클릭 시 select-box__btn--active 클래스 추가
+                             select-box 비활성화 시 select__btn--disabled 클래스 추가
+                             -->
+                            <span class="select-box__btn -select-box__btn--active">입출구</span>
+                            <div class="select-box__content">
+                                <ul>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="inoutCarIdSelect" class="select-box" style="width:80px;">
+                            <!-- [D]
+                             select-box 클릭 시 select-box__btn--active 클래스 추가
+                             select-box 비활성화 시 select__btn--disabled 클래스 추가
+                             -->
+                            <span class="select-box__btn -select-box__btn--active">출차ID</span>
+                            <div class="select-box__content">
+                                <ul>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="regularTypeSelect" class="select-box" style="width:80px;">
+                            <!-- [D]
+                             select-box 클릭 시 select-box__btn--active 클래스 추가
+                             select-box 비활성화 시 select__btn--disabled 클래스 추가
+                             -->
+                            <span class="select-box__btn -select-box__btn--active">구분</span>
+                            <div class="select-box__content">
+                                <ul>
+
+                                </ul>
+                            </div>
+                        </div>
+<!--                        <div id="carNoSelect" class="select-box" style="width:80px;">-->
+                        <div id="parkSearchSelect" class="select-box" style="width:80px;">
+                            <!-- [D]
+                             select-box 클릭 시 select-box__btn--active 클래스 추가
+                             select-box 비활성화 시 select__btn--disabled 클래스 추가
+                             -->
+                            <span class="select-box__btn -select-box__btn--active">차량번호</span>
+                            <div class="select-box__content">
+                                <ul>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- input[type="text"]-->
+                        <!-- [D] width값 지정 -->
+<!--                        <input id="deviceName" type="text" placeholder="입력" style="width:127px;">-->
+                        <input id="parkSearchInput" type="text" placeholder="입력" style="width:127px;">
+                        <button id="parkSearchBtn" type="button" class="button button--solid-middle">검색</button>
+                    </div>
+                    <div class="search-result__contents">
+                        <div id="parkingTotalCnt" class="title">
+                            <button id="parkRefresh" type="button" class="reflesh" style="cursor: pointer"><span class="hide">새로고침</span></button>
+                        </div>
+                        <div id="parkingContentList" class="event-info">
+                            <table>
+                                <caption class="hide">출입구</caption>
+                                <colgroup>
+                                    <col style="width:8%">
+                                    <col style="width:8%">
+                                    <col style="width:13%">
+                                    <col style="width:8%">
+                                    <col style="width:13%">
+                                    <col style="width:10%">
+                                    <col style="width:10%">
+                                    <col style="width:10%">
+                                    <col style="width:10%">
+                                </colgroup>
+                                <thead>
+                                    <th scope="col">번호</th>
+                                    <th scope="col">입차장비ID</th>
+                                    <th scope="col">입차 장비명</th>
+                                    <th scope="col">입출구</th>
+                                    <th scope="col">입출차시각</th>
+                                    <th scope="col">차량번호</th>
+                                    <th scope="col">출차 ID</th>
+                                    <th scope="col">주차요금</th>
+                                    <th scope="col">구분</th>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="parkingFooter" class="search-result__footer">
+                        <div id="parkingPaging" class="search-result__paging">
+                            <button type="button" class="left"><span class="hide">left</span></button>
+                            <div class="number"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                            <button type="button" class="right"><span class="hide">right</span></button>
+                        </div>
+                        <button style="cursor: pointer" type="button" class="download">데이터 다운로드</button>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div id="parkingMonitorContent" style="margin: 15px">
-            <div class="search-result__filter">
-                <div class="date-pickerwrap">
-                    <div class="date-picker">
-                        <input type="date" id="start-date">
-                    </div>
-                    <span>~</span>
-                    <div class="date-picker">
-                        <input type="date" id="end-date">
-                    </div>
-                </div>
-                <div class="select-box" style="width: 110px;">
-                    <span class="select-box__btn">주차 구분 전체</span>
-                    <div class="select-box__content">
-                        <ul>
-                            <li>주차 구분 전체</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="select-box" style="width: 80px;">
-                    <span class="select-box__btn">입구 전체</span>
-                    <div class="select-box__content">
-                        <ul>
-                            <li>입구 전체</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="select-box" style="width: 80px;">
-                    <span class="select-box__btn">출구 전체</span>
-                    <div class="select-box__content">
-                        <ul>
-                            <li>출구 전체</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="select-box" style="width: 80px;">
-                    <span class="select-box__btn">차량 번호</span>
-                    <div class="select-box__content">
-                        <ul>
-                            <li>차량 번호</li>
-                        </ul>
-                    </div>
-                </div>
-                <input type="text" placeholder="입력">
-                <button type="button" class="button button--solid-middle" style="width: 100px;">검색</button>
-            </div>
-            <div class="search-result__contents">
-                <div class="title">
-                    총 <span id="alarmCount">0</span><button type="button" class="reflesh"><span class="hide">새로고침</span></button>
-                </div>
-                <div class="event-info">
-                    <table>
-                        <colgroup>
-                            <!--<col style="width:">-->
-                        </colgroup>
-                        <thead>
-                        <tr>
-                            <th scope="col">번호</th>
-                            <th scope="col">차량번호</th>
-                            <th scope="col">주차구분</th>
-                            <th scope="col">상태</th>
-                            <th scope="col">주차층</th>
-                            <th scope="col">주차면</th>
-                            <th scope="col">입차 시각</th>
-                            <th scope="col">입구코드</th>
-                            <th scope="col">출차 시각</th>
-                            <th scope="col">출구코드</th>
-                            <th scope="col">주차 시간</th>
-                        </tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                            <tr>
-                                <td>21</td>
-                                <td>123가123</td>
-                                <td>정기</td>
-                                <td>출차</td>
-                                <td>B3</td>
-                                <td>B1_AO1-115</td>
-                                <td>2024-10-10 14:21:11</td>
-                                <td>IN00A</td>
-                                <td>2024-10-10 14:21:21</td>
-                                <td>OUT00A</td>
-                                <td>10:55:12</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="search-result__footer">
-                <div class="search-result__paging">
-                    <button type="button" class="left"><span class="hide">left</span></button>
-                    <div class="number"></div>
-                    <button type="button" class="right"><span class="hide">right</span></button>
-                </div>
-                <button type="button" class="download">데이터 다운로드</button>
             </div>
         </div>
     </div>
+
+    <!-- 팝업 배경 덮기 -->
+    <div class="popup-dimmed"></div>
     <!-- 에어컨 -->
-    <div id="airPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem; height: 780px; z-index: 50">
+    <div id="airPop" class="popup-basic popup-basic--wide"  style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%);">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>
@@ -606,7 +487,7 @@
         </div>
     </div>
     <!-- 에너지 -->
-    <div id="energyPop" class="popup-basic popup-basic--wide"  style="display: none;width: 80rem;z-index: 50">
+    <div id="energyPop" class="popup-basic popup-basic--wide"  style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%);">
         <div class="popup-basic__head">
             <h2 class="name"></h2>
             <button type="button" class="close"><span class="hide">close</span></button>

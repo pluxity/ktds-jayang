@@ -182,18 +182,25 @@
                     content.classList.add('active', 'show');
             });
 
-            Px.Poi.HideAll();
-
+            // Px.Poi.HideAll();
+            clearActiveCctvRows();
 
             if (target.id === 'poi-tab') {
+                document.getElementById('registeredPoiSelect').style.display = 'none';
                 editPoiToolBar.style.display = '';
                 getPoiRenderingAndList();
                 Px.VirtualPatrol.Clear();
                 Px.VirtualPatrol.Editor.Off();
             } else if (target.id === 'patrol-tab') {
+                document.getElementById('registeredPoiSelect').style.display = 'none';
                 editPoiToolBar.style.display = 'none';
                 getPoiRenderingAndList();
                 renderPatrolList();
+            } else if (target.id === 'cctv-tab') {
+                document.getElementById('registeredPoiSelect').style.display = 'flex';
+                getPoiRenderingAndList();
+                Px.VirtualPatrol.Clear();
+                Px.VirtualPatrol.Editor.Off();
             }
             changeEventFloor(document.getElementById('floorNo').value);
         });
@@ -206,14 +213,16 @@ function changeEventFloor(floorNo) {
     if (floorNo === '') {
         Px.Model.Visible.ShowAll();
         Px.Camera.ExtendView();
+        Px.Poi.HideAll();
     } else {
-
         Px.Model.Visible.HideAll();
+        Px.Poi.HideAll();
 
         const floor = BuildingManager.findFloorsByHistory().find(
             (floor) => floor.no === Number(floorNo),
         );
         Px.Model.Visible.Show(floor.id);
+        Px.Poi.ShowByProperty("floorNo", Number(floorNo));
         Px.Camera.ExtendView();
     }
     const activeId = document.querySelector(
@@ -226,11 +235,9 @@ function changeEventFloor(floorNo) {
             document.querySelector('#virtualPatrolCtrlToolBar').classList.remove('active');
             document.querySelector('#evacRouteBtnToolBar').classList.add('active');
 
-
             break;
         }
         case 'patrol-tab': {
-            getPoiRenderingAndList();
             clickPatrolTab();
             document.querySelector('#virtualPatrolCtrlToolBar').classList.add('active');
             document.querySelector('#evacRouteBtnToolBar').classList.remove('active');
@@ -238,6 +245,14 @@ function changeEventFloor(floorNo) {
             if(activePatrolId != null) {
                 patrolPointImport(activePatrolId.dataset.id, floorId);
             }
+            break;
+        }
+        case 'cctv-tab': {
+            document.querySelector('#virtualPatrolCtrlToolBar').classList.remove('active');
+            document.querySelector('#evacRouteBtnToolBar').classList.remove('active');
+            getCctvList();
+            const searchKeyword = document.querySelector('#cctvListSearchKeyword');
+            searchKeyword.value = ''; // 검색어 초기화
             break;
         }
         default:
@@ -366,6 +381,95 @@ function initBuilding() {
                         addPatrolPoi(poiInfo);
                     }
                 });
+
+                // CCTV POI 선택 이벤트
+                Px.Event.AddEventListener('pointerup', 'poi', (selectedPoi) => {
+                    const currentTab = document.querySelector('.viewer-sidebar .nav li a.active').id;
+                    if(currentTab === 'cctv-tab') {
+                        const poiCategoryName = selectedPoi.property.poiCategoryName;
+                        const poiDisplayName = selectedPoi.displayText;
+                        const poiId = Number(selectedPoi.id);
+
+                        const cctvTableBody = document.querySelector('#cctvListTable > tbody');
+                        if(poiCategoryName.toLowerCase().includes('cctv')) {
+                            // CCTV POI인 경우
+                            if (!renderCctvMap.has(poiId)) {
+                                // 사이드 목록에 표시되지 않는 CCTV인 경우
+                                renderCctvMap.set(poiId, []);
+                                const newCctvRow = document.createElement('tr');
+                                newCctvRow.innerHTML = `
+                                <th scope="row"><i class="fa-solid fa-circle-minus" style="color:#FF0000; cursor: pointer;" onclick="removeCctvRow(${poiId})">                                
+                                    </i>${poiDisplayName}</th>
+                                <td style="text-align: center; vertical-align: bottom; height: 100px;"></td>
+                                  `;
+                                newCctvRow.dataset.poiId = poiId;
+
+                                cctvTableBody.appendChild(newCctvRow);
+                                clearActiveCctvRows();
+                                newCctvRow.classList.add('active');
+                            }else {
+                                clearActiveCctvRows();
+                                const row = cctvTableBody.querySelector(`tbody > tr[data-poi-id="${poiId}"]`)
+                                row.classList.add('active');
+                                row.querySelectorAll('div').forEach(div => {
+                                    const poiId = Number(div.dataset.poiId);
+                                    Px.Poi.SetColor(poiId, '#f80606');
+                                });
+                            }
+                        } else {
+                            // 일반 POI인 경우
+                            const activeCctvRow = cctvTableBody.querySelector('tr.active');
+
+                            if(activeCctvRow && activeCctvRow.dataset.poiId) {
+                                const cctvId = Number(activeCctvRow.dataset.poiId);
+                                const equipmentCell = activeCctvRow.querySelector('td');
+
+                                if(equipmentCell) {
+                                    const existingEquipment = equipmentCell.querySelector(`div[data-poi-id="${poiId}"]`);
+
+                                    if(existingEquipment) {
+                                        // 이미 선택된 POI라면 제거
+                                        existingEquipment.remove();
+                                        Px.Poi.RestoreColor(poiId);
+
+                                        // Map과 Set에서도 제거
+                                        const cctvEquipments = renderCctvMap.get(cctvId);
+                                        if (cctvEquipments) {
+                                            renderCctvMap.set(cctvId, cctvEquipments.filter(id => id !== poiId));
+                                        }
+                                        selectedPoiSet.delete(poiId);
+
+                                    } else {
+                                        // 새로운 POI인지 확인
+                                        if (selectedPoiSet.has(poiId)) {
+                                            // 이미 다른 CCTV에서 선택된 POI
+                                            alertSwal('이미 다른 CCTV에서 선택된 장비입니다.');
+                                            return;
+                                        }
+
+                                        // 새로운 POI라면 추가
+                                        Px.Poi.SetColor(poiId, '#f80606');
+                                        const equipmentItem = document.createElement('div');
+                                        equipmentItem.textContent = poiDisplayName;
+                                        equipmentItem.style.marginBottom = '5px';
+                                        equipmentItem.dataset.poiId = poiId;
+                                        equipmentCell.appendChild(equipmentItem);
+
+                                        // renderCctvMap에 추가
+                                        if (!renderCctvMap.has(cctvId)) {
+                                            renderCctvMap.set(cctvId, new Set());
+                                        }
+                                        renderCctvMap.get(cctvId).push(poiId);
+                                        selectedPoiSet.add(poiId);
+                                    }
+                                }
+                            } else {
+                                alertSwal('먼저 CCTV를 선택해주세요.');
+                            }
+                        }
+                    }
+                });
+
                 console.log('sbm loading complete');
             },
         });
@@ -376,11 +480,21 @@ function initBuilding() {
         floors.forEach((floor) => {
             floorListOpt += `<option value='${floor.no}'>${floor.name}</option>`;
         });
-        const floorNo = document.querySelector('#floorNo');
-        floorNo.innerHTML = floorListOpt;
+        const floorSelectors = document.querySelectorAll('.floor-selector');
+        floorSelectors.forEach(selector => {
+            selector.innerHTML = floorListOpt;
+            selector.addEventListener('change', function () {
+                const selectedValue = this.value;
 
-        floorNo.addEventListener('change', function () {
-            changeEventFloor(this.value);
+                // 다른 floor-selector들도 같은 값으로 업데이트
+                floorSelectors.forEach(otherSelector => {
+                    if (otherSelector !== this) {  // 자기 자신 제외
+                        otherSelector.value = selectedValue;
+                    }
+                });
+                console.log(selectedValue);
+                changeEventFloor(selectedValue);
+            });
         });
     });
 }
@@ -661,7 +775,7 @@ function initializeViewerPoiModal() {
                 alertSwal('등록이 완료 되었습니다.').then(() => {
                     document.querySelector('#poiRegisterModal > div > div > div.modal-header > button').click();
                     // POI 리스트 새로고침 (기존 viewer 함수 활용)
-                        getPoiRenderingAndList();
+                        getPoiRenderingAndList(true);
                 });
             });
         });
@@ -708,7 +822,7 @@ function initializeViewerPoiModal() {
                 alertSwal('일괄등록이 완료 되었습니다.').then(() => {
                     document.querySelector('#poiBatchRegisterModal > div > div > div.modal-header > button').click();
                     // POI 리스트 새로고침
-                        getPoiRenderingAndList();
+                        getPoiRenderingAndList(true);
                 });
             }).catch(() => {
                 document.querySelector('#batchRegisterFile').value = '';
@@ -759,6 +873,268 @@ function getViewerTagNames(type) {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 }
+
+
+document.querySelector('#btnCctvListSearch').addEventListener('click', () => {
+    searchPoiList();
+});
+
+
+const searchPoiList = () => {
+    const floorNo = document.getElementById('floorNo').value;
+    const searchKeyword = document.querySelector('#cctvListSearchKeyword');
+
+    if(floorNo === '') {
+        alertSwal('층을 선택해주세요.');
+        searchKeyword.value = '';
+        return;
+    }
+    clearActiveCctvRows();
+
+    // 검색마다 renderCctvMap 초기화
+    renderCctvMap = new Map(cctvEquipmentMap);
+
+    if (searchKeyword.value) {
+        const buildingId = getUrlBuildingId();
+        const poiList = PoiManager.findByBuilding(buildingId);
+        const filteredPoiList = poiList.filter(poi => {
+            return poi.property.name.toLowerCase().includes(searchKeyword.value.toLowerCase());
+        });
+
+        // 검색어에 해당하는 모든 poi ids를 Set으로 저장
+        const filteredPoiIds = new Set(filteredPoiList.map(poi => poi.id));
+
+        for (const [cctvId, poiArray] of cctvEquipmentMap.entries()) {
+            // key(cctvId)가 filteredPoiIds에 포함되거나, value(poiArray)에 하나라도 포함된 POI가 있으면 유지
+            const hasValidKey = filteredPoiIds.has(cctvId);
+            const hasValidValue = poiArray.some(poi => filteredPoiIds.has(poi));
+
+            if (!hasValidKey && !hasValidValue) {
+                // key도 value도 모두 필터링되지 않았을 때만 삭제
+                renderCctvMap.delete(cctvId);
+            }
+        }
+        renderCctvList(renderCctvMap);
+    }
+}
+
+
+const renderCctvList = (data) => {
+    console.log(data);
+    const cctvListHtml = document.querySelector('.cctv-list');
+    cctvListHtml.innerHTML = '';
+
+    let rowsHtml = '';
+    data.forEach((value, key) => {
+        const cctvPoiData = Px.Poi.GetData(Number(key));
+        console.log("cctvPoiData:", cctvPoiData);
+
+        const poiCells = value.map(poiId => {
+            const poiData = Px.Poi.GetData(Number(poiId));
+            return `<div data-poi-id="${poiId}">${poiData.property.name}</div>`;
+        }).join('');
+
+        rowsHtml += `
+            <tr data-poi-id="${key}">
+                <th scope="row">
+                    <i class="fa-solid fa-circle-minus" style="color:#FF0000; cursor: pointer;" onclick="removeCctvRow(${cctvPoiData.id})"></i>
+                    ${cctvPoiData.property.name}
+                </th>
+                <td style="text-align: center; vertical-align: bottom; height: 100px;">
+                    ${poiCells}
+                </td>
+            </tr>`;
+    });
+
+    cctvListHtml.innerHTML = `<table id="cctvListTable" class="table"> 
+        <thead> 
+            <tr> 
+                <th style="width: 50%" scope="col">CCTV</th> 
+                <th style="width: 50%" scope="col">장비</th> 
+            </tr> 
+        </thead> 
+        <tbody> 
+            ${rowsHtml}
+        </tbody> 
+    </table>`;
+    const cctvTableBody = document.querySelector('#cctvListTable > tbody');
+    if (cctvTableBody) {
+        cctvTableBody.addEventListener('click', (event) => {
+            const clickedRow = event.target.closest('tr');
+            if (clickedRow && clickedRow.dataset.poiId) {
+                clearActiveCctvRows();
+                clickedRow.classList.add('active');
+                clickedRow.querySelectorAll('div').forEach(div => {
+                    const poiId = Number(div.dataset.poiId);
+                    Px.Poi.SetColor(poiId, '#f80606');
+                });
+            }
+        });
+    }
+}
+
+
+let cctvEquipmentMap = new Map(); // CCTV별 선택된 POI들 (db 저장용)
+let selectedPoiSet = new Set();   // 전체 선택된 POI들 (중복 방지용)
+let renderCctvMap = new Map(); // 화면 렌더링용 map(목록에 표시된)
+
+const removeCctvRow = (poiId) => {
+    const rowToDelete = document.querySelector('#cctvListTable > tbody > tr[data-poi-id="' + poiId + '"]');
+    const equipmentToRemove = rowToDelete.querySelectorAll('td > div');
+
+    if(equipmentToRemove.length > 0) {
+        equipmentToRemove.forEach(div => {
+            const equipmentPoiId = Number(div.dataset.poiId);
+            Px.Poi.RestoreColor(equipmentPoiId);
+            div.remove();
+
+            // 전체 선택된 POI Set에서도 제거
+            selectedPoiSet.delete(equipmentPoiId);
+        });
+    }
+
+    // CCTV POI 삭제
+    renderCctvMap.delete(poiId);
+    cctvEquipmentMap.delete(poiId);
+
+    rowToDelete.remove();
+};
+
+const clearActiveCctvRows = () => {
+    document.querySelectorAll('#cctvListTable > tbody > tr').forEach(row => {
+        if(row.classList.contains('active')) {
+            row.classList.remove('active');
+
+            // 선택된 POI의 색상 복원
+            row.querySelectorAll('div').forEach(div => {
+                const poiId = Number(div.dataset.poiId);
+                Px.Poi.RestoreColor(poiId);
+            });
+        }
+    });
+}
+
+const saveCctvEquipment = async () => {
+    const searchKeyword = document.querySelector('#cctvListSearchKeyword');
+    searchKeyword.value = ''; // 검색어 초기화
+
+    // 변경된 사항들을 cctvEquipmentMap에 동기화
+    renderCctvMap.forEach((equipmentSet, cctvId) => {
+        cctvEquipmentMap.set(cctvId, [...equipmentSet]); // 배열 복사
+    });
+
+    const data = convertMapToBackendData();
+
+    const params = new URLSearchParams({
+        buildingId: getUrlBuildingId(),
+        floorNo: document.getElementById('floorNo').value
+    })
+
+    try {
+        const response = await fetch(`/poi/cctv?${params}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alertSwal('저장되었습니다.');
+            getCctvList();
+        } else {
+            alertSwal('저장에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alertSwal('저장 중 오류가 발생했습니다.');
+    }
+};
+
+const getCctvList = async () => {
+    clearActiveCctvRows();
+    const buildingId = getUrlBuildingId();
+    const floorNo = document.getElementById('floorNo').value;
+
+    if (floorNo === '') {
+        const cctvListHtml = document.querySelector('.cctv-list');
+        cctvListHtml.innerHTML = '';
+        return;
+    }
+
+    try{
+        const params = new URLSearchParams({
+            buildingId: buildingId,
+            floorNo: floorNo
+        });
+
+        const response = await fetch(`/poi/cctvs/poi-ids?${params}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const { result: data } = result;
+
+        cctvEquipmentMap = new Map(
+            Object.entries(data).map(([key, value]) => [
+                Number(key),
+                value
+            ])
+        );
+        selectedPoiSet = new Set(Object.values(data).flat());
+        // 화면 렌더링용 renderCctvMap 초기화
+        renderCctvMap = new Map(cctvEquipmentMap); 
+
+        renderCctvList(renderCctvMap);
+
+    }catch (error) {
+        console.error('Error fetching CCTV list:', error);
+        alertSwal('CCTV 목록을 불러오는 중 오류가 발생했습니다.');
+    }
+}
+
+const convertMapToBackendData = () => {
+    const backendData = [];
+
+    cctvEquipmentMap.forEach((equipmentSet, cctvId) => {
+        // CCTV ID와 선택된 POI ID 목록으로 DTO 생성
+        const dto = {
+            cctvPoiId: parseInt(cctvId),  // CCTV인 POI의 ID
+            targetPoiIds: Array.from(equipmentSet).map(poiId => parseInt(poiId)) // CCTV를 추가할 주변 POI들의 ID 목록
+        };
+        
+        backendData.push(dto);
+    });
+    
+    return backendData;
+};
+
+const resetCctvList = () => {
+    const searchKeyword = document.querySelector('#cctvListSearchKeyword');
+    searchKeyword.value = ''; // 검색어 초기화
+    confirmSwal('초기화 시 취소 또는 복구되지 않습니다. \n 초기화하시겠습니까?').then((res) => {
+        if(res){
+            clearActiveCctvRows();
+            getCctvList();
+            alertSwal("초기화되었습니다. ")
+        }
+    });
+};
+
+document.getElementById('cctvSave').addEventListener('click', saveCctvEquipment);
+document.getElementById('cctvReset').addEventListener('click', resetCctvList);
+
+
+
+
 
 // 뷰어용 POI 데이터 초기화 함수
 function initializeViewerPoiData() {

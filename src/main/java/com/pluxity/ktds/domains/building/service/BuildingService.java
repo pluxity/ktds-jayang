@@ -70,14 +70,14 @@ public class BuildingService {
 
     @Transactional(readOnly = true)
     public List<BuildingResponseDTO> findAll() {
-        return buildingRepository.findAll().stream()
+        return buildingRepository.findAllByIsIndoor("Y").stream()
                 .map(Building::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<BuildingDetailResponseDTO> findDetailAll() {
-        return buildingRepository.findAll().stream()
+        return buildingRepository.findAllByIsIndoor("Y").stream()
                 .filter(building -> !"store".equals(building.getCode()))
                 .map(Building::toDetailResponseDTO)
                 .toList();
@@ -98,6 +98,17 @@ public class BuildingService {
     public BuildingDetailResponseDTO findStoreDetail() {
 
         Building building = buildingRepository.findByCode("store")
+                .orElse(null);
+        if (building == null) {
+            return null;
+        }
+        return building.toDetailResponseDTO();
+    }
+
+    @Transactional(readOnly = true)
+    public BuildingDetailResponseDTO findParkDetail() {
+
+        Building building = buildingRepository.findByCode("park")
                 .orElse(null);
         if (building == null) {
             return null;

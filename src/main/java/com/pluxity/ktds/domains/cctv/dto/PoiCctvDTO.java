@@ -7,10 +7,11 @@ import lombok.Builder;
 public record PoiCctvDTO(
         Long id,
         String cctvName,
-        String isMain
+        String isMain,
+        String cameraIp
 ) {
     public PoiCctvDTO(String cctvName, String isMain) {
-        this(null, cctvName, isMain);
+        this(null, cctvName, isMain, null);
     }
 
     public static PoiCctvDTO from(PoiCctv poiCctv) {

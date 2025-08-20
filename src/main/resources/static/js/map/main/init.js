@@ -492,16 +492,18 @@ const Init = (function () {
                 urlDataList: sbmDataArray,
                 center: "",
                 onLoad: function() {
-                    initPoi(buildingId).then(() => {
+                    initPoi(buildingId).then(async () => {
                         // initPoi 완료 후 실행
                         moveToPoiFromSession();
 
                         // 세션 처리
                         const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
                         const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
+                        const poiData = Px.Poi.GetData(selectedPoiId);
+                        renderPoiInfo(poiData);
 
                         if (mainCctv) {
-                            const mainCCTVTemplate = EventManager.createMainCCTVPopup(mainCctv);
+                            const mainCCTVTemplate = await EventManager.createMainCCTVPopup(mainCctv);
                             mainCCTVTemplate.style.position = 'fixed';
                             mainCCTVTemplate.style.top = '50%';
                             mainCCTVTemplate.style.transform = 'translateY(-50%)';

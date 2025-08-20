@@ -211,8 +211,37 @@ public class PoiService {
     }
 
     @Transactional(readOnly = true)
-    public PoiTag findPoiIdsByTagName(String tagName){
-        return poiTagRepository.findByTagName(tagName);
+    public PoiDetailResponseDTO findPoiDTOByTagName(String tagName){
+        Poi poi = poiRepository.findPoiByTagName(tagName)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_POI, "Not Found Poi with tagName: " + tagName));
+        List<String> cctvNames = poi.getPoiCctvs().stream()
+                        .map(PoiCctv::getCctvName)
+                        .toList();
+        List<PoiCctvDTO> byCctvNames = poiRepository.findByCctvNames(cctvNames);
+
+        return PoiDetailResponseDTO.builder()
+                .id(poi.getId())
+                .buildingId(poi.getBuilding().getId())
+                .floorNo(poi.getFloorNo())
+                .poiCategoryId(poi.getPoiCategory().getId())
+                .poiMiddleCategoryId(Optional.ofNullable(poi.getPoiMiddleCategory())
+                        .map(PoiMiddleCategory::getId)
+                        .orElse(null))
+                .iconSetId(poi.getIconSet().getId())
+                .position(poi.getPosition())
+                .rotation(poi.getRotation())
+                .scale(poi.getScale())
+                .name(poi.getName())
+                .code(poi.getCode())
+                .tagNames(poi.getTagNames())
+                .cctvList(byCctvNames)
+                .isLight(poi.getIsLight())
+                .lightGroup(poi.getLightGroup())
+                .cameraIp(poi.getCameraIp())
+                .cameraId(poi.getCameraId())
+                .build();
+
+
     }
 
     @Transactional

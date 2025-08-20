@@ -252,14 +252,14 @@ const EventManager = (() => {
 
             removeWarningElements();
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
-            toast(alarm); // 새 토스트 추가
+            // Px.Poi.ShowAll();
             warningPopup(alarm);
         });
 
         // 이벤트 해제 메시지 수신
         eventSource.addEventListener('disableAlarm', async (event) => {
             const disableAlarmId = JSON.parse(event.data);
+            console.log("disableAlarmId : ",disableAlarmId);
             removeAllAlarmElements(disableAlarmId); // 토스트 포함 모두 제거
         });
 
@@ -298,7 +298,7 @@ const EventManager = (() => {
     }
 
     // 토스트 알림
-    function toast(alarm) {
+    function toast(alarm, poiData) {
 
         const toast = document.querySelector('.toast');
 
@@ -312,7 +312,7 @@ const EventManager = (() => {
             <input type="hidden" class="alarm-id" value="${alarm.id}">
             <div class="toast__texts">
                 <strong>[SMS] ${alarmFormatTime(alarm.occurrenceDate)} </strong>
-                <p>[${alarm.alarmType}] ${alarm.buildingNm} ${alarm.floorNm} F </p>
+                <p>[${poiData.property.poiCategoryName}] ${poiData.property.buildingName} ${poiData.property.floorName} </p>
             </div>
         `;
 
@@ -334,13 +334,19 @@ const EventManager = (() => {
     // 경고 팝업
     async function warningPopup(alarm) {
         try {
-            const response = await api.get(`/cctv/tag/${alarm.tagName}`);
-            const cctvData = response.data;
-            const cctvList = cctvData.result;
+            const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
+            const alarmedPoi = response.data.result;
+            const cctvList = alarmedPoi.cctvList;
+            console.log("alarmedPoi : ",alarmedPoi);
+            console.log("alarm", alarm);
+            const poiData = PoiManager.findById(alarmedPoi.id);
+
+            // toast
+            toast(alarm, poiData); // 새 토스트 추가
 
 
             // 경고 팝업 생성
-            const warningTemplate = createWarningPopup(alarm);
+            const warningTemplate = createWarningPopup(alarm, poiData);
             document.body.appendChild(warningTemplate);
             const warningRect = warningTemplate.getBoundingClientRect();
 
@@ -351,13 +357,13 @@ const EventManager = (() => {
                 const subCctvs = cctvList.filter(cctv => cctv.isMain === 'N');
 
                 if (mainCctv) {
-                    const mainCCTVTemplate = createMainCCTVPopup(mainCctv);
+                    const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                     mainCCTVTemplate.style.top = `${warningRect.bottom + 10}px`;
                     mainCCTVTemplate.style.left = `${warningRect.left}px`;
                 }
 
                 if (subCctvs.length > 0) {
-                    const subCCTVTemplate = createSubCCTVPopup(subCctvs);
+                    const subCCTVTemplate = await createSubCCTVPopup(subCctvs);
                     subCCTVTemplate.style.bottom = `${warningRect.top}px`;
                     subCCTVTemplate.style.left = `${warningRect.right + 10}px`;
                 }
@@ -372,7 +378,7 @@ const EventManager = (() => {
             // 이벤트 해제, 3d맵 이동 이벤트
             const buttons = warningTemplate.querySelector('.buttons');
             buttons.querySelector('.button--ghost-middle').onclick = () => handleAlarmConfirm(alarm.id);
-            buttons.querySelector('.button--solid-middle').onclick = () => handle3DMapMove(alarm);
+            buttons.querySelector('.button--solid-middle').onclick = () => handle3DMapMove(alarmedPoi);
         } catch (error) {
             console.log('팝업 생성 실패', error);
         }
@@ -391,44 +397,45 @@ const EventManager = (() => {
     }
 
     // 3d 맵 이동
-    async function handle3DMapMove(alarm) {
+    async function handle3DMapMove(alarmPoi) {
         try {
             removeWarningElements()
-
-            const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
-            const data = response.data;
-            const poi = data.result;
-
-            // CCTV 정보 조회
-            const cctvResponse = await api.get(`/cctv/tag/${alarm.tagName}`);
-            const cctvData = cctvResponse.data;
-            const cctvList = cctvData.result;
+            const cctvList = alarmPoi.cctvList;
             const mainCctv = cctvList?.find(cctv => cctv.isMain === 'Y');
 
-            const poiData = Px.Poi.GetData(poi.id);
+            const poiData = Px.Poi.GetData(alarmPoi.id);
             const isViewerPage = window.location.pathname.includes('/viewer');
 
             if (!poiData || isViewerPage) {
-                sessionStorage.setItem('selectedPoiId', poi.id);
+                sessionStorage.setItem('selectedPoiId', alarmPoi.id);
                 sessionStorage.setItem('mainCctv', JSON.stringify(mainCctv));
-                window.location.href = `/map?buildingId=${poi.building.id}`; // 파라미터 추가
+                window.location.href = `/map?buildingId=${alarmPoi.buildingId}`; // 파라미터 추가
             } else {
-                Px.Model.Visible.Show(String(poiData.property.floorId));
-                Px.Poi.Show(poi.id);
+                Px.Model.Visible.HideAll();
+
+                const floor = BuildingManager.findFloorsByHistory().find(
+                    (floor) => Number(floor.no) === Number(poiData.property.floorNo),
+                );
+
+                Px.Model.Visible.Show(Number(floor.id));
+
+
+                Px.Poi.HideAll();
+                Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
                 Px.Camera.MoveToPoi({
-                    id: poi.id,
+                    id: alarmPoi.id,
                     isAnimation: true,
                     duration: 500,
-                    onComplete: () => {
+                    heightOffset:70,
+                    onComplete: async () => {
                         Init.renderPoiInfo(poiData);
                         if (mainCctv) {
-                            const mainCCTVTemplate = createMainCCTVPopup(mainCctv);
-                            mainCCTVTemplate.style.position = 'fixed';
+                            const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                             // 화면 중앙 높이
                             mainCCTVTemplate.style.top = '50%';
                             mainCCTVTemplate.style.transform = 'translateY(-50%)';
 
-                            // 화면 중앙을 기준으로 CCTV 팝업의 오른쪽 면이 중앙에 오도록
+                        // 화면 중앙을 기준으로 CCTV 팝업의 오른쪽 면이 중앙에 오도록
                             mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
                         }
                     }
@@ -440,11 +447,11 @@ const EventManager = (() => {
     }
 
     // 알람 팝업 생성
-    function createWarningPopup(alarm) {
+    function createWarningPopup(alarm, poiData) {
         const warningTemplate = document.createElement('div');
         warningTemplate.className = 'popup-warning';
         warningTemplate.innerHTML = `
-            <h2 class="popup-warning__head">[${alarm.process}] ${alarm.alarmType}</h2>
+            <h2 class="popup-warning__head">[${poiData.property.poiCategoryName}] ${alarm.event}</h2>
             <div class="popup-warning__content">
                 <input type="hidden" class="alarm-id" value="${alarm.id}">
                 <table>
@@ -456,11 +463,11 @@ const EventManager = (() => {
                     <tbody>
                         <tr>
                             <th scope="row">발생 위치</th>
-                            <td>${alarm.buildingNm} ${alarm.floorNm}F</td>
+                            <td>${poiData.property.buildingName} ${poiData.property.floorName}</td>
                         </tr>
                         <tr>
                             <th scope="row">장비명</th>
-                            <td>${alarm.deviceNm}</td>
+                            <td>${poiData.property.name}</td>
                         </tr>
                         <tr>
                             <th scope="row">발생 일시</th>
@@ -757,7 +764,7 @@ const EventManager = (() => {
     }
 
     function createCctvItem(cctv, index = 0, isMain = false) {
-        const canvasId = `cctv${cctv.id}`;
+        const canvasId = `cctv-${cctv.id}`;
         const width = isMain ? 800 : 320;
         const height = isMain ? 450 : 180;
         return `
@@ -768,10 +775,6 @@ const EventManager = (() => {
                 </div>
                 <div class="cctv-content">
                     <canvas id="${canvasId}" width="${width}" height="${height}"></canvas>
-                    <div class="cctv-controls">
-                        <button type="button" class="btn-play">▶</button>
-                        <button type="button" class="btn-rotate">↻</button>
-                    </div>
                 </div>
             </div>
         `;
@@ -785,8 +788,8 @@ const EventManager = (() => {
 
         document.body.appendChild(mainCctvTemplate);
 
-        const canvasId = `cctv${mainCctv.id}`;
-        const cameraIp = mainCctv.property.cameraIp;
+        const canvasId = `cctv-${mainCctv.id}`;
+        const cameraIp = mainCctv.cameraIp;
         await playLiveStream(canvasId, cameraIp);
 
         mainCctvTemplate.querySelector('.cctv-close').addEventListener('click', (event) => {
@@ -806,11 +809,11 @@ const EventManager = (() => {
         document.body.appendChild(subCctvTemplate);
 
         // 각각의 CCTV에 대해 스트리밍 시작
-        subCctvs.forEach((cctv) => {
+        for (const cctv of subCctvs) {
             const canvasId = `cctv-${cctv.id}`;
-            const cameraIp = cctv.property.cameraIp;
-            playLiveStream(canvasId, cameraIp);
-        });
+            const cameraIp = cctv.cameraIp;
+            await playLiveStream(canvasId, cameraIp);
+        }
 
         const closeButtons = subCctvTemplate.querySelectorAll('.cctv-close');
         closeButtons.forEach(button => {
@@ -933,16 +936,20 @@ const EventManager = (() => {
         const mainPopup = target.closest('.main-cctv-container');
         const subPopup = target.closest('.cctv-item');
         const sopPopup = target.closest('.sop-container');
+        let canvasId;
 
         if (sopPopup) {
             sopPopup.remove();
         }
         if (mainPopup) {
             mainPopup.remove();
+            canvasId = mainPopup.querySelector('canvas');
         }
         if (subPopup) {
             subPopup.remove();
+            canvasId = subPopup.querySelector('canvas');
         }
+        layerPopup.closePlayer(canvasId ? canvasId.id : null);
     }
 
 
@@ -1003,8 +1010,8 @@ const EventManager = (() => {
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
                 <td>${event.floorNm + 'F' || '-'}</td>
-                <td class="ellipsis">${event.alarmType || '-'}</td>
-                <td class="ellipsis">${event.deviceNm || '-'}</td>
+                <td class="ellipsis">${event.event || '-'}</td>
+                <td class="ellipsis">${event.poiName || '-'}</td>
                 <td>${formatTime(event.occurrenceDate)}</td>
             `;
             tableBody.appendChild(row);
@@ -1070,14 +1077,15 @@ const EventManager = (() => {
                             position: 'left',
                             align: 'center',
                             labels: {
-                                padding: 20,
-                                boxWidth: 40,
+                                padding: 10,
+                                boxWidth: 10,
                                 generateLabels: function (chart) {
                                     const data = chart.data;
                                     return data.labels.map((label, i) => ({
                                         text: `${label}: ${data.datasets[0].data[i]}`,
                                         fillStyle: data.datasets[0].backgroundColor[i],
-                                        index: i
+                                        index: i,
+                                        fontColor: '#FFFFFF',
                                     }));
                                 }
                             }

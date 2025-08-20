@@ -39,7 +39,11 @@ const TagManager = (() => {
         const uri = `/poi/clear-tags`;
 
         return new Promise((resolve) => {
-            api.delete(uri).then((result) => {
+            api.delete(uri,{
+                headers: {
+                    'X-Skip-Error-Alert': 'true'  // 에러 alert 제외 플래그
+                }
+            }).then((result) => {
                 const { result: data } = result.data;
                 console.log("서버로 부터 태그 동기화 해제 완료");
                 resolve(data);

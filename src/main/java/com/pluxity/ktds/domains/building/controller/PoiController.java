@@ -81,8 +81,8 @@ public class PoiController {
     }
 
     @GetMapping("/tagNames/{tagName}")
-    public DataResponseBody<Long> findPoiIdByTagName(@PathVariable String tagName) {
-        return DataResponseBody.of(service.findPoiIdsByTagName(tagName).getPoi().getId());
+    public DataResponseBody<PoiDetailResponseDTO> findPoiDTOByTagName(@PathVariable String tagName) {
+        return DataResponseBody.of(service.findPoiDTOByTagName(tagName));
     }
 
     @GetMapping("/cctvs/poi-ids")

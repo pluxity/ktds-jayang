@@ -2469,3 +2469,142 @@ input[type=text]:disabled, input[type=password]:disabled {
   -webkit-mask-position: -172px -12px;
   mask-position: -172px -12px;
 }
+
+.popup-warning {
+  background-color: var(--color-black);
+  border: 2px solid var(--color-danger);
+  border-radius: 10px;
+  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.75);
+  box-sizing: border-box;
+  width: 21.875rem;
+}
+.popup-warning__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  background-color: var(--color-danger);
+  border-radius: 7px 7px 0 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.01rem;
+  text-align: center;
+}
+.popup-warning__content {
+  padding: 20px;
+}
+.popup-warning__content table {
+  width: 100%;
+}
+.popup-warning__content table th, .popup-warning__content table td {
+  border: 1px solid var(--color-black);
+  background-color: #2C2E31;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.popup-warning__content table th {
+  padding: 7.5px 10px 7.5px 5px;
+  color: var(--color-grayscale02);
+}
+.popup-warning__content table td {
+  padding: 7.5px 5px 7.5px 10px;
+  color: var(--color-grayscale-light);
+  text-align: left;
+}
+.popup-warning__content .buttons {
+  display: flex;
+  grid-gap: 10px;
+  margin-top: 19px;
+}
+.popup-warning__content .buttons button:first-child {
+  flex: 1;
+}
+.popup-warning__content .buttons button:nth-child(2) {
+  flex: 2;
+}
+
+
+.popup-warning {
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+.main-cctv-container {
+  display: block;
+  position: fixed;
+  z-index: 999;
+}
+
+.main-cctv-container {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cctv-container {
+  display: block;
+  position: fixed;
+  z-index: 999;
+}
+
+.main-cctv-item canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+
+.main-cctv-container {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.main-cctv-item {
+  width: 450px;
+}
+
+.main-cctv-item .cctv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #333;
+  color: white;
+  border-radius: 4px 4px 0 0;
+}
+
+.main-cctv-item canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.main-cctv-item .cctv-controls {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.event-state .table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.event-state .table td {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.event-state .table td.ellipsis {
+  text-overflow: ellipsis;
+}

@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 
 public record Last24HoursEventDTO(
     String buildingNm,
-    String floorNm,
-    AlarmStatus alarmType,
-    String deviceNm,
+    int floorNm,
+    String event,
+    String poiName,
     LocalDateTime occurrenceDate
 ) {}

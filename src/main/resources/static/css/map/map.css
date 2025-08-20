@@ -3964,4 +3964,17 @@ canvas {
   justify-content: center;
 }
 
+.event-state .table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.event-state .table td {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.event-state .table td.ellipsis {
+  text-overflow: ellipsis;
+}
 /*# sourceMappingURL=map.css.map */

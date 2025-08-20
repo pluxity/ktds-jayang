@@ -1,5 +1,11 @@
 const EventManager = (() => {
 
+    // 전역 변수로 연결 상태 관리
+    let eventSource = null;
+    let reconnectAttempts = 0;
+    let reconnectTimeout = null;
+    const MAX_RECONNECT_ATTEMPTS = 10;
+
     // 이벤트 사이드바 토글
     const eventState = () => {
         const eventStateCtrl = document.querySelector('.event-state__ctrl');
@@ -243,31 +249,106 @@ const EventManager = (() => {
 
     // SSE 연결
     const connectToSSE = () => {
-        const eventSource = new EventSource(`/events/subscribe`);
+        // 이미 연결 중이면 중복 실행 방지
+        if (eventSource && (eventSource.readyState === EventSource.CONNECTING || eventSource.readyState === EventSource.OPEN)) {
+            console.log('이미 SSE 연결 중입니다.');
+            return;
+        }
 
-        // 이벤트 발생 시
-        eventSource.addEventListener('newAlarm', async (event) => {
-            const alarm = JSON.parse(event.data);
-            console.log("alarm : ",alarm);
+        // 최대 재연결 시도 횟수 초과시 중단
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+            console.error('최대 재연결 시도 횟수 초과. 수동으로 새로고침해주세요.');
+            return;
+        }
 
-            removeWarningElements();
-            Px.VirtualPatrol.Clear();
-            // Px.Poi.ShowAll();
-            warningPopup(alarm);
-        });
+        try {
+            eventSource = new EventSource(`/events/subscribe`);
 
-        // 이벤트 해제 메시지 수신
-        eventSource.addEventListener('disableAlarm', async (event) => {
-            const disableAlarmId = JSON.parse(event.data);
-            console.log("disableAlarmId : ",disableAlarmId);
-            removeAllAlarmElements(disableAlarmId); // 토스트 포함 모두 제거
-        });
+            // 이벤트 발생 시
+            eventSource.addEventListener('newAlarm', async (event) => {
+                try {
+                    const alarm = JSON.parse(event.data);
+                    console.log("alarm : ", alarm);
 
-        eventSource.onerror = () => {
-            console.error("SSE 연결 끊김. 0.5초 후 재연결 시도...");
+                    removeWarningElements();
+                    Px.VirtualPatrol.Clear();
+                    // Px.Poi.ShowAll();
+                    warningPopup(alarm);
+                } catch (error) {
+                    console.error('알람 데이터 파싱 오류:', error);
+                }
+            });
+
+            // 이벤트 해제 메시지 수신
+            eventSource.addEventListener('disableAlarm', async (event) => {
+                try {
+                    const disableAlarmId = JSON.parse(event.data);
+                    console.log("disableAlarmId : ", disableAlarmId);
+                    removeAllAlarmElements(disableAlarmId); // 토스트 포함 모두 제거
+                } catch (error) {
+                    console.error('알람 해제 데이터 파싱 오류:', error);
+                }
+            });
+
+            // 연결 성공시
+            eventSource.onopen = () => {
+                console.log('SSE 연결 성공');
+                reconnectAttempts = 0;
+                clearTimeout(reconnectTimeout);
+            };
+
+            // 에러 발생시
+            eventSource.onerror = (error) => {
+                console.error("SSE 연결 에러:", error);
+
+                if (eventSource) {
+                    eventSource.close();
+                    eventSource = null;
+                }
+
+                // 재연결 시도
+                reconnectAttempts++;
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 30000); // 최대 30초
+
+                console.log(`${reconnectAttempts}번째 재연결 시도 (${delay}ms 후)...`);
+
+                reconnectTimeout = setTimeout(() => {
+                    connectToSSE();
+                }, delay);
+            };
+
+        } catch (error) {
+            console.error('SSE 연결 생성 실패:', error);
+            // 에러 발생시에도 재연결 시도
+            reconnectAttempts++;
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 30000);
+            reconnectTimeout = setTimeout(() => {
+                connectToSSE();
+            }, delay);
+        }
+    };
+
+    // 페이지 이동/닫힘 시 리소스 정리
+    const cleanupOnPageUnload = () => {
+        if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+            reconnectTimeout = null;
+        }
+
+        if (eventSource) {
             eventSource.close();
-            setTimeout(connectToSSE, 500);
-        };
+            eventSource = null;
+        }
+
+        reconnectAttempts = 0;
+        console.log('페이지 언로드 시 리소스 정리 완료');
+    };
+
+    // 이벤트 리스너 등록
+    const initializeEventListeners = () => {
+        // 페이지 언로드 시 정리
+        window.addEventListener('beforeunload', cleanupOnPageUnload);
+        window.addEventListener('unload', cleanupOnPageUnload);
     };
 
     // 이벤트 발생 시 모든 팝업 제거용

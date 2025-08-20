@@ -2693,8 +2693,8 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 }
 
 .poi-menu__list--map li > a {
-  -webkit-mask-image: url("../../dashboard/img/icon_poi_3d.svg");
-  mask-image: url("../../dashboard/img/icon_poi_3d.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon_poi_3d.svg");
+  mask-image: url("/static/images/viewer/icon_poi_3d.svg");
 }
 
 .poi-menu__list--map li.patrol a {

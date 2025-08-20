@@ -1339,7 +1339,7 @@ $base-img-path:"/static/images/viewer/";
                 margin-top:3px; 
                 background:linear-gradient(178deg, #00F5BF 44.07%, #15B9FF 99.49%); 
                 li{
-                    > a{-webkit-mask-image:url('../../dashboard/img/icon_poi_3d.svg'); mask-image:url('../../dashboard/img/icon_poi_3d.svg');}
+                    > a{-webkit-mask-image:url('#{$base-img-path}icon_poi_3d.svg'); mask-image:url('#{$base-img-path}icon_poi_3d.svg');}
                     &.patrol a {-webkit-mask-position:-52px -12px; mask-position:-52px -12px;}
                     &.sop a {-webkit-mask-position:-92px -12px; mask-position:-92px -12px;}
                     &.shelter a {-webkit-mask-position:-132px -12px; mask-position:-132px -12px;}

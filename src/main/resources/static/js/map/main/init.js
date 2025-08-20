@@ -492,27 +492,8 @@ const Init = (function () {
                 urlDataList: sbmDataArray,
                 center: "",
                 onLoad: function() {
-                    initPoi(buildingId).then(async () => {
-                        // initPoi 완료 후 실행
+                    initPoi(buildingId).then(() => {
                         moveToPoiFromSession();
-
-                        // 세션 처리
-                        const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
-                        const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
-                        const poiData = Px.Poi.GetData(selectedPoiId);
-                        renderPoiInfo(poiData);
-
-                        if (mainCctv) {
-                            const mainCCTVTemplate = await EventManager.createMainCCTVPopup(mainCctv);
-                            mainCCTVTemplate.style.position = 'fixed';
-                            mainCCTVTemplate.style.top = '50%';
-                            mainCCTVTemplate.style.transform = 'translateY(-50%)';
-                            mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
-                        }
-
-                        // 세션 스토리지 정리
-                        sessionStorage.removeItem('mainCctv');
-                        sessionStorage.removeItem('selectedPoiId');
                     });
                     Px.Util.SetBackgroundColor('#333333');
                     Px.Camera.FPS.SetHeightOffset(15);
@@ -601,13 +582,30 @@ const Init = (function () {
         }
     };
 
-    const moveToPoiFromSession = () => {
+    const moveToPoiFromSession = async () => {
 
-        const selectedPoiId = sessionStorage.getItem('selectedPoiId');
-        if(selectedPoiId){
+        const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
+        const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
+
+
+        if (selectedPoiId) {
             moveToPoi(selectedPoiId);
             Px.Poi.Show(selectedPoiId);
+            const poiData = Px.Poi.GetData(selectedPoiId);
+            await renderPoiInfo(poiData);
         }
+
+        if (mainCctv) {
+            const mainCCTVTemplate = await EventManager.createMainCCTVPopup(mainCctv);
+            mainCCTVTemplate.style.position = 'fixed';
+            mainCCTVTemplate.style.top = '50%';
+            mainCCTVTemplate.style.transform = 'translateY(-50%)';
+            mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
+        }
+
+        // 세션 스토리지 정리
+        sessionStorage.removeItem('mainCctv');
+        sessionStorage.removeItem('selectedPoiId');
     }
 
     const moveToPoi = (id) => {

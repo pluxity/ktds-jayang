@@ -216,6 +216,7 @@
                         if (poiInfo.property.floorNo !== Number(floorNo)) {
                             popup.remove();
                             layerPopup.closePlayers();
+                            TagManager.clearTags();
                         }
                     })
                 }
@@ -527,11 +528,13 @@ const Init = (function () {
 
                             if (popupPoiId === clickedPoiId) {
                                 popup.remove();
+                                TagManager.clearTags();
                                 layerPopup.closePlayers();
                                 samePopupOpen = true;
                             } else {
                                 layerPopup.closePlayers();
                                 popup.remove();
+                                TagManager.clearTags();
                             }
                         });
                         if (poiInfo.property.isLight) {

@@ -220,12 +220,16 @@ public class TagService {
                 "C-P5-PK-GU-null-Parking"
         );
 
-        TagResponseDTO all = restTemplate.postForObject(
+        ResponseEntity<String> addRes = tagClientService.addTags(parkingTags);
+        if (!addRes.getStatusCode().is2xxSuccessful()) {
+            throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+        }
+
+        return restTemplate.postForObject(
                 baseUrl + "/?ReadTags",
                 parkingTags,
                 TagResponseDTO.class
         );
-        return all;
     }
 
     @Transactional

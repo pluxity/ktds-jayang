@@ -68,10 +68,10 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
-            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
-            if (!addRes.getStatusCode().is2xxSuccessful()) {
-                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
-            }
+//            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
+//            if (!addRes.getStatusCode().is2xxSuccessful()) {
+//                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+//            }
 
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
@@ -149,10 +149,10 @@ public class TagService {
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
 
-            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
-            if (!addRes.getStatusCode().is2xxSuccessful()) {
-                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
-            }
+//            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
+//            if (!addRes.getStatusCode().is2xxSuccessful()) {
+//                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+//            }
 
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",

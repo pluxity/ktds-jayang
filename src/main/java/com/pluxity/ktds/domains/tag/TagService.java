@@ -39,11 +39,6 @@ public class TagService {
 
     public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
 
-//        String mappedBuilding = (buildingName.equals("A") || buildingName.equals("B")) ? buildingName : "C";
-//
-//        String prefix = type.equals("ELEV")
-//                ? String.format("%s-null-EV-ELEV-", mappedBuilding)
-//                : String.format("%s-null-EV-ESCL-", mappedBuilding);
         boolean isAllBuilding = (buildingId == null || buildingName == null);
         List<Poi> pois = poiRepository.findByBuildingIdAndMiddleCategoryName(buildingId, "승강기");
 
@@ -73,10 +68,13 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
+            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
+            if (!addRes.getStatusCode().is2xxSuccessful()) {
+                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+            }
 
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
-//                    "http://192.168.4.149:9999/api/tags/data/filter",
                     allTagNamesToFetch,
                     TagResponseDTO.class
             );
@@ -128,7 +126,6 @@ public class TagService {
     public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type) {
 
         String prefix = "C-null-EV-ESCL-";
-//        List<Poi> pois = poiRepository.findPoisByBuildingId(buildingId);
 
         List<Poi> pois = poiRepository.findByMiddleCategoryName("에스컬레이터");
 
@@ -151,9 +148,14 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
+
+            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
+            if (!addRes.getStatusCode().is2xxSuccessful()) {
+                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+            }
+
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
-//                    "http://192.168.4.149:9999/api/tags/data/filter",
                     allTagNamesToFetch,
                     TagResponseDTO.class
             );
@@ -197,7 +199,7 @@ public class TagService {
     }
 
     // test
-    public TagResponseDTO processParkingTags() {
+    public TagResponseDTO processParkingTags(boolean register) {
 
         List<String> parkingTags = List.of(
                 "C-null-PK-GU-G-ParkTotal",
@@ -220,9 +222,11 @@ public class TagService {
                 "C-P5-PK-GU-null-Parking"
         );
 
-        ResponseEntity<String> addRes = tagClientService.addTags(parkingTags);
-        if (!addRes.getStatusCode().is2xxSuccessful()) {
-            throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+        if (register) {
+            ResponseEntity<String> addRes = tagClientService.addTags(parkingTags);
+            if (!addRes.getStatusCode().is2xxSuccessful()) {
+                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+            }
         }
 
         return restTemplate.postForObject(

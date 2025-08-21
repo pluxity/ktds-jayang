@@ -294,8 +294,16 @@
                     </div>
                 </div>
             </div>
-            <!-- [!] 이벤트 메뉴 영역 미리 적용 추후 작업 예정 -->
-            <aside class="event-state event-state--active"></aside>
+            <!-- [!] 이벤트 메뉴 영역 -->
+            <aside class="event-state event-state--active">
+                <button type="button" class=event-state__ctrl><span class="hide">ctrl button</span></button>
+                <div class="event-state__title">
+                    이벤트 통계
+                    <a href="#none" class="event-state__button">
+                        <span class="hide">이벤트 통계 전체보기</span>
+                    </a>
+                </div>
+            </aside>
         </div>
 
         <!-- ptz viewer -->
@@ -874,7 +882,7 @@
         </div>
 
         <!-- 시스템 에어컨 팝업 -->
-        <div class="popup-basic popup-basic--xwide" style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%); ">
+        <div class="popup-basic popup-basic--xwide" style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%); display:none;">
             <div class="popup-basic__head">
                 <h2 class="name">시스템 에어컨</h2>
                 <button type="button" class="close"><span class="hide">close</span></button>
@@ -1398,7 +1406,7 @@
         
 
        <!-- 팝업 배경 덮기 -->
-       <div class="popup-dimmed"></div>
+       <div class="popup-dimmed" style="display:none;"></div>
     </div>
 </body>
 </html>

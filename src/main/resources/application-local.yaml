@@ -86,3 +86,7 @@ cctv:
 tag:
   client:
     max-retries: 3
+
+api:
+  parking:
+    access-token: pluxity

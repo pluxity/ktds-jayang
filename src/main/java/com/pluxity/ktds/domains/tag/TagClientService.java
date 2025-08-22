@@ -1,14 +1,17 @@
 package com.pluxity.ktds.domains.tag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pluxity.ktds.domains.tag.constant.TagStatus;
 import com.pluxity.ktds.domains.tag.dto.AlarmData;
 import com.pluxity.ktds.domains.tag.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.tag.dto.TagData;
 import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.*;
@@ -19,15 +22,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class TagClientService {
 
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
+
     @Value("${event.server.access-key}")
     private String accessKey;
+
     @Value("${event.server.base-url}")
     private String baseUrl;
+
+    @Value("${tag.client.max-retries}")
+    private int maxRetries;
+
     public TagClientService(ObjectMapper objectMapper) {
         this.restTemplate = new RestTemplate();
         this.restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
@@ -44,23 +54,66 @@ public class TagClientService {
 
     // 감시태그 등록(태그 추가 -> 모니터링)
     public ResponseEntity<String> addTags(List<String> tags) {
-        try {
-            String requestStr = objectMapper.writeValueAsString(tags);
-            HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
-            ResponseEntity<String> response = restTemplate.exchange(
-                    baseUrl + "/?AddTags",
-                    HttpMethod.POST,
-                    request,
-                    String.class
-            );
-            return response;
-        } catch (RestClientException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body("Service Unavailable : " + e.getMessage());
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("JSON Processing Error : " + e.getMessage());
+        int retryCount = 0;
+        int tagSize = tags.size();
+
+        while (retryCount < maxRetries) {
+            try {
+                String requestStr = objectMapper.writeValueAsString(tags);
+                HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
+
+                ResponseEntity<String> response = restTemplate.exchange(
+                        baseUrl + "/?AddTags",
+                        HttpMethod.POST,
+                        request,
+                        String.class
+                );
+
+                // 응답 검증
+                JsonNode jsonNode = objectMapper.readTree(response.getBody());
+                int addTagsValue = jsonNode.get("AddTags").asInt();
+
+
+                if (addTagsValue == tagSize) {
+                    return response; // 성공 시 즉시 반환
+                }
+
+                // 응답값이 tagSize와 다르면 재시도
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    try {
+                        Thread.sleep(1000 * retryCount); // 재시도 간격을 점진적으로 증가
+                        log.info("retryCount = {}, tagSize = {}", retryCount, tagSize);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Interrupted during retry");
+                    }
+                }
+
+            } catch (RestClientException e) {
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                            .body("Service Unavailable after " + maxRetries + " retries: " + e.getMessage());
+                }
+                // 재시도 간격
+                try {
+                    Thread.sleep(1000 * retryCount);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Interrupted during retry");
+                }
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("JSON Processing Error : " + e.getMessage());
+            }
         }
+
+        // 최대 재시도 횟수 초과
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Maximum retry attempts (" + maxRetries + ") exceeded. Expected: " + tagSize + " tags to be added");
     }
 
     // 태그 값 읽기
@@ -224,81 +277,123 @@ public class TagClientService {
         }
     }
 
-    // readTag Test(ReadTags와 동일)
-    // 추 후 url 변경
     public ResponseEntity<String> testReadTags(List<String> tags) {
-        try {
-            String requestStr = objectMapper.writeValueAsString(tags);
-            HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
-            ResponseEntity<String> response = restTemplate.exchange(
-                    baseUrl + "/?ReadTags",
-                    HttpMethod.POST,
-                    request,
-                    String.class
-            );
+        int retryCount = 0;
 
-            if (response.getBody() == null) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No data");
-            }
-            TagResponseDTO rawResponse = objectMapper.readValue(response.getBody(), TagResponseDTO.class);
+        while (retryCount < maxRetries) {
+            try {
+                String requestStr = objectMapper.writeValueAsString(tags);
+                HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
+                ResponseEntity<String> response = restTemplate.exchange(
+                        baseUrl + "/?ReadTags",
+                        HttpMethod.POST,
+                        request,
+                        String.class
+                );
 
-            List<TagData> processedTags = new ArrayList<>();
-            for (TagData td : rawResponse.tags()) {
-                String tagName = td.tagName();
-                String[] parts = tagName.split("-");
-                String rawValue = td.currentValue();
-                String enumName = parts[parts.length - 1];
-                String desc = null;
-                String prefix = parts[0];
-                String category = parts[2];
-                String evMiddleCategory = parts[3];
+                if (response.getBody() == null) {
+                    return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No data");
+                }
+                TagResponseDTO rawResponse = objectMapper.readValue(response.getBody(), TagResponseDTO.class);
 
-                try {
-                    if("EV".equals(category)) {
-                        if ("ELEV".equals(evMiddleCategory)) {
-                            if ("A".equals(prefix) || "B".equals(prefix)) {
-                                desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(rawValue);
-                            } else {
-                                desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(rawValue);
+                List<TagData> processedTags = new ArrayList<>();
+                boolean hasAbnormalStatus = false;
+
+                for (TagData td : rawResponse.tags()) {
+
+                    if (td.tagStatus() != TagStatus.NORMAL) {
+                        hasAbnormalStatus = true;
+                        break;
+                    }
+
+                    String tagName = td.tagName();
+                    String[] parts = tagName.split("-");
+                    String rawValue = td.currentValue();
+                    String enumName = parts[parts.length - 1];
+                    String desc = null;
+                    String prefix = parts[0];
+                    String category = parts[2];
+                    String evMiddleCategory = parts[3];
+
+                    try {
+                        if("EV".equals(category)) {
+                            if ("ELEV".equals(evMiddleCategory)) {
+                                if ("A".equals(prefix) || "B".equals(prefix)) {
+                                    desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(rawValue);
+                                } else {
+                                    desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(rawValue);
+                                }
+                            } else if ("ESCL".equals(evMiddleCategory)) {
+                                desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(rawValue);
                             }
-                        } else if ("ESCL".equals(evMiddleCategory)) {
-                            desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(rawValue);
+                        } else if ("VAV".equals(category)) {
+                            String s = parseSuffix(enumName);
+                            desc = ElevatorTagManager.VavTag.valueOf(s).getValueDescription(rawValue);
+                        } else if ("FU".equals(category)) {
+                            desc = ElevatorTagManager.CellTag.valueOf(enumName).getValueDescription(rawValue);
+                        } else {
+                            desc = rawValue;
                         }
-                    } else if ("VAV".equals(category)) {
-                        String s = parseSuffix(enumName);
-                        desc = ElevatorTagManager.VavTag.valueOf(s).getValueDescription(rawValue);
-                    } else if ("FU".equals(category)) {
-                        desc = ElevatorTagManager.CellTag.valueOf(enumName).getValueDescription(rawValue);
-                    } else {
+
+                    } catch (IllegalArgumentException e) {
                         desc = rawValue;
                     }
 
-                } catch (IllegalArgumentException e) {
-                    desc = rawValue;
+                    processedTags.add(new TagData(
+                            tagName,
+                            desc,
+                            td.tagStatus(),
+                            td.alarmStatus()
+                    ));
                 }
 
-                processedTags.add(new TagData(
-                        tagName,
-                        desc,
-                        td.tagStatus(),
-                        td.alarmStatus()
-                ));
-            }
-            TagResponseDTO processedDto = new TagResponseDTO(
-                    processedTags.size(),
-                    rawResponse.timestamp(),
-                    processedTags
-            );
+                // 모든 태그가 normal 상태인 경우에만 성공으로 처리
+                if (!hasAbnormalStatus) {
+                    TagResponseDTO processedDto = new TagResponseDTO(
+                            processedTags.size(),
+                            rawResponse.timestamp(),
+                            processedTags
+                    );
 
-            String resultJson = objectMapper.writeValueAsString(processedDto);
-            return ResponseEntity.ok(resultJson);
-        } catch (RestClientException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body("Service Unavailable : " + e.getMessage());
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("JSON Processing Error : " + e.getMessage());
+                    String resultJson = objectMapper.writeValueAsString(processedDto);
+                    return ResponseEntity.ok(resultJson);
+                }
+
+                // abnormal 상태가 있는 경우 재시도
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    try {
+                        Thread.sleep(1000 * retryCount); // 재시도 간격을 점진적으로 증가
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Interrupted during retry");
+                    }
+                }
+
+            } catch (RestClientException e) {
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                            .body("Service Unavailable after " + maxRetries + " retries: " + e.getMessage());
+                }
+                // 재시도 간격
+                try {
+                    Thread.sleep(1000 * retryCount);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Interrupted during retry");
+                }
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("JSON Processing Error : " + e.getMessage());
+            }
         }
+
+        // 최대 재시도 횟수 초과
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Maximum retry attempts (" + maxRetries + ") exceeded due to abnormal tag status");
     }
 
     public ResponseEntity<String> testReadAlarm(List<String> tags) {

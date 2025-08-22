@@ -83,3 +83,6 @@ cctv:
   username: admin
   password: pluxity123!@#
 
+tag:
+  client:
+    max-retries: 3

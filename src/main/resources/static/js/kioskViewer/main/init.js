@@ -231,10 +231,9 @@
                     Px.Camera.MoveToPoi({
                         id: kioskPoi.id,
                         isAnimation: true,
-                        isTopView: true,
-                        topViewDistance: 500,
                         duration: 500,
-                        distanceOffset: 500
+                        heightOffset: 100,
+                        distanceOffset: 1000
                     });
                 })
 
@@ -278,10 +277,9 @@ const Init = (function () {
         Px.Camera.MoveToPoi({
             id: kioskPoi.id,
             isAnimation: true,
-            isTopView: true,
-            topViewDistance: 500,
             duration: 500,
-            distanceOffset: 500
+            heightOffset: 100,
+            distanceOffset: 1000
         });
     }
 

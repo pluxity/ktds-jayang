@@ -43,7 +43,7 @@
                 </div>
             </div>
             <div id="poiMenuList" class="poi-menu__list">
-                <ul>
+                <ul class="default_group">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <li class="cctv">
                         <a href="javascript:void(0)"><span class="hide">cctv</span></a>
@@ -127,22 +127,22 @@
                     </li>
 
                 </ul>
-                <ul>
-                    <li class="parking">
+                <ul class="system_group">
+                    <li id="parkingTab" class="parking">
                         <a href="javascript:void(0)"><span class="hide">주차관제</span></a>
                         <div class="tool-tip">
                             <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
                         </div>
                     </li>
 
-                    <li class="elevator">
+                    <li id="elevatorTab" class="elevator">
                         <a href="javascript:void(0)"><span class="hide">승강기</span></a>
                         <div class="tool-tip">
                             <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
                         </div>
                     </li>
 
-                    <li class="ac">
+                    <li id="airTab" class="ac">
                         <a href="javascript:void(0)"><span class="hide">시스템에어컨</span></a>
                         <div class="tool-tip">
                             <span class="tool-tip__text tool-tip__text--bottom">시스템에어컨</span>
@@ -152,7 +152,7 @@
             </div>
             <!-- poi menu list map -->
             <div id="poiMenuListMap" class="poi-menu__list poi-menu__list--map">
-                <ul>
+                <ul class="map_group">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <li class="patrol">
                         <a href="javascript:void(0)"><span class="hide">가상순찰</span></a>
@@ -181,17 +181,15 @@
                 </ul>
             </div>
         </div>
-        <div class="system-tap">
-            <ul>
-                <!-- [D] 선택 시 active 클래스 추가 -->
-<!--                <li id="equipment">설비</li>-->
-                <li id="elevatorTab">승강</li>
-                <li id="parkingTab">주차</li>
-                <li id="airTab">시스템 에어컨</li>
-<!--                <li id="energyTab">에너지</li>-->
-<!--                <li id="electricTab">전력</li>-->
-            </ul>
-        </div>
+<!--        <div class="system-tap">-->
+<!--            <ul>-->
+<!--                &lt;!&ndash; [D] 선택 시 active 클래스 추가 &ndash;&gt;-->
+<!--&lt;!&ndash;                <li id="equipment">설비</li>&ndash;&gt;-->
+<!--               -->
+<!--&lt;!&ndash;                <li id="energyTab">에너지</li>&ndash;&gt;-->
+<!--&lt;!&ndash;                <li id="electricTab">전력</li>&ndash;&gt;-->
+<!--            </ul>-->
+<!--        </div>-->
         <!--  floor-info--active 추가 여부 -->
         <div id="floor-info" class="floor-info floor-info--active">
             <div class="floor-info__inner">
@@ -255,7 +253,7 @@
         <template th:replace="map/systemPopup :: popup-template"></template>
         <template th:replace="map/eventPopup :: popup-template"></template>
         <!-- toolBox -->
-        <div class="tool-box">
+        <div class="tool-box tool-box--active">
             <ul class="tool-box__list">
                 <!-- [D] 선택 시 active 클래스 추가 -->
                 <li class="home active">

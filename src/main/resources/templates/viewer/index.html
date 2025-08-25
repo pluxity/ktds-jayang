@@ -45,7 +45,7 @@
                     </div>
                 </div>
                 <div class="poi-menu__list" id="poiMenuList">
-                    <ul>
+                    <ul class="default_group">
                         <!-- [D] 선택 시 active 클래스 추가 -->
                         <li class="cctv">
                             <a href="javascript:void(0)"><span class="hide">cctv</span></a>
@@ -131,22 +131,22 @@
                             </div>
                         </li>
                     </ul>
-                    <ul>
-                        <li class="parking">
+                    <ul class="system_group">
+                        <li id="parkingTab" class="parking">
                             <a href="javascript:void(0)"><span class="hide">주차관제</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
                             </div>
                         </li>
 
-                        <li class="elevator">
+                        <li id="elevatorTab" class="elevator">
                             <a href="javascript:void(0)"><span class="hide">승강기</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
                             </div>
                         </li>
 
-                        <li class="ac">
+                        <li id="airTab" class="ac">
                             <a href="javascript:void(0)"><span class="hide">시스템에어컨</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">시스템에어컨</span>
@@ -164,6 +164,7 @@
 
             <template th:replace="viewer/popup :: popup-template"></template>
             <template th:replace="viewer/eventPopup :: popup-template"></template>
+            <template th:replace="map/systemPopup :: popup-template"></template>
             <!-- toolBox -->
             <div class="tool-box tool-box--active">
                 <ul class="tool-box__list">

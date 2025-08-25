@@ -70,17 +70,17 @@
             if (matchedCategory) {
                 element.setAttribute('data-category-id', matchedCategory.id);
             }
+
+
         });
     }
 
     const initCategory = () => {
         const equipmentGroup = document.querySelectorAll('#equipmentGroup a')
         const poiMenuList = document.querySelectorAll('#poiMenuList ul li');
-        const systemTabList = document.querySelectorAll('.system-tap ul li');
         let allCategoryIds = PoiCategoryManager.findAll();
         setCategoryId(poiMenuList, allCategoryIds);
         setCategoryId(equipmentGroup, allCategoryIds);
-        setCategoryId(systemTabList, allCategoryIds);
     }
 
 

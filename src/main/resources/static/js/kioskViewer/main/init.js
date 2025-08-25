@@ -91,6 +91,7 @@
                     urlDataList: sbmDataArray,
                     center: "",
                     onLoad: async function() {
+                        Px.Util.SetBackgroundColor('#f1f1f1');
                         initPoi().then(() => {
                             Init.moveToKiosk(kioskPoi);
 

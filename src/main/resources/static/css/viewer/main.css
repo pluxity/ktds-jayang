@@ -729,16 +729,6 @@ body{
   margin-top: 5px;
 }
 
-.popup-dimmed {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-}
-
 .popup-warning {
   background-color: var(--color-black);
   border: 2px solid var(--color-danger);
@@ -2618,7 +2608,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 .system-tap {
   position: fixed;
   bottom: 20px;
-  left: 50%;
+  left:48%;
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
   z-index: 999;

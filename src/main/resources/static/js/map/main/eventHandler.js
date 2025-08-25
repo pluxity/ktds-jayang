@@ -21,7 +21,11 @@
     const equipmentListPop = document.getElementById('equipmentListPop');
     const equipGroupLinks = document.querySelectorAll('#equipmentListPop .equip-group a');
 
-    const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+    const poiMenuList = document.querySelectorAll(
+        '.poi-menu__list .default_group li, .poi-menu__list--map .map_group li'
+    );
+
+
     const selectBtn = document.querySelectorAll('.select-box__btn');
     const searchText = document.querySelector('input[name="searchText"]');
 
@@ -29,7 +33,7 @@
 
     const closeButtons = document.querySelectorAll('.popup-basic .close');
     const popup = document.getElementById('layerPopup');
-    const systemTabs = document.querySelectorAll('.system-tap li');
+    const systemTabs = document.querySelectorAll('.system_group li');
     
     // 팝업 close
     const closePop = () => {
@@ -153,7 +157,6 @@
     const systemPopView = () => {
         systemTabs.forEach(tab => {
             tab.addEventListener('click', (event) => {
-
                 handleSystemTabClick(event);
             })
         })
@@ -386,9 +389,6 @@
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
             }
-            document.querySelectorAll(".system-tap ul li").forEach(li => {
-                li.classList.remove("active");
-            })
             resetSelectBoxes();
             resetAccordions();
         }

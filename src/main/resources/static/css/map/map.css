@@ -2220,6 +2220,10 @@ input[type=text]:disabled, input[type=password]:disabled {
   box-shadow: 0 -8px 13px 0 rgba(3, 61, 170, 0.6) inset, 3px 3px 6px 0 rgba(0, 0, 0, 0.7);
 }
 
+.tool-box.tool-box--active {
+  right: 430px;
+}
+
 .tool-box {
   display: inline-flex;
   position: absolute;
@@ -2310,7 +2314,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   display: none;
 }
 .event-state {
-  height: calc(100vh - 190px);
+  height: 100%;
   position: fixed;
   top: 80px;
   right: -24.625rem;
@@ -2467,7 +2471,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 .system-tap {
   position: fixed;
   bottom: 20px;
-  left: 50%;
+  left: 48%;
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
   z-index: 999;
@@ -2868,7 +2872,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 }
 
 .event-state {
-  height: calc(100% - 12.5rem);
+  height: 100%;
 }
 .cctv-container {
   padding: 10px;

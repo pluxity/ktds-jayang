@@ -1,7 +1,6 @@
 'use strict';
 
 const layerPopup = (function () {
-    const systemTabs = document.querySelectorAll('.system-tap li');
     const systemPop = document.getElementById("systemPopup");
     // 센서
     let cctvConfig = {};
@@ -1183,9 +1182,6 @@ const layerPopup = (function () {
             }
         });
         systemPop.style.display = 'none';
-        systemTabs.forEach(tab => {
-            tab.classList.remove('active')
-        });
         layerPopup.closePlayers();
     };
 
@@ -3007,7 +3003,6 @@ const layerPopup = (function () {
             const poiId = moveBtn.getAttribute("btn-poi-id");
             elevatorPopup.style.display = "none";
             systemPop.style.display = "none";
-            closeSystemPopup();
             movePoi(poiId);
         });
     }
@@ -3021,13 +3016,6 @@ const layerPopup = (function () {
 
         const moveBtn = sectionHead.querySelector(".button-move");
         moveBtn.setAttribute("btn-poi-id", poi.id);
-    }
-
-    const closeSystemPopup = () =>{
-        const systemTap = document.querySelectorAll(".system-tap li");
-        systemTap.forEach(element =>{
-            element.classList.remove('active');
-        })
     }
 
     let selectedLightGroup = null;
@@ -3508,7 +3496,7 @@ const layerPopup = (function () {
             console.log("globalAlarmList : ", globalAlarmList.length);
             const filteredAlarms = data.filter(alarm =>
                 poiList.some(poi =>
-                    poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                    poi.tagNames.some(tag => tag?.toLowerCase() === alarm.tagName.toLowerCase())
                 )
             );
 
@@ -3588,7 +3576,7 @@ const layerPopup = (function () {
                 isEHP(data) ||
                 poiList.some(poi =>
                     poi.tagNames.some(tag =>
-                        tag.toLowerCase() === data.tagName.toLowerCase()
+                        tag?.toLowerCase() === data.tagName.toLowerCase()
                     )
                 )
             );
@@ -3877,7 +3865,8 @@ const layerPopup = (function () {
             document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
             document.body.style.overflow = '';
         } else if (target.closest('#systemPopup')) {
-            document.querySelectorAll('.system-tab ul li').forEach(li => console.log("li : ", li));
+            document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
+            document.body.style.overflow = '';
             closeAllPopups();
         }
     }
@@ -3887,11 +3876,6 @@ const layerPopup = (function () {
         document.querySelectorAll('.popup-basic .close, .popup-basic .arrow').forEach(btn => {
             btn.addEventListener('click', (event) => {
                 const target = event.target.closest('.popup-basic');
-                if (btn.closest('#systemPopup')) {
-                    systemTabs.forEach(tab => {
-                        tab.classList.remove('active')
-                    });
-                }
                 closePopup(target);
                 // clearAllIntervals();
             });

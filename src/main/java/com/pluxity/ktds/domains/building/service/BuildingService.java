@@ -106,14 +106,11 @@ public class BuildingService {
     }
 
     @Transactional(readOnly = true)
-    public BuildingDetailResponseDTO findParkDetail() {
+    public List<BuildingDetailResponseDTO> findParkDetail() {
 
-        Building building = buildingRepository.findByCode("park")
-                .orElse(null);
-        if (building == null) {
-            return null;
-        }
-        return building.toDetailResponseDTO();
+        return buildingRepository.findByCodeContaining("park").stream()
+                .map(Building::toDetailResponseDTO)
+                .toList();
     }
 
     @Transactional

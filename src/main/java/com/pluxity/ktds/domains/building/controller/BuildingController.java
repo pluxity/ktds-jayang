@@ -48,7 +48,7 @@ public class BuildingController {
     }
 
     @GetMapping("/park")
-    public DataResponseBody<BuildingDetailResponseDTO> getParkBuilding() {
+    public DataResponseBody<List<BuildingDetailResponseDTO>> getParkBuilding() {
         return DataResponseBody.of(service.findParkDetail());
     }
 

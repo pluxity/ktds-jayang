@@ -55,6 +55,7 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
     boolean existsByIsIndoor(String isIndoor);
 
     Optional<Building> findByCode(String code);
+    List<Building> findByCodeContaining(String code);
 
     Building findByActiveVersion(String activeVersion);
 

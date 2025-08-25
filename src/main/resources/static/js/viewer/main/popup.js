@@ -2151,8 +2151,8 @@ const layerPopup = (function () {
     }
 
 
-    const getParkingTags = () => {
-        return api.get('/api/tags/parking').then(res => res.data?.TAGs ?? []);
+    const getParkingTags = (register = false) => {
+        return api.get('/api/tags/parking', { params: { register } }).then(res => res.data?.TAGs ?? []);
     }
     const getParkingSearch = (params = {}) => {
         return api.get('/parking/search', { params }).then(res => Array.isArray(res.data) ? res.data : []);
@@ -2226,11 +2226,8 @@ const layerPopup = (function () {
         renderParkingTable();
     }
 
-    const setParking = (searchParams = {}) => {
-        // if (!searchParams || Object.keys(searchParams).length === 0) {
-        //     const p = buildParams();
-        //     if (p) searchParams = p;
-        // }
+    const setParking = async (searchParams = {}) => {
+
         const startInput = document.getElementById('parkStartDate');
         const endInput = document.getElementById('parkEndDate');
         const now = new Date();
@@ -2243,12 +2240,15 @@ const layerPopup = (function () {
         const endTime = `${endDate} 23:59:59.999`;
         const params = { ...searchParams, startTime, endTime };
 
-        Promise.all([
-            getParkingTags(),
-            getParkingSearch(params)
-        ]).then(([parkingTagValue, result]) => {
+        try {
+            try {
+                const parkingTagValue = await getParkingTags(true);
+                renderTagSummaryAndList(parkingTagValue);
+            } catch (tagErr) {
+                console.warn('getParkingTags error :', tagErr);
+            }
 
-            renderTagSummaryAndList(parkingTagValue);
+            const result = await getParkingSearch(params);
 
             if (!optionsFilled) {
                 fillSelectOptions(result);
@@ -2257,27 +2257,15 @@ const layerPopup = (function () {
 
             renderResultHeader(result);
             renderResultTableAndPaging(result);
-
-        }).catch(err => {
-            console.error('setParking error:', err);
-        });
+        } catch (err) {
+            console.error('setParking 전체 에러:', err);
+        }
     }
 
     function buildParams() {
         const param = {};
         const start = document.getElementById('parkStartDate')?.value || '';
         const end   = document.getElementById('parkEndDate')?.value || '';
-
-        // if (!start || !end) {
-        //     const now = new Date();
-        //     if (!start) {
-        //         const first = new Date(now.getFullYear(), now.getMonth(), 1);
-        //         start = `${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(first.getDate()).padStart(2,'0')}`;
-        //     }
-        //     if (!end) {
-        //         end = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-        //     }
-        // }
 
         if (start && end && new Date(start) > new Date(end)) {
             alertSwal('종료일이 시작일보다 빠릅니다.')
@@ -2369,7 +2357,7 @@ const layerPopup = (function () {
         btn.onclick = null;
         btn.addEventListener('click', async () => {
             try {
-                const parkingTagValue = await getParkingTags();
+                const parkingTagValue = await getParkingTags(false);
                 renderTagSummaryAndList(parkingTagValue);
             } catch (err) {
                 console.error('tags refresh error:', err);

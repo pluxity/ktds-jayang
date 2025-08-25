@@ -2059,6 +2059,13 @@ input[type=text]:disabled, input[type=password]:disabled {
       grid-template-columns: 1fr 1fr;
   grid-gap: 5px;
 }
+
+.poi-menu__list ul + ul {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #00CC9E;
+}
+
 .poi-menu__list li {
   position: relative;
   display: -webkit-box;

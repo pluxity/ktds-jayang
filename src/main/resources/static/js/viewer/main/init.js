@@ -36,16 +36,7 @@
         adminButton.style.display = "none";
     }
 
-
-    const floorInfo = document.querySelector('#floor-info .floor-info__button');
-    const floorDetail = document.querySelector('#floor-info .floor-info__detail');
-    floorInfo.addEventListener('click', event => {
-        if (floorDetail.style.display == 'none') {
-            floorDetail.style.display = 'block';
-        } else {
-            floorDetail.style.display = 'none';
-        }
-    })
+    
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
         const { } = systemSetting;
     });
@@ -247,19 +238,19 @@ const Init = (function () {
 
     const initBuildingList = () => {
         const buildingList = BuildingManager.findAll();
-        const buildingUi = document.querySelector('#floor-info .floor-info__detail ul');
+        const buildingUl = document.querySelector('#systemTab ul')
 
         buildingList.forEach(building => {
             const buildingLi = document.createElement('li');
             buildingLi.setAttribute('building-id', building.id);
             buildingLi.textContent = building.name
-            buildingUi.appendChild(buildingLi);
+            buildingUl.appendChild(buildingLi);
         })
         clickBuilding();
     }
 
     const clickBuilding = () => {
-        const buildingBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
+        const buildingBtns = document.querySelectorAll('#systemTab ul li');
         // btnClick
         buildingBtns.forEach(buildingBtn => {
             buildingBtn.style.cursor = 'pointer';

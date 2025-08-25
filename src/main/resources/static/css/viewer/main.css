@@ -2614,3 +2614,51 @@ input[type=text]:disabled, input[type=password]:disabled {
 .event-state .table td.ellipsis {
   text-overflow: ellipsis;
 }
+
+.system-tap {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  z-index: 999;
+}
+.system-tap ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-black);
+  border-radius: 40px;
+  background: linear-gradient(180deg, rgba(116, 122, 165, 0.6) 0%, rgba(0, 0, 0, 0) 100%), #25262E;
+  height: 65px;
+  padding: 0 20px;
+}
+.system-tap li {
+  padding: 0 10px;
+  white-space: nowrap;
+  color: var(--color-grayscale-light);
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 30px;
+}
+.system-tap li:hover, .system-tap li.active {
+  border-radius: 20px;
+  background-color: var(--color-black);
+}
+.system-tap li.active {
+  color: var(--color-mint);
+}
+.system-tap li + li {
+  position: relative;
+  margin-left: 31px;
+}
+.system-tap li + li::before {
+  content: "";
+  position: absolute;
+  left: -15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 21px;
+  background-color: var(--color-grayscale03);
+}

@@ -2432,12 +2432,32 @@ const layerPopup = (function () {
         const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'parking');
-
         const startVal = document.getElementById('parkStartDate')?.value || 'all';
         const endVal   = document.getElementById('parkEndDate')?.value   || 'all';
         const rangeStr = (startVal === 'all' && endVal === 'all') ? 'all' : `${startVal}_${endVal}`;
-
         XLSX.writeFile(wb, `parking_${rangeStr}.xlsx`);
+
+        // 임시 추가
+        const rawHeader = [
+            'No', 'deviceId', 'deviceName', 'inoutType',
+            'gateDatetime', 'carNo', 'inoutCarId', 'parkingFee', 'regularType'
+        ];
+
+        const rowsRaw = parkingResult.map((item, idx) => ([
+            idx + 1,
+            item.deviceId || '',
+            item.deviceName || '',
+            item.inoutType ?? '',
+            item.gateDatetime || '',
+            item.carNo || '',
+            item.inoutCarId || '',
+            item.parkingFee ?? 0,
+            item.regularType ?? ''
+        ]));
+        const wb2 = XLSX.utils.book_new();
+        const ws2 = XLSX.utils.aoa_to_sheet([rawHeader, ...rowsRaw]);
+        XLSX.utils.book_append_sheet(wb2, ws2, 'parking_raw');
+        XLSX.writeFile(wb2, `parking_${rangeStr}_raw.xlsx`);
     }
 
     const btn = document.querySelector('#parkingFooter .download');
@@ -2656,7 +2676,6 @@ const layerPopup = (function () {
         const directionBtn = document.querySelector('#airDirectionSelector .select-box__btn');
         let buildingList = BuildingManager.findAll();
 
-
         const toggleBtnActive = (btn, otherBtn) => {
             if (!btn.classList.contains('select-box__disabled')) {
                 btn.classList.toggle('select-box__btn--active');
@@ -2740,8 +2759,6 @@ const layerPopup = (function () {
 
             buildingUl.appendChild(buildingLi);
         })
-
-
     }
 
 

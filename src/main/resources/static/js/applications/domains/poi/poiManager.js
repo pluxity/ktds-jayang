@@ -281,6 +281,7 @@ const PoiManager = (() => {
             });
 
             Px.Poi.AddFromDataArray(poiData, () => {
+                Px.Poi.HideAll();
                 Px.Poi.GetDataAll().forEach((poi) => {
                     Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
                     Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);

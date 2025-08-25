@@ -610,22 +610,6 @@
         return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
 
-    const allCheck = document.getElementById('check');
-    allCheck.addEventListener('change', () => {
-        // floorid도 고려해서
-        if (allCheck.checked) {
-            equipmentGroup.forEach(equipment => {
-                equipment.classList.add('active')
-            });
-            Px.Poi.ShowAll();
-        } else {
-            equipmentGroup.forEach(equipment => {
-                equipment.classList.remove('active')
-            });
-            Px.Poi.HideAll();
-        }
-    })
-
     const initializeTexture = () => {
         Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
             console.log('화살표 로딩완료');

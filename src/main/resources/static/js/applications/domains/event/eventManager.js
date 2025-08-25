@@ -488,18 +488,19 @@ const EventManager = (() => {
             const isViewerPage = window.location.pathname.includes('/viewer');
 
             if (!poiData || isViewerPage) {
+                sessionStorage.setItem('fromEvent', 'Y');
                 sessionStorage.setItem('selectedPoiId', alarmPoi.id);
                 sessionStorage.setItem('mainCctv', JSON.stringify(mainCctv));
-                window.location.href = `/map?buildingId=${alarmPoi.buildingId}`; // 파라미터 추가
+                window.location.href = `/map?buildingId=${alarmPoi.buildingId}`;
             } else {
                 Px.Model.Visible.HideAll();
 
-                const floor = BuildingManager.findFloorsByHistory().find(
-                    (floor) => Number(floor.no) === Number(poiData.property.floorNo),
-                );
-
-                Px.Model.Visible.Show(Number(floor.id));
-
+                const floorNo = poiData.property.floorNo;
+                Init.moveToFloorPage(floorNo);
+                const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+                if (floorElement) {
+                    floorElement.click();
+                }
 
                 Px.Poi.HideAll();
                 Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
@@ -507,16 +508,13 @@ const EventManager = (() => {
                     id: alarmPoi.id,
                     isAnimation: true,
                     duration: 500,
-                    heightOffset:70,
+                    heightOffset: 70,
                     onComplete: async () => {
                         Init.renderPoiInfo(poiData);
                         if (mainCctv) {
                             const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
-                            // 화면 중앙 높이
                             mainCCTVTemplate.style.top = '50%';
                             mainCCTVTemplate.style.transform = 'translateY(-50%)';
-
-                        // 화면 중앙을 기준으로 CCTV 팝업의 오른쪽 면이 중앙에 오도록
                             mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
                         }
                     }

@@ -3055,6 +3055,12 @@ const layerPopup = (function () {
             Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
         }
 
+        const floorNo = poiData.property.floorNo;
+        Init.moveToFloorPage(floorNo);
+        const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+        if (floorElement) {
+            floorElement.click(); // 클릭 이벤트 실행
+        }
 
         Px.Camera.MoveToPoi({
             id: poiId,

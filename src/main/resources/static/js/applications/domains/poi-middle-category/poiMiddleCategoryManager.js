@@ -9,7 +9,7 @@ const PoiMiddleCategoryManager = (function () {
                 const { result: data } = result.data;
                 poiMiddleCategoryList = data.map((poiMiddleCategory) =>
                     new PoiMiddleCategory(poiMiddleCategory.id, poiMiddleCategory.name,
-                        poiMiddleCategory.poiCategory, poiMiddleCategory.imageFile));
+                        poiMiddleCategory.poiCategory, poiMiddleCategory.imageFile, poiMiddleCategory.iconSets));
 
                 resolve(poiMiddleCategoryList);
             });

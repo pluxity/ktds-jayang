@@ -4,12 +4,14 @@ class PoiMiddleCategory {
     #name;
     #poiCategory;
     #imageFile;
+    #iconSets;
 
-    constructor(id, name, poiCategory, imageFile) {
+    constructor(id, name, poiCategory, imageFile, iconSets) {
         this.#id = id;
         this.#name = name;
         this.#poiCategory = poiCategory;
         this.#imageFile = imageFile;
+        this.#iconSets = iconSets;
     }
 
     get id() {
@@ -26,5 +28,9 @@ class PoiMiddleCategory {
 
     get imageFile() {
         return this.#imageFile;
+    }
+
+    get iconSets() {
+        return this.#iconSets;
     }
 }

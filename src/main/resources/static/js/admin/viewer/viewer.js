@@ -735,7 +735,7 @@ function initializeViewerPoiModal() {
             params.poiMiddleCategoryId = Number(document.querySelector('#selectPoiMiddleCategoryIdRegister').value);
             const poiMiddleCategory = viewerPoiData.poiMiddleCategory.find((poiMiddleCategory) =>
                 poiMiddleCategory.id === params.poiMiddleCategoryId);
-            params.iconSetId = poiMiddleCategory.imageFile.id;
+            params.iconSetId = poiMiddleCategory.iconSets[0].id;
 
             params.code = document.querySelector('#poiCodeRegister').value;
             params.name = document.querySelector('#poiNameRegister').value;

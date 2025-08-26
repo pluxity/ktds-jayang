@@ -116,12 +116,12 @@
                             //     Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
 
                             Px.Poi.GetDataAll().forEach(poi => {
-                                Px.Poi.SetIconSize(poi.id, 70);
+                                Px.Poi.SetIconSize(poi.id, 60);
 
                                 const findPoi = KioskPoiManager.findById(poi.id);
                                 const isOtherKiosk = findPoi.isKiosk && findPoi.id !==  kioskPoi.id;
 
-                                const textSize = isOtherKiosk ? 1 : 70;
+                                const textSize = isOtherKiosk ? 1 : 50;
                                 Px.Poi.SetTextSize(poi.id, textSize);
                             });
                         })

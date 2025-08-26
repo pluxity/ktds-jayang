@@ -440,7 +440,7 @@
                     if (popup) {
                         popup.style.display = 'none';
                         Px.VirtualPatrol.Clear();
-                        Px.Poi.ShowAll();
+                        // Px.Poi.ShowAll();
                     }
                 });
             },
@@ -779,7 +779,7 @@
     
         function handleLiveMode() {
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
+            // Px.Poi.ShowAll();
             renderPatrol(true);
             setInputsState(true);
             clearInputValues();
@@ -787,7 +787,7 @@
     
         function handleHistoryMode() {
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
+            // Px.Poi.ShowAll();
             renderPatrol(true);
             setInputsState(false);
             setCurrentDateTime();
@@ -827,7 +827,7 @@
         function handleHistorySearch() {
             if (patrolRadioHistory.checked) {
                 Px.VirtualPatrol.Clear();
-                Px.Poi.ShowAll();
+                // Px.Poi.ShowAll();
                 renderPatrol(false, `${patrolDateInput.value} ${patrolTimeInput.value}`);
             }
         }
@@ -873,7 +873,7 @@
         `;
 
         if (patrolList.length === 0) {
-            return patrolContentList.innerHTML += `<div class="error-text">저장된 가상순찰 목록이 없습니다.</div>`
+            return patrolContentList.innerHTML += `<div class="error-text" style="color:#FFFFFF;">저장된 가상순찰 목록이 없습니다.</div>`
         }
 
         patrolList.forEach((patrol) => {
@@ -932,7 +932,7 @@
                 });
                 target.classList.toggle('accordion__btn--active');
                 Px.VirtualPatrol.Clear();
-                Px.Poi.ShowAll();
+                // Px.Poi.ShowAll();
                 currentPatrol = -1;
             });
         });

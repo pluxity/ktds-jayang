@@ -14,8 +14,8 @@ initSetting();
 const modifySetting = () => {
 
     const poiLineLength = document.querySelector('input[name="poiLineLength"]').value;
-    if(Number(poiLineLength) > 30.0 || Number(poiLineLength) <= 0.0) {
-        alertSwal('POI 라인 길이는 0초과 30미만여야 합니다.').then(() => {
+    if(Number(poiLineLength) > 100.0 || Number(poiLineLength) <= 0.0) {
+        alertSwal('POI 라인 길이는 0초과 100미만여야 합니다.').then(() => {
             document.querySelector('input[name="poiLineLength"]').focus();
         });
         return;

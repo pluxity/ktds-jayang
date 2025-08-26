@@ -47,7 +47,6 @@ class Poi {
         this.#icon2DUrl = this.#iconSet.iconFile2D !== null ? this.getIcon2DUrl() : '/static/img/icon_2d_default.svg';
         this.position = position;
         this.rotation = rotation;
-        this.scale = scale;
         this.#icon3DUrl = this.#iconSet.iconFile3D !== null ? this.getIcon3DUrl() : '';
         property.floorNo = floorNo;
         property.floorName = BuildingManager.findById(buildingId).floors.find(floor => floor.no === floorNo)?.name;
@@ -137,7 +136,6 @@ class Poi {
             iconUrl: this.iconUrl,
             position: this.position ? this.position : {x:0,y:0,z:0},
             rotation: this.rotation ? this.rotation : {x:0,y:0,z:0},
-            scale: this.scale ? this.scale : {x:100,y:100,z:100},
             property: this.property,
         };
     }

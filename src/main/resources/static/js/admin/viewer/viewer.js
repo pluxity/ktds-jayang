@@ -509,6 +509,8 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
     const viewerSidebar = document.querySelector('.viewer-sidebar');
     const poiCategorySelect = document.getElementById('poiSelect');
     const virtualPatrolCtrlToolBar = document.getElementById('virtualPatrolCtrlToolBar');
+    const params = new URLSearchParams(window.location.search);
+    const buildingId = params.get('buildingId');
 
     changeEventFloor('');
 
@@ -528,7 +530,7 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
 
             Px.Model.Collapse({duration: 1000});
 
-            const poiList = PoiManager.findByBuilding(BUILDING_ID)
+            const poiList = PoiManager.findByBuilding(buildingId)
                 .filter(selectedPoiCategory(poiCategorySelect.value))
                 .filter(selectedFloor(''));
             renderingPoiList(poiList);
@@ -545,10 +547,10 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
 
         EvacRouteHandler.load((isExist) => {
             Px.Evac.ShowAll();
-            const { floors } = BuildingManager.findById(BUILDING_ID);
+            const { floors } = BuildingManager.findById(buildingId);
             Px.Model.Expand({
                 name: floors[0].id,
-                interval: 200,
+                interval: 20,
                 duration: 1000,
                 onComplete: () => {
                     Px.Camera.ExtendView();
@@ -559,7 +561,7 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
         Px.Poi.HideAll();
     }
 
-    const {camera3d} = BuildingManager.findById(BUILDING_ID);
+    const {camera3d} = BuildingManager.findById(buildingId);
     if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
 })
 

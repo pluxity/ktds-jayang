@@ -9,7 +9,7 @@ const EvacRouteHandler = (() => {
                     BuildingManager.findById(BUILDING_ID).getDetail().then((res) => {
                         Px.Model.Expand({
                             name: res.floors[0].id,
-                            interval: 200,
+                            interval: 20,
                             duration: 1000,
                             onComplete: () => {
                                 Px.Camera.ExtendView();
@@ -24,15 +24,24 @@ const EvacRouteHandler = (() => {
     }
 
     const load = (onComplete) => {
-        Px.Evac.LoadArrowTexture('/static/images/evacRoute/arrow.png', () => {
-            BuildingManager.findById(BUILDING_ID).getDetail().then((data) => {
+        Px.Evac.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', () => {
+            const params = new URLSearchParams(window.location.search);
+            const buildingId = params.get('buildingId') || BUILDING_ID;
+
+
+            BuildingManager.findById(buildingId).getDetail().then((data) => {
                 const {evacuationRoute, floors} = data;
                 if (evacuationRoute) {
                     Px.Model.Visible.ShowAll();
                     Px.Model.Collapse({
                         duration: 0,
                         onComplete: () => {
-                            Px.Evac.Import(evacuationRoute);
+                            try{
+                                Px.Evac.Import(evacuationRoute);
+                            }catch(e){
+                                alertSwal('대피로 정보를 불러오는데 실패했습니다. 버전을 확인해주세요.');
+                            }
+                            Px.Evac.SetSize(20);
                             if(onComplete) onComplete(true);
                         }
                     });
@@ -87,7 +96,7 @@ const EvacRouteHandler = (() => {
                         if(floorId === '') {
                             Px.Model.Expand({
                                 duration: 200,
-                                interval: 100,
+                                interval: 20,
                                 name: floors[0].id,
                                 onComplete: () => {
                                     Px.Camera.ExtendView();

@@ -395,8 +395,26 @@
 
         if (clickedItem.classList.contains('active')) {
             clickedItem.classList.remove('active');
+
+            if(clickedItem.classList.contains('shelter')){
+                Px.Evac.Clear();
+                Px.Core.Resize();
+                Px.Camera.ExtendView();
+                Px.Model.Collapse({duration: 1000});
+                Px.Model.Transparent.Restore();
+            }
+
         } else {
             poiMenuList.forEach(li => li.classList.remove('active'));
+
+            if(!clickedItem.classList.contains('shelter')){
+                Px.Evac.Clear();
+                Px.Core.Resize();
+                Px.Camera.ExtendView();
+                Px.Model.Collapse({duration: 1000});
+                Px.Model.Transparent.Restore();
+            }
+
             clickedItem.classList.add('active');
 
             // 새로운 팝업 표시
@@ -471,8 +489,28 @@
                 maintenancePopup.style.display = 'block';
             },
             shelter: () => {
-                // shelter popup
-                console.log("shelter");
+
+                document.getElementById('mapLayerPopup').style.display = 'none';
+                const params = new URLSearchParams(window.location.search);
+                const buildingId = params.get('buildingId');
+
+                Px.Poi.HideAll(); // poi hide
+                Px.Model.Transparent.SetAll(50); // model 투명도
+                EvacRouteHandler.load((isExist) => {
+                    Px.Evac.ShowAll();
+                    Px.Evac.SetSize(20);
+                    const { floors } = BuildingManager.findById(buildingId);
+                    Px.Model.Expand({
+                        name: floors[0].id,
+                        interval: 50,
+                        duration: 1000,
+                        onComplete: () => {
+                            Px.Camera.ExtendView();
+                        }
+                    });
+                });
+                Px.Core.Resize();
+                Px.Poi.HideAll();
             }
         };
 
@@ -982,8 +1020,13 @@
     };
 
     const moveVirtualPatrol = async (id, patrol) => {
+
+        const patrolRadioHistory = document.getElementById('radioHistory');
+        const patrolDateInput = document.getElementById('patrol-date-input');
+        const patrolTimeInput = document.getElementById('patrol-time-input');
+
         // CctvEventHandler.cctvPlayerClose();
-        return new Promise(function (resolve, reject) {
+        return new Promise(async function (resolve, reject) {
             const point = patrol.patrolPoints[currentPatrolIndex];
 
 
@@ -992,8 +1035,8 @@
             }
             const floorElement = document.querySelector(".floor-info__detail .active");
 
-               //층 이동 또는 처음시작할때 화면 렌더링
-            if(!floorElement || point.floorNo !== Number(floorElement.getAttribute("floor-id"))){
+            //층 이동 또는 처음시작할때 화면 렌더링
+            if (!floorElement || point.floorNo !== Number(floorElement.getAttribute("floor-id"))) {
 
                 // 기존 `active` 제거
                 document.querySelectorAll(".floor-info__detail li").forEach(li => li.classList.remove("active"));
@@ -1017,14 +1060,50 @@
                 Px.Poi.HideAll();
 
                 patrol.patrolPoints
-                      .filter(p => p.floorNo === point.floorNo)
-                      .flatMap(p => p.pois)
-                      .forEach(poiId => Px.Poi.Show(poiId));
+                    .filter(p => p.floorNo === point.floorNo)
+                    .flatMap(p => p.pois)
+                    .forEach(poiId => Px.Poi.Show(poiId));
             }
 
             Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
-                index++;
                 highlightCurrentPatrolPoint(point.id);
+
+                // 해당 순찰 지점에 POI가 있다면 CCTV 자동재생
+                if (point.pois && point.pois.length > 0) {
+                    for (const poiId of point.pois) {
+                        const poi = PoiManager.findById(poiId);
+                        let startDate = null;
+                        let endTime = null;
+                        if (patrolRadioHistory.checked) {
+                            startDate = new Date(`${patrolDateInput.value}T${patrolTimeInput.value}`);
+                            endTime = {
+                                hour: 0,
+                                minutes: 10,
+                                second: 0
+                            };
+                        }
+
+                        const cctvTemplate = await EventManager.createMainCCTVPopup(poi, startDate, endTime);
+                        cctvTemplate.style.top = '50%';
+                        cctvTemplate.style.left = '50%';
+                        cctvTemplate.style.transform = 'translate(-50%, -50%)';
+
+                        highlightCurrentCCTV(poiId, true);
+
+                        // CCTV 팝업이 닫힐 때까지 기다림
+                        await new Promise((resolve) => {
+                            const closeButton = cctvTemplate.querySelector('.cctv-close');
+                            const handleClose = () => {
+                                highlightCurrentCCTV(poiId, false);
+                                closeButton.removeEventListener('click', handleClose);
+                                resolve();
+                            };
+                            closeButton.addEventListener('click', handleClose);
+                        });
+                    }
+                }
+
+                index++;
                 return resolve();
             });
 
@@ -1040,6 +1119,21 @@
                 title.style.color = 'red'; // 텍스트 강조 색상
             } else {
                 title.style.color = ''; // 기본 색상으로 복원
+            }
+        });
+    }
+
+    const highlightCurrentCCTV = (poiId, isActive = true) => {
+        const poiItems = document.querySelectorAll('.poi__title li');
+        poiItems.forEach(item => {
+            if (item.getAttribute('data-id') === poiId.toString()) {
+                if (isActive) {
+                    item.style.color = 'red'; // CCTV 재생 중일 때 강조 색상
+                    item.style.fontWeight = 'bold'; // 굵게 표시
+                } else {
+                    item.style.color = ''; // 기본 색상으로 복원
+                    item.style.fontWeight = ''; // 기본 굵기로 복원
+                }
             }
         });
     }
@@ -1078,8 +1172,10 @@
 
                 controlButtons.forEach((button) => {
                     button.classList.remove('on');
+                    button.style.backgroundColor = '';
                 });
                 target.classList.add('on');
+                target.style.backgroundColor = 'rgb(0, 245, 191)';
 
                 switch (item.dataset.btnType) {
                     case 'play':

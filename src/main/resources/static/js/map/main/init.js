@@ -202,7 +202,16 @@
                 );
 
                 Px.Model.Visible.Show(floor.id);
-                equipmentCategoryActiveHover(floorNo);
+
+                if (document.querySelector('.shelter').classList.contains('active')) {
+                    Px.Poi.HideAll();
+                    Px.Evac.HideAll();
+                    Px.Evac.ShowByProperty('floorId', String(floor.id));
+                    allCheck.checked = false;
+                }else{
+                    equipmentCategoryActiveHover(floorNo);
+                }
+
                 Px.Camera.ExtendView();
             })
         })
@@ -213,10 +222,17 @@
             floorBtns.forEach(btn => btn.classList.remove('active'));
             allFloor.classList.add('active');
 
+            if (document.querySelector('.shelter').classList.contains('active')) {
+                Px.Poi.HideAll();
+                Px.Evac.ShowAll();
+            }else{
+                allCheck.checked = false;
+                equipmentGroup.forEach(equipment => {
+                    equipment.classList.remove('active')
+                });
+                Px.Poi.HideAll();
+            }
 
-            equipmentCategoryActiveHover();
-
-            Px.Poi.ShowAll();
             Px.Model.Visible.ShowAll();
             Px.VirtualPatrol.Clear();
             Px.Camera.ExtendView();
@@ -233,7 +249,7 @@
             if (expandBtn.classList.contains("scale--down")) {
                 Px.Model.Expand({
                     duration: 1000,
-                    interval: 100,
+                    interval: 20,
                     name: Number(targetFloorId),
                 });
                 expandBtn.classList.remove("scale--down");

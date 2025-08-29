@@ -1,5 +1,8 @@
 package com.pluxity.ktds.domains.building.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pluxity.ktds.domains.building.dto.*;
 import com.pluxity.ktds.domains.building.entity.*;
 import com.pluxity.ktds.domains.building.repostiory.*;
@@ -17,6 +20,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +49,7 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BuildingService {
     private final BuildingRepository buildingRepository;
     private final FileInfoService fileIoService;
@@ -167,11 +172,74 @@ public class BuildingService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_FILE));
 
         Building building = getBuildingById(id);
+
+        // 버전 변경인 경우 evacuationRoute 업데이트
+        if (!building.getActiveVersion().equals(updateHistory.getBuildingVersion())) {
+            updateEvacuationRouteForNewVersion(building, updateHistory);
+        }
+
         building.changeActiveVersion(updateHistory.getBuildingVersion());
         building.changeFileInfo(getFileInfo(updateHistory.getFileInfo().getId()));
 
         building.update(dto);
         return id;
+    }
+
+    /**
+     * 새로운 버전에 맞게 evacuationRoute의 floor 정보를 업데이트
+     */
+    private void updateEvacuationRouteForNewVersion(Building building, BuildingFileHistory newHistory) {
+        String currentEvacuationRoute = building.getEvacuationRoute();
+        if (currentEvacuationRoute == null || currentEvacuationRoute.isEmpty()) {
+            return;
+        }
+
+        try {
+            // JSON 파싱
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode evacuationRouteJson = objectMapper.readTree(currentEvacuationRoute);
+
+            // points 배열의 각 요소 업데이트
+            JsonNode points = evacuationRouteJson.get("points");
+            if (points != null && points.isArray()) {
+                for (JsonNode point : points) {
+                    String currentFloorId = point.get("floorId").asText();
+
+                    // 현재 floor 정보로 새로운 버전의 floor 정보 조회
+                    FloorInfo newFloorInfo = getFloorInfoForNewVersion(
+                            building.getId(),
+                            currentFloorId,
+                            newHistory.getId()
+                    );
+
+                    log.info("newFloorInfo = {}", newFloorInfo.toString());
+
+                    if (newFloorInfo != null) {
+                        // JSON 노드 업데이트
+                        ((ObjectNode) point).put("floorId", newFloorInfo.floorId());
+                        ((ObjectNode) point).put("floorDisplayName", newFloorInfo.floorDisplayName());
+                        ((ObjectNode) point).put("floorBaseFloor", newFloorInfo.floorBaseFloor());
+                    }
+                }
+            }
+
+            // 업데이트된 JSON을 building에 설정
+            String updatedEvacuationRoute = objectMapper.writeValueAsString(evacuationRouteJson);
+            building.changeEvacuationRoute(updatedEvacuationRoute);
+
+        } catch (Exception e) {
+            log.error("updateEvacuationRouteForNewVersion error : {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 새로운 버전의 floor 정보를 조회
+     */
+    private FloorInfo getFloorInfoForNewVersion(Long buildingId, String currentFloorId, Long newHistoryId) {
+        return floorRepository.findFloorInfoForNewVersion(buildingId, Long.valueOf(currentFloorId), newHistoryId)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
 

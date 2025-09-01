@@ -263,9 +263,12 @@
     }
 
     // 화면 세팅
-    await SystemSettingManager.getSystemSetting().then((systemSetting) => {
+    const params = new URLSearchParams(window.location.search);
+    let buildingId = params.get('buildingId');
+    // 화면 세팅
+    await SystemSettingManager.getSystemSettingByBuildingId(buildingId).then((systemSetting) => {
         const { } = systemSetting;
-    });
+    })
     await NoticeManager.getNotices();
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();

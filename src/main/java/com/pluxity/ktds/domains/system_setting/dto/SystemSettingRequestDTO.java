@@ -5,6 +5,7 @@ import com.pluxity.ktds.domains.system_setting.entity.SystemSetting;
 
 @Builder(toBuilder = true)
 public record SystemSettingRequestDTO(
+        Long buildingId,
         float poiLineLength,
         float poiIconSizeRatio,
         float poiTextSizeRatio,

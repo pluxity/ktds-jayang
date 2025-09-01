@@ -90,15 +90,15 @@ public class Initializer implements CommandLineRunner {
             userRepository.save(user);
 
         }
-        if(systemSettingRepository.findAll().isEmpty()) {
-            SystemSettingRequestDTO systemSettingRequestDto = SystemSettingRequestDTO.builder()
-                    .poiIconSizeRatio(100)
-                    .poiLineLength(30)
-                    .poiTextSizeRatio(100)
-                    .nodeDefaultColor("#FF0000")
-                    .build();
-            systemSettingService.updateSystemSetting(systemSettingRequestDto);
-        }
+//        if(systemSettingRepository.findAll().isEmpty()) {
+//            SystemSettingRequestDTO systemSettingRequestDto = SystemSettingRequestDTO.builder()
+//                    .poiIconSizeRatio(100)
+//                    .poiLineLength(30)
+//                    .poiTextSizeRatio(100)
+//                    .nodeDefaultColor("#FF0000")
+//                    .build();
+//            systemSettingService.updateSystemSetting(systemSettingRequestDto);
+//        }
         if(!kioskUserRepository.existsByName("kiosk")) {
             KioskUser kiosk = KioskUser.builder()
                     .password(passwordEncoder.encode("pluxity123!@#"))

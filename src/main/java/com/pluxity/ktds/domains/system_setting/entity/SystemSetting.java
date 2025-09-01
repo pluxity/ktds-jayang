@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.system_setting.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pluxity.ktds.domains.building.entity.Building;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,6 +22,10 @@ public class SystemSetting {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "building_id", nullable = false, unique = true)
+    private Building building;
+
     @Column(name = "poi_line_length", nullable = false)
     private float poiLineLength;
 
@@ -34,8 +39,9 @@ public class SystemSetting {
     private String nodeDefaultColor;
 
     @Builder
-    public SystemSetting(Long id, float poiLineLength, float poiIconSizeRatio, float poiTextSizeRatio, String nodeDefaultColor) {
+    public SystemSetting(Long id, Building building, float poiLineLength, float poiIconSizeRatio, float poiTextSizeRatio, String nodeDefaultColor) {
         this.id = id;
+        this.building = building;
         this.poiLineLength = poiLineLength;
         this.poiIconSizeRatio = poiIconSizeRatio;
         this.poiTextSizeRatio = poiTextSizeRatio;
@@ -52,6 +58,7 @@ public class SystemSetting {
     public SystemSettingResponseDTO toDto(){
         return SystemSettingResponseDTO.builder()
                 .id(id)
+                .buildingId(building.getId())
                 .nodeDefaultColor(nodeDefaultColor)
                 .poiIconSizeRatio(poiIconSizeRatio)
                 .poiTextSizeRatio(poiTextSizeRatio)

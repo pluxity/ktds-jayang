@@ -1,6 +1,6 @@
 (async function () {
     // 시스템 셋팅
-    await SystemSettingManager.getSystemSetting();
+    await SystemSettingManager.getSystemSettingByBuildingId(BUILDING_ID);
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
     await PoiMiddleCategoryManager.getPoiMiddleCategoryList();

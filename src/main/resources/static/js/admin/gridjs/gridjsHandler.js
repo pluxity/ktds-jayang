@@ -53,26 +53,29 @@ const createGrid = (options) => {
         buttonsCount = 10,
         previous,
         next,
-        noRecordsFound = '데이터가 존재하지 않습니다.'
+        noRecordsFound = '데이터가 존재하지 않습니다.',
+        withNumbering = true
     } = options;
 
     const total = data.length;
 
-    const dataWithNumber = data.map((row, idx) => {
-        return [total - idx, ...row];
-    });
+    const dataWithNumber = withNumbering
+        ? data.map((row, idx) => [total - idx, ...row])
+        : data;
 
     const cols = addHeaderSelectAll(columns);
 
-    const numberedColumns = [
-        cols[0],
-        {
-            id: 'number',
-            name: '번호',
-            width: '6%',
-        },
-        ...cols.slice(1)
-    ];
+    const numberedColumns = withNumbering
+        ? [
+            cols[0],
+            {
+                id: 'number',
+                name: '번호',
+                width: '6%',
+            },
+            ...cols.slice(1)
+        ]
+        : cols;
 
     grid = new gridjs.Grid({
         pagination: isPagination && {
@@ -116,23 +119,26 @@ const resizeGrid = (option) => {
     const {
         dom,
         columns,
-        data
+        data,
+        withNumbering = true
     } = option;
 
     const total = data.length;
-    const dataWithNumber = data.map((row, idx) => {
-        return [total - idx, ...row];
-    });
+    const dataWithNumber = withNumbering
+        ? data.map((row, idx) => [total - idx, ...row])
+        : data;
     const cols = addHeaderSelectAll(columns);
-    const numberedColumns = [
-        cols[0],
-        {
-            id: 'number',
-            name: '번호',
-            width: '6%',
-        },
-        ...cols.slice(1)
-    ];
+    const numberedColumns = withNumbering
+        ? [
+            cols[0],
+            {
+                id: 'number',
+                name: '번호',
+                width: '6%',
+            },
+            ...cols.slice(1)
+        ]
+        : cols;
 
     grid.updateConfig({
         columns: numberedColumns,

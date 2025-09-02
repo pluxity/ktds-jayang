@@ -19,7 +19,7 @@ const renderBuildingList = (buildingList) => {
         data.buildingFile.originName === null
             ? ''
             : gridjs.html(
-                `<a href="/Building/${data.buildingFile.directory}/${data.buildingFile.storedName}.${data.buildingFile.extension}">
+                `<a href="/Building/${data.buildingFile.directory}/${data.version}/${data.buildingFile.storedName}.${data.buildingFile.extension}">
                             ${data.buildingFile.originName}
                       </a>`,
             ),
@@ -310,6 +310,17 @@ const renderHistoryList = (historyList) => {
     const tbody = document.getElementById('historyListBody');
     tbody.innerHTML = ''; // 기존 내용 초기화
 
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+            <th>도면 버전</th>
+            <th>도면 파일명</th>
+            <th>수정 내용</th>
+            <th>등록자</th>
+            <th>등록일</th>
+            <th>관리</th>
+        `;
+    tbody.appendChild(headerRow);
+
     if (historyList.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -346,7 +357,7 @@ const renderHistoryList = (historyList) => {
 };
 
 function downloadFile(fileEntityType, directory, version, storedName, extension) {
-    const url = `${CONTEXT_PATH}/${fileEntityType}/${directory}/${version}/${storedName}.${extension}`;
+    const url = `/${fileEntityType}/${directory}/${version}/${storedName}.${extension}`;
 
     // 다운로드 링크 생성
     const link = document.createElement('a');

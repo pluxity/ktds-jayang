@@ -6,15 +6,13 @@ import lombok.Builder;
 @Builder
 public record CreateSopDTO(
         Long id,
-        String sopCategory,
         String sopName,
-        String sopDescription,
         String mainManagerDivision,
         String mainManagerName,
         String mainManagerContact,
         String subManagerDivision,
         String subManagerName,
         String subManagerContact,
-        FileInfo sopFile
+        Long sopFileId
 ) {
 }

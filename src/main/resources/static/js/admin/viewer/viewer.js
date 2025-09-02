@@ -241,10 +241,7 @@ function changeEventFloor(floorNo) {
             clickPatrolTab();
             document.querySelector('#virtualPatrolCtrlToolBar').classList.add('active');
             document.querySelector('#evacRouteBtnToolBar').classList.remove('active');
-            const activePatrolId = document.querySelector("#patrolListTable > tbody > tr.collapsed.active");
-            if(activePatrolId != null) {
-                patrolPointImport(activePatrolId.dataset.id, floorId);
-            }
+
             break;
         }
         case 'cctv-tab': {
@@ -285,13 +282,7 @@ function initBuilding() {
         const { directory, storedName, extension } = buildingFile;
         const params = new URLSearchParams(window.location.search);
         const version = params.get('version') || building.getVersion();
-
-
         const floors =  await BuildingManager.getFloorsByHistoryVersion(version);
-        console.log(floors);
-
-        // histotry에 맞는 floor를 가져오면?
-        // 층 + history를 갖는 엔티티
 
         const sbmDataArray = floors.flatMap(floor =>
             floor.sbmFloor.map(sbm => ({
@@ -302,7 +293,6 @@ function initBuilding() {
                 groupId: sbm.sbmFloorGroup,
             }))
         );
-        console.log("sbmDataArray : ", sbmDataArray);
 
         Px.Loader.LoadSbmUrlArray({
             urlDataList: sbmDataArray,

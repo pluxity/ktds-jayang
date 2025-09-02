@@ -4,7 +4,7 @@ const dataManufacturer = (rowData) =>
     rowData
         .map((maintenance, index) => {
 
-            const { id, no, managementCategory, maintenanceName, mainManagerDivision, mainManagerName, mainManagerContact, subManagerDivision, subManagerName, subManagerContact, modifier } = maintenance;
+            const { id, managementCategory, maintenanceName, mainManagerDivision, mainManagerName, mainManagerContact, subManagerDivision, subManagerName, subManagerContact, modifier } = maintenance;
 
             const divisionHtml = gridjs.html(`
               <div>(정)${mainManagerDivision}</div>
@@ -24,7 +24,6 @@ const dataManufacturer = (rowData) =>
 
             return [
                 id,
-                rowData.length - index,
                 managementCategory,
                 maintenanceName,
                 divisionHtml,
@@ -47,7 +46,7 @@ const renderMaintenance = (rawData = []) => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -56,10 +55,7 @@ const renderMaintenance = (rawData = []) => {
             name: 'id',
             hidden: true,
         },
-        {
-            name: '번호',
-            width: '6%',
-        },
+
         {
             name: '카테고리명',
             width: '10%',
@@ -201,7 +197,14 @@ const searchMaintenanceInfoList = () => {
     const searchType = document.getElementById('searchType').value;
     const searchName = document.getElementById('searchName').value.toLowerCase();
 
-    const filteredList = data.maintenance.filter((maintenance) => maintenance[searchType].toLowerCase().indexOf(searchName) > -1)
+    const filteredList = data.maintenance.filter((maintenance) => {
+        const value =
+            searchType === 'maintenanceCategory'
+                ? maintenance['managementCategory']
+                : maintenance[searchType];
+
+        return typeof value === 'string' && value.toLowerCase().includes(searchName);
+    });
 
     renderMaintenance(filteredList);
 }

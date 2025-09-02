@@ -13,6 +13,35 @@ let grid;
  *   </pre>
  *
  */
+
+function addHeaderSelectAll(columns) {
+    if (!columns?.length) return columns;
+    if (columns[0]?.id === 'checkbox') {
+        return [
+            {
+                ...columns[0],
+                name: gridjs.html(`선택 <input type="checkbox" id="select-all-checkbox" style="margin-left:4px;">`)
+            },
+            ...columns.slice(1),
+        ];
+    }
+    return columns;
+}
+
+function wireSelectAll(dom) {
+    if (!dom) return;
+    if (dom.dataset.selectAllWired === '1') return;
+    dom.addEventListener('change', (e) => {
+        if (e.target.id === 'select-all-checkbox') {
+            const on = e.target.checked;
+            dom.querySelectorAll('.gridjs-table tbody td:first-child input[type="checkbox"]').forEach(cb => {
+                if (cb.checked !== on) cb.click();
+            });
+        }
+    });
+    dom.dataset.selectAllWired = '1';
+}
+
 const createGrid = (options) => {
     const {
         dom,
@@ -26,6 +55,25 @@ const createGrid = (options) => {
         next,
         noRecordsFound = '데이터가 존재하지 않습니다.'
     } = options;
+
+    const total = data.length;
+
+    const dataWithNumber = data.map((row, idx) => {
+        return [total - idx, ...row];
+    });
+
+    const cols = addHeaderSelectAll(columns);
+
+    const numberedColumns = [
+        cols[0],
+        {
+            id: 'number',
+            name: '번호',
+            width: '6%',
+        },
+        ...cols.slice(1)
+    ];
+
     grid = new gridjs.Grid({
         pagination: isPagination && {
             limit,
@@ -39,10 +87,10 @@ const createGrid = (options) => {
             },
             noRecordsFound,
         },
-        sort: true,
+        sort: false,
         fixedHeader: true,
-        columns,
-        data,
+        columns: numberedColumns,
+        data: dataWithNumber,
         style: {
             td: {
                 'text-align': 'center',
@@ -53,6 +101,8 @@ const createGrid = (options) => {
             },
         },
     }).render(dom);
+    const root = dom || document.querySelector('#wrapper');
+    requestAnimationFrame(() => wireSelectAll(root));
 };
 
 /**
@@ -64,14 +114,33 @@ const createGrid = (options) => {
  */
 const resizeGrid = (option) => {
     const {
+        dom,
         columns,
         data
     } = option;
 
+    const total = data.length;
+    const dataWithNumber = data.map((row, idx) => {
+        return [total - idx, ...row];
+    });
+    const cols = addHeaderSelectAll(columns);
+    const numberedColumns = [
+        cols[0],
+        {
+            id: 'number',
+            name: '번호',
+            width: '6%',
+        },
+        ...cols.slice(1)
+    ];
+
     grid.updateConfig({
-        columns,
-        data,
+        columns: numberedColumns,
+        data: dataWithNumber,
     }).forceRender();
+
+    const root = dom || document.querySelector('#wrapper');
+    requestAnimationFrame(() => wireSelectAll(root));
 };
 
 const getSelectedId = () => {

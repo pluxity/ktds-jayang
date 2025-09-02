@@ -11,6 +11,7 @@ const getBuildingInfoList = () => {
 const renderBuildingList = (buildingList) => {
     const gridData = buildingList.map((data) => [
         data.id,
+        data.isIndoor === 'Y' ? '실내' : '실외',
         data.code,
         gridjs.html(
             `<a data-bs-toggle="modal" data-bs-target="#buildingModifyModal" id="showModifyModalButton" onclick="modifyBuildingModal(${data.id})">${data.name}</a>`,
@@ -33,11 +34,11 @@ const renderBuildingList = (buildingList) => {
         {
             id: 'checkbox',
             name: '선택',
-            width: '10%',
+            width: '8%',
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -45,6 +46,10 @@ const renderBuildingList = (buildingList) => {
             id: 'id',
             name: 'id',
             hidden: true,
+        },
+        {
+            name: '구분',
+            width: '8%',
         },
         {
             name: '도면코드',
@@ -60,7 +65,7 @@ const renderBuildingList = (buildingList) => {
         },
         {
             name: '상세설명',
-            width: '30%',
+            width: '15%',
         },
         {
             name: '관리',
@@ -324,7 +329,7 @@ const renderHistoryList = (historyList) => {
             <td>${history.regUser || '-'}</td>
             <td>${history.createdAt || '-'}</td>
             <input type="hidden" id="historyId" value="${history.historyId}">
-            <td>
+            <td style="text-align: center">
                 <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}&version=${history.buildingVersion}')" >
                     <i class="fas fa-map"></i>
                 </button>

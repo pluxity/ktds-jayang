@@ -962,6 +962,12 @@
             btn.addEventListener('click', (event) => {
                 const target = event.currentTarget;
 
+                const cctvContainer = document.querySelector('.cctv-container');
+                if(cctvContainer){
+                    cctvContainer.remove();
+                    layerPopup.closePlayers();
+                }
+
                 // 다른 아코디언 버튼이 열려 있으면 닫기
                 document.querySelectorAll('#patrolPopup .accordion__btn').forEach((otherBtn) => {
                     if (otherBtn !== target) {
@@ -1065,42 +1071,40 @@
                     .forEach(poiId => Px.Poi.Show(poiId));
             }
 
-            Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
+            Px.VirtualPatrol.MoveTo(0, index, 200, 3000, async () => {
                 highlightCurrentPatrolPoint(point.id);
 
                 // 해당 순찰 지점에 POI가 있다면 CCTV 자동재생
                 if (point.pois && point.pois.length > 0) {
+                    // 모든 cctv 재생(5초 후 자동 닫기) - createSubCctvPopup으로 여러개 재생
+                    let poiList = [];
                     for (const poiId of point.pois) {
-                        const poi = PoiManager.findById(poiId);
-                        let startDate = null;
-                        let endTime = null;
-                        if (patrolRadioHistory.checked) {
-                            startDate = new Date(`${patrolDateInput.value}T${patrolTimeInput.value}`);
-                            endTime = {
-                                hour: 0,
-                                minutes: 10,
-                                second: 0
-                            };
-                        }
-
-                        const cctvTemplate = await EventManager.createMainCCTVPopup(poi, startDate, endTime);
-                        cctvTemplate.style.top = '50%';
-                        cctvTemplate.style.left = '50%';
-                        cctvTemplate.style.transform = 'translate(-50%, -50%)';
-
-                        highlightCurrentCCTV(poiId, true);
-
-                        // CCTV 팝업이 닫힐 때까지 기다림
-                        await new Promise((resolve) => {
-                            const closeButton = cctvTemplate.querySelector('.cctv-close');
-                            const handleClose = () => {
-                                highlightCurrentCCTV(poiId, false);
-                                closeButton.removeEventListener('click', handleClose);
-                                resolve();
-                            };
-                            closeButton.addEventListener('click', handleClose);
-                        });
+                        poiList.push(PoiManager.findById(poiId));
                     }
+                    let startDate = null;
+                    let endTime = null;
+                    if (patrolRadioHistory.checked) {
+                        startDate = new Date(`${patrolDateInput.value}T${patrolTimeInput.value}`);
+                        endTime = {
+                            hour: 0,
+                            minutes: 0,
+                            second: 5
+                        };
+                    }
+
+                    const cctvTemplate = await EventManager.createSubCCTVPopup(poiList, startDate, endTime);
+                    cctvTemplate.style.top = '50%';
+                    cctvTemplate.style.left = '50%';
+                    cctvTemplate.style.transform = 'translate(-50%, -50%)';
+
+                    // 5초 후 cctvTemplate 닫기
+                    await new Promise((resolve) => {
+                        setTimeout(() => {
+                            cctvTemplate.remove();
+                            layerPopup.closePlayers();
+                            resolve();
+                        }, 5000);
+                    });
                 }
 
                 index++;
@@ -1116,28 +1120,12 @@
         const locationTitles = document.querySelectorAll('.location__title');
         locationTitles.forEach(title => {
             if (title.getAttribute('data-id') === pointId.toString()) {
-                title.style.color = 'red'; // 텍스트 강조 색상
+                title.style.color = '#00F5BF'; // 텍스트 강조 색상
             } else {
                 title.style.color = ''; // 기본 색상으로 복원
             }
         });
     }
-
-    const highlightCurrentCCTV = (poiId, isActive = true) => {
-        const poiItems = document.querySelectorAll('.poi__title li');
-        poiItems.forEach(item => {
-            if (item.getAttribute('data-id') === poiId.toString()) {
-                if (isActive) {
-                    item.style.color = 'red'; // CCTV 재생 중일 때 강조 색상
-                    item.style.fontWeight = 'bold'; // 굵게 표시
-                } else {
-                    item.style.color = ''; // 기본 색상으로 복원
-                    item.style.fontWeight = ''; // 기본 굵기로 복원
-                }
-            }
-        });
-    }
-
 
     const play = (id) => {
         isPaused = false;

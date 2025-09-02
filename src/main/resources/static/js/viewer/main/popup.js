@@ -3855,6 +3855,13 @@ const layerPopup = (function () {
         Px.VirtualPatrol.Clear();
         // Px.Model.Visible.ShowAll();
 
+        const cctvContainer = document.querySelector('.cctv-container');
+        if(cctvContainer){
+            cctvContainer.remove();
+            layerPopup.closePlayers();
+        }
+
+
         if (target.id === 'mapLayerPopup') {
             document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));
             const sopMiddlePopup = document.querySelector('#sopLayerPopup');

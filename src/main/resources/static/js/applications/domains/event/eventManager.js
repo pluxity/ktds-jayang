@@ -605,21 +605,18 @@ const EventManager = (() => {
     async function playLiveStream(canvasId, cameraIp) {
         const config = await getCCTVConfig();
         const canvasElement = document.getElementById(canvasId);
-        const dummyCanvas = document.createElement('canvas');
-        dummyCanvas.width  = 1;
-        dummyCanvas.height = 1;
         const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
-        player.
-            getLiveStreamUri(cameraIp, config.username, config.password)
-            // getStreamUri(cameraIp, config.username, config.password)
-            .then(hlsUrl => {
-                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, player);
-                    // playVideoInCanvas(hlsUrl, canvasElement, player);
-                    player.cameraIp = cameraIp;
-                    player.httpRelayUrl = config.httpRelayUrl;
-                    player.httpRelayPort = config.httpRelayPort;
-                })
+        try {
+            const hlsUrl = await player.getLiveStreamUri(cameraIp, config.username, config.password);
+            playLiveJsmpegInCanvas(hlsUrl, canvasElement, player);
+            player.cameraIp = cameraIp;
+            player.httpRelayUrl = config.httpRelayUrl;
+            player.httpRelayPort = config.httpRelayPort;
+        } catch (error) {
+            console.error("재생 에러:", error);
+            showCctvError(canvasId);
+        }
     }
 
 
@@ -628,30 +625,55 @@ const EventManager = (() => {
         const canvasElement = document.getElementById(canvasId);
         const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
-        await player.getDeviceInfo((cameraList) => {
-            player.cameraIp = cameraIp;
-            let foundCamera = null;
+        try {
+            await player.getDeviceInfo((cameraList) => {
+                player.cameraIp = cameraIp;
+                let foundCamera = null;
 
-            if (Array.isArray(cameraList)) {
-                // 배열인 경우
-                foundCamera = cameraList.find(c => c && c["ns1:strIPAddress"] === cameraIp);
-            } else if (cameraList && typeof cameraList === 'object') {
-                // 객체인 경우
-                if (cameraList["ns1:strIPAddress"] === cameraIp) {
-                    // 단일 카메라 객체인 경우
-                    foundCamera = cameraList;
-                } else {
-                    // 키-값 형태의 객체인 경우, 값들을 순회
-                    foundCamera = Object.values(cameraList).find(c =>
-                        c && typeof c === 'object' && c["ns1:strIPAddress"] === cameraIp
-                    );
+                if (Array.isArray(cameraList)) {
+                    // 배열인 경우
+                    foundCamera = cameraList.find(c => c && c["ns1:strIPAddress"] === cameraIp);
+                } else if (cameraList && typeof cameraList === 'object') {
+                    // 객체인 경우
+                    if (cameraList["ns1:strIPAddress"] === cameraIp) {
+                        // 단일 카메라 객체인 경우
+                        foundCamera = cameraList;
+                    } else {
+                        // 키-값 형태의 객체인 경우, 값들을 순회
+                        foundCamera = Object.values(cameraList).find(c =>
+                            c && typeof c === 'object' && c["ns1:strIPAddress"] === cameraIp
+                        );
+                    }
                 }
-            }
 
-            const deviceId = foundCamera["ns1:strCameraID"];
+                const deviceId = foundCamera["ns1:strCameraID"];
+                player.playBack(deviceId, startDate, endTime);
+            });
+        }catch (error) {
+            console.error("재생 에러:", error);
+            showCctvError(canvasId);
 
-            player.playBack(deviceId, startDate, endTime);
-        });
+        }
+    }
+
+    function showCctvError(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        // 캔버스 배경을 어둡게
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 에러 메시지 스타일 설정
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 메인 메시지
+        ctx.fillText('영상 불러오기 실패', canvas.width / 2, canvas.height / 2 - 20);
     }
 
     async function livePlayMove(canvasId, x, y) {
@@ -844,20 +866,22 @@ const EventManager = (() => {
 
     function createCctvItem(cctv, index = 0, isMain = false) {
         const canvasId = `cctv-${cctv.id}`;
-        const width = isMain ? 800 : 320;
-        const height = isMain ? 450 : 180;
+        // false일 때만 width, height 지정
+        const canvasStyle = isMain ? '' : 'width: 340px; height: 180px;';
+
         return `
-            <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
-                <div class="cctv-header">
-                    <span class="cctv-title">${cctv.cctvName || (isMain ? '메인 CCTV' : `CCTV ${index + 1}`)}</span>
-                    <button type="button" class="cctv-close">×</button>
-                </div>
-                <div class="cctv-content">
-                    <canvas id="${canvasId}" width="${width}" height="${height}"></canvas>
-                </div>
+        <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
+            <div class="cctv-header">
+                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.name}</span>
+                <button type="button" class="cctv-close">×</button>
             </div>
-        `;
+            <div class="cctv-content">
+                <canvas id="${canvasId}" style="${canvasStyle}"></canvas>
+            </div>
+        </div>
+    `;
     }
+
 
     // MainCCTV 팝업 생성
     async function createMainCCTVPopup(mainCctv) {
@@ -878,28 +902,47 @@ const EventManager = (() => {
     }
 
     // SubCCTV 팝업 생성
-    async function createSubCCTVPopup(subCctvs) {
+    async function createSubCCTVPopup(subCctvs, startDate, endTime) {
         const subCctvTemplate = document.createElement('div');
         subCctvTemplate.className = 'cctv-container';
 
         const cctvItems = subCctvs.map((cctv, idx) => createCctvItem(cctv, idx, false)).join('');
         subCctvTemplate.innerHTML = `<div class="cctv-grid">${cctvItems}</div>`;
 
+        // 1. 먼저 팝업을 화면에 표시
         document.body.appendChild(subCctvTemplate);
 
-        // 각각의 CCTV에 대해 스트리밍 시작
-        for (const cctv of subCctvs) {
-            const canvasId = `cctv-${cctv.id}`;
-            const cameraIp = cctv.cameraIp;
-            await playLiveStream(canvasId, cameraIp);
-        }
-
+        // 2. 닫기 버튼 이벤트 추가
         const closeButtons = subCctvTemplate.querySelectorAll('.cctv-close');
         closeButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 closeEventPopup(event);
             });
         });
+
+        // 3. 각 CCTV 영상을 비동기로 로딩 (대기하지 않음)
+        if(startDate && endTime){
+            subCctvs.forEach(async (cctv) => {
+                const canvasId = `cctv-${cctv.id}`;
+                const cameraIp = cctv.cameraIp;
+                try {
+                    await playPlaybackStream(canvasId, cameraIp, startDate, endTime);
+                } catch (error) {
+                    console.error(`CCTV ${cctv.id} 로딩 실패:`, error);
+                }
+            });
+        } else {
+            subCctvs.forEach(async (cctv) => {
+                const canvasId = `cctv-${cctv.id}`;
+                const cameraIp = cctv.cameraIp;
+                try {
+                    await playLiveStream(canvasId, cameraIp);
+                } catch (error) {
+                    console.error(`CCTV ${cctv.id} 로딩 실패:`, error);
+                }
+            });
+        }
+
         return subCctvTemplate;
     }
 
@@ -1269,6 +1312,7 @@ const EventManager = (() => {
     return {
         eventState,
         createMainCCTVPopup,
+        createSubCCTVPopup,
         initializeAlarms,
         initializeLatest24HoursList,
         initializeProcessChart,

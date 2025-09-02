@@ -1,5 +1,14 @@
 const data = {};
+const categoryList = [];
 
+const initCategory = () => {
+    api.get('/poi-categories').then(res => {
+        categoryList.length = 0;
+        categoryList.push(...res.data.result.map(category => category.name));
+    })
+}
+
+initCategory();
 const dataManufacturer = (rowData) =>
     rowData
         .map((maintenance, index) => {
@@ -104,7 +113,7 @@ maintenanceRegistModal.addEventListener('shown.bs.modal', () => {
     document.getElementById('btnMaintenanceRegister').disabled = false;
     document.getElementById('btnMaintenanceRegister').innerHTML = '등록';
     document.getElementById('maintenanceRegisterForm').reset();
-    const categoryList = ['category1', 'category2', 'category3', 'category4']
+
     const select = document.getElementById('selectCategoryRegister');
     select.innerHTML = '<option class="selected" value="">카테고리 선택</option>';
     categoryList.forEach(cat => {
@@ -168,7 +177,6 @@ modifyModal.addEventListener('show.bs.modal', (event) => {
         (maintenance) => maintenance.id === Number(event.relatedTarget.dataset.id),
     );
 
-    const categoryList = ['category1', 'category2', 'category3', 'category4'];
     const select = document.getElementById('selectCategoryModify');
     select.innerHTML = '<option class="selected" value="">카테고리 선택</option>';
     categoryList.forEach(cat => {

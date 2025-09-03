@@ -1,14 +1,19 @@
 package com.pluxity.ktds.global.config;
 
+import com.pluxity.ktds.domains.api.parking.AccessTokenInterceptor;
 import com.pluxity.ktds.global.constant.ViewPath;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    private final AccessTokenInterceptor accessTokenInterceptor;
 
     @Value("${root-path.upload}")
     private String resourcePath;
@@ -47,4 +52,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         }
     }
 
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(accessTokenInterceptor)
+                .addPathPatterns("/api/v1/park/**");
+    }
 }

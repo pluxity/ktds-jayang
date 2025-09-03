@@ -21,7 +21,11 @@
     const equipmentListPop = document.getElementById('equipmentListPop');
     const equipGroupLinks = document.querySelectorAll('#equipmentListPop .equip-group a');
 
-    const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+    const poiMenuList = document.querySelectorAll(
+        '.poi-menu__list .default_group li, .poi-menu__list--map .map_group li'
+    );
+
+
     const selectBtn = document.querySelectorAll('.select-box__btn');
     const searchText = document.querySelector('input[name="searchText"]');
 
@@ -29,7 +33,7 @@
 
     const closeButtons = document.querySelectorAll('.popup-basic .close');
     const popup = document.getElementById('layerPopup');
-    const systemTabs = document.querySelectorAll('.system-tap li');
+    const systemTabs = document.querySelectorAll('.system_group li');
     
     // 팝업 close
     const closePop = () => {
@@ -153,7 +157,6 @@
     const systemPopView = () => {
         systemTabs.forEach(tab => {
             tab.addEventListener('click', (event) => {
-
                 handleSystemTabClick(event);
             })
         })
@@ -386,17 +389,32 @@
             if (sopPopup.style.display !== 'none') {
                 sopPopup.style.display = 'none';
             }
-            document.querySelectorAll(".system-tap ul li").forEach(li => {
-                li.classList.remove("active");
-            })
             resetSelectBoxes();
             resetAccordions();
         }
 
         if (clickedItem.classList.contains('active')) {
             clickedItem.classList.remove('active');
+
+            if(clickedItem.classList.contains('shelter')){
+                Px.Evac.Clear();
+                Px.Core.Resize();
+                Px.Camera.ExtendView();
+                Px.Model.Collapse({duration: 1000});
+                Px.Model.Transparent.Restore();
+            }
+
         } else {
             poiMenuList.forEach(li => li.classList.remove('active'));
+
+            if(!clickedItem.classList.contains('shelter')){
+                Px.Evac.Clear();
+                Px.Core.Resize();
+                Px.Camera.ExtendView();
+                Px.Model.Collapse({duration: 1000});
+                Px.Model.Transparent.Restore();
+            }
+
             clickedItem.classList.add('active');
 
             // 새로운 팝업 표시
@@ -440,7 +458,7 @@
                     if (popup) {
                         popup.style.display = 'none';
                         Px.VirtualPatrol.Clear();
-                        Px.Poi.ShowAll();
+                        // Px.Poi.ShowAll();
                     }
                 });
             },
@@ -471,8 +489,28 @@
                 maintenancePopup.style.display = 'block';
             },
             shelter: () => {
-                // shelter popup
-                console.log("shelter");
+
+                document.getElementById('mapLayerPopup').style.display = 'none';
+                const params = new URLSearchParams(window.location.search);
+                const buildingId = params.get('buildingId');
+
+                Px.Poi.HideAll(); // poi hide
+                Px.Model.Transparent.SetAll(50); // model 투명도
+                EvacRouteHandler.load((isExist) => {
+                    Px.Evac.ShowAll();
+                    Px.Evac.SetSize(20);
+                    const { floors } = BuildingManager.findById(buildingId);
+                    Px.Model.Expand({
+                        name: floors[0].id,
+                        interval: 50,
+                        duration: 1000,
+                        onComplete: () => {
+                            Px.Camera.ExtendView();
+                        }
+                    });
+                });
+                Px.Core.Resize();
+                Px.Poi.HideAll();
             }
         };
 
@@ -609,22 +647,6 @@
 
         return `${year}년 ${month.toString().padStart(2, '0')}월 ${day.toString().padStart(2, '0')}일 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
-
-    const allCheck = document.getElementById('check');
-    allCheck.addEventListener('change', () => {
-        // floorid도 고려해서
-        if (allCheck.checked) {
-            equipmentGroup.forEach(equipment => {
-                equipment.classList.add('active')
-            });
-            Px.Poi.ShowAll();
-        } else {
-            equipmentGroup.forEach(equipment => {
-                equipment.classList.remove('active')
-            });
-            Px.Poi.HideAll();
-        }
-    })
 
     const initializeTexture = () => {
         Px.VirtualPatrol.LoadArrowTexture('/static/images/virtualPatrol/arrow.png', function () {
@@ -795,7 +817,7 @@
     
         function handleLiveMode() {
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
+            // Px.Poi.ShowAll();
             renderPatrol(true);
             setInputsState(true);
             clearInputValues();
@@ -803,7 +825,7 @@
     
         function handleHistoryMode() {
             Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
+            // Px.Poi.ShowAll();
             renderPatrol(true);
             setInputsState(false);
             setCurrentDateTime();
@@ -843,7 +865,7 @@
         function handleHistorySearch() {
             if (patrolRadioHistory.checked) {
                 Px.VirtualPatrol.Clear();
-                Px.Poi.ShowAll();
+                // Px.Poi.ShowAll();
                 renderPatrol(false, `${patrolDateInput.value} ${patrolTimeInput.value}`);
             }
         }
@@ -889,7 +911,7 @@
         `;
 
         if (patrolList.length === 0) {
-            return patrolContentList.innerHTML += `<div class="error-text">저장된 가상순찰 목록이 없습니다.</div>`
+            return patrolContentList.innerHTML += `<div class="error-text" style="color:#FFFFFF;">저장된 가상순찰 목록이 없습니다.</div>`
         }
 
         patrolList.forEach((patrol) => {
@@ -940,6 +962,12 @@
             btn.addEventListener('click', (event) => {
                 const target = event.currentTarget;
 
+                const cctvContainer = document.querySelector('.cctv-container');
+                if(cctvContainer){
+                    cctvContainer.remove();
+                    layerPopup.closePlayers();
+                }
+
                 // 다른 아코디언 버튼이 열려 있으면 닫기
                 document.querySelectorAll('#patrolPopup .accordion__btn').forEach((otherBtn) => {
                     if (otherBtn !== target) {
@@ -948,7 +976,7 @@
                 });
                 target.classList.toggle('accordion__btn--active');
                 Px.VirtualPatrol.Clear();
-                Px.Poi.ShowAll();
+                // Px.Poi.ShowAll();
                 currentPatrol = -1;
             });
         });
@@ -998,8 +1026,13 @@
     };
 
     const moveVirtualPatrol = async (id, patrol) => {
+
+        const patrolRadioHistory = document.getElementById('radioHistory');
+        const patrolDateInput = document.getElementById('patrol-date-input');
+        const patrolTimeInput = document.getElementById('patrol-time-input');
+
         // CctvEventHandler.cctvPlayerClose();
-        return new Promise(function (resolve, reject) {
+        return new Promise(async function (resolve, reject) {
             const point = patrol.patrolPoints[currentPatrolIndex];
 
 
@@ -1008,8 +1041,8 @@
             }
             const floorElement = document.querySelector(".floor-info__detail .active");
 
-               //층 이동 또는 처음시작할때 화면 렌더링
-            if(!floorElement || point.floorNo !== Number(floorElement.getAttribute("floor-id"))){
+            //층 이동 또는 처음시작할때 화면 렌더링
+            if (!floorElement || point.floorNo !== Number(floorElement.getAttribute("floor-id"))) {
 
                 // 기존 `active` 제거
                 document.querySelectorAll(".floor-info__detail li").forEach(li => li.classList.remove("active"));
@@ -1033,14 +1066,48 @@
                 Px.Poi.HideAll();
 
                 patrol.patrolPoints
-                      .filter(p => p.floorNo === point.floorNo)
-                      .flatMap(p => p.pois)
-                      .forEach(poiId => Px.Poi.Show(poiId));
+                    .filter(p => p.floorNo === point.floorNo)
+                    .flatMap(p => p.pois)
+                    .forEach(poiId => Px.Poi.Show(poiId));
             }
 
-            Px.VirtualPatrol.MoveTo(0, index, 200, 5000, async () => {
-                index++;
+            Px.VirtualPatrol.MoveTo(0, index, 200, 3000, async () => {
                 highlightCurrentPatrolPoint(point.id);
+
+                // 해당 순찰 지점에 POI가 있다면 CCTV 자동재생
+                if (point.pois && point.pois.length > 0) {
+                    // 모든 cctv 재생(5초 후 자동 닫기) - createSubCctvPopup으로 여러개 재생
+                    let poiList = [];
+                    for (const poiId of point.pois) {
+                        poiList.push(PoiManager.findById(poiId));
+                    }
+                    let startDate = null;
+                    let endTime = null;
+                    if (patrolRadioHistory.checked) {
+                        startDate = new Date(`${patrolDateInput.value}T${patrolTimeInput.value}`);
+                        endTime = {
+                            hour: 0,
+                            minutes: 0,
+                            second: 5
+                        };
+                    }
+
+                    const cctvTemplate = await EventManager.createSubCCTVPopup(poiList, startDate, endTime);
+                    cctvTemplate.style.top = '50%';
+                    cctvTemplate.style.left = '50%';
+                    cctvTemplate.style.transform = 'translate(-50%, -50%)';
+
+                    // 5초 후 cctvTemplate 닫기
+                    await new Promise((resolve) => {
+                        setTimeout(() => {
+                            cctvTemplate.remove();
+                            layerPopup.closePlayers();
+                            resolve();
+                        }, 5000);
+                    });
+                }
+
+                index++;
                 return resolve();
             });
 
@@ -1053,13 +1120,12 @@
         const locationTitles = document.querySelectorAll('.location__title');
         locationTitles.forEach(title => {
             if (title.getAttribute('data-id') === pointId.toString()) {
-                title.style.color = 'red'; // 텍스트 강조 색상
+                title.style.color = '#00F5BF'; // 텍스트 강조 색상
             } else {
                 title.style.color = ''; // 기본 색상으로 복원
             }
         });
     }
-
 
     const play = (id) => {
         isPaused = false;
@@ -1094,8 +1160,10 @@
 
                 controlButtons.forEach((button) => {
                     button.classList.remove('on');
+                    button.style.backgroundColor = '';
                 });
                 target.classList.add('on');
+                target.style.backgroundColor = 'rgb(0, 245, 191)';
 
                 switch (item.dataset.btnType) {
                     case 'play':

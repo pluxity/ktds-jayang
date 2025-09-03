@@ -610,7 +610,7 @@
         });
     });
     // menu list click
-    const poiMenuList = document.querySelectorAll('.poi-menu__list li');
+    const poiMenuList = document.querySelectorAll('.poi-menu__list .default_group li');
     const selectBtn = document.querySelectorAll('.select-box__btn');
     const searchText = document.querySelector('input[name="searchText"]');
     poiMenuList.forEach(item => {
@@ -765,4 +765,184 @@
         await layerPopup.createEventPopup(true);
     });
 
+    const systemTabs = document.querySelectorAll('.system_group li');
+
+    // system tab
+    const systemPopup = document.getElementById('systemPopup');
+    const systemPopView = () => {
+        systemTabs.forEach(tab => {
+            tab.addEventListener('click', (event) => {
+                handleSystemTabClick(event);
+            })
+        })
+    }
+    const elevatorPop = document.getElementById('elevatorPop');
+    const lightPop = document.getElementById('lightPop');
+    const energyPop = document.getElementById('energyPop');
+    const airPop = document.getElementById('airPop');
+    const parkingPop = document.getElementById('parkingPop');
+    const electricPop = document.getElementById('electricPop');
+    // 하단 systemTab handle
+    const handleSystemTabClick = (event) => {
+        const clickedItem = event.target.closest('li');
+        const isActive = clickedItem.classList.contains('active');
+
+        const closeAllPopups = () => {
+            ['lightPop', 'elevatorPop', 'parkingPop', 'airPop', 'energyPop', 'electricPop'].forEach(id => {
+                const popup = document.getElementById(id);
+                if (popup) {
+                    if (popup.id.startsWith('light')) {
+                        popup.querySelector('.section__detail').innerHTML = '';
+                    }
+                    popup.style.display = 'none';
+                }
+            });
+            systemPopup.style.display = 'none';
+            systemTabs.forEach(tab => {
+                tab.classList.remove('active')
+            });
+            // layerPopup.clearAllIntervals();
+            layerPopup.closePlayers()
+        };
+
+        const toggleMenu = document.querySelector('#toggle-menu').closest('.all');
+        if (toggleMenu.classList.contains('active')) {
+            toggleMenu.classList.remove('active');
+        }
+
+        const currentPopup = document.getElementById('systemPopup');
+        document.querySelectorAll(".popup-basic").forEach(element => {
+            if (element !== currentPopup) {
+                element.style.display = 'none';
+                document.querySelectorAll("#poiMenuList ul li, #poiMenuListMap ul li").forEach(li => {
+                    li.classList.remove("active");
+                })
+            }
+        });
+
+        if (isActive) {
+            closeAllPopups();
+            return;
+        }
+
+        closeAllPopups();
+        clickedItem.classList.add('active');
+
+        systemPopup.style.position = 'absolute';
+        systemPopup.style.top = '50%';
+        systemPopup.style.left = '50%';
+        systemPopup.style.transform = 'translate(-50%, -50%)';
+        systemPopup.style.display = 'inline-block';
+        const actions = {
+            lightTab: () => {
+                console.log("lightTab");
+                layerPopup.setLight();
+                lightPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                lightPop.style.display = 'block';
+            },
+            elevatorTab: () => {
+                // 여기서 elevator 태그 add
+                api.get('/api/tags/elevator/add').then(res => {
+                    console.log("res : ", res);
+                    layerPopup.setElevator();
+
+                    const elevatorTab = document.querySelector('.elevator-tab');
+                    const escalatorTab = document.querySelector('.escalator-tab');
+                    const elevatorContent = document.getElementById('elevatorContent');
+                    const escalatorContent = document.getElementById('escalatorContent');
+
+                    initPopup(elevatorPop, clickedItem);
+                    registerTabHandlers({
+                        firstTab: elevatorTab,
+                        secondTab: escalatorTab,
+                        firstContent: elevatorContent,
+                        secondContent: escalatorContent,
+                    });
+                }).catch(err => {
+                    console.error(err);
+                })
+            },
+            parkingTab: () => {
+
+                const guideTab = document.querySelector('.parking-guide-tab');
+                const monitorTab = document.querySelector('.parking-monitor-tab');
+                const guideContent = document.getElementById('parkingGuideContent');
+                const monitorContent = document.getElementById('parkingMonitorContent');
+
+                initPopup(parkingPop, clickedItem);
+                // registerTabHandlers({
+                //     firstTab: guideTab,
+                //     secondTab: monitorTab,
+                //     firstContent: guideContent,
+                //     secondContent: monitorContent
+                // });
+                layerPopup.resetParkingFilterUI();
+                layerPopup.setParking();
+            },
+            airTab: () => {
+                layerPopup.setAirTab();
+                initPopup(airPop, clickedItem);
+
+            },
+            energyTab: () => {
+                console.log("energyTab");
+                energyPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                energyPop.style.display = 'block';
+            },
+            electricTab: () => {
+                console.log("electricTab");
+                electricPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+                electricPop.style.display = 'block';
+            }
+        };
+        const matchedAction = Object.keys(actions).find(action => clickedItem.id === action);
+
+        if (matchedAction) {
+            actions[matchedAction]();
+        }
+    }
+
+    const registerTabHandlers = (option) => {
+        const  {
+            firstTab,
+            secondTab,
+            firstContent,
+            secondContent
+        } = option;
+
+        const clearActiveBtns = (container) => {
+            container.querySelectorAll('.select-box__btn--active')
+                .forEach(btn => btn.classList.remove('select-box__btn--active'));
+        }
+
+        firstTab.addEventListener('click', () => {
+            switchTab(firstTab, secondTab, firstContent, secondContent);
+            clearActiveBtns(secondContent);
+            layerPopup.setElevator();
+        });
+
+        secondTab.addEventListener('click', () => {
+            switchTab(secondTab, firstTab, secondContent, firstContent);
+            clearActiveBtns(firstContent);
+            layerPopup.setEscalator();
+        });
+
+        // 초기 상태 설정
+        switchTab(firstTab, secondTab, firstContent, secondContent);
+        // layerPopup.setElevator();
+    };
+
+    const initPopup = (popup, clickedItem) => {
+        popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+        popup.style.display = 'block';
+    };
+
+    const switchTab = (activeTab, inactiveTab, activeContent, inactiveContent) => {
+        activeTab.classList.add('active');
+        inactiveTab.classList.remove('active');
+        activeContent.style.display = 'block';
+        inactiveContent.style.display = 'none';
+    };
+
+    systemPopView();
 })();

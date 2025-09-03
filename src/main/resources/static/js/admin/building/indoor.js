@@ -11,6 +11,7 @@ const getBuildingInfoList = () => {
 const renderBuildingList = (buildingList) => {
     const gridData = buildingList.map((data) => [
         data.id,
+        data.isIndoor === 'Y' ? '실내' : '실외',
         data.code,
         gridjs.html(
             `<a data-bs-toggle="modal" data-bs-target="#buildingModifyModal" id="showModifyModalButton" onclick="modifyBuildingModal(${data.id})">${data.name}</a>`,
@@ -18,7 +19,7 @@ const renderBuildingList = (buildingList) => {
         data.buildingFile.originName === null
             ? ''
             : gridjs.html(
-                `<a href="/Building/${data.buildingFile.directory}/${data.buildingFile.storedName}.${data.buildingFile.extension}">
+                `<a href="/Building/${data.buildingFile.directory}/${data.version}/${data.buildingFile.storedName}.${data.buildingFile.extension}">
                             ${data.buildingFile.originName}
                       </a>`,
             ),
@@ -33,11 +34,11 @@ const renderBuildingList = (buildingList) => {
         {
             id: 'checkbox',
             name: '선택',
-            width: '10%',
+            width: '8%',
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -45,6 +46,10 @@ const renderBuildingList = (buildingList) => {
             id: 'id',
             name: 'id',
             hidden: true,
+        },
+        {
+            name: '구분',
+            width: '8%',
         },
         {
             name: '도면코드',
@@ -60,7 +65,7 @@ const renderBuildingList = (buildingList) => {
         },
         {
             name: '상세설명',
-            width: '30%',
+            width: '15%',
         },
         {
             name: '관리',
@@ -305,6 +310,17 @@ const renderHistoryList = (historyList) => {
     const tbody = document.getElementById('historyListBody');
     tbody.innerHTML = ''; // 기존 내용 초기화
 
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+            <th>도면 버전</th>
+            <th>도면 파일명</th>
+            <th>수정 내용</th>
+            <th>등록자</th>
+            <th>등록일</th>
+            <th>관리</th>
+        `;
+    tbody.appendChild(headerRow);
+
     if (historyList.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -324,7 +340,7 @@ const renderHistoryList = (historyList) => {
             <td>${history.regUser || '-'}</td>
             <td>${history.createdAt || '-'}</td>
             <input type="hidden" id="historyId" value="${history.historyId}">
-            <td>
+            <td style="text-align: center">
                 <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}&version=${history.buildingVersion}')" >
                     <i class="fas fa-map"></i>
                 </button>
@@ -341,7 +357,7 @@ const renderHistoryList = (historyList) => {
 };
 
 function downloadFile(fileEntityType, directory, version, storedName, extension) {
-    const url = `${CONTEXT_PATH}/${fileEntityType}/${directory}/${version}/${storedName}.${extension}`;
+    const url = `/${fileEntityType}/${directory}/${version}/${storedName}.${extension}`;
 
     // 다운로드 링크 생성
     const link = document.createElement('a');

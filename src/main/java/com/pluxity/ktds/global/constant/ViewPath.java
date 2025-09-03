@@ -21,6 +21,8 @@ public enum ViewPath {
     ADMIN_MNG_VENDOR("/admin/management/vendor", "admin/management/vendor"),
     ADMIN_MNG_MAINTENANCE("/admin/management/maintenance", "admin/management/maintenance"),
 
+    ADMIN_SOP("/admin/sop", "admin/sop/sop"),
+
     LOGIN("/login", "login/login"),
     KIOSK_LOGIN("/kiosk-login", "login/kiosk-login"),
     LOGIN_FAILURE("/login/failure", "login/failure/accessDenied"),

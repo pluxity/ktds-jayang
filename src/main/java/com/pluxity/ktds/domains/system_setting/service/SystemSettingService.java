@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.system_setting.service;
 
+import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.pluxity.ktds.global.exception.CustomException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.NOT_FOUND_SYSTEM_SETTING;
@@ -23,34 +25,58 @@ import static com.pluxity.ktds.global.constant.ErrorCode.NOT_FOUND_SYSTEM_SETTIN
 public class SystemSettingService {
 
     private final SystemSettingRepository systemSettingRepository;
+    private final BuildingRepository buildingRepository;
 
     @Transactional(readOnly = true)
-    public SystemSettingResponseDTO getSystemSetting() {
+    public List<SystemSettingResponseDTO> getSystemSetting() {
         List<SystemSetting> systemSettingList = systemSettingRepository.findAll();
         if (systemSettingList.isEmpty()) {
-            return SystemSetting.builder().build().toDto();
+            return buildingRepository.findAll().stream()
+                    .map(b -> SystemSettingResponseDTO.builder()
+                            .buildingId(b.getId())
+                            .poiLineLength(30F)
+                            .poiIconSizeRatio(210F)
+                            .poiTextSizeRatio(100F)
+                            .nodeDefaultColor("#FFFFFF")
+                            .build())
+                    .toList();
         } else {
-            return systemSettingList.get(0).toDto();
+            return systemSettingList.stream()
+                    .map(SystemSetting::toDto)
+                    .toList();
         }
     }
 
     @Transactional
-    public SystemSettingResponseDTO updateSystemSetting(SystemSettingRequestDTO requestDto) {
+    public SystemSettingResponseDTO getSystemSettingByBuildingId(Long buildingId) {
+        SystemSetting systemSetting = systemSettingRepository.findByBuildingId(buildingId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_SYSTEM_SETTING));
 
-        List<SystemSetting> systemSettingList = systemSettingRepository.findAll();
-        if(systemSettingList.isEmpty()) {
-            SystemSetting systemSetting = SystemSetting.builder()
-                    .poiIconSizeRatio(requestDto.poiIconSizeRatio())
-                    .poiLineLength(requestDto.poiLineLength())
-                    .poiTextSizeRatio(requestDto.poiTextSizeRatio())
-                    .nodeDefaultColor(requestDto.nodeDefaultColor())
-                    .build();
-            return systemSettingRepository.save(systemSetting).toDto();
-        } else {
-            SystemSetting systemSetting = systemSettingRepository.findById(systemSettingList.get(0).getId()).orElseThrow(() -> new CustomException(NOT_FOUND_SYSTEM_SETTING));
-             systemSetting.update(requestDto.poiLineLength(), requestDto.poiIconSizeRatio(), requestDto.poiTextSizeRatio(), requestDto.nodeDefaultColor());
-            return systemSetting.toDto();
+        return systemSetting.toDto();
+    }
+
+    @Transactional
+    public List<SystemSettingResponseDTO> updateSystemSetting(List<SystemSettingRequestDTO> requests) {
+
+        List<SystemSettingResponseDTO> results = new ArrayList<>();
+
+        for (SystemSettingRequestDTO req : requests) {
+            SystemSetting setting = systemSettingRepository.findByBuildingId(req.buildingId())
+                    .orElseGet(() -> SystemSetting.builder()
+                            .building(buildingRepository.getReferenceById(req.buildingId()))
+                            .build());
+
+            setting.update(
+                    req.poiLineLength(),
+                    req.poiIconSizeRatio(),
+                    req.poiTextSizeRatio(),
+                    req.nodeDefaultColor()
+            );
+
+            results.add(systemSettingRepository.save(setting).toDto());
         }
+
+        return results;
     }
 
     @Transactional

@@ -2,54 +2,156 @@ const TagManager = (() => {
 
     const addTags = async (poiId) => {
         const uri = `/poi/add-tags`;
+        console.log('=== 외부 서버 태그 추가 시작 ===');
+        console.log('요청 URI:', uri);
+        console.log('POI ID:', poiId);
+        console.log('요청 시간:', new Date().toISOString());
+
         try {
+            console.log('외부 서버로 태그 추가 요청 전송 중...');
             const result = await api.post(uri, poiId, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
+
+            console.log('외부 서버 응답 성공:', result);
+            console.log('응답 상태:', result.status);
+            console.log('응답 헤더:', result.headers);
+            console.log('응답 데이터:', result.data);
+
             const { result: data } = result.data;
             if(!data){
-                console.error("서버로 부터 태그 추가 실패");
+                console.error("외부 서버로부터 태그 추가 실패 - 데이터 없음");
                 return { success: false, error: '태그 추가 실패' };
             }
-            console.log('서버로 태그 추가 성공')
+
+            console.log('외부 서버 태그 추가 성공 - 응답 데이터:', data);
+            console.log('=== 외부 서버 태그 추가 완료 ===');
             return { success: true, data: data };
+
         } catch (error) {
-            console.error('TagManager.addTags 오류:', error);
+            console.error('=== 외부 서버 태그 추가 실패 ===');
+            console.error('에러 타입:', error.constructor.name);
+            console.error('에러 메시지:', error.message);
+            console.error('에러 스택:', error.stack);
+
+            if (error.response) {
+                // 서버 응답이 있는 경우
+                console.error('서버 응답 상태:', error.response.status);
+                console.error('서버 응답 헤더:', error.response.headers);
+                console.error('서버 응답 데이터:', error.response.data);
+                console.error('서버 에러 메시지:', error.response.data?.message || '알 수 없는 서버 에러');
+            } else if (error.request) {
+                // 요청은 보냈지만 응답이 없는 경우
+                console.error('요청은 전송됨, 응답 없음');
+                console.error('요청 정보:', error.request);
+            } else {
+                // 요청 설정 중 에러
+                console.error('요청 설정 에러:', error.message);
+            }
+
+            console.error('=== 외부 서버 태그 추가 실패 종료 ===');
             return { success: false, error: error.message };
         }
     };
 
     const readTags = async (tagNames) => {
+        console.log('=== 외부 서버 태그 상태 조회 시작 ===');
+        console.log('조회할 태그 목록:', tagNames);
+        console.log('요청 시간:', new Date().toISOString());
+
         try {
-            console.log("서버로 태그 상태 조회 요청 보냄");
+            console.log('외부 서버로 태그 상태 조회 요청 전송 중...');
             const response = await api.post('/poi/test-status', tagNames, {
                 headers: {
-                    'X-Skip-Error-Alert': 'true'  // 에러 alert 제외 플래그
+                    'X-Skip-Error-Alert': 'true'
                 }
             });
+
+            console.log('외부 서버 태그 상태 조회 성공:', response);
+            console.log('응답 상태:', response.status);
+            console.log('응답 헤더:', response.headers);
+            console.log('응답 데이터:', response.data);
+
+            if (response.data?.result) {
+                console.log('태그 개수:', response.data.result.TAGCNT);
+                console.log('태그 상세 정보:', response.data.result.TAGs);
+
+                // 각 태그별 상세 로깅
+                if (response.data.result.TAGs) {
+                    response.data.result.TAGs.forEach((tag, index) => {
+                        console.log(`태그 ${index + 1}:`, {
+                            tagName: tag.tagName,
+                            currentValue: tag.currentValue,
+                            timestamp: tag.timestamp || 'N/A'
+                        });
+                    });
+                }
+            }
+
+            console.log('=== 외부 서버 태그 상태 조회 완료 ===');
             return { success: true, data: response.data };
+
         } catch (error) {
+            console.error('=== 외부 서버 태그 상태 조회 실패 ===');
+            console.error('에러 타입:', error.constructor.name);
+            console.error('에러 메시지:', error.message);
+            console.error('에러 스택:', error.stack);
+
+            if (error.response) {
+                console.error('서버 응답 상태:', error.response.status);
+                console.error('서버 응답 헤더:', error.response.headers);
+                console.error('서버 응답 데이터:', error.response.data);
+                console.error('서버 에러 메시지:', error.response.data?.message || '알 수 없는 서버 에러');
+            } else if (error.request) {
+                console.error('요청은 전송됨, 응답 없음');
+                console.error('요청 정보:', error.request);
+            } else {
+                console.error('요청 설정 에러:', error.message);
+            }
+
+            console.error('=== 외부 서버 태그 상태 조회 실패 종료 ===');
             return { success: false, error: error.message };
         }
     };
 
     const clearTags = () => {
         const uri = `/poi/clear-tags`;
+        console.log('=== 외부 서버 태그 동기화 해제 시작 ===');
+        console.log('요청 URI:', uri);
+        console.log('요청 시간:', new Date().toISOString());
 
         return new Promise((resolve) => {
-            api.delete(uri).then((result) => {
+            console.log('외부 서버로 태그 동기화 해제 요청 전송 중...');
+            api.delete(uri, {
+                headers: {
+                    'X-Skip-Error-Alert': 'true'
+                }
+            }).then((result) => {
+                console.log('외부 서버 태그 동기화 해제 성공:', result);
+                console.log('응답 상태:', result.status);
+                console.log('응답 데이터:', result.data);
+
                 const { result: data } = result.data;
-                console.log("서버로 부터 태그 동기화 해제 완료");
+                console.log('서버로부터 태그 동기화 해제 완료');
+                console.log('=== 외부 서버 태그 동기화 해제 완료 ===');
                 resolve(data);
             }).catch((error) => {
-                console.error('TagManager.clearSyncedTagList 오류:', error);
+                console.error('=== 외부 서버 태그 동기화 해제 실패 ===');
+                console.error('에러 타입:', error.constructor.name);
+                console.error('에러 메시지:', error.message);
+
+                if (error.response) {
+                    console.error('서버 응답 상태:', error.response.status);
+                    console.error('서버 응답 데이터:', error.response.data);
+                }
+
+                console.error('=== 외부 서버 태그 동기화 해제 실패 종료 ===');
                 resolve([]); // 에러 시에도 resolve
             });
         });
-    }
-
+    };
     const mapTagDataToPopup = async (poiProperty, popupInfo, statusCell) => {
         try {
 

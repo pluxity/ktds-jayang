@@ -298,10 +298,11 @@ const modifyPatrolPointPoiModal = (pointId) => {
 
     let html = '';
 
-    const poiList = PoiManager.findByBuilding(BUILDING_ID).filter(poi => foundItem != null ? poi.property.floorId === foundItem.floorId : true).filter(poi => poi.poiCategoryDetail.name.toLowerCase().includes("CCTV".toLowerCase()));
+    const poiList = PoiManager.findByBuilding(BUILDING_ID)
+        .filter(poi => foundItem != null ? poi.property.floorNo === foundItem.floorNo : true)
+        .filter(poi => poi.poiCategoryDetail.name.toLowerCase().includes("CCTV".toLowerCase()));
 
     poiList.forEach(poi => {
-        console.log(poi);
         const checked = foundItem != null && foundItem.pois.includes(poi.id) ? 'checked' : '';
 
         html += `
@@ -310,7 +311,7 @@ const modifyPatrolPointPoiModal = (pointId) => {
                     <input type="checkbox" class="poiId" name="poiId" value="${poi.id}" ${checked}>
                 </th>
                 <td class="text-center">${poi.name}</td>
-                <td class="text-center">${poi.code}</td>
+                <td class="text-center">${poi.property.poiMiddleCategoryName}</td>
                 <td class="text-center">${poi.position == null ? "N" : "Y"}</td>
             </tr>
         `;
@@ -384,8 +385,7 @@ const patrolPointOnComplete = (onComplete) => {
 const addPatrolPoi = (poiInfo) => {
     const activePoint = document.querySelector('#patrolList tr.accordion-collapse.active');
     if(!activePoint) return;
-
-    if(!poiInfo.property.code.toLowerCase().includes('cctv')) {
+    if(!poiInfo.property.poiCategoryName.toLowerCase().includes('cctv')) {
         alertSwal('CCTV만 선택가능합니다.');
         return;
     }

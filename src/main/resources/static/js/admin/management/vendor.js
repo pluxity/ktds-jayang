@@ -3,11 +3,10 @@ const data = {};
 const dataManufacturer = (rowData) =>
     rowData
         .map((vendor, index) => {
-            const { id, no, vendorName, representativeName, businessNumber, contactNumber, modifier } = vendor;
+            const { id, vendorName, representativeName, businessNumber, contactNumber, modifier } = vendor;
 
             return [
                 id,
-                rowData.length - index,
                 vendorName,
                 representativeName,
                 businessNumber,
@@ -29,7 +28,7 @@ const renderVendor = (rawData = []) => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -37,10 +36,6 @@ const renderVendor = (rawData = []) => {
             id: 'id',
             name: 'id',
             hidden: true,
-        },
-        {
-            name: '번호',
-            width: '6%',
         },
         {
             name: '거래처명',

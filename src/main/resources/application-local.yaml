@@ -83,3 +83,10 @@ cctv:
   username: admin
   password: pluxity123!@#
 
+tag:
+  client:
+    max-retries: 3
+
+api:
+  parking:
+    access-token: pluxity

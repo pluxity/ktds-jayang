@@ -32,7 +32,6 @@
                                 <a href="javascript:void(0)" class="fire">소방</a>
                                 <a href="javascript:void(0)" class="elevator">승강기</a>
                                 <a href="javascript:void(0)" class="solar">태양광</a>
-                                <a href="javascript:void(0)" class="parking">주차관제</a>
                                 <a href="javascript:void(0)" class="air">공기질</a>
                                 <a href="javascript:void(0)" class="obstacle">항공장애</a>
                                 <a href="javascript:void(0)" class="leak">누수</a>
@@ -40,14 +39,13 @@
                                 <a href="javascript:void(0)" class="bell">비상벨</a>
                                 <a href="javascript:void(0)" class="vav">VAV</a>
                                 <a href="javascript:void(0)" class="geo">지열</a>
-                                <a href="javascript:void(0)" class="ac">시스템에어컨</a>
                             </div>
                         </div>
 <!--                        <template th:replace="viewer/popup :: popup-template"></template>-->
                     </div>
                 </div>
                 <div class="poi-menu__list" id="poiMenuList">
-                    <ul>
+                    <ul class="default_group">
                         <!-- [D] 선택 시 active 클래스 추가 -->
                         <li class="cctv">
                             <a href="javascript:void(0)"><span class="hide">cctv</span></a>
@@ -79,48 +77,41 @@
                                 <span class="tool-tip__text tool-tip__text--bottom">소방</span>
                             </div>
                         </li>
-                        <li class="elevator">
-                            <a href="javascript:void(0)"><span class="hide">승강기</span></a>
-                            <div class="tool-tip">
-                                <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
-                            </div>
-                        </li>
                         <li class="solar">
                             <a href="javascript:void(0)"><span class="hide">태양광</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">태양광</span>
                             </div>
                         </li>
-                        <li class="parking">
-                            <a href="javascript:void(0)"><span class="hide">주차관제</span></a>
-                            <div class="tool-tip">
-                                <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
-                            </div>
-                        </li>
+
                         <li class="air">
                             <a href="javascript:void(0)"><span class="hide">공기질</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">공기질</span>
                             </div>
                         </li>
+
                         <li class="obstacle">
                             <a href="javascript:void(0)"><span class="hide">항공장애</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">항공장애</span>
                             </div>
                         </li>
+
                         <li class="leak">
                             <a href="javascript:void(0)"><span class="hide">누수</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">누수</span>
                             </div>
                         </li>
+
                         <li class="access">
                             <a href="javascript:void(0)"><span class="hide">출입탐지</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">출입탐지</span>
                             </div>
                         </li>
+
                         <li class="bell">
                             <a href="javascript:void(0)"><span class="hide">비상벨</span></a>
                             <div class="tool-tip">
@@ -139,7 +130,23 @@
                                 <span class="tool-tip__text tool-tip__text--bottom">지열</span>
                             </div>
                         </li>
-                        <li class="ac">
+                    </ul>
+                    <ul class="system_group">
+                        <li id="parkingTab" class="parking">
+                            <a href="javascript:void(0)"><span class="hide">주차관제</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--bottom">주차관제</span>
+                            </div>
+                        </li>
+
+                        <li id="elevatorTab" class="elevator">
+                            <a href="javascript:void(0)"><span class="hide">승강기</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--bottom">승강기</span>
+                            </div>
+                        </li>
+
+                        <li id="airTab" class="ac">
                             <a href="javascript:void(0)"><span class="hide">시스템에어컨</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">시스템에어컨</span>
@@ -148,8 +155,16 @@
                     </ul>
                 </div>
             </div>
+
+            <div id="systemTab" class="system-tap">
+                <ul>
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                </ul>
+            </div>
+
             <template th:replace="viewer/popup :: popup-template"></template>
             <template th:replace="viewer/eventPopup :: popup-template"></template>
+            <template th:replace="map/systemPopup :: popup-template"></template>
             <!-- toolBox -->
             <div class="tool-box tool-box--active">
                 <ul class="tool-box__list">
@@ -239,20 +254,7 @@
                 </div>
             </aside>
 
-            <!-- floor -->
-            <!--  floor-info--active 추가 여부 -->
-            <div id="floor-info" class="floor-info floor-info--active">
-                <div class="floor-info__inner">
-                    <!-- [D] 버튼 클릭 시 floor-info__detail show/hide 적용 -->
-                    <button type="button" class="floor-info__button">건물</button>
-                    <div class="floor-info__detail">
-                        <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
-                        <ul>
-                        </ul>
-                        <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
-                    </div>
-                </div>
-            </div>
+
             <!-- notice -->
             <div id="noticePopup" class="popup-event" style="display: none">
                 <div class="popup-event__head">

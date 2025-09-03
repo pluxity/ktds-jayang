@@ -53,8 +53,10 @@ public class TagController {
     }
 
     @GetMapping("/parking")
-    public ResponseEntity<TagResponseDTO> getParkingTags() {
-        TagResponseDTO poiTagResponseMap = tagService.processParkingTags();
+    public ResponseEntity<TagResponseDTO> getParkingTags(
+            @RequestParam(name = "register", defaultValue = "false") boolean register
+    ) {
+        TagResponseDTO poiTagResponseMap = tagService.processParkingTags(register);
 
         return ResponseEntity.ok(poiTagResponseMap);
     }

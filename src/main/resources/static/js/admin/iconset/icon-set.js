@@ -39,7 +39,7 @@ const renderIconSet = (rawData = [], limit = 20) => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -54,11 +54,11 @@ const renderIconSet = (rawData = [], limit = 20) => {
         },
         {
             name: '2D 아이콘',
-            width: '25%',
+            width: '20%',
         },
         {
             name: '3D 아이콘',
-            width: '25%',
+            width: '20%',
         },
         {
             name: '관리',

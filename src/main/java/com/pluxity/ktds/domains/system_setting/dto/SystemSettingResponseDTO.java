@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record SystemSettingResponseDTO(
         Long id,
+        Long buildingId,
         float poiLineLength,
         float poiIconSizeRatio,
         float poiTextSizeRatio,

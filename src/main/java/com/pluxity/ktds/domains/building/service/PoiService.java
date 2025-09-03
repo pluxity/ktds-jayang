@@ -211,8 +211,11 @@ public class PoiService {
     }
 
     @Transactional(readOnly = true)
-    public PoiTag findPoiIdsByTagName(String tagName){
-        return poiTagRepository.findByTagName(tagName);
+    public PoiDetailResponseDTO findPoiDTOByTagName(String tagName){
+        Poi poi = poiRepository.findPoiByTagName(tagName)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_POI, "Not Found Poi with tagName: " + tagName));
+
+        return poi.toDetailResponseDTO();
     }
 
     @Transactional

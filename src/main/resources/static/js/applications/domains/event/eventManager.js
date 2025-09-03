@@ -1,5 +1,11 @@
 const EventManager = (() => {
 
+    // 전역 변수로 연결 상태 관리
+    let eventSource = null;
+    let reconnectAttempts = 0;
+    let reconnectTimeout = null;
+    const MAX_RECONNECT_ATTEMPTS = 10;
+
     // 이벤트 사이드바 토글
     const eventState = () => {
         const eventStateCtrl = document.querySelector('.event-state__ctrl');
@@ -243,31 +249,106 @@ const EventManager = (() => {
 
     // SSE 연결
     const connectToSSE = () => {
-        const eventSource = new EventSource(`/events/subscribe`);
+        // 이미 연결 중이면 중복 실행 방지
+        if (eventSource && (eventSource.readyState === EventSource.CONNECTING || eventSource.readyState === EventSource.OPEN)) {
+            console.log('이미 SSE 연결 중입니다.');
+            return;
+        }
 
-        // 이벤트 발생 시
-        eventSource.addEventListener('newAlarm', async (event) => {
-            const alarm = JSON.parse(event.data);
-            console.log("alarm : ",alarm);
+        // 최대 재연결 시도 횟수 초과시 중단
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+            console.error('최대 재연결 시도 횟수 초과. 수동으로 새로고침해주세요.');
+            return;
+        }
 
-            removeWarningElements();
-            Px.VirtualPatrol.Clear();
-            Px.Poi.ShowAll();
-            toast(alarm); // 새 토스트 추가
-            warningPopup(alarm);
-        });
+        try {
+            eventSource = new EventSource(`/events/subscribe`);
 
-        // 이벤트 해제 메시지 수신
-        eventSource.addEventListener('disableAlarm', async (event) => {
-            const disableAlarmId = JSON.parse(event.data);
-            removeAllAlarmElements(disableAlarmId); // 토스트 포함 모두 제거
-        });
+            // 이벤트 발생 시
+            eventSource.addEventListener('newAlarm', async (event) => {
+                try {
+                    const alarm = JSON.parse(event.data);
+                    console.log("alarm : ", alarm);
 
-        eventSource.onerror = () => {
-            console.error("SSE 연결 끊김. 0.5초 후 재연결 시도...");
+                    removeWarningElements();
+                    Px.VirtualPatrol.Clear();
+                    // Px.Poi.ShowAll();
+                    warningPopup(alarm);
+                } catch (error) {
+                    console.error('알람 데이터 파싱 오류:', error);
+                }
+            });
+
+            // 이벤트 해제 메시지 수신
+            eventSource.addEventListener('disableAlarm', async (event) => {
+                try {
+                    const disableAlarmId = JSON.parse(event.data);
+                    console.log("disableAlarmId : ", disableAlarmId);
+                    removeAllAlarmElements(disableAlarmId); // 토스트 포함 모두 제거
+                } catch (error) {
+                    console.error('알람 해제 데이터 파싱 오류:', error);
+                }
+            });
+
+            // 연결 성공시
+            eventSource.onopen = () => {
+                console.log('SSE 연결 성공');
+                reconnectAttempts = 0;
+                clearTimeout(reconnectTimeout);
+            };
+
+            // 에러 발생시
+            eventSource.onerror = (error) => {
+                console.error("SSE 연결 에러:", error);
+
+                if (eventSource) {
+                    eventSource.close();
+                    eventSource = null;
+                }
+
+                // 재연결 시도
+                reconnectAttempts++;
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 30000); // 최대 30초
+
+                console.log(`${reconnectAttempts}번째 재연결 시도 (${delay}ms 후)...`);
+
+                reconnectTimeout = setTimeout(() => {
+                    connectToSSE();
+                }, delay);
+            };
+
+        } catch (error) {
+            console.error('SSE 연결 생성 실패:', error);
+            // 에러 발생시에도 재연결 시도
+            reconnectAttempts++;
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 30000);
+            reconnectTimeout = setTimeout(() => {
+                connectToSSE();
+            }, delay);
+        }
+    };
+
+    // 페이지 이동/닫힘 시 리소스 정리
+    const cleanupOnPageUnload = () => {
+        if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+            reconnectTimeout = null;
+        }
+
+        if (eventSource) {
             eventSource.close();
-            setTimeout(connectToSSE, 500);
-        };
+            eventSource = null;
+        }
+
+        reconnectAttempts = 0;
+        console.log('페이지 언로드 시 리소스 정리 완료');
+    };
+
+    // 이벤트 리스너 등록
+    const initializeEventListeners = () => {
+        // 페이지 언로드 시 정리
+        window.addEventListener('beforeunload', cleanupOnPageUnload);
+        window.addEventListener('unload', cleanupOnPageUnload);
     };
 
     // 이벤트 발생 시 모든 팝업 제거용
@@ -298,7 +379,7 @@ const EventManager = (() => {
     }
 
     // 토스트 알림
-    function toast(alarm) {
+    function toast(alarm, poiData) {
 
         const toast = document.querySelector('.toast');
 
@@ -312,7 +393,7 @@ const EventManager = (() => {
             <input type="hidden" class="alarm-id" value="${alarm.id}">
             <div class="toast__texts">
                 <strong>[SMS] ${alarmFormatTime(alarm.occurrenceDate)} </strong>
-                <p>[${alarm.alarmType}] ${alarm.buildingNm} ${alarm.floorNm} F </p>
+                <p>[${poiData.property.poiCategoryName}] ${poiData.property.buildingName} ${poiData.property.floorName} </p>
             </div>
         `;
 
@@ -334,13 +415,19 @@ const EventManager = (() => {
     // 경고 팝업
     async function warningPopup(alarm) {
         try {
-            const response = await api.get(`/cctv/tag/${alarm.tagName}`);
-            const cctvData = response.data;
-            const cctvList = cctvData.result;
+            const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
+            const alarmedPoi = response.data.result;
+            const cctvList = alarmedPoi.cctvList;
+            console.log("alarmedPoi : ",alarmedPoi);
+            console.log("alarm", alarm);
+            const poiData = PoiManager.findById(alarmedPoi.id);
+
+            // toast
+            toast(alarm, poiData); // 새 토스트 추가
 
 
             // 경고 팝업 생성
-            const warningTemplate = createWarningPopup(alarm);
+            const warningTemplate = createWarningPopup(alarm, poiData);
             document.body.appendChild(warningTemplate);
             const warningRect = warningTemplate.getBoundingClientRect();
 
@@ -351,13 +438,13 @@ const EventManager = (() => {
                 const subCctvs = cctvList.filter(cctv => cctv.isMain === 'N');
 
                 if (mainCctv) {
-                    const mainCCTVTemplate = createMainCCTVPopup(mainCctv);
+                    const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                     mainCCTVTemplate.style.top = `${warningRect.bottom + 10}px`;
                     mainCCTVTemplate.style.left = `${warningRect.left}px`;
                 }
 
                 if (subCctvs.length > 0) {
-                    const subCCTVTemplate = createSubCCTVPopup(subCctvs);
+                    const subCCTVTemplate = await createSubCCTVPopup(subCctvs);
                     subCCTVTemplate.style.bottom = `${warningRect.top}px`;
                     subCCTVTemplate.style.left = `${warningRect.right + 10}px`;
                 }
@@ -372,7 +459,7 @@ const EventManager = (() => {
             // 이벤트 해제, 3d맵 이동 이벤트
             const buttons = warningTemplate.querySelector('.buttons');
             buttons.querySelector('.button--ghost-middle').onclick = () => handleAlarmConfirm(alarm.id);
-            buttons.querySelector('.button--solid-middle').onclick = () => handle3DMapMove(alarm);
+            buttons.querySelector('.button--solid-middle').onclick = () => handle3DMapMove(alarmedPoi);
         } catch (error) {
             console.log('팝업 생성 실패', error);
         }
@@ -391,44 +478,43 @@ const EventManager = (() => {
     }
 
     // 3d 맵 이동
-    async function handle3DMapMove(alarm) {
+    async function handle3DMapMove(alarmPoi) {
         try {
             removeWarningElements()
-
-            const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
-            const data = response.data;
-            const poi = data.result;
-
-            // CCTV 정보 조회
-            const cctvResponse = await api.get(`/cctv/tag/${alarm.tagName}`);
-            const cctvData = cctvResponse.data;
-            const cctvList = cctvData.result;
+            const cctvList = alarmPoi.cctvList;
             const mainCctv = cctvList?.find(cctv => cctv.isMain === 'Y');
 
-            const poiData = Px.Poi.GetData(poi.id);
+            const poiData = Px.Poi.GetData(alarmPoi.id);
             const isViewerPage = window.location.pathname.includes('/viewer');
 
             if (!poiData || isViewerPage) {
-                sessionStorage.setItem('selectedPoiId', poi.id);
+                sessionStorage.setItem('fromEvent', 'Y');
+                sessionStorage.setItem('selectedPoiId', alarmPoi.id);
                 sessionStorage.setItem('mainCctv', JSON.stringify(mainCctv));
-                window.location.href = `/map?buildingId=${poi.building.id}`; // 파라미터 추가
+                window.location.href = `/map?buildingId=${alarmPoi.buildingId}`;
             } else {
-                Px.Model.Visible.Show(String(poiData.property.floorId));
-                Px.Poi.Show(poi.id);
+                Px.Model.Visible.HideAll();
+
+                const floorNo = poiData.property.floorNo;
+                Init.moveToFloorPage(floorNo);
+                const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+                if (floorElement) {
+                    floorElement.click();
+                }
+
+                Px.Poi.HideAll();
+                Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
                 Px.Camera.MoveToPoi({
-                    id: poi.id,
+                    id: alarmPoi.id,
                     isAnimation: true,
                     duration: 500,
-                    onComplete: () => {
+                    heightOffset: 70,
+                    onComplete: async () => {
                         Init.renderPoiInfo(poiData);
                         if (mainCctv) {
-                            const mainCCTVTemplate = createMainCCTVPopup(mainCctv);
-                            mainCCTVTemplate.style.position = 'fixed';
-                            // 화면 중앙 높이
+                            const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                             mainCCTVTemplate.style.top = '50%';
                             mainCCTVTemplate.style.transform = 'translateY(-50%)';
-
-                            // 화면 중앙을 기준으로 CCTV 팝업의 오른쪽 면이 중앙에 오도록
                             mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
                         }
                     }
@@ -440,11 +526,11 @@ const EventManager = (() => {
     }
 
     // 알람 팝업 생성
-    function createWarningPopup(alarm) {
+    function createWarningPopup(alarm, poiData) {
         const warningTemplate = document.createElement('div');
         warningTemplate.className = 'popup-warning';
         warningTemplate.innerHTML = `
-            <h2 class="popup-warning__head">[${alarm.process}] ${alarm.alarmType}</h2>
+            <h2 class="popup-warning__head">[${poiData.property.poiCategoryName}] ${alarm.event}</h2>
             <div class="popup-warning__content">
                 <input type="hidden" class="alarm-id" value="${alarm.id}">
                 <table>
@@ -456,11 +542,11 @@ const EventManager = (() => {
                     <tbody>
                         <tr>
                             <th scope="row">발생 위치</th>
-                            <td>${alarm.buildingNm} ${alarm.floorNm}F</td>
+                            <td>${poiData.property.buildingName} ${poiData.property.floorName}</td>
                         </tr>
                         <tr>
                             <th scope="row">장비명</th>
-                            <td>${alarm.deviceNm}</td>
+                            <td>${poiData.property.name}</td>
                         </tr>
                         <tr>
                             <th scope="row">발생 일시</th>
@@ -519,21 +605,18 @@ const EventManager = (() => {
     async function playLiveStream(canvasId, cameraIp) {
         const config = await getCCTVConfig();
         const canvasElement = document.getElementById(canvasId);
-        const dummyCanvas = document.createElement('canvas');
-        dummyCanvas.width  = 1;
-        dummyCanvas.height = 1;
         const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
-        player.
-            getLiveStreamUri(cameraIp, config.username, config.password)
-            // getStreamUri(cameraIp, config.username, config.password)
-            .then(hlsUrl => {
-                    playLiveJsmpegInCanvas(hlsUrl, canvasElement, player);
-                    // playVideoInCanvas(hlsUrl, canvasElement, player);
-                    player.cameraIp = cameraIp;
-                    player.httpRelayUrl = config.httpRelayUrl;
-                    player.httpRelayPort = config.httpRelayPort;
-                })
+        try {
+            const hlsUrl = await player.getLiveStreamUri(cameraIp, config.username, config.password);
+            playLiveJsmpegInCanvas(hlsUrl, canvasElement, player);
+            player.cameraIp = cameraIp;
+            player.httpRelayUrl = config.httpRelayUrl;
+            player.httpRelayPort = config.httpRelayPort;
+        } catch (error) {
+            console.error("재생 에러:", error);
+            showCctvError(canvasId);
+        }
     }
 
 
@@ -542,30 +625,55 @@ const EventManager = (() => {
         const canvasElement = document.getElementById(canvasId);
         const player = getOrCreatePlayer(canvasId, config, canvasElement);
 
-        await player.getDeviceInfo((cameraList) => {
-            player.cameraIp = cameraIp;
-            let foundCamera = null;
+        try {
+            await player.getDeviceInfo((cameraList) => {
+                player.cameraIp = cameraIp;
+                let foundCamera = null;
 
-            if (Array.isArray(cameraList)) {
-                // 배열인 경우
-                foundCamera = cameraList.find(c => c && c["ns1:strIPAddress"] === cameraIp);
-            } else if (cameraList && typeof cameraList === 'object') {
-                // 객체인 경우
-                if (cameraList["ns1:strIPAddress"] === cameraIp) {
-                    // 단일 카메라 객체인 경우
-                    foundCamera = cameraList;
-                } else {
-                    // 키-값 형태의 객체인 경우, 값들을 순회
-                    foundCamera = Object.values(cameraList).find(c =>
-                        c && typeof c === 'object' && c["ns1:strIPAddress"] === cameraIp
-                    );
+                if (Array.isArray(cameraList)) {
+                    // 배열인 경우
+                    foundCamera = cameraList.find(c => c && c["ns1:strIPAddress"] === cameraIp);
+                } else if (cameraList && typeof cameraList === 'object') {
+                    // 객체인 경우
+                    if (cameraList["ns1:strIPAddress"] === cameraIp) {
+                        // 단일 카메라 객체인 경우
+                        foundCamera = cameraList;
+                    } else {
+                        // 키-값 형태의 객체인 경우, 값들을 순회
+                        foundCamera = Object.values(cameraList).find(c =>
+                            c && typeof c === 'object' && c["ns1:strIPAddress"] === cameraIp
+                        );
+                    }
                 }
-            }
 
-            const deviceId = foundCamera["ns1:strCameraID"];
+                const deviceId = foundCamera["ns1:strCameraID"];
+                player.playBack(deviceId, startDate, endTime);
+            });
+        }catch (error) {
+            console.error("재생 에러:", error);
+            showCctvError(canvasId);
 
-            player.playBack(deviceId, startDate, endTime);
-        });
+        }
+    }
+
+    function showCctvError(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        // 캔버스 배경을 어둡게
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 에러 메시지 스타일 설정
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 메인 메시지
+        ctx.fillText('영상 불러오기 실패', canvas.width / 2, canvas.height / 2 - 20);
     }
 
     async function livePlayMove(canvasId, x, y) {
@@ -757,25 +865,23 @@ const EventManager = (() => {
     }
 
     function createCctvItem(cctv, index = 0, isMain = false) {
-        const canvasId = `cctv${cctv.id}`;
-        const width = isMain ? 800 : 320;
-        const height = isMain ? 450 : 180;
+        const canvasId = `cctv-${cctv.id}`;
+        // false일 때만 width, height 지정
+        const canvasStyle = isMain ? '' : 'width: 340px; height: 180px;';
+
         return `
-            <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
-                <div class="cctv-header">
-                    <span class="cctv-title">${cctv.cctvName || (isMain ? '메인 CCTV' : `CCTV ${index + 1}`)}</span>
-                    <button type="button" class="cctv-close">×</button>
-                </div>
-                <div class="cctv-content">
-                    <canvas id="${canvasId}" width="${width}" height="${height}"></canvas>
-                    <div class="cctv-controls">
-                        <button type="button" class="btn-play">▶</button>
-                        <button type="button" class="btn-rotate">↻</button>
-                    </div>
-                </div>
+        <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
+            <div class="cctv-header">
+                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.name}</span>
+                <button type="button" class="cctv-close">×</button>
             </div>
-        `;
+            <div class="cctv-content">
+                <canvas id="${canvasId}" style="${canvasStyle}"></canvas>
+            </div>
+        </div>
+    `;
     }
+
 
     // MainCCTV 팝업 생성
     async function createMainCCTVPopup(mainCctv) {
@@ -785,8 +891,8 @@ const EventManager = (() => {
 
         document.body.appendChild(mainCctvTemplate);
 
-        const canvasId = `cctv${mainCctv.id}`;
-        const cameraIp = mainCctv.property.cameraIp;
+        const canvasId = `cctv-${mainCctv.id}`;
+        const cameraIp = mainCctv.cameraIp;
         await playLiveStream(canvasId, cameraIp);
 
         mainCctvTemplate.querySelector('.cctv-close').addEventListener('click', (event) => {
@@ -796,28 +902,47 @@ const EventManager = (() => {
     }
 
     // SubCCTV 팝업 생성
-    async function createSubCCTVPopup(subCctvs) {
+    async function createSubCCTVPopup(subCctvs, startDate, endTime) {
         const subCctvTemplate = document.createElement('div');
         subCctvTemplate.className = 'cctv-container';
 
         const cctvItems = subCctvs.map((cctv, idx) => createCctvItem(cctv, idx, false)).join('');
         subCctvTemplate.innerHTML = `<div class="cctv-grid">${cctvItems}</div>`;
 
+        // 1. 먼저 팝업을 화면에 표시
         document.body.appendChild(subCctvTemplate);
 
-        // 각각의 CCTV에 대해 스트리밍 시작
-        subCctvs.forEach((cctv) => {
-            const canvasId = `cctv-${cctv.id}`;
-            const cameraIp = cctv.property.cameraIp;
-            playLiveStream(canvasId, cameraIp);
-        });
-
+        // 2. 닫기 버튼 이벤트 추가
         const closeButtons = subCctvTemplate.querySelectorAll('.cctv-close');
         closeButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 closeEventPopup(event);
             });
         });
+
+        // 3. 각 CCTV 영상을 비동기로 로딩 (대기하지 않음)
+        if(startDate && endTime){
+            subCctvs.forEach(async (cctv) => {
+                const canvasId = `cctv-${cctv.id}`;
+                const cameraIp = cctv.cameraIp;
+                try {
+                    await playPlaybackStream(canvasId, cameraIp, startDate, endTime);
+                } catch (error) {
+                    console.error(`CCTV ${cctv.id} 로딩 실패:`, error);
+                }
+            });
+        } else {
+            subCctvs.forEach(async (cctv) => {
+                const canvasId = `cctv-${cctv.id}`;
+                const cameraIp = cctv.cameraIp;
+                try {
+                    await playLiveStream(canvasId, cameraIp);
+                } catch (error) {
+                    console.error(`CCTV ${cctv.id} 로딩 실패:`, error);
+                }
+            });
+        }
+
         return subCctvTemplate;
     }
 
@@ -933,16 +1058,20 @@ const EventManager = (() => {
         const mainPopup = target.closest('.main-cctv-container');
         const subPopup = target.closest('.cctv-item');
         const sopPopup = target.closest('.sop-container');
+        let canvasId;
 
         if (sopPopup) {
             sopPopup.remove();
         }
         if (mainPopup) {
             mainPopup.remove();
+            canvasId = mainPopup.querySelector('canvas');
         }
         if (subPopup) {
             subPopup.remove();
+            canvasId = subPopup.querySelector('canvas');
         }
+        layerPopup.closePlayer(canvasId ? canvasId.id : null);
     }
 
 
@@ -1003,8 +1132,8 @@ const EventManager = (() => {
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
                 <td>${event.floorNm + 'F' || '-'}</td>
-                <td class="ellipsis">${event.alarmType || '-'}</td>
-                <td class="ellipsis">${event.deviceNm || '-'}</td>
+                <td class="ellipsis">${event.event || '-'}</td>
+                <td class="ellipsis">${event.poiName || '-'}</td>
                 <td>${formatTime(event.occurrenceDate)}</td>
             `;
             tableBody.appendChild(row);
@@ -1070,14 +1199,15 @@ const EventManager = (() => {
                             position: 'left',
                             align: 'center',
                             labels: {
-                                padding: 20,
-                                boxWidth: 40,
+                                padding: 10,
+                                boxWidth: 10,
                                 generateLabels: function (chart) {
                                     const data = chart.data;
                                     return data.labels.map((label, i) => ({
                                         text: `${label}: ${data.datasets[0].data[i]}`,
                                         fillStyle: data.datasets[0].backgroundColor[i],
-                                        index: i
+                                        index: i,
+                                        fontColor: '#FFFFFF',
                                     }));
                                 }
                             }
@@ -1182,6 +1312,7 @@ const EventManager = (() => {
     return {
         eventState,
         createMainCCTVPopup,
+        createSubCCTVPopup,
         initializeAlarms,
         initializeLatest24HoursList,
         initializeProcessChart,

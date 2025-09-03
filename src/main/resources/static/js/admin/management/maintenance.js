@@ -1,10 +1,19 @@
 const data = {};
+const categoryList = [];
 
+const initCategory = () => {
+    api.get('/poi-categories').then(res => {
+        categoryList.length = 0;
+        categoryList.push(...res.data.result.map(category => category.name));
+    })
+}
+
+initCategory();
 const dataManufacturer = (rowData) =>
     rowData
         .map((maintenance, index) => {
 
-            const { id, no, managementCategory, maintenanceName, mainManagerDivision, mainManagerName, mainManagerContact, subManagerDivision, subManagerName, subManagerContact, modifier } = maintenance;
+            const { id, managementCategory, maintenanceName, mainManagerDivision, mainManagerName, mainManagerContact, subManagerDivision, subManagerName, subManagerContact, modifier } = maintenance;
 
             const divisionHtml = gridjs.html(`
               <div>(정)${mainManagerDivision}</div>
@@ -24,7 +33,6 @@ const dataManufacturer = (rowData) =>
 
             return [
                 id,
-                rowData.length - index,
                 managementCategory,
                 maintenanceName,
                 divisionHtml,
@@ -47,7 +55,7 @@ const renderMaintenance = (rawData = []) => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -56,10 +64,7 @@ const renderMaintenance = (rawData = []) => {
             name: 'id',
             hidden: true,
         },
-        {
-            name: '번호',
-            width: '6%',
-        },
+
         {
             name: '카테고리명',
             width: '10%',
@@ -108,7 +113,7 @@ maintenanceRegistModal.addEventListener('shown.bs.modal', () => {
     document.getElementById('btnMaintenanceRegister').disabled = false;
     document.getElementById('btnMaintenanceRegister').innerHTML = '등록';
     document.getElementById('maintenanceRegisterForm').reset();
-    const categoryList = ['category1', 'category2', 'category3', 'category4']
+
     const select = document.getElementById('selectCategoryRegister');
     select.innerHTML = '<option class="selected" value="">카테고리 선택</option>';
     categoryList.forEach(cat => {
@@ -172,7 +177,6 @@ modifyModal.addEventListener('show.bs.modal', (event) => {
         (maintenance) => maintenance.id === Number(event.relatedTarget.dataset.id),
     );
 
-    const categoryList = ['category1', 'category2', 'category3', 'category4'];
     const select = document.getElementById('selectCategoryModify');
     select.innerHTML = '<option class="selected" value="">카테고리 선택</option>';
     categoryList.forEach(cat => {
@@ -201,7 +205,14 @@ const searchMaintenanceInfoList = () => {
     const searchType = document.getElementById('searchType').value;
     const searchName = document.getElementById('searchName').value.toLowerCase();
 
-    const filteredList = data.maintenance.filter((maintenance) => maintenance[searchType].toLowerCase().indexOf(searchName) > -1)
+    const filteredList = data.maintenance.filter((maintenance) => {
+        const value =
+            searchType === 'maintenanceCategory'
+                ? maintenance['managementCategory']
+                : maintenance[searchType];
+
+        return typeof value === 'string' && value.toLowerCase().includes(searchName);
+    });
 
     renderMaintenance(filteredList);
 }

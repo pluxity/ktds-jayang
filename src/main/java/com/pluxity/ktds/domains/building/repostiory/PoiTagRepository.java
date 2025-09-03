@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PoiTagRepository extends JpaRepository<PoiTag, Long> {
@@ -28,11 +29,11 @@ public interface PoiTagRepository extends JpaRepository<PoiTag, Long> {
      * 외부 서버에 미등록된 태그들 조회
      */
     List<PoiTag> findByExternalRegisteredFalse();
-    
+
     /**
      * 태그명으로 조회
      */
-    PoiTag findByTagName(String tagName);
+    Optional<PoiTag> findByTagName(String tagName);
 
     /**
      * 특정 POI에 대해 외부 서버에 등록되지 않은 태그들 조회

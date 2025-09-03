@@ -1,22 +1,19 @@
 package com.pluxity.ktds.domains.tag;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.PoiTag;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiTagRepository;
 import com.pluxity.ktds.domains.tag.dto.TagData;
 import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
-import com.pluxity.ktds.global.constant.ErrorCode;
-import com.pluxity.ktds.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -34,16 +31,12 @@ public class TagService {
     private final RestTemplate restTemplate;
     private final PoiTagRepository poiTagRepository;
     private final TagClientService tagClientService;
+    private final ObjectMapper objectMapper;
     @Value("${event.server.base-url}")
     private String baseUrl;
 
     public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
 
-//        String mappedBuilding = (buildingName.equals("A") || buildingName.equals("B")) ? buildingName : "C";
-//
-//        String prefix = type.equals("ELEV")
-//                ? String.format("%s-null-EV-ELEV-", mappedBuilding)
-//                : String.format("%s-null-EV-ESCL-", mappedBuilding);
         boolean isAllBuilding = (buildingId == null || buildingName == null);
         List<Poi> pois = poiRepository.findByBuildingIdAndMiddleCategoryName(buildingId, "승강기");
 
@@ -73,10 +66,13 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
+//            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
+//            if (!addRes.getStatusCode().is2xxSuccessful()) {
+//                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+//            }
 
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
-//                    "http://192.168.4.149:9999/api/tags/data/filter",
                     allTagNamesToFetch,
                     TagResponseDTO.class
             );
@@ -128,7 +124,6 @@ public class TagService {
     public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type) {
 
         String prefix = "C-null-EV-ESCL-";
-//        List<Poi> pois = poiRepository.findPoisByBuildingId(buildingId);
 
         List<Poi> pois = poiRepository.findByMiddleCategoryName("에스컬레이터");
 
@@ -151,9 +146,14 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
+
+//            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
+//            if (!addRes.getStatusCode().is2xxSuccessful()) {
+//                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
+//            }
+
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
-//                    "http://192.168.4.149:9999/api/tags/data/filter",
                     allTagNamesToFetch,
                     TagResponseDTO.class
             );
@@ -196,8 +196,7 @@ public class TagService {
         return poiTagResponseMap;
     }
 
-    // test
-    public TagResponseDTO processParkingTags() {
+    public TagResponseDTO processParkingTags(boolean register) {
 
         List<String> parkingTags = List.of(
                 "C-null-PK-GU-G-ParkTotal",
@@ -220,12 +219,29 @@ public class TagService {
                 "C-P5-PK-GU-null-Parking"
         );
 
-        TagResponseDTO all = restTemplate.postForObject(
-                baseUrl + "/?ReadTags",
-                parkingTags,
-                TagResponseDTO.class
-        );
-        return all;
+        if (register) {
+            ResponseEntity<String> addRes = tagClientService.addTags(parkingTags);
+            if (!addRes.getStatusCode().is2xxSuccessful()) {
+                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCode().value());
+            }
+        }
+
+        ResponseEntity<String> response = tagClientService.testReadTags(parkingTags);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new IllegalStateException("testReadTags 실패: " + response.getStatusCode().value());
+        }
+
+        if (response.getBody() == null) {
+            throw new IllegalStateException("응답 데이터가 없습니다.");
+        }
+
+        try {
+            return objectMapper.readValue(response.getBody(), TagResponseDTO.class);
+
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("응답 데이터 파싱 실패: " + e.getMessage());
+        }
     }
 
     @Transactional

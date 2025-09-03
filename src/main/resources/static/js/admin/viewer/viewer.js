@@ -1,6 +1,6 @@
 (async function () {
     // 시스템 셋팅
-    await SystemSettingManager.getSystemSetting();
+    await SystemSettingManager.getSystemSettingByBuildingId(BUILDING_ID);
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
     await PoiMiddleCategoryManager.getPoiMiddleCategoryList();
@@ -241,10 +241,7 @@ function changeEventFloor(floorNo) {
             clickPatrolTab();
             document.querySelector('#virtualPatrolCtrlToolBar').classList.add('active');
             document.querySelector('#evacRouteBtnToolBar').classList.remove('active');
-            const activePatrolId = document.querySelector("#patrolListTable > tbody > tr.collapsed.active");
-            if(activePatrolId != null) {
-                patrolPointImport(activePatrolId.dataset.id, floorId);
-            }
+
             break;
         }
         case 'cctv-tab': {
@@ -285,13 +282,7 @@ function initBuilding() {
         const { directory, storedName, extension } = buildingFile;
         const params = new URLSearchParams(window.location.search);
         const version = params.get('version') || building.getVersion();
-
-
         const floors =  await BuildingManager.getFloorsByHistoryVersion(version);
-        console.log(floors);
-
-        // histotry에 맞는 floor를 가져오면?
-        // 층 + history를 갖는 엔티티
 
         const sbmDataArray = floors.flatMap(floor =>
             floor.sbmFloor.map(sbm => ({
@@ -302,7 +293,6 @@ function initBuilding() {
                 groupId: sbm.sbmFloorGroup,
             }))
         );
-        console.log("sbmDataArray : ", sbmDataArray);
 
         Px.Loader.LoadSbmUrlArray({
             urlDataList: sbmDataArray,
@@ -509,6 +499,8 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
     const viewerSidebar = document.querySelector('.viewer-sidebar');
     const poiCategorySelect = document.getElementById('poiSelect');
     const virtualPatrolCtrlToolBar = document.getElementById('virtualPatrolCtrlToolBar');
+    const params = new URLSearchParams(window.location.search);
+    const buildingId = params.get('buildingId');
 
     changeEventFloor('');
 
@@ -528,7 +520,7 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
 
             Px.Model.Collapse({duration: 1000});
 
-            const poiList = PoiManager.findByBuilding(BUILDING_ID)
+            const poiList = PoiManager.findByBuilding(buildingId)
                 .filter(selectedPoiCategory(poiCategorySelect.value))
                 .filter(selectedFloor(''));
             renderingPoiList(poiList);
@@ -545,10 +537,10 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
 
         EvacRouteHandler.load((isExist) => {
             Px.Evac.ShowAll();
-            const { floors } = BuildingManager.findById(BUILDING_ID);
+            const { floors } = BuildingManager.findById(buildingId);
             Px.Model.Expand({
                 name: floors[0].id,
-                interval: 200,
+                interval: 20,
                 duration: 1000,
                 onComplete: () => {
                     Px.Camera.ExtendView();
@@ -559,7 +551,7 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
         Px.Poi.HideAll();
     }
 
-    const {camera3d} = BuildingManager.findById(BUILDING_ID);
+    const {camera3d} = BuildingManager.findById(buildingId);
     if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
 })
 
@@ -735,7 +727,7 @@ function initializeViewerPoiModal() {
             params.poiMiddleCategoryId = Number(document.querySelector('#selectPoiMiddleCategoryIdRegister').value);
             const poiMiddleCategory = viewerPoiData.poiMiddleCategory.find((poiMiddleCategory) =>
                 poiMiddleCategory.id === params.poiMiddleCategoryId);
-            params.iconSetId = poiMiddleCategory.imageFile.id;
+            params.iconSetId = poiMiddleCategory.iconSets[0].id;
 
             params.code = document.querySelector('#poiCodeRegister').value;
             params.name = document.querySelector('#poiNameRegister').value;

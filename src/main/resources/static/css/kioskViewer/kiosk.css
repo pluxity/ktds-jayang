@@ -871,7 +871,7 @@ html {
     height: calc(100% - 22.5rem - 25rem);
   }
   .kiosk-3d__control {
-    bottom: 65rem;
+    bottom: 50rem;
     right: 20px;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;

@@ -32,7 +32,7 @@ const renderPoi = (rawData = []) => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -520,7 +520,7 @@ function validateCctvDuplicates(mainCctvValue, subCctvFields) {
         } else {
             const cameraIp = document.querySelector(`#cameraIp${type}`).value;
             params.cameraIp = cameraIp;
-            params.cameraId = await getCameraId(params.cameraIp);
+            // params.cameraId = await getCameraId(params.cameraIp);
         }
 
         if(poiCategory.name.includes('센서')) {
@@ -674,7 +674,7 @@ const searchPoi = () => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -709,7 +709,7 @@ const searchPoi = () => {
         },
         {
             name: '배치 여부',
-            width: '5%',
+            width: '3%',
         },
         {
             name: '관리',

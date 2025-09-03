@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.building.repostiory;
 
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
+import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,8 +25,16 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     Optional<Poi> findByFloorNo(@Param(value = "floorNo") Integer floorNo);
     List<Poi> findPoisByPoiCategoryId(@Param(value = "id") Long id);
     List<Poi> findPoisByFloorNo(@Param(value = "floorNo") Integer floorNo);
-    @Query("SELECT p FROM Poi p JOIN p.poiTags pt WHERE pt.tagName = :tagName")
-    Poi findPoiByTagName(@Param("tagName") String tagName);
+
+    @Query("SELECT p " +
+            "FROM Poi p JOIN FETCH p.poiTags pt WHERE pt.tagName = :tagName")
+    Optional<Poi> findPoiByTagName(@Param("tagName") String tagName);
+
+    @Query("SELECT new com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO(p.id, pc.cctvName, pc.isMain, p.cameraIp) " +
+            "FROM Poi p join PoiCctv pc on p.name = pc.cctvName "+
+            "where pc.cctvName IN :cctvNames")
+    List<PoiCctvDTO> findByCctvNames(List<String> cctvNames);
+
 
     boolean existsByName(String name);
 

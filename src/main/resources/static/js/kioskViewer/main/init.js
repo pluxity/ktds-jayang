@@ -91,40 +91,43 @@
                     urlDataList: sbmDataArray,
                     center: "",
                     onLoad: async function() {
-                        await initPoi();
+                        Px.Util.SetBackgroundColor('#f1f1f1');
+                        initPoi().then(() => {
+                            Init.moveToKiosk(kioskPoi);
+
+                            Px.Event.On();
+                            Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
+
+                                const currentTime = new Date().getTime();
+                                const tapLength = currentTime - lastTap;
+
+                                if(tapLength < DOUBLE_TAP_DELAY && tapLength > 0) {
+                                    popup.showPoiPopup(poiInfo);
+                                    lastTap = 0;
+                                }else{
+                                    lastTap = currentTime;
+                                }
+
+                            });
+                            Px.Camera.EnableScreenPanning();
+                            Px.Effect.Outline.HoverEventOn('area_no');
+                            if (onComplete) onComplete();
+                            // if(storeBuilding?.camera3d)
+                            //     Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
+
+                            Px.Poi.GetDataAll().forEach(poi => {
+                                Px.Poi.SetIconSize(poi.id, 60);
+
+                                const findPoi = KioskPoiManager.findById(poi.id);
+                                const isOtherKiosk = findPoi.isKiosk && findPoi.id !==  kioskPoi.id;
+
+                                const textSize = isOtherKiosk ? 1 : 50;
+                                Px.Poi.SetTextSize(poi.id, textSize);
+                            });
+                        })
                         // Px.Camera.SetOrthographic(() => {
                         //     Init.moveToKiosk(kioskPoi);
                         // });
-                        Init.moveToKiosk(kioskPoi);
-                        Px.Event.On();
-                        Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
-
-                            const currentTime = new Date().getTime();
-                            const tapLength = currentTime - lastTap;
-
-                            if(tapLength < DOUBLE_TAP_DELAY && tapLength > 0) {
-                                popup.showPoiPopup(poiInfo);
-                                lastTap = 0;
-                            }else{
-                                lastTap = currentTime;
-                            }
-
-                        });
-                        Px.Camera.EnableScreenPanning();
-                        Px.Effect.Outline.HoverEventOn('area_no');
-                        if (onComplete) onComplete();
-                        if(storeBuilding?.camera3d)
-                            Px.Camera.SetState(JSON.parse(storeBuilding.camera3d));
-
-                        Px.Poi.GetDataAll().forEach(poi => {
-                            Px.Poi.SetIconSize(poi.id, 70);
-                            
-                            const findPoi = KioskPoiManager.findById(poi.id);
-                            const isOtherKiosk = findPoi.isKiosk && findPoi.id !==  kioskPoi.id;
-                            
-                            const textSize = isOtherKiosk ? 1 : 70;
-                            Px.Poi.SetTextSize(poi.id, textSize);
-                        });
                     }
                 });
             });
@@ -141,7 +144,6 @@
     const initPoi = async () => {
         await KioskPoiManager.getKioskPoiList();
         await KioskPoiManager.renderAllPoiToEngine();
-
     };
 
     const homeButton = document.querySelector('.kiosk-3d__control .home');
@@ -226,14 +228,15 @@
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const kioskCode = urlParams.get('kioskCode');
-                const kioskPoi = KioskPoiManager.getKioskPoiByCode(kioskCode);
-
-                Px.Camera.MoveToPoi({
-                    id: kioskPoi.id,
-                    isAnimation: true,
-                    duration: 500,
-                    distanceOffset: 500
-                });
+                KioskPoiManager.getKioskPoiByCode(kioskCode).then(kioskPoi => {
+                    Px.Camera.MoveToPoi({
+                        id: kioskPoi.id,
+                        isAnimation: true,
+                        duration: 500,
+                        heightOffset: 100,
+                        distanceOffset: 1000
+                    });
+                })
 
                 // Px.Camera.MoveToObject(Number(floor.id), 50, 1);
                 Px.Poi.HideAll();
@@ -275,11 +278,9 @@ const Init = (function () {
         Px.Camera.MoveToPoi({
             id: kioskPoi.id,
             isAnimation: true,
-            isTopView: true,
-            topViewDistance: 500,
-            duration: 0,
-            // distanceOffset: 500,
-            heightOffset:200
+            duration: 500,
+            heightOffset: 100,
+            distanceOffset: 1000
         });
     }
 

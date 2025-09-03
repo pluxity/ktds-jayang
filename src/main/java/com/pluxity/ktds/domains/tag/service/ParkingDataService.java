@@ -93,4 +93,42 @@ public class ParkingDataService {
 
         return rows;
     }
+
+    public List<Map<String, Object>> searchByTimeAndInoutType(
+            String startTime,
+            String endTime
+    ) {
+        StringBuilder sql = new StringBuilder(BASE_QUERY);
+        List<String> conditions = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        if (startTime == null || startTime.isEmpty()) {
+            throw new IllegalArgumentException("startTime은 필수값입니다.");
+        }
+
+        if (endTime == null || endTime.isEmpty()) {
+            endTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        }
+
+        conditions.add("gateDatetime BETWEEN ? AND ?");
+        params.add(startTime);
+        params.add(endTime);
+
+//        if (inoutType != null && !inoutType.isEmpty()) {
+//            conditions.add("inoutType = ?");
+//            params.add(inoutType);
+//        }
+
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+
+        List<Map<String, Object>> rows = secondaryJdbcTemplate.queryForList(sql.toString(), params.toArray());
+
+        System.out.println("sql : " + sql);
+        System.out.println("params : " + params);
+        System.out.println("rows : " + rows);
+
+        return rows;
+    }
 }

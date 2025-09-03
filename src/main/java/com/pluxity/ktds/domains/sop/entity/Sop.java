@@ -1,6 +1,11 @@
 package com.pluxity.ktds.domains.sop.entity;
 
+import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
+import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
+import com.pluxity.ktds.domains.sop.dto.UpdateSopDTO;
+import com.pluxity.ktds.global.constant.ErrorCode;
+import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,12 +22,8 @@ public class Sop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "sop_category")
-    private String sopCategory;
     @Column(name = "sop_name")
     private String sopName;
-    @Column(name = "sop_description")
-    private String sopDescription;
     @Column(name = "main_mngr_division")
     private String mainManagerDivision;
     @Column(name = "main_mngr_name")
@@ -40,10 +41,8 @@ public class Sop {
     private FileInfo sopFile;
 
     @Builder
-    public Sop(String sopCategory, String sopName, String sopDescription, String mainManagerDivision, String mainManagerName, String mainManagerContact, String subManagerDivision, String subManagerName, String subManagerContact) {
-        this.sopCategory = sopCategory;
+    public Sop(String sopName, String mainManagerDivision, String mainManagerName, String mainManagerContact, String subManagerDivision, String subManagerName, String subManagerContact) {
         this.sopName = sopName;
-        this.sopDescription = sopDescription;
         this.mainManagerDivision = mainManagerDivision;
         this.mainManagerName = mainManagerName;
         this.mainManagerContact = mainManagerContact;
@@ -52,6 +51,33 @@ public class Sop {
         this.subManagerContact = subManagerContact;
     }
     public void updateSopFile(FileInfo sopFile) {
+        if (!sopFile.getFileEntityType().equals(FileEntityType.ICON2D.getType())) {
+            throw new CustomException(ErrorCode.INVALID_FILE_ENTITY_TYPE, sopFile.getFileEntityType());
+        }
         this.sopFile = sopFile;
+    }
+
+    public void updateSop(UpdateSopDTO dto) {
+        this.sopName = dto.sopName();
+        this.mainManagerDivision = dto.mainManagerDivision();
+        this.mainManagerName = dto.mainManagerName();
+        this.mainManagerContact = dto.mainManagerContact();
+        this.subManagerDivision = dto.subManagerDivision();
+        this.subManagerName = dto.subManagerName();
+        this.subManagerContact = dto.subManagerContact();
+    }
+
+    public SopResponseDTO toResponseDTO() {
+        return SopResponseDTO.builder()
+                .id(this.id)
+                .sopName(this.sopName)
+                .mainManagerDivision(this.mainManagerDivision)
+                .mainManagerName(this.mainManagerName)
+                .mainManagerContact(this.mainManagerContact)
+                .subManagerDivision(this.subManagerDivision)
+                .subManagerName(this.subManagerName)
+                .subManagerContact(this.subManagerContact)
+                .sopFile(sopFile != null ? sopFile.toDto() : null)
+                .build();
     }
 }

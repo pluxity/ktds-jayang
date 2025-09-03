@@ -152,7 +152,7 @@ const createBuildingTreeData = (buildingList, type) => {
 const dataManufacturer = (rowData) =>
     rowData
         .map((notice, index) => {
-        const { id, no, title, createdAt, expiredAt, isUrgent, isActive } = notice;
+        const { id, title, createdAt, expiredAt, isUrgent, isActive } = notice;
         const formatDate = (dateString) => {
             if (!dateString) return ''; // 값이 없을 경우 빈 문자열 반환
             const date = new Date(dateString);
@@ -161,7 +161,6 @@ const dataManufacturer = (rowData) =>
 
         return [
             id,
-            rowData.length - index,
             title,
             `${formatDate(createdAt)} ~ ${formatDate(expiredAt)}`,
             isUrgent ? 'Y' : 'N',
@@ -187,7 +186,7 @@ const renderNotice = (rawData = []) => {
             plugin: {
                 component: gridjs.plugins.selection.RowSelection,
                 props: {
-                    id: (row) => row.cell(1).data,
+                    id: (row) => row.cell(2).data,
                 },
             },
         },
@@ -195,10 +194,6 @@ const renderNotice = (rawData = []) => {
             id: 'id',
             name: 'id',
             hidden: true,
-        },
-        {
-            name: '번호',
-            width: '6%',
         },
         {
             name: '제목',
@@ -372,6 +367,26 @@ modifyModal.addEventListener('show.bs.modal', (event) => {
     }
 
 });
+
+const searchNoticeInfoList = () => {
+    const searchName = document.getElementById('searchNoticeName').value.toLowerCase();
+
+    const filteredList = data.notice.filter((notice) => {
+        return typeof notice.title === 'string' && notice.title.toLowerCase().includes(searchName);
+    })
+
+    renderNotice(filteredList)
+}
+document.getElementById('noticeSearchBtn').onclick = () => searchNoticeInfoList();
+document.addEventListener(
+    'keydown',
+    function (event) {
+        if (event.keyCode === 13) {
+            searchNoticeInfoList();
+        }
+    },
+    true,
+);
 
 initNoticeList();
 getBuildingList();

@@ -1,7 +1,6 @@
 'use strict';
 
 const layerPopup = (function () {
-    const systemTabs = document.querySelectorAll('.system-tap li');
     const systemPop = document.getElementById("systemPopup");
     // 센서
     let cctvConfig = {};
@@ -1183,9 +1182,6 @@ const layerPopup = (function () {
             }
         });
         systemPop.style.display = 'none';
-        systemTabs.forEach(tab => {
-            tab.classList.remove('active')
-        });
         layerPopup.closePlayers();
     };
 
@@ -2151,8 +2147,8 @@ const layerPopup = (function () {
     }
 
 
-    const getParkingTags = () => {
-        return api.get('/api/tags/parking').then(res => res.data?.TAGs ?? []);
+    const getParkingTags = (register = false) => {
+        return api.get('/api/tags/parking', { params: { register } }).then(res => res.data?.TAGs ?? []);
     }
     const getParkingSearch = (params = {}) => {
         return api.get('/parking/search', { params }).then(res => Array.isArray(res.data) ? res.data : []);
@@ -2226,11 +2222,8 @@ const layerPopup = (function () {
         renderParkingTable();
     }
 
-    const setParking = (searchParams = {}) => {
-        // if (!searchParams || Object.keys(searchParams).length === 0) {
-        //     const p = buildParams();
-        //     if (p) searchParams = p;
-        // }
+    const setParking = async (searchParams = {}) => {
+
         const startInput = document.getElementById('parkStartDate');
         const endInput = document.getElementById('parkEndDate');
         const now = new Date();
@@ -2243,12 +2236,15 @@ const layerPopup = (function () {
         const endTime = `${endDate} 23:59:59.999`;
         const params = { ...searchParams, startTime, endTime };
 
-        Promise.all([
-            getParkingTags(),
-            getParkingSearch(params)
-        ]).then(([parkingTagValue, result]) => {
+        try {
+            try {
+                const parkingTagValue = await getParkingTags(true);
+                renderTagSummaryAndList(parkingTagValue);
+            } catch (tagErr) {
+                console.warn('getParkingTags error :', tagErr);
+            }
 
-            renderTagSummaryAndList(parkingTagValue);
+            const result = await getParkingSearch(params);
 
             if (!optionsFilled) {
                 fillSelectOptions(result);
@@ -2257,27 +2253,15 @@ const layerPopup = (function () {
 
             renderResultHeader(result);
             renderResultTableAndPaging(result);
-
-        }).catch(err => {
-            console.error('setParking error:', err);
-        });
+        } catch (err) {
+            console.error('setParking 전체 에러:', err);
+        }
     }
 
     function buildParams() {
         const param = {};
         const start = document.getElementById('parkStartDate')?.value || '';
         const end   = document.getElementById('parkEndDate')?.value || '';
-
-        // if (!start || !end) {
-        //     const now = new Date();
-        //     if (!start) {
-        //         const first = new Date(now.getFullYear(), now.getMonth(), 1);
-        //         start = `${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(first.getDate()).padStart(2,'0')}`;
-        //     }
-        //     if (!end) {
-        //         end = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-        //     }
-        // }
 
         if (start && end && new Date(start) > new Date(end)) {
             alertSwal('종료일이 시작일보다 빠릅니다.')
@@ -2369,7 +2353,7 @@ const layerPopup = (function () {
         btn.onclick = null;
         btn.addEventListener('click', async () => {
             try {
-                const parkingTagValue = await getParkingTags();
+                const parkingTagValue = await getParkingTags(false);
                 renderTagSummaryAndList(parkingTagValue);
             } catch (err) {
                 console.error('tags refresh error:', err);
@@ -2444,12 +2428,32 @@ const layerPopup = (function () {
         const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'parking');
-
         const startVal = document.getElementById('parkStartDate')?.value || 'all';
         const endVal   = document.getElementById('parkEndDate')?.value   || 'all';
         const rangeStr = (startVal === 'all' && endVal === 'all') ? 'all' : `${startVal}_${endVal}`;
-
         XLSX.writeFile(wb, `parking_${rangeStr}.xlsx`);
+
+        // 임시 추가
+        const rawHeader = [
+            'No', 'deviceId', 'deviceName', 'inoutType',
+            'gateDatetime', 'carNo', 'inoutCarId', 'parkingFee', 'regularType'
+        ];
+
+        const rowsRaw = parkingResult.map((item, idx) => ([
+            idx + 1,
+            item.deviceId || '',
+            item.deviceName || '',
+            item.inoutType ?? '',
+            item.gateDatetime || '',
+            item.carNo || '',
+            item.inoutCarId || '',
+            item.parkingFee ?? 0,
+            item.regularType ?? ''
+        ]));
+        const wb2 = XLSX.utils.book_new();
+        const ws2 = XLSX.utils.aoa_to_sheet([rawHeader, ...rowsRaw]);
+        XLSX.utils.book_append_sheet(wb2, ws2, 'parking_raw');
+        XLSX.writeFile(wb2, `parking_${rangeStr}_raw.xlsx`);
     }
 
     const btn = document.querySelector('#parkingFooter .download');
@@ -2668,7 +2672,6 @@ const layerPopup = (function () {
         const directionBtn = document.querySelector('#airDirectionSelector .select-box__btn');
         let buildingList = BuildingManager.findAll();
 
-
         const toggleBtnActive = (btn, otherBtn) => {
             if (!btn.classList.contains('select-box__disabled')) {
                 btn.classList.toggle('select-box__btn--active');
@@ -2752,8 +2755,6 @@ const layerPopup = (function () {
 
             buildingUl.appendChild(buildingLi);
         })
-
-
     }
 
 
@@ -3002,7 +3003,6 @@ const layerPopup = (function () {
             const poiId = moveBtn.getAttribute("btn-poi-id");
             elevatorPopup.style.display = "none";
             systemPop.style.display = "none";
-            closeSystemPopup();
             movePoi(poiId);
         });
     }
@@ -3016,13 +3016,6 @@ const layerPopup = (function () {
 
         const moveBtn = sectionHead.querySelector(".button-move");
         moveBtn.setAttribute("btn-poi-id", poi.id);
-    }
-
-    const closeSystemPopup = () =>{
-        const systemTap = document.querySelectorAll(".system-tap li");
-        systemTap.forEach(element =>{
-            element.classList.remove('active');
-        })
     }
 
     let selectedLightGroup = null;
@@ -3067,6 +3060,12 @@ const layerPopup = (function () {
             Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
         }
 
+        const floorNo = poiData.property.floorNo;
+        Init.moveToFloorPage(floorNo);
+        const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+        if (floorElement) {
+            floorElement.click(); // 클릭 이벤트 실행
+        }
 
         Px.Camera.MoveToPoi({
             id: poiId,
@@ -3494,17 +3493,25 @@ const layerPopup = (function () {
             const { result: data } = res.data;
             globalAlarmList = data;
 
+            console.log("globalAlarmList : ", globalAlarmList.length);
             const filteredAlarms = data.filter(alarm =>
                 poiList.some(poi =>
-                    poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
+                    poi.tagNames.some(tag => tag?.toLowerCase() === alarm.tagName.toLowerCase())
                 )
             );
+
+            console.log('EHP/PARK in data:', data.filter(a =>
+                /^(EHP|PARK)$/i.test(String(a?.equipment ?? a?.process ?? ''))
+            ).length);
+
+            const isEHP = a => String(a?.equipment ?? '').trim().toUpperCase() === 'EHP';
 
             // let searchedAlarms = filteredAlarms.slice();
             let searchedAlarms = data.slice();
 
             if (selectedBuilding !== '전체' && selectedBuilding !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3515,6 +3522,7 @@ const layerPopup = (function () {
 
             if (selectedFloor !== '전체' && selectedFloor !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3524,6 +3532,7 @@ const layerPopup = (function () {
 
             if (selectedDeviceType !== '전체' && selectedDeviceType !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3535,6 +3544,7 @@ const layerPopup = (function () {
             if (deviceNmInput !== '') {
                 const searchTerm = deviceNmInput.toLowerCase();
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3549,6 +3559,7 @@ const layerPopup = (function () {
                     box.dataset.type ? norm(box.dataset.type) : norm(box.nextElementSibling?.textContent)
                 );
                 searchedAlarms = searchedAlarms.filter((alarm) => {
+                    if (isEHP(alarm)) return true;
                     const ev = norm(alarm.event);
                     return ev && checkedEvents.includes(ev);
                 });
@@ -3560,11 +3571,12 @@ const layerPopup = (function () {
             eventLayerPopup.style.transform = 'translate(-50%, -50%)';
             eventLayerPopup.style.display = 'inline-block';
 
-            matchedAlarms = searchedAlarms
-                .filter(data =>
+            console.log("searchedAlarms : ", searchedAlarms);
+            matchedAlarms = searchedAlarms.filter(data =>
+                isEHP(data) ||
                 poiList.some(poi =>
                     poi.tagNames.some(tag =>
-                        tag.toLowerCase() === data.tagName.toLowerCase()
+                        tag?.toLowerCase() === data.tagName.toLowerCase()
                     )
                 )
             );
@@ -3595,28 +3607,47 @@ const layerPopup = (function () {
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
 
                     const taggedPoi = poiList.find(poi =>
-                        poi.tagNames.some(tag => tag.toLowerCase() === data.tagName.toLowerCase())
+                        poi.tagNames?.some(tag => tag && data.tagName && tag.toLowerCase() === data.tagName.toLowerCase())
                     );
 
-                    if (taggedPoi) {
-                        eventRow.innerHTML = `
-                            <td>${taggedPoi.property.buildingName || '-'}</td>
-                            <td>${taggedPoi.property.floorName || '-'}</td>
-                            <td>${data.event || '-'}</td>
-                            <td>${taggedPoi.property.poiMiddleCategoryName || '-'}</td>
-                            <td>${taggedPoi.name || '-'}</td>
+                    let buildingName = taggedPoi?.property?.buildingName ?? '-';
+                    let floorName = taggedPoi?.property?.floorName ?? '-';
+                    let middleCat = taggedPoi?.property?.poiMiddleCategoryName ?? '-';
+                    let poiName = taggedPoi?.name ?? '-';
+                    let moveCls = taggedPoi ? '' : 'disabled';
+                    let poiId = taggedPoi?.id ?? '';
+                    const isEhpRow = String(data?.equipment ?? '').trim().toUpperCase() === 'EHP';
+                    if (isEhpRow && !taggedPoi) {
+                        const tag = String(data.tagName || '');
+                        const parts = tag.split('-');
+                        if (parts.length >= 2) {
+                            buildingName = parts[0] || '-';
+                            floorName = parts[1] || '-';
+                        }
+                        middleCat = '에어컨';
+                        const m = tag.match(/EHP-(\d+)/i);
+                        poiName = m ? `EHP-${m[1]}` : 'EHP';
+                        moveCls = 'disabled';
+                        poiId = '';
+                    }
+                    eventRow.innerHTML = `
+                            <td>${buildingName}</td>
+                            <td>${floorName}</td>
+                            <td>${data.event ?? '-'}</td>
+                            <td>${middleCat}</td>
+                            <td>${poiName}</td>
                             <td>${formatDateTime(data.occurrenceDate) || '-'}</td>
                             <td>${formatDateTime(data.confirmDate) || '-'}</td>
                             <td>
-                                <a href="javascript:void(0);" class="icon-move moveToMap" data-poi-id="${taggedPoi ? taggedPoi.id : ''}">
-                                    <span class="hide">도면 이동</span>
-                                </a>
+                              <a href="javascript:void(0);" class="icon-move moveToMap ${moveCls}" data-poi-id="${poiId}">
+                                <span class="hide">도면 이동</span>
+                              </a>
                             </td>
                         `;
-                        // tableBody.appendChild(eventRow);
-                        frag.appendChild(eventRow);
-                        taggedPoiMap.set(taggedPoi.id, taggedPoi);
-                    }
+                    // tableBody.appendChild(eventRow);
+                    frag.appendChild(eventRow);
+
+                    if (taggedPoi) taggedPoiMap.set(taggedPoi.id, taggedPoi);
                 });
                 tableBody.textContent = '';
                 tableBody.appendChild(frag);
@@ -3700,8 +3731,9 @@ const layerPopup = (function () {
                 const keySet = new Set(selectedEventKeys);
 
                 const filteredAlarmList = selectedEventKeys.length === 0
-                    ? []
+                    ? baseAlarms.slice()
                     : baseAlarms.filter(a => {
+                        if (isEHP(a)) return true;
                         const evKey = toKey(a.event);
                         return evKey && keySet.has(evKey);
                     });
@@ -3817,31 +3849,18 @@ const layerPopup = (function () {
         }
     })
 
-    function closePopup2(target) {
-        if (!target) return;
-        target.style.display = 'none';
-        const popupParent = target.closest('#layerPopup.popup-basic, #mapLayerPopup.popup-basic');
-        if (popupParent) {
-            const container = popupParent.parentElement;
-            if (container) {
-                const poiMenu = container.querySelector('.poi-menu');
-                if (poiMenu) {
-                    const menuDiv = poiMenu.querySelector('#poiMenuList, #poiMenuListMap');
-                    if (menuDiv) {
-                        menuDiv.querySelectorAll('ul li.active').forEach(li => {
-                            li.classList.remove('active');
-                        });
-                    }
-                }
-            }
-        }
-    }
-
     function closePopup(target) {
         if (!target) return;
         target.style.display = 'none';
         Px.VirtualPatrol.Clear();
         // Px.Model.Visible.ShowAll();
+
+        const cctvContainer = document.querySelector('.cctv-container');
+        if(cctvContainer){
+            cctvContainer.remove();
+            layerPopup.closePlayers();
+        }
+
 
         if (target.id === 'mapLayerPopup') {
             document.querySelectorAll('#poiMenuListMap ul li').forEach(li => li.classList.remove('active'));
@@ -3853,7 +3872,8 @@ const layerPopup = (function () {
             document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
             document.body.style.overflow = '';
         } else if (target.closest('#systemPopup')) {
-            document.querySelectorAll('.system-tab ul li').forEach(li => console.log("li : ", li));
+            document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
+            document.body.style.overflow = '';
             closeAllPopups();
         }
     }
@@ -3863,11 +3883,6 @@ const layerPopup = (function () {
         document.querySelectorAll('.popup-basic .close, .popup-basic .arrow').forEach(btn => {
             btn.addEventListener('click', (event) => {
                 const target = event.target.closest('.popup-basic');
-                if (btn.closest('#systemPopup')) {
-                    systemTabs.forEach(tab => {
-                        tab.classList.remove('active')
-                    });
-                }
                 closePopup(target);
                 // clearAllIntervals();
             });

@@ -2,12 +2,10 @@
 (async function () {
     const cookieMatch = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)');
     const USER_ID = cookieMatch ? cookieMatch[2] : null;
-    if (!USER_ID) {
+    if (!USER_ID || USER_ID.toLowerCase() === 'kiosk') {
         window.location.href = '/login';
     }
-    if(USER_ID === 'kiosk'){
-        window.location.href = '/login';
-    }
+
     api.get(`/users/userid/${USER_ID}`).then((result) => {
         const {result: data} = result.data;
 
@@ -38,16 +36,7 @@
         adminButton.style.display = "none";
     }
 
-
-    const floorInfo = document.querySelector('#floor-info .floor-info__button');
-    const floorDetail = document.querySelector('#floor-info .floor-info__detail');
-    floorInfo.addEventListener('click', event => {
-        if (floorDetail.style.display == 'none') {
-            floorDetail.style.display = 'block';
-        } else {
-            floorDetail.style.display = 'none';
-        }
-    })
+    
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
         const { } = systemSetting;
     });
@@ -249,19 +238,19 @@ const Init = (function () {
 
     const initBuildingList = () => {
         const buildingList = BuildingManager.findAll();
-        const buildingUi = document.querySelector('#floor-info .floor-info__detail ul');
+        const buildingUl = document.querySelector('#systemTab ul')
 
         buildingList.forEach(building => {
             const buildingLi = document.createElement('li');
             buildingLi.setAttribute('building-id', building.id);
             buildingLi.textContent = building.name
-            buildingUi.appendChild(buildingLi);
+            buildingUl.appendChild(buildingLi);
         })
         clickBuilding();
     }
 
     const clickBuilding = () => {
-        const buildingBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
+        const buildingBtns = document.querySelectorAll('#systemTab ul li');
         // btnClick
         buildingBtns.forEach(buildingBtn => {
             buildingBtn.style.cursor = 'pointer';
@@ -687,7 +676,7 @@ const Init = (function () {
 
         popup.closeAllPopup();
         BUILDING_ID = building.id;
-        await initializeIndoorBuilding();
+        // await initializeIndoorBuilding();
         setBuildingNameAndFloors();
     }
 
@@ -919,7 +908,7 @@ const Init = (function () {
     }
 
     return {
-        initializeIndoorBuilding,
+        // initializeIndoorBuilding,
         initializeOutdoorBuilding,
         initCategoryId,
         poiDblclick,

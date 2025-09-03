@@ -76,6 +76,7 @@ public enum ErrorCode implements Code {
   NOT_FOUND_WEATHER_API_DATA(BAD_REQUEST, "날씨 api 데이터가 존재하지 않습니다."),
   NOT_FOUND_EVENT_DATA(BAD_REQUEST, "이벤트 데이터가 존재하지 않습니다."),
   NOT_FOUND_CCTV_POI(BAD_REQUEST, "해당 CCTV를 찾을 수 없습니다. 해당 건물에 등록된 CCTV인지 확인해주세요."),
+  NOT_FOUND_TAG(BAD_REQUEST, "해당 태그를 찾을 수 없습니다."),
 
   EMPTY_VALUE_USERNAME(BAD_REQUEST, "아이디를 입력해주세요."),
   EMPTY_VALUE_PASSWORD(BAD_REQUEST, "비밀번호를 입력해주세요."),

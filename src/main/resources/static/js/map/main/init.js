@@ -4,7 +4,7 @@
     const cookieMatch = document.cookie.match('(^|;) ?USER_ID=([^;]*)(;|$)');
     const USER_ID = cookieMatch ? cookieMatch[2] : null;
 
-    if (!USER_ID) {
+    if (!USER_ID || USER_ID.toLowerCase() === 'kiosk') {
         window.location.href = '/login';
     }
     api.get(`/users/userid/${USER_ID}`).then((result) => {
@@ -47,7 +47,7 @@
         }
     })
 
-    function setCategoryId(elements, categoryIds, isEquipment) {
+    function setCategoryId(elements, categoryIds) {
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
         elements.forEach(element => {
@@ -70,31 +70,17 @@
             if (matchedCategory) {
                 element.setAttribute('data-category-id', matchedCategory.id);
             }
+
+
         });
-        if (isEquipment) {
-            const allPois = PoiManager.findAll();
-            const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
-            elements.forEach(element => {
-                const categoryId = element.getAttribute('data-category-id');
-                filteredPois.forEach(poi => {
-                    if (poi.poiCategory == categoryId && poi.property.poiCategoryName.toLowerCase() == 'cctv') {
-                        if (poi.position !== null) {
-                            element.classList.add('active');
-                        }
-                    }
-                });
-            });
-        }
     }
 
     const initCategory = () => {
         const equipmentGroup = document.querySelectorAll('#equipmentGroup a')
         const poiMenuList = document.querySelectorAll('#poiMenuList ul li');
-        const systemTabList = document.querySelectorAll('.system-tap ul li');
         let allCategoryIds = PoiCategoryManager.findAll();
-        setCategoryId(poiMenuList, allCategoryIds, false);
-        setCategoryId(equipmentGroup, allCategoryIds, true);
-        setCategoryId(systemTabList, allCategoryIds, false);
+        setCategoryId(poiMenuList, allCategoryIds);
+        setCategoryId(equipmentGroup, allCategoryIds);
     }
 
 
@@ -126,23 +112,6 @@
         await Init.getBuilding(buildingId);
     }
 
-    // paging
-    const updateFloorPage = (floorUl, startIndex, itemsPerPage) => {
-        const allItems = floorUl.querySelectorAll('li');
-        allItems.forEach((li, index) => {
-            if (index >= startIndex && index < startIndex + itemsPerPage) {
-                li.style.display = 'inline-block';
-            } else {
-                li.style.display = 'none';
-            }
-        });
-    };
-
-    const updateButtons = (startIndex, totalItems, itemsPerPage, upButton, downButton) => {
-        upButton.style.display = startIndex > 0 ? 'inline-block' : 'none';
-        downButton.style.display = startIndex + itemsPerPage < totalItems ? 'inline-block' : 'none';
-    };
-
     const initFloors = () => {
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
@@ -168,25 +137,31 @@
             const totalItems = floors.length;
             let startIndex = 0;
 
-            updateFloorPage(floorUl, startIndex, itemsPerPage);
-            updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+            Init.updateFloorPage(floorUl, startIndex, itemsPerPage);
+            Init.updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
 
-            // 1층단위
             upButton.addEventListener('click', () => {
-                if (startIndex > 0) {
-                    startIndex -= 10;
-                    // startIndex = Math.max(0, startIndex - 10);
-                    updateFloorPage(floorUl, startIndex, itemsPerPage);
-                    updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+                const floorUl = document.querySelector('#floor-info .floor-info__detail ul');
+                const currentPage = parseInt(floorUl.getAttribute('data-current-page') || '0');
+                const itemsPerPage = 10;
+
+                if (currentPage > 0) {
+                    const newStartIndex = (currentPage - 1) * itemsPerPage;
+                    Init.updateFloorPage(floorUl, newStartIndex, itemsPerPage);
+                    Init.updateButtons(newStartIndex, floorUl.querySelectorAll('li').length, itemsPerPage, upButton, downButton);
                 }
             });
 
             downButton.addEventListener('click', () => {
-                if (startIndex + itemsPerPage < totalItems) {
-                    startIndex += 10;
-                    // startIndex = Math.min(totalItems - itemsPerPage, startIndex + 10);
-                    updateFloorPage(floorUl, startIndex, itemsPerPage);
-                    updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+                const floorUl = document.querySelector('#floor-info .floor-info__detail ul');
+                const currentPage = parseInt(floorUl.getAttribute('data-current-page') || '0');
+                const itemsPerPage = 10;
+                const totalItems = floorUl.querySelectorAll('li').length;
+
+                if (currentPage < Math.ceil(totalItems / itemsPerPage) - 1) {
+                    const newStartIndex = (currentPage + 1) * itemsPerPage;
+                    Init.updateFloorPage(floorUl, newStartIndex, itemsPerPage);
+                    Init.updateButtons(newStartIndex, totalItems, itemsPerPage, upButton, downButton);
                 }
             });
             clickFloor();
@@ -196,11 +171,13 @@
 
     const clickFloor = () => {
         const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
-        // btnClick
+        const params = new URLSearchParams(window.location.search);
+        let buildingId = params.get('buildingId');
+        const allCheck = document.getElementById('equipmentCheckBox');
         floorBtns.forEach(floorBtn => {
             floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', event => {
-
+                allCheck.checked = true;
                 floorBtns.forEach(btn => btn.classList.remove('active'));
                 floorBtn.classList.add('active');
                 Px.VirtualPatrol.Clear();
@@ -225,11 +202,16 @@
                 );
 
                 Px.Model.Visible.Show(floor.id);
-                const allPois = PoiManager.findAll();
-                const filteredPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-                filteredPois.forEach(poi => {
-                    Px.Poi.Show(Number(poi.id));
-                });
+
+                if (document.querySelector('.shelter').classList.contains('active')) {
+                    Px.Poi.HideAll();
+                    Px.Evac.HideAll();
+                    Px.Evac.ShowByProperty('floorId', String(floor.id));
+                    allCheck.checked = false;
+                }else{
+                    equipmentCategoryActiveHover(floorNo);
+                }
+
                 Px.Camera.ExtendView();
             })
         })
@@ -238,7 +220,19 @@
         allFloor.style.cursor = 'pointer';
         allFloor.addEventListener('click', event => {
             floorBtns.forEach(btn => btn.classList.remove('active'));
-            Px.Poi.ShowAll();
+            allFloor.classList.add('active');
+
+            if (document.querySelector('.shelter').classList.contains('active')) {
+                Px.Poi.HideAll();
+                Px.Evac.ShowAll();
+            }else{
+                allCheck.checked = false;
+                equipmentGroup.forEach(equipment => {
+                    equipment.classList.remove('active')
+                });
+                Px.Poi.HideAll();
+            }
+
             Px.Model.Visible.ShowAll();
             Px.VirtualPatrol.Clear();
             Px.Camera.ExtendView();
@@ -247,8 +241,6 @@
         const expandBtn = document.querySelector('.floor-info__ctrl .scale');
         expandBtn.addEventListener('click', event => {
             event.target.closest('.floor-info__ctrl')
-            const params = new URLSearchParams(window.location.search);
-            let buildingId = params.get('buildingId');
             const {floors} = BuildingManager.findById(buildingId);
             const activeLi = document.querySelector('.floor-info__detail ul li.active');
             const targetFloorId = activeLi
@@ -257,7 +249,7 @@
             if (expandBtn.classList.contains("scale--down")) {
                 Px.Model.Expand({
                     duration: 1000,
-                    interval: 100,
+                    interval: 20,
                     name: Number(targetFloorId),
                 });
                 expandBtn.classList.remove("scale--down");
@@ -271,9 +263,12 @@
     }
 
     // 화면 세팅
-    await SystemSettingManager.getSystemSetting().then((systemSetting) => {
+    const params = new URLSearchParams(window.location.search);
+    let buildingId = params.get('buildingId');
+    // 화면 세팅
+    await SystemSettingManager.getSystemSettingByBuildingId(buildingId).then((systemSetting) => {
         const { } = systemSetting;
-    });
+    })
     await NoticeManager.getNotices();
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
@@ -323,6 +318,45 @@
 
         Cron.addCronjob('* * * * * *', renderDateTime);
     };
+
+    const allCheck = document.getElementById('equipmentCheckBox');
+    const equipmentGroup = document.querySelectorAll('.equip-group a');
+    allCheck.addEventListener('change', () => {
+        const activeFloor = document.querySelector('.floor-info__detail ul li.active');
+        const floorNo = activeFloor?.getAttribute('floor-id');
+
+        if (allCheck.checked) {
+            equipmentCategoryActiveHover(floorNo);
+        } else {
+            equipmentGroup.forEach(equipment => {
+                equipment.classList.remove('active')
+            });
+            Px.Poi.HideAll();
+        }
+    })
+
+    const equipmentCategoryActiveHover = (floorNo) => {
+        const params = new URLSearchParams(window.location.search);
+        const buildingId = params.get('buildingId');
+        const categoryIdSet = new Set();
+        let allPois = PoiManager.findByBuilding(buildingId);
+        if(floorNo) {
+            allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+        }
+        allPois.forEach(poi => {
+            Px.Poi.Show(Number(poi.id));
+            categoryIdSet.add(Number(poi.property.poiCategoryId));
+        });
+
+        equipmentGroup.forEach(equipment => {
+            const categoryId = Number(equipment.getAttribute('data-category-id'));
+            if (categoryIdSet.has(categoryId)) {
+                equipment.classList.add('active');
+            } else {
+                equipment.classList.remove('active');
+            }
+        })
+    }
 
     initFloors();
     initCategory();
@@ -444,24 +478,10 @@ const Init = (function () {
 
             if (filteredList === undefined || filteredList.length < 1) {
                 console.warn('POI 가 한 개도 없습니다.');
-                return;
-            }
-
-            Px.Poi.HideAll();
-            filteredList
-                .filter(poiInfo => poiInfo.poiCategoryDetail?.name?.toLowerCase() === 'cctv').forEach((poiInfo) => {
-                console.log("poiInfo : ", poiInfo);
-                Px.Poi.Show(poiInfo.id);
-            });
-
-            if (filteredList.some(poiInfo => poiInfo.poiCategoryDetail?.name?.toLowerCase() === 'cctv')) {
-                const cctvLink = document.querySelector('#equipmentGroup .cctv');
-                if (cctvLink) {
-                    cctvLink.classList.add('active');
-                }
             }
         });
     };
+
     let selectedGroup = null;
     let selectedId = null;
     const getBuilding = async (buildingId) => {
@@ -493,24 +513,7 @@ const Init = (function () {
                 center: "",
                 onLoad: function() {
                     initPoi(buildingId).then(() => {
-                        // initPoi 완료 후 실행
                         moveToPoiFromSession();
-
-                        // 세션 처리
-                        const mainCctv = JSON.parse(sessionStorage.getItem('mainCctv'));
-                        const selectedPoiId = JSON.parse(sessionStorage.getItem('selectedPoiId'));
-
-                        if (mainCctv) {
-                            const mainCCTVTemplate = EventManager.createMainCCTVPopup(mainCctv);
-                            mainCCTVTemplate.style.position = 'fixed';
-                            mainCCTVTemplate.style.top = '50%';
-                            mainCCTVTemplate.style.transform = 'translateY(-50%)';
-                            mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
-                        }
-
-                        // 세션 스토리지 정리
-                        sessionStorage.removeItem('mainCctv');
-                        sessionStorage.removeItem('selectedPoiId');
                     });
                     Px.Util.SetBackgroundColor('#333333');
                     Px.Camera.FPS.SetHeightOffset(15);
@@ -599,13 +602,133 @@ const Init = (function () {
         }
     };
 
-    const moveToPoiFromSession = () => {
+    // paging
+    function updateFloorPage(floorUl, startIndex, itemsPerPage) {
+        const allItems = floorUl.querySelectorAll('li');
+        allItems.forEach((li, index) => {
+            if (index >= startIndex && index < startIndex + itemsPerPage) {
+                li.style.display = 'inline-block';
+            } else {
+                li.style.display = 'none';
+            }
+        });
 
-        const selectedPoiId = sessionStorage.getItem('selectedPoiId');
-        if(selectedPoiId){
+        // 현재 페이지 상태 업데이트
+        const currentPage = Math.floor(startIndex / itemsPerPage);
+        floorUl.setAttribute('data-current-page', currentPage);
+    }
+
+    function updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton) {
+        upButton.style.display = startIndex > 0 ? 'inline-block' : 'none';
+        downButton.style.display = startIndex + itemsPerPage < totalItems ? 'inline-block' : 'none';
+    }
+
+    function moveToFloorPage(floorNo) {
+        const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+
+        // 이미 보이는 경우
+        if (floorElement && floorElement.style.display !== 'none') {
+            return true;
+        }
+
+        // 숨겨진 경우 페이지 이동
+        const floorUl = document.querySelector('#floor-info .floor-info__detail ul');
+        const upButton = document.querySelector('#floor-info .floor-info__detail .up');
+        const downButton = document.querySelector('#floor-info .floor-info__detail .down');
+
+        if (!floorUl || !upButton || !downButton) {
+            console.warn('Floor paging elements not found');
+            return false;
+        }
+
+        const itemsPerPage = 10;
+        const totalItems = floorUl.querySelectorAll('li').length;
+        let maxPages = Math.ceil(totalItems / itemsPerPage);
+
+        // 해당 층이 보일 때까지 페이지 이동
+        for (let page = 0; page < maxPages; page++) {
+            const startIndex = page * itemsPerPage;
+            updateFloorPage(floorUl, startIndex, itemsPerPage);
+            updateButtons(startIndex, totalItems, itemsPerPage, upButton, downButton);
+
+            // 해당 층이 보이는지 확인
+            const updatedFloorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+            if (updatedFloorElement && updatedFloorElement.style.display !== 'none') {
+                // 현재 페이지 상태를 DOM에 저장
+                floorUl.setAttribute('data-current-page', page);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    const moveToPoiFromSession = async () => {
+
+        let mainCctv = null;
+        let selectedPoiId = null;
+        let fromEvent = null;
+
+        try {
+            const mainCctvItem = sessionStorage.getItem('mainCctv');
+            if (mainCctvItem) {
+                mainCctv = JSON.parse(mainCctvItem);
+            }
+        } catch (error) {
+            console.warn('mainCctv 파싱 실패:', error);
+            sessionStorage.removeItem('mainCctv');
+        }
+
+        try {
+            const selectedPoiIdItem = sessionStorage.getItem('selectedPoiId');
+            if (selectedPoiIdItem) {
+                selectedPoiId = JSON.parse(selectedPoiIdItem);
+            }
+        } catch (error) {
+            console.warn('selectedPoiId 파싱 실패:', error);
+            sessionStorage.removeItem('selectedPoiId');
+        }
+
+        try {
+            const fromEventItem = sessionStorage.getItem('fromEvent');
+            if (fromEventItem) {
+                fromEvent = fromEventItem;
+            }
+        } catch (error) {
+            console.warn('fromEvent 파싱 실패:', error);
+            sessionStorage.removeItem('fromEvent');
+        }
+
+        if (selectedPoiId) {
+            const poiData = Px.Poi.GetData(selectedPoiId);
+            const floorNo = poiData.property.floorNo;
+            Init.moveToFloorPage(floorNo);
+            const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+            if (floorElement) {
+                floorElement.click(); // 클릭 이벤트 실행
+            }
+
             moveToPoi(selectedPoiId);
             Px.Poi.Show(selectedPoiId);
+
+            // fromEvent가 Y일 때만 팝업 띄우기
+            if (fromEvent === 'Y') {
+                renderPoiInfo(poiData);
+
+                if (mainCctv) {
+                    const mainCCTVTemplate = await EventManager.createMainCCTVPopup(mainCctv);
+                    mainCCTVTemplate.style.position = 'fixed';
+                    mainCCTVTemplate.style.top = '50%';
+                    mainCCTVTemplate.style.transform = 'translateY(-50%)';
+                    mainCCTVTemplate.style.left = `${(window.innerWidth / 2) - mainCCTVTemplate.offsetWidth}px`;
+                }
+            }
         }
+
+        // 세션 스토리지 정리 (싹다 날려버려도 됨)
+        sessionStorage.removeItem('mainCctv');
+        sessionStorage.removeItem('selectedPoiId');
+        sessionStorage.removeItem('fromEvent');
     }
 
     const moveToPoi = (id) => {
@@ -1705,6 +1828,9 @@ const Init = (function () {
     }
 
     return {
+        updateButtons,
+        updateFloorPage,
+        moveToFloorPage,
         initializeIndoorBuilding,
         poiDblclick,
         setBuildingNameAndFloors,

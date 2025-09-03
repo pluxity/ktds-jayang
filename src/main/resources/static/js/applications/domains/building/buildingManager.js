@@ -2,6 +2,7 @@ const BuildingManager = (() => {
     let buildingList = [];
     let storeBuilding = null;
     let historyFloors = [];
+    let parkBuilding = null;
 
     const getBuildingList = () => {
         const uri = `/buildings`;
@@ -40,6 +41,22 @@ const BuildingManager = (() => {
                 storeBuilding = new Building(data);
                 storeBuilding.setDetails(data);
                 resolve(storeBuilding);
+            }).catch(() => {
+                resolve(null);
+            });
+        });
+    };
+
+    // store get
+    const getParkBuilding = () => {
+        const uri = `/buildings/park`;
+
+        return new Promise((resolve) => {
+            api.get(uri).then((result) => {
+                const { result: data } = result.data;
+                parkBuilding = new Building(data);
+                parkBuilding.setDetails(data);
+                resolve(parkBuilding);
             }).catch(() => {
                 resolve(null);
             });
@@ -123,6 +140,10 @@ const BuildingManager = (() => {
         return storeBuilding;
     }
 
+    const findPark = () => {
+        return parkBuilding;
+    }
+
     const getFloorsByHistoryVersion = async (version) => {
         const uri = `/buildings/history/${version}/floors`;
 
@@ -151,7 +172,9 @@ const BuildingManager = (() => {
         findById,
         findByCode,
         getStoreBuilding,
+        getParkBuilding,
         findStore,
+        findPark,
         getFloorsByHistoryVersion,
         findFloorsByHistory
     };

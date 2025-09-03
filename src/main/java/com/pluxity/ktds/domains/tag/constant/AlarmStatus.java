@@ -31,11 +31,22 @@ public enum AlarmStatus {
         return status;
     }
     @JsonCreator
-    public static AlarmStatus fromCode(int code) {
-        return Arrays.stream(AlarmStatus.values())
-                .filter(status -> status.getCode() == code)
-                .findFirst()
-                .orElse(AlarmStatus.NORMAL);
+    public static AlarmStatus from(Object input) {
+        if (input instanceof Number) {
+            int code = ((Number) input).intValue();
+            return Arrays.stream(values())
+                    .filter(a -> a.code == code)
+                    .findFirst()
+                    .orElse(NORMAL);
+        } else if (input instanceof String) {
+            String label = (String) input;
+            for (AlarmStatus a : values()) {
+                if (a.status.equalsIgnoreCase(label) || a.name().equalsIgnoreCase(label)) {
+                    return a;
+                }
+            }
+        }
+        return NORMAL;
     }
 
     @Override

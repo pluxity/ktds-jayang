@@ -2619,20 +2619,23 @@ input[type=text]:disabled, input[type=password]:disabled {
   justify-content: center;
   border: 1px solid var(--color-black);
   border-radius: 40px;
-  background: linear-gradient(180deg, rgba(116, 122, 165, 0.6) 0%, rgba(0, 0, 0, 0) 100%), #25262E;
+  background: linear-gradient(180deg, rgba(0, 245, 191, 0) 61.5%, rgba(0, 245, 191, 0.2) 100%), #25252B;
+  box-shadow: 0 5px 14px 0 rgba(0, 245, 191, 0.65);
   height: 65px;
   padding: 0 20px;
 }
 .system-tap li {
   padding: 0 10px;
   white-space: nowrap;
-  color: var(--color-grayscale-light);
+  /*color: var(--color-grayscale-light);*/
+  color: white;
   font-size: 1rem;
   cursor: pointer;
   line-height: 30px;
 }
 .system-tap li:hover, .system-tap li.active {
   border-radius: 20px;
+  color: #00f5bf;
   background-color: var(--color-black);
 }
 .system-tap li.active {
@@ -2651,4 +2654,69 @@ input[type=text]:disabled, input[type=password]:disabled {
   width: 1px;
   height: 21px;
   background-color: var(--color-grayscale03);
+}
+
+.event-chart-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /*gap: 0.25rem;*/
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.event-state__chart {
+  position: relative;
+  flex-shrink: 0;
+  min-width: 200px;
+  max-width: 260px;
+  aspect-ratio: 1 / 1;
+  margin-left: -8px;
+}
+
+.event-state__chart_bar {
+  width: 100%;
+  height: 180px;
+}
+
+canvas#chart_doughnut {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.custom-legend-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #ccc;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.legend-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  /*font-weight: 600;*/
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  min-width: 50px;
+}
+
+.legend-text {
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
 }

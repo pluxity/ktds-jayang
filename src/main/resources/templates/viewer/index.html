@@ -240,15 +240,18 @@
                 <div class="event-state__group">
                     <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
                     <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart">
-                        <canvas id="chart_doughnut"></canvas>
-                        <div class="douut-inner"></div>
+                    <div class="event-chart-wrapper">
+                        <div id="custom-legend" class="custom-legend-container"></div>
+                        <div class="event-state__chart">
+                            <canvas id="chart_doughnut"></canvas>
+                            <div class="douut-inner"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="event-state__group">
                     <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
                     <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart">
+                    <div class="event-state__chart_bar">
                         <canvas id="chart_bar"></canvas>
                     </div>
                 </div>

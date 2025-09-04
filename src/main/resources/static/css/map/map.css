@@ -919,7 +919,19 @@
 .sop-info__contents .image {
   color: var(--color-grayscale-light);
   font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
 }
+.sop-info__contents .image img {
+  flex: 1 1 auto; /* 가능한 영역만큼만 차지 */
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
 .sop-info__contents .image__text {
   line-height: 1.6;
 }
@@ -2482,14 +2494,15 @@ input[type=text]:disabled, input[type=password]:disabled {
   justify-content: center;
   border: 1px solid var(--color-black);
   border-radius: 40px;
-  background: linear-gradient(180deg, rgba(116, 122, 165, 0.6) 0%, rgba(0, 0, 0, 0) 100%), #25262E;
+  /*background: linear-gradient(180deg, rgba(116, 122, 165, 0.6) 0%, rgba(0, 0, 0, 0) 100%), #25262E;*/
   height: 65px;
   padding: 0 20px;
 }
 .system-tap li {
   padding: 0 10px;
   white-space: nowrap;
-  color: var(--color-grayscale-light);
+  /*color: var(--color-grayscale-light);*/
+  color: white;
   font-size: 1rem;
   cursor: pointer;
   line-height: 30px;

@@ -353,6 +353,7 @@
     }
 
     // side
+    let _lastPoiCategoryId = null;
     const handlePoiMenuClick = (event) => {
         // event.preventDefault();
 
@@ -477,8 +478,25 @@
                 actions.closeAllPopups();
                 const sopPopup = mapPopup.querySelector('#sopPopup');
                 mapPopup.className = '';
-                mapPopup.classList.add('popup-basic', 'popup-basic--middle');
+                mapPopup.classList.add('popup-basic');
                 sopPopup.style.display = 'block';
+
+                api.get('/sop').then(res => {
+                    const sopData = res.data.result[0];
+                    sopPopup.querySelector('.sop-info__title em').textContent = sopData.sopName;
+
+                    const imgSrc = `/2D/${sopData.sopFile.directory}/${sopData.sopFile.storedName}.${sopData.sopFile.extension}`;
+
+                    const imgEl = sopPopup.querySelector('.image img');
+                    imgEl.src = imgSrc;
+                    imgEl.alt = sopData.sopName;
+
+                    sopPopup.querySelector('.image__text.main-manager').textContent =
+                        `(정) ${sopData.mainManagerName} | ${sopData.mainManagerDivision} | ${sopData.mainManagerContact}`;
+
+                    sopPopup.querySelector('.image__text.sub-manager').textContent =
+                        `(부) ${sopData.subManagerName} | ${sopData.subManagerDivision} | ${sopData.subManagerContact}`;
+                })
             },
             maintenance: () => {
                 // maintenance popup

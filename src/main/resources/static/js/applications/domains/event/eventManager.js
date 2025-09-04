@@ -1177,52 +1177,165 @@ const EventManager = (() => {
         try {
             // 프로세스 차트
             const processResponse = await api.get('/events/process-counts');
-            const processData = processResponse.data;
+            const processData = processResponse.data.result;
+
+            const refinedData = processData
+                .filter(item => item.count > 0)
+                .map(item => ({
+                    process: item.process?.trim() || '기타',
+                    count: item.count
+                }));
+
+            const total = refinedData.reduce((sum, item) => sum + item.count, 0);
+            const labels = refinedData.map(item => item.process);
+            const data = refinedData.map(item => item.count);
+
+            const colorPalette = [
+                '#00BD5B',
+                '#2581C4',
+                '#06C2C2',
+                '#8E44AD',
+                '#F39C12',
+                '#E74C3C',
+                '#36BF64',
+                '#3498DB'
+            ];
+            const processColorMap = {};
+            let colorIndex = 0;
+
+            refinedData.forEach(item => {
+                const key = item.process;
+                if (!processColorMap[key]) {
+                    processColorMap[key] = colorPalette[colorIndex % colorPalette.length];
+                    colorIndex++;
+                }
+            });
+
+            const backgroundColor = refinedData.map(item => processColorMap[item.process]);
+
+            const getLast7DaysText = () => {
+                const today = new Date();
+                const end = new Date(today);
+                const start = new Date(today);
+                start.setDate(start.getDate() - 6);
+                const format = (date) =>
+                    date.toLocaleDateString('ko-KR', {
+                        month: '2-digit',
+                        day: '2-digit'
+                    }).replace(/\./g, '').replace(/\s/g, '/');
+                return `${format(start)}\n~\n${format(end)}`;
+            };
 
             // 프로세스 차트
-            const chartDoughunt = document.getElementById('chart_doughnut');
-            new Chart(chartDoughunt, {
+            const chartDoughnut = document.getElementById('chart_doughnut').getContext('2d');
+            new Chart(chartDoughnut, {
                 type: 'doughnut',
                 data: {
-                    labels: processData.result.map(item => item.process),
+                    labels,
                     datasets: [{
-                        data: processData.result.map(item => item.count)
+                        data,
+                        backgroundColor,
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    layout: {
-                        padding: {
-                            left: 20,
-                            right: 20
-                        }
-                    },
+                    layout: { padding: 0 },
+                    cutout: '40%',
                     plugins: {
                         legend: {
-                            position: 'left',
-                            align: 'center',
-                            labels: {
-                                padding: 10,
-                                boxWidth: 10,
-                                generateLabels: function (chart) {
-                                    const data = chart.data;
-                                    return data.labels.map((label, i) => ({
-                                        text: `${label}: ${data.datasets[0].data[i]}`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        index: i,
-                                        fontColor: '#FFFFFF',
-                                    }));
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#000',
+                            callbacks: {
+                                label: function (ctx) {
+                                    const count = ctx.raw;
+                                    const percent = ((count / total) * 100).toFixed(0);
+                                    return `${ctx.label} ${count}개 (${percent}%)`;
                                 }
                             }
                         }
                     },
                     responsive: true,
                     maintainAspectRatio: false
-                }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw(chart) {
+                        const ctx = chart.ctx;
+                        ctx.save();
+
+                        const fontSize = 14;
+                        ctx.font = `500 ${fontSize}px 'Noto Sans KR', 'Malgun Gothic', sans-serif`;
+                        ctx.fillStyle = '#999';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        const text = getLast7DaysText();
+                        const lines = text.split('\n');
+
+                        const centerX = chart.chartArea.left + chart.chartArea.width / 2;
+                        const centerY = chart.chartArea.top + chart.chartArea.height / 2;
+
+                        lines.forEach((line, i) => {
+                            ctx.fillText(line, centerX, centerY + (i - 1) * fontSize);
+                        });
+
+                        ctx.restore();
+                    }
+                }]
             });
+
+            renderCustomLegend(refinedData, processColorMap, total);
+
         } catch (error) {
             console.error('차트 초기화 오류:', error);
         }
-    }
+    };
+
+    const relLum = (c) => {
+        const v = c/255;
+        return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+    };
+
+    const hex2rgb = (hex) => {
+        const h = hex.replace('#','');
+        return {
+            r: parseInt(h.slice(0,2),16),
+            g: parseInt(h.slice(2,4),16),
+            b: parseInt(h.slice(4,6),16)
+        };
+    };
+
+    const getReadableTextColor = (hexBg) => {
+        const {r,g,b} = hex2rgb(hexBg);
+        const Lbg = 0.2126*relLum(r) + 0.7152*relLum(g) + 0.0722*relLum(b);
+        const Lwhite = 1, Lblack = 0;
+        const contrastWhite = (Math.max(Lwhite, Lbg)+0.05)/(Math.min(Lwhite, Lbg)+0.05);
+        const contrastBlack = (Math.max(Lbg, Lblack)+0.05)/(Math.min(Lbg, Lblack)+0.05);
+        return contrastWhite >= contrastBlack ? '#fff' : '#000';
+    };
+
+    const renderCustomLegend = (refinedData, processColorMap, total) => {
+        const container = document.getElementById('custom-legend');
+        container.innerHTML = '';
+
+        refinedData.forEach(item => {
+            const base = processColorMap[item.process];
+            const textColor = getReadableTextColor(base);
+            const percent = ((item.count / total) * 100).toFixed(0);
+
+            const row = document.createElement('div');
+            row.className = 'legend-row';
+            row.innerHTML = `
+              <span class="legend-badge" style="background-color:${base}; color:${textColor};">
+                ${item.process}
+              </span>
+              <span class="legend-text">총 ${item.count}개 (${percent}%)</span>
+            `;
+            container.appendChild(row);
+        });
+    };
 
     // 날짜별 이벤트 통계 차트 초기화
     const initializeDateChart = async () => {
@@ -1254,27 +1367,63 @@ const EventManager = (() => {
 
             // 5. 차트 그리기
             const chartBar = document.getElementById('chart_bar');
-            new Chart(chartBar, {
+            const ctx = chartBar.getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, chartBar.height);
+            gradient.addColorStop(0, '#00F5A0'); // 민트
+            gradient.addColorStop(1, '#007CF0');
+
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: last7Days,
                     datasets: [{
                         data: counts,
-                        borderWidth: 1
+                        borderWidth: 0,
+                        backgroundColor: gradient,
+                        // borderSkipped: false
                     }]
                 },
                 options: {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#000',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 8,
+                            displayColors: false,
+                            callbacks: {
+                                title: () => '',
+                                label: (tooltipItem) => {
+                                    return `${tooltipItem.label}, ${tooltipItem.raw}`;
+                                }
+                            }
                         }
                     },
                     scales: {
+                        x: {
+                            offset: true,
+                            grid: {
+                                color: 'rgba(255,255,255,0.1)'
+                            },
+                            ticks: {
+                                color: '#C8CED6'
+                            },
+                            categoryPercentage: 0.3,
+                            barPercentage: 0.3
+                        },
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1,
-                                precision: 0
+                                stepSize: 20,
+                                color: '#C8CED6'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.12)',
+                                drawBorder: false
                             }
                         }
                     },

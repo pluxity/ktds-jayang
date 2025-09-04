@@ -1077,43 +1077,27 @@ const EventManager = (() => {
     }
 
 
-    let currentPage = 1;
     let allEvents = [];
 
     // 24시간 이벤트 목록 초기화
-    const initializeLatest24HoursList = async (itemsPerPage) => {
+    const initializeLatest24HoursList = async (maxHeight) => {
         try {
             const response = await api.get('/events/latest-24-hours');
             allEvents = response.data;
 
-            // 페이징 UI 추가
-            const paginationHTML = `
-                <div class="event-state__pagination">
-                    <button class="prev-btn" ${currentPage === 1 ? 'disabled' : ''}>이전</button>
-                    <span class="current-page">${currentPage}</span>
-                    <button class="next-btn" ${currentPage >= Math.ceil(allEvents.result.length / itemsPerPage) ? 'disabled' : ''}>다음</button>
-                </div>
-            `;
+            // 기존 페이징 UI 제거
+            document.querySelector('.event-state__pagination')?.remove();
 
+            // 컨테이너에 스크롤 적용 (높이는 CSS에서 제어 권장)
             const tableContainer = document.querySelector('.event-state .table').parentElement;
-            tableContainer.insertAdjacentHTML('beforeend', paginationHTML);
+            if (tableContainer) {
+                tableContainer.classList.add('table-container');
+                tableContainer.style.overflowY = 'auto';
+                tableContainer.style.maxHeight = `${maxHeight}rem`; // 필요에 따라 조정
+            }
 
-            // 페이징 버튼 이벤트 리스너
-            document.querySelector('.prev-btn').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPage(itemsPerPage);
-                }
-            });
-
-            document.querySelector('.next-btn').addEventListener('click', () => {
-                if (currentPage < Math.ceil(allEvents.result.length / itemsPerPage)) {
-                    currentPage++;
-                    renderPage(itemsPerPage);
-                }
-            });
-
-            renderPage(itemsPerPage);
+            // 전체 렌더
+            renderPage();
 
         } catch (error) {
             console.error('24시간 이벤트 목록 로딩 실패:', error);
@@ -1121,15 +1105,14 @@ const EventManager = (() => {
     };
 
     // 페이지 렌더링 함수
-    const renderPage = (itemsPerPage) => {
+    const renderPage = () => {
         const tableBody = document.querySelector('.event-state .table tbody');
+        if (!tableBody) return;
+
         tableBody.innerHTML = '';
 
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const pageItems = allEvents.result.slice(startIndex, endIndex);
-
-        pageItems.forEach(event => {
+        const items = (allEvents && allEvents.result) ? allEvents.result : [];
+        items.forEach(event => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
@@ -1140,29 +1123,6 @@ const EventManager = (() => {
             `;
             tableBody.appendChild(row);
         });
-
-        // 빈 행 추가하여 높이 유지
-        const emptyRowsNeeded = itemsPerPage - pageItems.length;
-        for (let i = 0; i < emptyRowsNeeded; i++) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            `;
-            tableBody.appendChild(emptyRow);
-        }
-
-        // 페이징 UI 업데이트
-        const prevBtn = document.querySelector('.prev-btn');
-        const nextBtn = document.querySelector('.next-btn');
-        const currentPageSpan = document.querySelector('.current-page');
-
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage >= Math.ceil(allEvents.result.length / itemsPerPage);
-        currentPageSpan.textContent = currentPage;
     };
 
     // 시간 포맷팅 함수

@@ -3989,6 +3989,20 @@ canvas {
   width: 100%;
 }
 
+.event-state .table-container::-webkit-scrollbar {
+  width: 0.5rem;  /* 두께 */
+}
+
+.event-state .table-container::-webkit-scrollbar-track {
+  background: transparent; /* 배경 제거 */
+}
+
+.event-state .table-container::-webkit-scrollbar-thumb {
+  background: #888;  /* 막대만 표시 */
+  border-radius: 0.25rem;
+
+}
+
 .event-state .table td {
   white-space: nowrap;
   overflow: hidden;

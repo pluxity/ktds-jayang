@@ -708,7 +708,7 @@
         await Promise.all([
             EventManager.initializeProcessChart(),
             EventManager.initializeDateChart(),
-            EventManager.initializeLatest24HoursList(8)
+            EventManager.initializeLatest24HoursList(20)
         ]);
 
         EventManager.eventState();

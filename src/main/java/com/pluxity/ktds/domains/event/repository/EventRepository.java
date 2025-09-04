@@ -36,9 +36,9 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
     List<Last7DaysDateCountDTO> findDateCountsForLast7Days(@Param("sevenDays") LocalDateTime sevenDays);
 
     @Query("""
-            SELECT new com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO(
+            SELECT distinct new com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO(
                 p.building.name,
-                p.floorNo,
+                f.name,
                 a.event,
                 p.name,
                 a.occurrenceDate
@@ -46,7 +46,9 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             FROM Alarm a
             JOIN PoiTag pt ON a.tagName = pt.tagName
             JOIN Poi p ON pt.poi.id = p.id
+            JOIN Floor f ON p.floorNo = f.floorNo
             WHERE a.occurrenceDate >= :last24Hours
+            AND f.building.id = p.building.id
             ORDER BY a.occurrenceDate DESC
        """)
     List<Last24HoursEventDTO> findLatest24HoursEventList(@Param("last24Hours") LocalDateTime last24Hours);

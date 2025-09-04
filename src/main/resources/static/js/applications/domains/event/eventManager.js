@@ -1133,7 +1133,7 @@ const EventManager = (() => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
-                <td>${event.floorNm + 'F' || '-'}</td>
+                <td>${event.floorNm  || '-'}</td>
                 <td class="ellipsis">${event.event || '-'}</td>
                 <td class="ellipsis">${event.poiName || '-'}</td>
                 <td>${formatTime(event.occurrenceDate)}</td>

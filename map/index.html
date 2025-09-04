@@ -10,7 +10,7 @@
 <body>
     <div class="container" style="background-image:url(/dashboard/img/bg_map.png)">
         <header class="header">
-            <h1 class="header__logo"><a href="/dashboard/index.html">KT 자양 통합운영 플랫폼</a></h1>
+            <h1 class="header__logo"><a href="/dashboard/index.html">통합운영 플랫폼</a></h1>
             <ul class="header__tab" role="tablist">
                 <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
                 <li class="active" role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">건물 A</a></li>
@@ -273,16 +273,17 @@
                         <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
                         <button type="button" class="up"><span class="hide">UP</span></button>
                         <ul>
-                            <li>1</li>
-                            <li>2</li>
-                            <li>3</li>
-                            <li>4</li>
-                            <li>5</li>
-                            <li>6</li>
-                            <li>7</li>
-                            <li>8</li>
-                            <li>9</li>
-                            <li>10</li>
+                            <!-- [D] 층 버튼 클릭 시 active 클래스 추가 -->
+                            <li><button type="button">1F</button></li>
+                            <li><button type="button">2F</button></li>
+                            <li><button type="button" class="active">3F</button></li>
+                            <li><button type="button">4F</button></li>
+                            <li><button type="button">5F</button></li>
+                            <li><button type="button">6F</button></li>
+                            <li><button type="button">7F</button></li>
+                            <li><button type="button">8F</button></li>
+                            <li><button type="button">9F</button></li>
+                            <li><button type="button">10F</button></li>
                         </ul>
                         <!-- [D] 10개 층 초과 시 층 이동 화살표 노출 -->
                         <button type="button" class="down"><span class="hide">DOWN</span></button>
@@ -302,6 +303,206 @@
                     <a href="#none" class="event-state__button">
                         <span class="hide">이벤트 통계 전체보기</span>
                     </a>
+                </div>
+                <div class="event-state__group">
+                    <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
+                    <table class="table">
+                        <caption class="hide">출입구</caption>
+ 
+                        <thead>
+                            <tr>
+                                <th scope="col">건물</th>
+                                <th scope="col">층</th>
+                                <th scope="col">이벤트명</th>
+                                <th scope="col">장비명</th>
+                                <th scope="col">발생시각</th>
+                            </tr>
+                        </thead>
+                            <tbody>
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>     
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>    
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td class="ellipsis">8글자이상일경우말줄임</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>   
+                        </tbody>
+                    </table>
                 </div>
             </aside>
         </div>

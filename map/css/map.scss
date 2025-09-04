@@ -36,34 +36,15 @@
 // ptz viewer
 @include ptz-viewer;
 
+// system tap
+@include systemTap;
+
 // 이미지 경로 변수 설정 
 $base-img-path:"/static/images/viewer/";
 
-
-/* Main */
 .system-tap{
-    position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%); z-index:999;
     ul{
-        display:flex; align-items:center; justify-content:center;
-        border:1px solid var(--color-black); border-radius:2.5rem; background:linear-gradient(180deg, rgba(116, 122, 165, 0.60) 0%, rgba(0, 0, 0, 0.00) 100%), #25262E;
-        height:4.0625rem; padding:0 1.25rem; 
-    }
-    li{
-        padding:0 0.625rem;
-        white-space:nowrap; color:var(--color-grayscale-light); font-size:1rem; cursor:pointer; line-height:1.875rem;
-        &:hover, &.active{
-            border-radius:1.25rem; background-color:var(--color-black);
-        }
-        &.active{color:var(--color-mint);}
-        + li{
-            position:relative;
-            margin-left:1.9375rem;
-            &::before{
-                content:'';
-                position:absolute; left:-0.9375rem; top:50%; transform:translateY(-50%);
-                width:0.0625rem; height:1.3125rem; background-color:var(--color-grayscale03);
-            }
-        }
+        background: linear-gradient(180deg, rgba(116, 122, 165, 0.60) 0%, rgba(0, 0, 0, 0.00) 100%), #25262E;
     }
 }
 
@@ -83,12 +64,18 @@ $base-img-path:"/static/images/viewer/";
         border-top:1px solid var(--color-grayscale-dark); padding:0.5rem 0 0.3125rem; 
         width:100%; 
         text-align:center;
+        button{cursor:pointer;}
         ul{
             display:flex; flex-direction:column; grid-gap:1.25rem; 
             margin:1.25rem 0;
-            color:var(--color-grayscale01); 
+            li{ 
+                button{
+                    font-size:0.75rem; color:var(--color-grayscale01);
+                    &.active{color:var(--color-mint);}
+                }
+            }
         }
-        button{
+        > button{
             position:relative; 
             background-color:var(--color-grayscale-dark); border-radius:1.25rem;
             width:1.25rem; height:1.25rem;
@@ -431,7 +418,17 @@ $base-img-path:"/static/images/viewer/";
 }
 
 // 이벤트 현황
-.event-state{height:calc(100% - 12.5rem);}
+.event-state{
+    height:calc(100% - 12.5rem);
+    .table tbody{
+        max-height:37.4rem;
+    }
+    @media (min-width: 768px) and (max-width: 1200px) {
+        .table tbody{
+            max-height:41.7rem;
+        }
+    }
+}
 
 
 /*---------------------------------------------------

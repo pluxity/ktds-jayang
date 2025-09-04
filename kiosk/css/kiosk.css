@@ -255,11 +255,12 @@ html {
 .kiosk-list__info .list > ul {
   display: -ms-grid;
   display: grid;
-  -ms-grid-rows: (1fr)[2];
       grid-template-rows: repeat(2, 1fr);
   grid-column-gap: 110px;
   grid-row-gap: 80px;
 }
+
+
 
 .kiosk-list__info .list__header {
   display: -webkit-box;
@@ -653,7 +654,6 @@ html {
     height: calc(100% - 22rem);
   }
   .kiosk-list__info .list > ul {
-    -ms-grid-columns: (1fr)[5];
         grid-template-columns: repeat(5, 1fr);
   }
   .kiosk-footer {
@@ -888,7 +888,6 @@ html {
     height: 50%;
   }
   .kiosk-list__info .list > ul {
-    -ms-grid-columns: (1fr)[3];
         grid-template-columns: repeat(3, 1fr);
   }
   .kiosk-footer__buttons {

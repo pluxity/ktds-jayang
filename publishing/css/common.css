@@ -238,6 +238,7 @@ body {
   height: 100%;
   background-repeat: no-repeat;
   background-size: cover;
+  background-color: #111316;
 }
 
 /* dashboard > main / map > main 
@@ -276,9 +277,6 @@ body {
 }
 
 .header__logo a {
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.5rem;
   position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -287,14 +285,17 @@ body {
       -ms-flex-align: start;
           align-items: flex-start;
   gap: 0.3125rem;
+  color: #fff;
+  font-size: 1.5rem;
+  letter-spacing: -0.03rem;
 }
 
 .header__logo a::before {
   content: '';
   display: inline-block;
-  width: 2.0625rem;
-  height: 1.6875rem;
-  background: url("/static/images/viewer/icon_kt.svg") no-repeat center/contain;
+  width: 7.875rem;
+  height: 1.5rem;
+  background: url("/static/images/viewer/icon_logo.svg") no-repeat center/contain;
 }
 
 .header__info {
@@ -308,8 +309,10 @@ body {
 }
 
 .header__info .date {
+  width: 15rem;
   font-size: 0.875rem;
   color: var(--color-grayscale-light);
+  text-align: right;
 }
 
 .header__info .profile {
@@ -385,6 +388,7 @@ body {
       -ms-flex-align: center;
           align-items: center;
   margin: 0.625rem 0;
+  font-size: 0.875rem;
 }
 
 .header__info .profile__layer .detail__group:last-of-type a {

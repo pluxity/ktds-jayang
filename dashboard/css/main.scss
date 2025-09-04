@@ -36,18 +36,34 @@
 
 // ptz viewer
 @include ptz-viewer;
+
+// system tap
+@include systemTap;
  
 // 이미지 경로 변수 설정 
 $base-img-path:"/static/images/viewer/";
 
 
 /* Main */ 
+.system-tap{
+    ul{
+        background: linear-gradient(180deg, rgba(0, 245, 191, 0.00) 61.5%, rgba(0, 245, 191, 0.20) 100%), #25252B;
+    }
+}
+
+.event-state{
+    @media (min-width: 768px) and (max-width: 1200px) {
+        .table{
+            tbody{
+                max-height:22rem;
+            }
+            &__group + &__group{margin-top:1.2875rem;}
+        }
+    }
+}
+
 .tool-box{
     right:2.5rem;
     transition:right 0.3s ease;
     &--active{right:26.875rem;}
 }
-
-
-
- 

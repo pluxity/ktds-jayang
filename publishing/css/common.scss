@@ -235,7 +235,7 @@ $base-img-path:"/static/images/viewer/";
 /* Container */
 .container{
     width:100%; height:100%;
-    background-repeat:no-repeat; background-size:cover;
+    background-repeat:no-repeat; background-size:cover; background-color:#111316;
 }
 
 
@@ -257,21 +257,24 @@ $base-img-path:"/static/images/viewer/";
     width:100%; height:5rem; 
     &__logo{
         a{
-            color:#fff; font-weight:800; font-size:1.5rem;
             position:relative;
             display:flex; align-items:flex-start; gap:0.3125rem;
+            color:#fff; font-size:1.5rem; letter-spacing:-0.03rem;
             &::before{
                 content:'';
                 display:inline-block;
-                width:2.0625rem; height:1.6875rem;
-                background:url('#{$base-img-path}icon_kt.svg') no-repeat center/contain; 
+                width:7.875rem; height:1.5rem;
+                background:url('#{$base-img-path}icon_logo.svg') no-repeat center/contain; 
                 
             }
         }
     }
     &__info{
         display:flex; gap:0.9375rem; align-items:center;
-        .date{font-size:0.875rem; color:var(--color-grayscale-light);}
+        .date{
+            width:15rem; 
+            font-size:0.875rem; color:var(--color-grayscale-light); text-align:right;
+        }
         .profile{
             position:relative;
             &__btn{
@@ -303,7 +306,7 @@ $base-img-path:"/static/images/viewer/";
                         border-top:1px solid var(--color-grayscale-dark);
                         a{
                             display:flex; align-items:center;
-                            margin:0.625rem 0;
+                            margin:0.625rem 0; font-size:0.875rem;
                         }
                         &:last-of-type a{margin-bottom:0;}
                         .icon{

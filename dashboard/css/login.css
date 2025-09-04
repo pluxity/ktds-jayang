@@ -23,6 +23,7 @@
 /* ToolBox */
 /* PTZ Viewer */
 /* 이벤트 현황 */
+/* system tap */
 .button {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -292,6 +293,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   -webkit-mask-position: -98px -9px;
   mask-position: -98px -9px;
   background-color: var(--color-mint);
+  cursor: pointer;
 }
 
 .popup-basic__head .arrow {
@@ -503,6 +505,14 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   height: calc(100% - 3.25rem);
 }
 
+.popup-basic--wide .search-result {
+  height: calc(100% - 3.6rem);
+}
+
+.popup-basic--xwide .search-result {
+  height: calc(100% - 3.9rem);
+}
+
 .search-result__filter {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -519,6 +529,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 
 .search-result__contents {
   margin-top: 1.125rem;
+  height: 100%;
 }
 
 .search-result__contents .title {
@@ -539,6 +550,23 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -11.25rem -0.625rem;
   width: 0.875rem;
   height: 0.875rem;
+}
+
+.search-result__empty {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  height: 100%;
+}
+
+.search-result__empty p {
+  color: var(--color-grayscale03);
 }
 
 .search-result__checkbox {

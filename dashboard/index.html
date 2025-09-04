@@ -10,7 +10,7 @@
 <body>
     <div class="container" style="background-image:url(/static/images/viewer/bg_dashboard.png)">
         <header class="header">
-            <h1 class="header__logo"><a href="/dashboard/index.html">KT 자양 통합운영 플랫폼</a></h1>
+            <h1 class="header__logo"><a href="/dashboard/index.html">통합운영 플랫폼</a></h1>
             <div class="header__info">
                 <p class="date">2024년 11월 20일(월요일 21:25:20)</p>
                 <div class="profile">
@@ -186,7 +186,16 @@
                     </ul>
                 </div>
             </div>
-            <!-- [!] tool-box 위치 : 이벤트 메뉴 영역과 같이 확인 진행 예정 추후 작업 진행 -->
+            <div class="system-tap">
+                <ul>
+                    <!-- [D] 선택 시 active 클래스 추가 -->
+                    <li class="active">외부 전경</li>
+                    <li>A 동</li>
+                    <li>B 동</li>
+                    <li>판매시설</li>
+                    <li>지하주차장</li>
+                </ul>
+            </div>
             <div class="tool-box tool-box--active"> 
                 <ul class="tool-box__list">
                 <!-- [D] 선택 시 active 클래스 추가 -->
@@ -235,13 +244,7 @@
                     <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
                     <table class="table">
                         <caption class="hide">출입구</caption>
-                        <colgroup>
-                            <col style="width:60px">
-                            <col style="width:25px">
-                            <col style="width:95px">
-                            <col style="width:95px">
-                            <col style="width:70px">
-                        </colgroup>
+ 
                         <thead>
                             <tr>
                                 <th scope="col">건물</th>
@@ -294,6 +297,41 @@
                                 <td class="ellipsis">CCTV</td>
                                 <td>23:54:12</td>
                             </tr>     
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>  
+                            <tr>
+                                <td>상가시설</td>
+                                <td>12F</td>
+                                <td class="ellipsis">제한구역침입</td>
+                                <td class="ellipsis">CCTV</td>
+                                <td>23:54:12</td>
+                            </tr>     
                         </tbody>
                     </table>
                 </div>
@@ -310,6 +348,522 @@
                     </div>
                 </div>
             </aside>
+
+            <!-- 팝업 영역 -->
+            <!-- [D] IF) 팝업이 세로 기준 가운데 정렬일 경우 top:50%; transform:translateY(-50%); 추가 (left 값은 임시로 지정해놓았습니다.)
+            -->
+            <div class="popup-basic" style="top:50%; transform:translateY(-50%); left:500px;">
+                <div class="popup-basic__head">
+                   <h2 class="name">CCTV</h2>
+                   <button type="button" class="close"><span class="hide">close</span></button>
+               </div>
+               <!-- 장비 목록 영역 -->
+               <div class="search-result">
+                   <div class="search-result__filter">
+                       <!-- select-box -->
+                       <!-- [D] width값 지정 -->
+                       <div class="select-box" style="width:100px;">
+                            <!-- [D] 
+                                select-box 선택 완료 시 select-box__btn--selected 클래스 추가 
+                                select-box 클릭 시 select-box__btn--active 클래스 추가 
+                                select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                                -->
+                            <span class="select-box__btn select-box__btn--active">건물 A</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                    <li class="selected">건물 A</li>
+                                    <li>건물 B</li>
+                                    <li>건물 A</li>
+                                    <li>건물 B</li>
+                                    <li>건물 A</li>
+                                    <li>건물 B</li>
+                                    <li>건물 A</li>
+                                    <li>건물 B</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="select-box" style="width:80px;">
+                            <!-- [D] 
+                                select-box 클릭 시 select-box__btn--active 클래스 추가 
+                                select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                                -->
+                            <span class="select-box__btn -select-box__btn--active">건물 A</span>
+                            <div class="select-box__content">
+                                <ul>
+                                    <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                    <li class="selected">건물 A</li>
+                                    <li>건물 B</li>
+                                    <li>건물 A</li>
+                                    <li>건물 B</li>
+                                    <li>건물 A</li>
+                                    <li>건물 B</li>
+                                    <li>건물 A</li>
+                                    <li>건물 B</li>
+                                </ul>
+                            </div>
+                        </div>
+                       <!-- input[type="text"]-->
+                       <!-- [D] width값 지정 -->
+                       <input type="text" placeholder="장비명" style="width:100px;">
+                       <button type="button" class="button button--solid-middle">검색</button>
+                   </div>
+                   <div class="search-result__contents">
+                       <div class="title">
+                           총 233,214,123<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+                       </div>
+                       <!-- Accordion -->
+                       <div class="accordion">
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn accordion__btn--active" type="button">출입구 (125)</button>
+                           <div class="accordion__detail">
+                               <table>
+                                   <caption class="hide">출입구</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th> 
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001 <em class="text-accent">박스형 카메라</em></td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn accordion__btn--active" type="button">에스컬레이터 (125)</button>
+                           <div class="accordion__detail">
+                               <p class="empty">검색 결과가 없습니다.</p>
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">엘리베이터 (125)</button>
+                           <div class="accordion__detail">
+                               <table>
+                                   <caption class="hide">엘리베이터</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>          
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">방화문 (125)</button>
+                           <div class="accordion__detail">
+                               <table>
+                                   <caption class="hide">방화문</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>          
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">소방시설 (125)</button>
+                           <div class="accordion__detail">                    
+                               <table>
+                                   <caption class="hide">소방시설</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>             
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">화장실 (125)</button>
+                           <div class="accordion__detail">                    
+                               <table>
+                                   <caption class="hide">화장실</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">엘리베이터 (125)</button>
+                           <div class="accordion__detail">                    
+                               <table>
+                                   <caption class="hide">엘리베이터</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>        
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">방화문 (125)</button>
+                           <div class="accordion__detail">                    
+                               <table>
+                                   <caption class="hide">방화문</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>       
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">소방시설 (125)</button>
+                           <div class="accordion__detail">                    
+                               <table>
+                                   <caption class="hide">소방시설</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>                
+                           </div>
+                           <!-- [D] 아코디언 클릭 시 accordion__btn--active 추가 -->
+                           <button class="accordion__btn" type="button">화장실 (125)</button>
+                           <div class="accordion__detail">                    
+                               <table>
+                                   <caption class="hide">화장실</caption>
+                                   <thead>
+                                       <th scope="col">건물</th>
+                                       <th scope="col">층</th>
+                                       <th scope="col">장비명</th>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                       <tr>
+                                           <td>건물 A</td>
+                                           <td>12F</td>
+                                           <td class="align-left">출입구 CCTV-001</td>
+                                       </tr>   
+                                   </tbody>
+                               </table>           
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div> 
         </div>
     </div>
 

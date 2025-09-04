@@ -613,6 +613,7 @@ const EventManager = (() => {
             player.cameraIp = cameraIp;
             player.httpRelayUrl = config.httpRelayUrl;
             player.httpRelayPort = config.httpRelayPort;
+            player.isLive = true;
         } catch (error) {
             console.error("재생 에러:", error);
             showCctvError(canvasId);
@@ -628,6 +629,7 @@ const EventManager = (() => {
         try {
             await player.getDeviceInfo((cameraList) => {
                 player.cameraIp = cameraIp;
+                player.isLive = false;
                 let foundCamera = null;
 
                 if (Array.isArray(cameraList)) {

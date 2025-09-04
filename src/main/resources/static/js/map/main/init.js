@@ -972,31 +972,20 @@ const Init = (function () {
     }
 
     async function setupCctvControls(popupInfo, poiInfo) {
-        resetPlaybackControls(popupInfo);
 
         // LIVE/PLAYBACK 모드 전환
         const liveBtn = popupInfo.querySelector('.button--solid-middle');
         const playbackBtn = popupInfo.querySelector('.button--ghost-lower');
         const canvasId = `cctv-${poiInfo.id}`;
         const cameraIp = poiInfo.cameraIp;
+        
 
         liveBtn.addEventListener('click', async () => {
-            resetPlaybackControls(popupInfo);
-
-            const player = window.livePlayers[canvasId];
-            if (player) {
-                player.cameraIp = cameraIp; // player에 카메라 IP 설정
-
-                // player 상태 초기화
-                if (player.isPaused === undefined) {
-                    player.isPaused = false;
-                }
-            }
-
+            const player = window.livePlayers?.[canvasId];
             if(player){
-                player.stopPlayback(); // playback 정지
-                player.isLive = true; // player live 상태
+                layerPopup.closePlayer(canvasId);
             }
+
             liveBtn.classList.add('button--solid-middle');
             liveBtn.classList.remove('button--ghost-lower');
             playbackBtn.classList.add('button--ghost-lower');
@@ -1007,47 +996,17 @@ const Init = (function () {
         });
 
         playbackBtn.addEventListener('click', () => {
-            const player = window.livePlayers[canvasId];
-            if (player) {
-                player.cameraIp = cameraIp; // player에 카메라 IP 설정
-
-                player.onPlaybackError = (errorType, message) => {
-                    console.log("Playback Error:", errorType, message);
-
-                    popupInfo.querySelectorAll('.playback__button').forEach(btn => {
-                        btn.style.backgroundColor = '';
-                    });
-
-                    // 재생 상태 초기화
-                    if (player.isPaused !== undefined) {
-                        player.isPaused = false;
-                    }
-
-                    // 에러 타입별 처리
-                    switch (errorType) {
-                        case "NO_DATA":
-                            console.log("해당 시간에 데이터가 없음");
-                            break;
-                        case "NETWORK_ERROR":
-                            console.log("네트워크 오류");
-                            break;
-                        default:
-                            console.log("알 수 없는 오류");
-                    }
-                };
+            const player = window.livePlayers?.[canvasId];
+            if(player){
+                layerPopup.closePlayer(canvasId);
             }
-            playbackBtn.classList.add('button--solid-middle');
-            playbackBtn.classList.remove('button--ghost-lower');
-            liveBtn.classList.add('button--ghost-lower');
-            liveBtn.classList.remove('button--solid-middle');
 
             resetPlaybackControls(popupInfo); // 재생 버튼 색상과 날짜 초기화
 
-            // PLAYBACK 모드 활성화
-            if(player) {
-                player.cancelDraw && player.cancelDraw(); // live 정지
-                player.isLive = false; // player playback 상태
-            }
+            liveBtn.classList.add('button--ghost-lower');
+            liveBtn.classList.remove('button--solid-middle');
+            playbackBtn.classList.add('button--solid-middle');
+            playbackBtn.classList.remove('button--ghost-lower');
         });
 
         // PTZ 컨트롤 설정

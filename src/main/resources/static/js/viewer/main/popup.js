@@ -3128,6 +3128,8 @@ const layerPopup = (function () {
                     body: JSON.stringify({ cameraIp: player.cameraIp })
                 }).catch(console.error);
             }
+
+            window.livePlayers = {};
         });
     };
 

@@ -81,7 +81,7 @@ public class PoiController {
     }
 
     @GetMapping("/tagNames/{tagName}")
-    public DataResponseBody<PoiDetailResponseDTO> findPoiDTOByTagName(@PathVariable String tagName) {
+    public DataResponseBody<PoiAlarmDetailDTO> findPoiDTOByTagName(@PathVariable String tagName) {
         return DataResponseBody.of(service.findPoiDTOByTagName(tagName));
     }
 

@@ -12,6 +12,8 @@ import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.poi_set.repository.IconSetRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
+import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
+import com.pluxity.ktds.domains.sop.service.SopService;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -48,15 +50,14 @@ public class PoiService {
 
     private final PoiRepository poiRepository;
     private final BuildingRepository buildingRepository;
-    private final FloorRepository floorRepository;
     private final PoiCategoryRepository poiCategoryRepository;
     private final IconSetRepository iconSetRepository;
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
     private final PoiCctvRepository poiCctvRepository;
     private final BuildingFileHistoryRepository buildingFileHistoryRepository;
     private final FloorHistoryRepository floorHistoryRepository;
-    private final PoiTagSyncService poiTagSyncService;
-    private final PoiTagRepository poiTagRepository;
+    private final SopService sopService;
+
 
     private Poi getPoi(Long id) {
         return poiRepository.findById(id)
@@ -211,11 +212,28 @@ public class PoiService {
     }
 
     @Transactional(readOnly = true)
-    public PoiDetailResponseDTO findPoiDTOByTagName(String tagName){
+    public PoiAlarmDetailDTO findPoiDTOByTagName(String tagName){
+        ArrayList<PoiCctvDTO> cctvDtoList = new ArrayList<>();
+        SopResponseDTO firstByOrderByIdDesc = null;
         Poi poi = poiRepository.findPoiByTagName(tagName)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_POI, "Not Found Poi with tagName: " + tagName));
 
-        return poi.toDetailResponseDTO();
+        for(PoiCctv pc : poi.getPoiCctvs()){
+            String cameraIp = poiCctvRepository.findCameraIpByPoiName(pc.getCctvName());
+            PoiCctvDTO dto = PoiCctvDTO.builder()
+                    .id(pc.getId())
+                    .cctvName(pc.getCctvName())
+                    .isMain(pc.getIsMain())
+                    .cameraIp(cameraIp)
+                    .build();
+            cctvDtoList.add(dto);
+        }
+
+        if(poi.getPoiCategory().getId() == 4){
+            firstByOrderByIdDesc = sopService.findFirstByOrderByIdDesc();
+        }
+
+        return poi.toPoiAlarmDetailDTO(cctvDtoList, firstByOrderByIdDesc);
     }
 
     @Transactional

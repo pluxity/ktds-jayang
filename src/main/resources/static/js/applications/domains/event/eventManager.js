@@ -418,8 +418,7 @@ const EventManager = (() => {
             const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
             const alarmedPoi = response.data.result;
             const cctvList = alarmedPoi.cctvList;
-            console.log("alarmedPoi : ",alarmedPoi);
-            console.log("alarm", alarm);
+            const sop = alarmedPoi.sop;
             const poiData = PoiManager.findById(alarmedPoi.id);
 
             // toast
@@ -440,7 +439,8 @@ const EventManager = (() => {
                 if (mainCctv) {
                     const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                     mainCCTVTemplate.style.top = `${warningRect.bottom + 10}px`;
-                    mainCCTVTemplate.style.left = `${warningRect.left}px`;
+                    mainCCTVTemplate.style.left = `${warningRect.left + (warningRect.width - mainCCTVTemplate.offsetWidth) / 2}px`;
+
                 }
 
                 if (subCctvs.length > 0) {
@@ -451,10 +451,12 @@ const EventManager = (() => {
             }
 
             // sop 팝업 생성
-            const sopTemplate = createSopPopup();
-            sopTemplate.style.position = 'fixed';
-            sopTemplate.style.left = `${warningRect.left - 10 - sopTemplate.offsetWidth}px`;
-            sopTemplate.style.top = `${warningRect.top + (warningRect.height - sopTemplate.offsetHeight) / 2}px`;
+            if(sop){
+                const sopTemplate = createSopPopup(sop);
+                sopTemplate.style.position = 'fixed';
+                sopTemplate.style.left = `${warningRect.left - 100 - sopTemplate.offsetWidth}px`;
+                sopTemplate.style.top = `${warningRect.top + (warningRect.height - sopTemplate.offsetHeight) / 2}px`;
+            }
 
             // 이벤트 해제, 3d맵 이동 이벤트
             const buttons = warningTemplate.querySelector('.buttons');
@@ -508,7 +510,7 @@ const EventManager = (() => {
                     id: alarmPoi.id,
                     isAnimation: true,
                     duration: 500,
-                    heightOffset: 70,
+                    heightOffset: 200,
                     onComplete: async () => {
                         Init.renderPoiInfo(poiData);
                         if (mainCctv) {
@@ -874,7 +876,7 @@ const EventManager = (() => {
         return `
         <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
             <div class="cctv-header">
-                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.name}</span>
+                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.cctvName}</span>
                 <button type="button" class="cctv-close">×</button>
             </div>
             <div class="cctv-content">
@@ -949,7 +951,7 @@ const EventManager = (() => {
     }
 
     // Sop 팝업 생성
-    function createSopPopup() {
+    function createSopPopup(sop) {
         const sopTemplate = document.createElement('div');
         sopTemplate.className = 'sop-container';
         sopTemplate.innerHTML =
@@ -958,86 +960,13 @@ const EventManager = (() => {
                     <h2 class="name">SOP</h2>
                     <button type="button" class="close"><span class="hide">close</span></button>
                 </div>
-                <!-- SOP 영역 -->
                 <div class="sop-info">
-                    <h3 class="sop-info__title">에스컬레이터 끼임 사고</h3>
+                    <h3 class="sop-info__title">${sop.sopName}</h3>
                     <div class="sop-info__contents">
                         <div class="image">
-                            <img src="/static/img/img_sop.png" alt="에스컬레이터 끼임 사고" width="330">
-                            <p class="image__text">(정) 홍길동 | 가나다라마팀 | 010-123-456</p>
-                            <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
-                        </div>
-                        <div class="manual">
-                            <div class="manual__title">매뉴얼</div>
-                            <div class="sop-accord">
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn sop-accord__btn--active">
-                                    <span class="label">1단계</span>
-                                    사고 위치 파악
-                                </button>
-                                <div class="sop-accord__detail">
-                                    <div class="message">
-                                        <strong class="message__title">방송 송출</strong>
-                                        <p>
-                                            안내 방송 송출 문구 표출 <br>
-                                            문구 없는 경우 영역 미노출
-                                        </p>
-                                    </div>
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">2단계</span>
-                                    안내 방송 송출
-                                </button>     
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">3단계</span>
-                                    초동 조치
-                                </button>  
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">4단계</span>
-                                    사고 상황 전파
-                                </button>     
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div> 
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">5단계</span>
-                                    상황종료
-                                </button>
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                            </div>
+                            <img src= "/${sop.sopFile.fileEntityType}/${sop.sopFile.directory}/${sop.sopFile.storedName}.${sop.sopFile.extension}" width="330">
+                            <p class="image__text">(정) ${sop.mainManagerName} | ${sop.mainManagerDivision} | ${sop.mainManagerContact}</p>
+                            <p class="image__text">(부) ${sop.subManagerName} | ${sop.subManagerDivision} | ${sop.subManagerContact}</p>
                         </div>
                     </div>
                 </div>
@@ -1440,6 +1369,8 @@ const EventManager = (() => {
         if (toastBox) {
             toastBox.remove();
         }
+
+        layerPopup.closePlayers();
     };
 
 

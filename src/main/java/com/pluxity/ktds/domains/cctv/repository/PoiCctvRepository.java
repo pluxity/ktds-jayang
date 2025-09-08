@@ -40,4 +40,10 @@ public interface PoiCctvRepository extends JpaRepository<PoiCctv, Long> {
     @Transactional
     @Query("DELETE FROM PoiCctv pc WHERE pc.cctvName = :cctvName")
     void deleteByCctvName(String cctvName);
+
+    @Query("SELECT p.cameraIp " +
+            "FROM PoiCctv pc " +
+            "JOIN Poi p ON pc.cctvName = p.name " +
+            "WHERE pc.cctvName = :poiName")
+    String findCameraIpByPoiName(String poiName);
 }

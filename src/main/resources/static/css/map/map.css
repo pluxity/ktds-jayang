@@ -812,7 +812,7 @@
   height: 37.5rem;
 }
 .popup-event--middle {
-  width: 38.125rem;
+  width: 25rem;
   height: 40rem;
 }
 .popup-event__head {
@@ -923,10 +923,10 @@
 }
 
 .sop-info__title {
-  margin: 1.25rem;
+  margin: 0.6rem;
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-grayscale-light);
+  color: var(--color-mint);
 }
 .sop-info__contents {
   display: flex;
@@ -944,10 +944,11 @@
 }
 .sop-info__contents .image img {
   flex: 1 1 auto; /* 가능한 영역만큼만 차지 */
-  max-width: 100%;
+  width: 20.625rem;
   height: auto;
   object-fit: contain;
   display: block;
+  margin-bottom: 0.6rem;
 }
 
 .sop-info__contents .image__text {

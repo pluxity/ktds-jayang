@@ -1700,11 +1700,11 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   background-color: var(--color-mint);
   padding: 0.4375rem 0.625rem 0.4375rem 0.9375rem;
-  height: 1.8125rem;
+  height: 0.94rem;
   color: var(--color-navy-dark);
   font-weight: 700;
   font-size: 0.75rem;
@@ -1714,22 +1714,25 @@
   margin-left: auto;
   width: 0.875rem;
   height: 0.875rem;
-  -webkit-mask-image: url("/static/img/icon14/icon14.svg");
-  mask-image: url("/static/img/icon14/icon14.svg");
+  -webkit-mask-image: url("/static/images/viewer/icon14/icon14.svg");
+  mask-image: url("/static/images/viewer/icon14/icon14.svg");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: -146px -10px;
   mask-position: -146px -10px;
   background-color: var(--color-navy-dark);
+  cursor: pointer;
 }
 
 .popup-info__content {
   padding: 0.625rem 0.9375rem 0.9375rem;
+  background-color: #fff;
 }
 
 .popup-info__content .title {
   color: var(--color-mint-dark);
   font-weight: 700;
+  font-size: 0.875rem;
 }
 
 .popup-info__content .date {
@@ -1737,8 +1740,8 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   grid-gap: 0.8125rem;
   margin: 0.3125rem 0;
   font-weight: 500;
@@ -1821,39 +1824,48 @@
 }
 
 .checkbox-wrap {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   grid-gap: 0.1875rem;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   height: 1.25rem;
 }
 
-input[type=checkbox] {
+input[type="checkbox"] {
   -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+      -moz-appearance: none;
+          appearance: none;
   position: relative;
   display: inline-block;
-  flex-shrink: 0;
+  -ms-flex-negative: 0;
+          flex-shrink: 0;
   width: 1rem;
   height: 1rem;
   margin: 0;
   border: 1px solid var(--color-grayscale03);
   background-color: var(--color-black);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
+
 input[type=checkbox]:checked {
   border-color: var(--color-mint-dark);
 }
-input[type=checkbox]:checked::after {
-  content: "";
+
+input[type="checkbox"]:checked::after {
+  content: '';
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
   background: url("/static/images/viewer/input_checkbox.svg") no-repeat center/contain;
-  width: 0.375rem;
-  height: 0.25rem;
+  width: 0.6rem;
+  height: 0.6rem;
 }
+
 input[type=checkbox]:checked + label {
   color: var(--color-mint-dark);
 }
@@ -2526,32 +2538,41 @@ input[type=text]:disabled, input[type=password]:disabled {
   bottom: 1.25rem;
   left: 48%;
   -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
+          transform: translateX(-50%);
   z-index: 999;
 }
+
 .system-tap ul {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
   border: 1px solid var(--color-black);
-  border-radius: 40px;
-  /*background: linear-gradient(180deg, rgba(116, 122, 165, 0.6) 0%, rgba(0, 0, 0, 0) 100%), #25262E;*/
-  height: 4.0625rem;
+  border-radius: 4.375rem;
+  height: 3.94rem;
   padding: 0 1.25rem;
 }
+
 .system-tap li {
   padding: 0 0.625rem;
   white-space: nowrap;
-  /*color: var(--color-grayscale-light);*/
-  color: white;
+  color: var(--color-grayscale-light);
   font-size: 1rem;
   cursor: pointer;
   line-height: 1.875rem;
 }
+
 .system-tap li:hover, .system-tap li.active {
-  border-radius: 20px;
+  border-radius: 1.25rem;
   background-color: var(--color-black);
+  color: var(--color-mint);
 }
+
 .system-tap li.active {
   color: var(--color-mint);
 }
@@ -2568,6 +2589,11 @@ input[type=text]:disabled, input[type=password]:disabled {
   width: 0.0625rem;
   height: 1.3125rem;
   background-color: var(--color-grayscale03);
+}
+
+.system-tap ul {
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(61.5%, rgba(0, 245, 191, 0)), to(rgba(0, 245, 191, 0.2))), #25252B;
+  background: linear-gradient(180deg, rgba(0, 245, 191, 0) 61.5%, rgba(0, 245, 191, 0.2) 100%), #25252B;
 }
 
 .floor-info {

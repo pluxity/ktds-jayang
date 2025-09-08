@@ -10,40 +10,6 @@
         <div id="webGLContainer" style="position:fixed; width: 100%; height:100%; "></div>
         <div class="contents">
             <div class="poi-menu">
-                <div class="poi-menu__all">
-                    <!-- [D] 선택 시 active 클래스 추가 -->
-                    <div class="all">
-                        <a href="javascript:void(0);" id="toggle-menu">장비보기</a>
-                        <!-- 장비 목록 팝업 -->
-                        <div id="equipmentListPop" class="popup-basic popup-basic--small">
-                            <div class="popup-basic__head">
-                                <span class="checkbox-wrap">
-                                    <input type="checkbox" id="check">
-                                    <label for="check">전체선택</label>
-                                </span>
-                            </div>
-                            <!-- 장비 표시 영역 -->
-                            <div class="equip-group">
-                                <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                                <a href="javascript:void(0);" class="cctv">CCTV</a>
-                                <a href="javascript:void(0)" class="facility">설비</a>
-                                <a href="javascript:void(0)" class="power">전력</a>
-                                <a href="javascript:void(0)" class="light">조명</a>
-                                <a href="javascript:void(0)" class="fire">소방</a>
-                                <a href="javascript:void(0)" class="elevator">승강기</a>
-                                <a href="javascript:void(0)" class="solar">태양광</a>
-                                <a href="javascript:void(0)" class="air">공기질</a>
-                                <a href="javascript:void(0)" class="obstacle">항공장애</a>
-                                <a href="javascript:void(0)" class="leak">누수</a>
-                                <a href="javascript:void(0)" class="access">출입탐지</a>
-                                <a href="javascript:void(0)" class="bell">비상벨</a>
-                                <a href="javascript:void(0)" class="vav">VAV</a>
-                                <a href="javascript:void(0)" class="geo">지열</a>
-                            </div>
-                        </div>
-<!--                        <template th:replace="viewer/popup :: popup-template"></template>-->
-                    </div>
-                </div>
                 <div class="poi-menu__list" id="poiMenuList">
                     <ul class="default_group">
                         <!-- [D] 선택 시 active 클래스 추가 -->
@@ -128,6 +94,12 @@
                             <a href="javascript:void(0)"><span class="hide">지열</span></a>
                             <div class="tool-tip">
                                 <span class="tool-tip__text tool-tip__text--bottom">지열</span>
+                            </div>
+                        </li>
+                        <li class="battery">
+                            <a href="javascript:void(0)"><span class="hide">연료전지</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--bottom">연료전지</span>
                             </div>
                         </li>
                     </ul>

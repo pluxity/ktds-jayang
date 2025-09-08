@@ -2210,6 +2210,12 @@ input[type=text]:disabled, input[type=password]:disabled {
   mask-position: -212px -62px;
 }
 
+.poi-menu__list li.battery a {
+  -webkit-mask-position: -512px -63px;
+  mask-position: -512px -63px;
+}
+
+
 .poi-menu__list li.ac a {
   -webkit-mask-position: -262px -62px;
   mask-position: -262px -62px;
@@ -3517,17 +3523,31 @@ canvas {
   grid-gap: 0.3125rem;
 }
 
+.ptz-viewer__playback .playback {
+  display: flex;
+  justify-content: space-between; /* 좌-우 끝에 배치 */
+  align-items: center;            /* 세로 중앙 정렬 */
+}
+
+
 .ptz-viewer__playback .playback__mode .button {
   height: 1.5rem;
   font-size: 0.75rem;
 }
 
+/*.ptz-viewer__playback .playback__action {*/
+/*  display: -webkit-box;*/
+/*  display: -ms-flexbox;*/
+/*  display: flex;*/
+/*  grid-gap: 0.3125rem;*/
+/*  margin: 0 auto;*/
+/*}*/
+
 .ptz-viewer__playback .playback__action {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  grid-gap: 0.3125rem;
-  margin: 0 auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* 화면 정중앙 */
+
 }
 
 

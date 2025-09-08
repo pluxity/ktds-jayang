@@ -938,7 +938,11 @@
         `;
 
         if (patrolList.length === 0) {
-            return patrolContentList.innerHTML += `<div class="error-text" style="color:#FFFFFF;">저장된 가상순찰 목록이 없습니다.</div>`
+            patrolContentList.style.display = 'flex';
+            patrolContentList.style.alignItems = 'center';
+            patrolContentList.style.justifyContent = 'center';
+            patrolContentList.style.textAlign = 'center';
+            return patrolContentList.innerHTML += `<div class="error-text" style="color:#676977;">저장된 가상순찰 목록이 없습니다.</div>`
         }
 
         patrolList.forEach((patrol) => {

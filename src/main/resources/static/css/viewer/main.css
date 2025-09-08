@@ -2030,6 +2030,11 @@ input[type=text]:disabled, input[type=password]:disabled {
   mask-position: -212px -62px;
 }
 
+.poi-menu__list li.battery a {
+  -webkit-mask-position: -512px -63px;
+  mask-position: -512px -63px;
+}
+
 .poi-menu__list li.ac a {
   -webkit-mask-position: -262px -62px;
   mask-position: -262px -62px;

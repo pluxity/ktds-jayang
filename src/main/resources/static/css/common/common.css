@@ -202,7 +202,7 @@ body {
 }
 .header__logo a {
   color: #fff;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 1.5rem;
   position: relative;
   display: flex;
@@ -212,9 +212,10 @@ body {
 .header__logo a::before {
   content: "";
   display: inline-block;
-  width: 2.0625rem;
-  height: 1.6875rem;
-  background: url("/static/images/viewer/icon_kt.svg") no-repeat center/contain;
+  width: 7.875rem;
+  height: 1.5rem;
+  top: 0.25rem;
+  background: url("/static/images/viewer/icon_estpole.svg") no-repeat center/contain;
 }
 .header__info {
   display: flex;
@@ -276,9 +277,14 @@ body {
   border-top: 1px solid var(--color-grayscale-dark);
 }
 .header__info .profile__layer .detail__group a {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   margin: 0.625rem 0;
+  font-size: 0.875rem;
 }
 .header__info .profile__layer .detail__group:last-of-type a {
   margin-bottom: 0;

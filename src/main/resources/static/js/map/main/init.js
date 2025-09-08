@@ -129,7 +129,12 @@
             floors.forEach(floor => {
                 const floorLi = document.createElement('li');
                 floorLi.setAttribute('floor-id', floor.no);
-                floorLi.textContent = floor.name
+
+                // 버튼 추가
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = floor.name;
+                floorLi.appendChild(btn);
                 floorUl.appendChild(floorLi);
             })
 
@@ -178,8 +183,17 @@
             floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', event => {
                 allCheck.checked = true;
-                floorBtns.forEach(btn => btn.classList.remove('active'));
+
+                floorBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    const innerBtn = btn.querySelector('button');
+                    if (innerBtn) innerBtn.classList.remove('active');
+                });
+
                 floorBtn.classList.add('active');
+                const btnInLi = floorBtn.querySelector('button');
+                if (btnInLi) btnInLi.classList.add('active');
+
                 Px.VirtualPatrol.Clear();
                 Px.Model.Visible.HideAll();
                 Px.Poi.HideAll();
@@ -508,6 +522,9 @@ const Init = (function () {
                     }))
                 );
 
+            let lastTap = 0;
+            const DOUBLE_TAP_DELAY = 300;
+
             Px.Loader.LoadSbmUrlArray({
                 urlDataList: sbmDataArray,
                 center: "",
@@ -521,50 +538,59 @@ const Init = (function () {
                     Px.Camera.EnableScreenPanning();
                     // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
-                    Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                        const clickedPoiId = String(poiInfo.id);
-                        const allPopups = document.querySelectorAll('.popup-info');
-                        let samePopupOpen = false;
-                        allPopups.forEach(popup => {
-                            const poiIdInput = popup.querySelector('.poi-id');
-                            const popupPoiId = poiIdInput?.value;
+                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
 
-                            if (popupPoiId === clickedPoiId) {
-                                popup.remove();
-                                TagManager.clearTags();
-                                layerPopup.closePlayers();
-                                samePopupOpen = true;
-                            } else {
-                                layerPopup.closePlayers();
-                                popup.remove();
-                                TagManager.clearTags();
-                            }
-                        });
-                        if (poiInfo.property.isLight) {
+                        const currentTime = new Date().getTime();
+                        const tapLength = currentTime - lastTap;
 
-                            if (selectedGroup === poiInfo.property.lightGroup) {
-                                if (selectedId === poiInfo.id) {
-                                    Px.Poi.RestoreColorAll();
-                                    selectedGroup = null;
-                                    selectedId = null;
+                        if(tapLength < DOUBLE_TAP_DELAY && tapLength > 0) {
+                            const clickedPoiId = String(poiInfo.id);
+                            const allPopups = document.querySelectorAll('.popup-info');
+                            let samePopupOpen = false;
+                            allPopups.forEach(popup => {
+                                const poiIdInput = popup.querySelector('.poi-id');
+                                const popupPoiId = poiIdInput?.value;
+
+                                if (popupPoiId === clickedPoiId) {
+                                    popup.remove();
+                                    TagManager.clearTags();
+                                    layerPopup.closePlayers();
+                                    samePopupOpen = true;
                                 } else {
+                                    layerPopup.closePlayers();
+                                    popup.remove();
+                                    TagManager.clearTags();
+                                }
+                            });
+                            if (poiInfo.property.isLight) {
+
+                                if (selectedGroup === poiInfo.property.lightGroup) {
+                                    if (selectedId === poiInfo.id) {
+                                        Px.Poi.RestoreColorAll();
+                                        selectedGroup = null;
+                                        selectedId = null;
+                                    } else {
+                                        selectedId = poiInfo.id;
+                                    }
+
+                                } else {
+                                    Px.Poi.RestoreColorAll();
+                                    Px.Poi.SetColorByProperty('lightGroup', poiInfo.property.lightGroup, '#f80606');
+                                    selectedGroup = poiInfo.property.lightGroup;
                                     selectedId = poiInfo.id;
                                 }
-
-                            } else {
-                                Px.Poi.RestoreColorAll();
-                                Px.Poi.SetColorByProperty('lightGroup', poiInfo.property.lightGroup, '#f80606');
-                                selectedGroup = poiInfo.property.lightGroup;
-                                selectedId = poiInfo.id;
                             }
-                        }
-                        if (samePopupOpen) return;
-                        if (poiInfo.group.toLowerCase() === 'cctv') {
-                            setTimeout(() => {
+                            if (samePopupOpen) return;
+                            if (poiInfo.group.toLowerCase() === 'cctv') {
+                                setTimeout(() => {
+                                    renderPoiInfo(poiInfo);
+                                }, 100)
+                            } else {
                                 renderPoiInfo(poiInfo);
-                            }, 100)
-                        } else {
-                            renderPoiInfo(poiInfo);
+                            }
+                            lastTap = 0;
+                        }else{
+                            lastTap = currentTime;
                         }
                     });
 
@@ -1785,6 +1811,16 @@ const Init = (function () {
         if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
 
     }
+
+    document.querySelectorAll('.date-picker input[type="date"], .time-picker input[type="time"]').forEach(input => {
+        input.addEventListener('change', () => {
+            if (input.value) {
+                input.classList.add('selected');
+            } else {
+                input.classList.remove('selected');
+            }
+        });
+    });
 
     return {
         updateButtons,

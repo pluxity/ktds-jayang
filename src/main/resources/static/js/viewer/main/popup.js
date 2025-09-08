@@ -809,7 +809,8 @@ const layerPopup = (function () {
             popup.style.display = popup.style.display === 'none' ? 'inline-block' : 'none';
         }
         popup.style.position = 'absolute';
-        popup.style.transform = 'translate(25%, 10%)';
+        popup.style.top = '50%';
+        popup.style.transform = 'translate(25%, -50%)';
         // popup.style.zIndex = '50';
         // total count
         // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
@@ -990,6 +991,20 @@ const layerPopup = (function () {
             closePopup();
             movePoi(poi.id);
         });
+
+        const allBtns = accordionElement.querySelectorAll('.accordion__btn');
+        allBtns.forEach((btn, idx) => {
+            btn.style.borderTop = '';
+            btn.style.borderBottom = '';
+
+            if (idx === 0) {
+                btn.style.borderTop = '1px solid var(--color-grayscale02)';
+                btn.style.borderBottom = '1px solid #3c3d43';
+            } else {
+                btn.style.borderTop = 'none';
+                btn.style.borderBottom = '1px solid #3c3d43';
+            }
+        });
     }
 
 
@@ -1013,6 +1028,7 @@ const layerPopup = (function () {
         if (event.target.tagName === 'LI') {
             const buildingId = event.target.getAttribute('data-building-id');
             buildingSelectBtn.textContent = event.target.textContent;
+            buildingSelectBtn.classList.add('select-box__btn--selected')
 
             updateFloorSelect(buildingId);
 
@@ -1036,6 +1052,7 @@ const layerPopup = (function () {
         if (event.target.tagName === 'LI') {
             const floorId = event.target.getAttribute('data-floor-id');
             floorSelectBtn.textContent = event.target.textContent;
+            floorSelectBtn.classList.add('select-box__btn--selected')
 
             floorSelectBtn.classList.remove('select-box__btn--active');
         }
@@ -1267,6 +1284,7 @@ const layerPopup = (function () {
                 li.textContent = text;
                 li.onclick = () => {
                     statusBtn.textContent = text;
+                    statusBtn.classList.add('select-box__btn--selected')
                     statusBtn.classList.remove('select-box__btn--active');
                     filterElevatorByStatus(text);
                 };
@@ -1301,6 +1319,7 @@ const layerPopup = (function () {
                 allLi.textContent = '상태 전체';
                 allLi.onclick = () => {
                     statusBtn.textContent = '상태 전체';
+                    statusBtn.classList.add('select-box__btn--selected');
                     statusBtn.classList.remove('select-box__btn--active');
                     escalatorFilterState = '상태 전체';
                     filterEscalator(escalatorFilterDirection, escalatorFilterState);
@@ -1313,6 +1332,7 @@ const layerPopup = (function () {
                     li.textContent = text;
                     li.onclick = () => {
                         statusBtn.textContent = text;
+                        statusBtn.classList.add('select-box__btn--selected');
                         statusBtn.classList.remove('select-box__btn--active');
                         escalatorFilterState = text;
                         filterEscalator(escalatorFilterDirection, escalatorFilterState);
@@ -1329,6 +1349,7 @@ const layerPopup = (function () {
                 allLi.textContent = '방향 전체';
                 allLi.onclick = () => {
                     driveBtn.textContent = '방향 전체';
+                    driveBtn.classList.add('select-box__btn--selected');
                     driveBtn.classList.remove('select-box__btn--active');
                     escalatorFilterDirection = '방향 전체';
                     filterEscalator(escalatorFilterDirection, escalatorFilterState);
@@ -1340,6 +1361,7 @@ const layerPopup = (function () {
                     li.textContent = text;
                     li.onclick = () => {
                         driveBtn.textContent = text;
+                        driveBtn.classList.add('select-box__btn--selected');
                         driveBtn.classList.remove('select-box__btn--active');
                         escalatorFilterDirection = text;
                         filterEscalator(escalatorFilterDirection, escalatorFilterState);
@@ -1376,6 +1398,7 @@ const layerPopup = (function () {
                         if (buildingBtn) {
                             buildingBtn.textContent = building.name;
                             buildingBtn.classList.remove('select-box__btn--active');
+                            buildingBtn.classList.add('select-box__btn--selected');
                         }
                         onBuildingChange(building);
                         updateStatusList(building.name);
@@ -2080,19 +2103,19 @@ const layerPopup = (function () {
         const carIds = uniq(data.map(v => v.inoutCarId));
 
         populateUl(deviceIdUl, [
-            { label: 'IN01', value: '1' },
-            { label: 'IN02', value: '2' },
-            { label: 'IN04', value: '3' },
-            { label: 'IN05', value: '4' },
-            { label: 'IN06', value: '5' },
-            { label: 'IN07', value: '6' },
-            { label: 'OT01', value: '7' },
-            { label: 'OT02', value: '8' },
-            { label: 'OT03', value: '9' },
-            { label: 'OT05', value: '10' },
-            { label: 'OT06', value: '11' },
-            { label: 'OT07', value: '12' },
-            { label: 'OT08', value: '13' }
+            { label: 'IN01', value: 'IN01' },
+            { label: 'IN02', value: 'IN02' },
+            { label: 'IN04', value: 'IN04' },
+            { label: 'IN05', value: 'IN05' },
+            { label: 'IN06', value: 'IN06' },
+            { label: 'IN07', value: 'IN07' },
+            { label: 'OT01', value: 'OT01' },
+            { label: 'OT02', value: 'OT02' },
+            { label: 'OT03', value: 'OT03' },
+            { label: 'OT05', value: 'OT05' },
+            { label: 'OT06', value: 'OT06' },
+            { label: 'OT07', value: 'OT07' },
+            { label: 'OT08', value: 'OT08' }
         ]);
         populateUl(inoutTypeUl, [
             { label: '입구', value: '0' },
@@ -2401,6 +2424,7 @@ const layerPopup = (function () {
             btn.textContent   = li.textContent;
             btn.dataset.value = li.dataset.value ?? '';
             btn.classList.remove('select-box__btn--active');
+            btn.classList.add('select-box__btn--selected');
             content.style.display = 'none';
         });
     }
@@ -3183,6 +3207,7 @@ const layerPopup = (function () {
         liAll.onclick = () => {
             buildingBtn.textContent = '전체';
             buildingBtn.classList.remove("select-box__btn--active");
+            buildingBtn.classList.add("select-box__btn--selected");
             buildingSelect.querySelector(".select-box__content").classList.remove("active");
             updateFloorSelectBox(allFloors);
         };
@@ -3199,6 +3224,7 @@ const layerPopup = (function () {
             li.onclick = () => {
                 buildingBtn.textContent = building.name;
                 buildingBtn.classList.remove("select-box__btn--active");
+                buildingBtn.classList.add("select-box__btn--selected");
                 buildingSelect.querySelector(".select-box__content").classList.remove("active");
                 updateFloorSelectBox(building.floors, building.id);
             }
@@ -3227,6 +3253,7 @@ const layerPopup = (function () {
         liAll.onclick = () => {
             floorBtn.textContent = "전체";
             floorBtn.classList.remove("select-box__btn--active");
+            floorBtn.classList.add("select-box__btn--selected");
             floorSelect.querySelector(".select-box__content").classList.remove("active");
             const allPois = PoiManager.findAll();
             if (buildingId) {
@@ -3249,6 +3276,7 @@ const layerPopup = (function () {
             li.onclick = () => {
                 floorBtn.textContent = floor.name;
                 floorBtn.classList.remove("select-box__btn--active");
+                floorBtn.classList.add("select-box__btn--selected");
                 floorSelect.querySelector(".select-box__content").classList.remove("active");
 
                 // const allPois = PoiManager.findAll();
@@ -3294,6 +3322,7 @@ const layerPopup = (function () {
             liAll.onclick = () => {
                 poiBtn.textContent = "전체";
                 poiBtn.classList.remove("select-box__btn--active");
+                poiBtn.classList.add("select-box__btn--selected");
                 poiSelect.querySelector(".select-box__content").classList.remove("active");
             };
             poiContent.appendChild(liAll);
@@ -3305,6 +3334,7 @@ const layerPopup = (function () {
                 li.onclick = () => {
                     poiBtn.textContent = category.name;
                     poiBtn.classList.remove("select-box__btn--active");
+                    poiBtn.classList.add("select-box__btn--selected");
                     poiSelect.querySelector(".select-box__content").classList.remove("active");
                 };
                 poiContent.appendChild(li);
@@ -3431,6 +3461,11 @@ const layerPopup = (function () {
     const taggedPoiMap = new Map();
     const createEventPopup = async (reinitializeSelectBoxes = false) => {
         if (reinitializeSelectBoxes) {
+            document.querySelectorAll('.select-box__btn').forEach(btn => {
+                if (btn.classList.contains('select-box__btn--selected')) {
+                    btn.classList.remove('select-box__btn--selected');
+                }
+            })
             const buildingList = await BuildingManager.getBuildingList();
             updateBuildingSelectBox(buildingList);
             const poiListData = PoiManager.findAll();

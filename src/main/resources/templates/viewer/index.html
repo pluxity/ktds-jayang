@@ -216,13 +216,6 @@
                     <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
                     <table class="table">
                         <caption class="hide">출입구</caption>
-                        <colgroup>
-                            <col style="width:60px">
-                            <col style="width:25px">
-                            <col style="width:95px">
-                            <col style="width:95px">
-                            <col style="width:70px">
-                        </colgroup>
                         <thead>
                         <tr>
                             <th scope="col">건물</th>
@@ -295,5 +288,6 @@
         </div>
     </div>
     <th:block th:replace="viewer/script :: script "></th:block>
+    <template th:replace="alert/alert :: custom-alert"></template>
 </body>
 </html>

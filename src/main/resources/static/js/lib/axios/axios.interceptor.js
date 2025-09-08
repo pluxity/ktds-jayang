@@ -19,20 +19,14 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
         const errorData = error.response.data;
         
         // X-Skip-Error-Alert 헤더가 있으면 alert 제외
         const skipAlert = error.config?.headers?.['X-Skip-Error-Alert'] === 'true';
-        
-        if(typeof Swal !== 'undefined' && !skipAlert) {
-            Swal.fire({
-                width: 650,
-                icon: 'error',
-                title: `${errorData.message}`,
-                text: `Error code : ${errorData.error} ( ${errorData.status} )`,
 
-            });
+        if (!skipAlert) {
+            await alertBox(`${errorData.message}`);
         }
         console.error(error.response.data);
 

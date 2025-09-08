@@ -1089,12 +1089,37 @@ const EventManager = (() => {
             document.querySelector('.event-state__pagination')?.remove();
 
             // 컨테이너에 스크롤 적용 (높이는 CSS에서 제어 권장)
-            const tableContainer = document.querySelector('.event-state .table').parentElement;
-            if (tableContainer) {
-                tableContainer.classList.add('table-container');
-                tableContainer.style.overflowY = 'auto';
-                tableContainer.style.maxHeight = `${maxHeight}rem`; // 필요에 따라 조정
+            const table = document.querySelector('.event-state__group .table');
+            if (!table) return;
+
+            const thead = table.querySelector('thead');
+            if (thead) {
+                thead.style.position = 'sticky';
+                thead.style.top = '0';
+                thead.style.zIndex = '1';
+                thead.style.backgroundColor = getComputedStyle(thead).backgroundColor || '#fff';
             }
+
+            if (!table.parentElement.classList.contains('table-container')) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('table-container');
+                wrapper.style.overflowY = 'auto';
+                wrapper.style.maxHeight = `${maxHeight}rem`;
+
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            } else {
+                const wrapper = table.parentElement;
+                wrapper.style.overflowY = 'auto';
+                wrapper.style.maxHeight = `${maxHeight}rem`;
+            }
+
+            // const tableContainer = document.querySelector('.event-state .table').parentElement;
+            // if (tableContainer) {
+            //     tableContainer.classList.add('table-container');
+            //     tableContainer.style.overflowY = 'auto';
+            //     tableContainer.style.maxHeight = `${maxHeight}rem`; // 필요에 따라 조정
+            // }
 
             // 전체 렌더
             renderPage();

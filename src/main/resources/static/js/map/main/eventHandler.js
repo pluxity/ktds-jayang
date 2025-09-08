@@ -319,7 +319,9 @@
     };
 
     const initPopup = (popup, clickedItem) => {
-        popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+        const titleEl = popup.querySelector('.popup-basic__head h2');
+        titleEl.textContent = '';
+        titleEl.textContent = clickedItem.querySelector('span.hide')?.textContent.trim() || '';
         popup.style.display = 'block';
     };
 
@@ -357,6 +359,11 @@
     const handlePoiMenuClick = (event) => {
         // event.preventDefault();
 
+        document.querySelectorAll('.select-box__btn').forEach(btn => {
+            if (btn.classList.contains('select-box__btn--selected')) {
+                btn.classList.remove('select-box__btn--selected');
+            }
+        })
         if (searchText && searchText.value.trim() !== '') {
             searchText.value = '';
         }
@@ -446,8 +453,10 @@
         const titleElement = document.querySelector('#mapLayerPopup .popup-basic__head .name');
         const mapPopup = document.getElementById('mapLayerPopup');
         mapPopup.style.display = 'inline-block';
+
         mapPopup.style.position = 'absolute';
-        mapPopup.style.transform = 'translate(100px, 10%)';
+        mapPopup.style.top = '50%';
+        mapPopup.style.transform = 'translate(25%, -50%)';
         // mapPopup.style.zIndex = '50';
 
         titleElement.textContent = title;
@@ -854,15 +863,15 @@
             patrolTimeInput.disabled = disabled;
             patrolHistorySearchBtn.disabled = disabled;
     
-            const cursor = disabled ? "not-allowed" : "pointer";
+            const cursor = disabled ? "" : "pointer";
             patrolTimeInput.style.cursor = cursor;
             patrolDateInput.style.cursor = cursor;
             patrolHistorySearchBtn.style.cursor = cursor;
     
             if (disabled) {
-                patrolHistorySearchBtn.classList.add("button--solid-disabled");
+                patrolHistorySearchBtn.classList.add("button--solid-unselect");
             } else {
-                patrolHistorySearchBtn.classList.remove("button--solid-disabled");
+                patrolHistorySearchBtn.classList.remove("button--solid-unselect");
             }
         }
     

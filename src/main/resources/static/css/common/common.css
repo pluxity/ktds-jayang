@@ -339,3 +339,39 @@ body {
 .text-accent {
   color: var(--color-mint-dark);
 }/*# sourceMappingURL=common.css.map */
+
+.alert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 3rem;
+  padding: 2.8125rem 1.875rem 1.875rem;
+  background-color: var(--color-black);
+  border-radius: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0 1.875rem 0 rgba(0, 0, 0, 0.75);
+  width: 18.75rem;
+  color: #fff;
+  text-align: center;
+  line-height: 1.1;
+}
+.alert .button {
+  width: 5rem;
+}
+.alert--border {
+  grid-gap: 1.8125rem;
+  padding: 1.875rem 1.25rem 1.25rem;
+  border: 2px solid var(--color-mint);
+  font-size: 0.875rem;
+  color: var(--color-grayscale-light);
+}
+.alert__buttons {
+  display: flex;
+  justify-content: center;
+  grid-gap: 0.625rem;
+  width: 100%;
+}
+.alert__buttons .button {
+  width: 7.8125rem;
+}

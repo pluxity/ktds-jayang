@@ -619,8 +619,17 @@
             if (searchText && searchText.value.trim() !== '') {
                 searchText.value = '';
             }
+
+            const clickedItem = event.target.closest('li');
+            if (clickedItem.classList.contains('active')) {
+                clickedItem.classList.remove('active');
+            } else {
+                clickedItem.classList.add('active');
+            }
             poiMenuList.forEach(li => {
-                li.classList.remove('active');
+                if (li !== clickedItem) {
+                    li.classList.remove('active');
+                }
             });
             selectBtn.forEach(btn => {
                 if (btn.classList.contains('select-box__btn--active')) {
@@ -628,7 +637,6 @@
                 }
             })
 
-            const clickedItem = event.target.closest('li');
             let name = clickedItem.className;
 
             let title = clickedItem.querySelector('span').textContent;
@@ -638,11 +646,6 @@
             const poiList = PoiManager.findAll();
             const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
             layerPopup.setCategoryData(title, filteringPoiList);
-            if (clickedItem.classList.contains('active')) {
-                clickedItem.classList.remove('active');
-            } else {
-                clickedItem.classList.add('active');
-            }
         });
     });
 
@@ -933,6 +936,7 @@
     };
 
     const initPopup = (popup, clickedItem) => {
+        console.log("viewer initPoup")
         popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
         popup.style.display = 'block';
     };

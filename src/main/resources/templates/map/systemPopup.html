@@ -105,7 +105,7 @@
                                      select-box 클릭 시 select-box__btn--active 클래스 추가
                                      select-box 비활성화 시 select__btn--disabled 클래스 추가
                                      -->
-                                    <span class="select-box__btn">건물 전체</span>
+                                    <span class="select-box__btn select-box__btn--selected">건물 전체</span>
                                     <div class="select-box__content">
                                         <ul id="elevatorBuildingUl">
 
@@ -138,12 +138,12 @@
                             <span id="totalElevatorCnt" class="text">총 0대</span>
                         </div>
                     </div>
-                    <div class="left-info">
+                    <div class="left-info left-info--elevator">
                         <ul id="elevatorList" class="left-info__list left-info__list--grid5">
 
                         </ul>
                     </div>
-                    <div class="search-result__footer">
+                    <div class="search-result__footer" style="margin-top: 2.5rem;">
                         <div id="elevatorPaging" class="search-result__paging" data-type="elevator">
                             <button type="button" class="left"><span class="hide">left</span></button>
                             <div class="number"></div>

@@ -514,6 +514,68 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 maintenancePopup.style.display = 'block';
+
+                api.get('/maintenance').then(res => {
+                    const maintenanceData = res.data.result
+                    console.log("maintenanceData : ", maintenanceData);
+
+                    const grouped = maintenanceData.reduce((acc, cur) => {
+                        const category = cur.managementCategory;
+                        if (!acc[category]) acc[category] = [];
+                        acc[category].push(cur);
+                        return acc;
+                    }, {});
+
+                    const listEl = maintenancePopup.querySelector('.maintenance-info__list');
+                    listEl.innerHTML = '';
+
+                    Object.entries(grouped).forEach(([category, items]) => {
+                        const li = document.createElement('li');
+
+                        const title = document.createElement('h3');
+                        title.className = 'maintenance-info__title';
+                        title.textContent = category;
+                        li.appendChild(title);
+
+                        const table = document.createElement('table');
+                        table.style.width = '100%';
+                        table.innerHTML = `
+                            <caption class="hide">${category}</caption>
+                            <colgroup>
+                                <col style="width:28%;">
+                                <col style="width:25%;">
+                                <col style="width:20%;">
+                                <col style="width:30%;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th scope="col">유지보수명</th>
+                                    <th scope="col">담당 부서</th>
+                                    <th scope="col">담당자</th>
+                                    <th scope="col">연락처</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(item => `
+                                    <tr>
+                                        <td>${item.maintenanceName}</td>
+                                        <td>${item.mainManagerDivision}</td>
+                                        <td>${item.mainManagerName}</td>
+                                        <td>${item.mainManagerContact}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>${item.maintenanceName}</td>
+                                        <td>${item.subManagerDivision}</td>
+                                        <td>${item.subManagerName}</td>
+                                        <td>${item.subManagerContact}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+                        li.appendChild(table);
+                        listEl.appendChild(li);
+                    });
+                })
             },
             shelter: () => {
 

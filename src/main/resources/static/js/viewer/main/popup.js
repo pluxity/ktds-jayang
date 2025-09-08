@@ -3095,6 +3095,7 @@ const layerPopup = (function () {
             id: poiId,
             isAnimation: true,
             duration: 500,
+            heightOffset:200
         });
 
         if (poiData.property.lightGroup) {

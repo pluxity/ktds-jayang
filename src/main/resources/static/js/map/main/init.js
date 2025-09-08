@@ -781,6 +781,7 @@ const Init = (function () {
                 id: poiId,
                 isAnimation: true,
                 duration: 500,
+                heightOffset:200
             });
         } else {
             console.warn("POI 데이터가 없습니다. ID:", poiId);

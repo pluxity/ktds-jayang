@@ -251,4 +251,34 @@ public class TagService {
         ResponseEntity<String> resp = tagClientService.addTags(tagNames);
         return resp.getBody();
     }
+
+    public TagResponseDTO processAirConditionerTags() {
+
+        List<String> allEHPTags = TagMetadataStore.getAllTagList();
+
+        Map<String, Map<String, Double>> groupedTagMap = TagMetadataStore.getGroupedTagMap();
+        log.info("allEHPTags : {}\nsize : {}",  allEHPTags, allEHPTags.size());
+        log.info("groupedTagMap keys : {}\nsize : {}",  groupedTagMap.keySet(), groupedTagMap.keySet().size());
+        ResponseEntity<String> addRes = tagClientService.addTags(allEHPTags);
+        if (!addRes.getStatusCode().is2xxSuccessful()) {
+            throw new IllegalStateException("addTags 실패: " + addRes.getStatusCode().value());
+        }
+
+        ResponseEntity<String> response = tagClientService.testReadTags(allEHPTags);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new IllegalStateException("testReadTags 실패: " + response.getStatusCode().value());
+        }
+
+        if (response.getBody() == null) {
+            throw new IllegalStateException("응답 데이터가 없습니다.");
+        }
+
+        try {
+            return objectMapper.readValue(response.getBody(), TagResponseDTO.class);
+
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("응답 데이터 파싱 실패: " + e.getMessage());
+        }
+    }
 }

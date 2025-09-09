@@ -67,4 +67,10 @@ public class TagController {
         return ResponseEntity.ok(body);
     }
 
+    @GetMapping("/airConditioner")
+    public ResponseEntity<TagResponseDTO> getAirConditionerTags() {
+        TagResponseDTO poiTagResponseMap = tagService.processAirConditionerTags();
+
+        return ResponseEntity.ok(poiTagResponseMap);
+    }
 }

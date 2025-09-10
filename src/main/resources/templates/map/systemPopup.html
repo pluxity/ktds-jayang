@@ -375,19 +375,14 @@
                 <div class="section section--contents">
                     <div class="search-result__filter"  style="justify-content: space-between;margin-bottom: 10px">
                         <div class="filter-left" style="display: flex;align-items: center;grid-gap: 5px ">
-                            <div id="airBuildingSelector"  class="select-box" style="width: 100px;">
+                            <div id="airBuildingSelector"  class="select-box" style="width: 130px;">
                                 <span class="select-box__btn">건물 전체</span>
                                 <div class="select-box__content">
                                     <ul id="airBuildingUl">
                                         <li>건물 전체</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div id="airFloorSelector" class="select-box" style="width: 100px;">
-                                <span class="select-box__btn">층 전체</span>
-                                <div class="select-box__content">
-                                    <ul id="airFloorUl">
-                                        <li>층 전체</li>
+                                        <li>A동</li>
+                                        <li>B동</li>
+                                        <li>판매시설/주차장</li>
                                     </ul>
                                 </div>
                             </div>
@@ -396,8 +391,8 @@
                                 <div class="select-box__content">
                                     <ul>
                                         <li>ON/OFF 전체</li>
-                                        <li>ON</li>
                                         <li>OFF</li>
+                                        <li>ON</li>
                                     </ul>
                                 </div>
                             </div>
@@ -406,10 +401,11 @@
                                 <div class="select-box__content">
                                     <ul>
                                         <li>모드 전체</li>
-                                        <li>난방</li>
+                                        <li>자동</li>
                                         <li>냉방</li>
-                                        <li>제습</li>
+                                        <li>난방</li>
                                         <li>송풍</li>
+                                        <li>제습</li>
                                     </ul>
                                 </div>
                             </div>
@@ -418,24 +414,13 @@
                                 <div class="select-box__content">
                                     <ul>
                                         <li>풍량 전체</li>
+                                        <li>자동</li>
                                         <li>미풍</li>
                                         <li>약풍</li>
                                         <li>강풍</li>
-                                        <li>터보풍</li>
                                     </ul>
                                 </div>
                             </div>
-                            <div id="airDirectionSelector" class="select-box" style="width: 100px;">
-                                <span class="select-box__btn">풍향 전체</span>
-                                <div class="select-box__content">
-                                    <ul>
-                                        <li>풍향 전체</li>
-                                        <li>좌우</li>
-                                        <li>상하</li>
-                                    </ul>
-                                </div>
-                            </div>
-
                             <button type="button" class="button button--solid-middle" style="width: 100px;">검색</button>
                         </div>
                         <div class="title" style="color: var(--color-grayscale-light);padding: 5px 5px">
@@ -444,437 +429,8 @@
                     </div>
                     <div class="system-ac">
                         <!-- ul로 20개씩 묶어서 노출 -->
-                        <ul class="system-ac__list system-ac__list--grid5">
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>A동</span><span>1F</span><span>1호기</span></div></div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__state">
-                                        <div class="detail__info">
-                                            <div class="temp temp--current">
-                                                <span class="temp__image"><span class="hide">에어컨</span></span>
-                                                <span class="temp__state">
-                                                            <span class="temp__text">현재</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                            <div class="temp temp--set">
-                                                        <span class="temp__state">
-                                                            <span class="temp__text">설정온도</span>
-                                                            <span class="temp__value">24.5℃</span>
-                                                        </span>
-                                            </div>
-                                        </div>
-                                        <div class="detail__mode">
-                                            <div class="item item">
-                                                <span class="item__image"><span class="hide">모드</span></span>
-                                                <span class="item__label">냉방</span>
-                                            </div>
-                                            <div class="item item">
-                                                <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
-                                                <span class="item__label">무풍</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- 대기 상태일 때 -->
-                            <li class="off">
-                                <div class="head">
-                                    <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>A동</span> <span>1F</span> <span>1호기</span></div> </div>
-                                </div>
-                                <div class="detail">
-                                    <div class="detail__empty">대기상태 입니다</div>
-                                </div>
-                            </li>
+                        <ul class="system-ac__list system-ac__list--grid5" id="ac-list">
+
                         </ul>
                     </div>
                     <div id="airFooter" class="search-result__footer">

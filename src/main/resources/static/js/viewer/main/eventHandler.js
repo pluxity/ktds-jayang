@@ -232,11 +232,11 @@
                 lightPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
                 lightPop.style.display = 'block';
             },
-            elevatorTab: () => {
-                // 여기서 elevator 태그 add
-                api.get('/api/tags/elevator/add').then(res => {
-                    console.log("res : ", res);
-                    layerPopup.setElevator();
+            elevatorTab: async () => {
+                showLoading("승강기 정보를 불러오는 중입니다...");
+                try{
+                    await api.get('/api/tags/elevator/add');
+                    await layerPopup.setElevator();
 
                     const elevatorTab = document.querySelector('.elevator-tab');
                     const escalatorTab = document.querySelector('.escalator-tab');
@@ -250,9 +250,10 @@
                         firstContent: elevatorContent,
                         secondContent: escalatorContent,
                     });
-                }).catch(err => {
-                    console.error(err);
-                })
+
+                }finally {
+                    hideLoading();
+                }
             },
             parkingTab: () => {
 
@@ -271,10 +272,15 @@
                 layerPopup.resetParkingFilterUI();
                 layerPopup.setParking();
             },
-            airTab: () => {
-                layerPopup.setAirTab();
-                initPopup(airPop, clickedItem);
-
+            airTab: async () => {
+                showLoading("에어컨 정보를 불러오는 중입니다...");
+                try{
+                    await layerPopup.loadAircons();
+                    layerPopup.setAirTab();
+                    initPopup(airPop, clickedItem);
+                }finally {
+                    hideLoading();
+                }
             },
             energyTab: () => {
                 console.log("energyTab");

@@ -3,7 +3,9 @@ const alertBox = (message, detail) => {
         const alertEl = document.getElementById('customAlert');
         const messageEl = alertEl.querySelector('.alert__message');
         const detailEl = alertEl.querySelector('.alert__detail');
-        const okBtn = alertEl.querySelector('.alert-ok');
+        const okBtn = alertEl.querySelector('.alert-ok')
+        const btnEl = alertEl.querySelector('.alert__buttons');
+        btnEl.style.display = 'flex';
 
         messageEl.innerHTML = message;
         messageEl.style.marginBottom = '10%';
@@ -52,3 +54,19 @@ const confirmBox = (message) => {
         cancelBtn.addEventListener('click', cancelHandler);
     });
 };
+
+const showLoading = (message = '불러오는 중...') => {
+    const loadingEl = document.getElementById('customAlert');
+    const messageEl = loadingEl.querySelector('.alert__message');
+    const btnEl = loadingEl.querySelector('.alert__buttons');
+    btnEl.style.display = 'none';
+    loadingEl.style.display = 'block';
+
+    messageEl.innerHTML = message;
+    messageEl.style.marginBottom = '10%';
+}
+
+const hideLoading = () => {
+    const loadingEl = document.getElementById('customAlert');
+    loadingEl.style.display = 'none';
+}

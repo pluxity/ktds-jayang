@@ -1,6 +1,7 @@
 package com.pluxity.ktds.domains.tag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.PoiTag;
@@ -35,6 +36,9 @@ public class TagService {
     @Value("${event.server.base-url}")
     private String baseUrl;
 
+    private static final int TAG_CHUNK_SIZE = 30;
+
+    @Transactional
     public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
 
         boolean isAllBuilding = (buildingId == null || buildingName == null);
@@ -66,10 +70,6 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
-//            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
-//            if (!addRes.getStatusCode().is2xxSuccessful()) {
-//                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
-//            }
 
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
@@ -121,6 +121,7 @@ public class TagService {
         return poiTagResponseMap;
     }
 
+    @Transactional
     public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type) {
 
         String prefix = "C-null-EV-ESCL-";
@@ -146,11 +147,6 @@ public class TagService {
 
         if (!allTagNamesToFetch.isEmpty()) {
             String tagNamesParam = String.join(",", allTagNamesToFetch);
-
-//            ResponseEntity<String> addRes = tagClientService.addTags(allTagNamesToFetch);
-//            if (!addRes.getStatusCode().is2xxSuccessful()) {
-//                throw new IllegalStateException("addTags 실패: " + addRes.getStatusCodeValue());
-//            }
 
             TagResponseDTO all = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",
@@ -196,6 +192,7 @@ public class TagService {
         return poiTagResponseMap;
     }
 
+    @Transactional
     public TagResponseDTO processParkingTags(boolean register) {
 
         List<String> parkingTags = List.of(
@@ -245,40 +242,119 @@ public class TagService {
     }
 
     @Transactional
-    public String addAllElevatorTags() {
+    public int addAllElevatorTags() {
         List<String> tagNames = poiTagRepository.findByTagNameContaining("-EV-")
                 .stream().map(PoiTag::getTagName).toList();
-        ResponseEntity<String> resp = tagClientService.addTags(tagNames);
-        return resp.getBody();
+        return processTagsInChunks(tagNames, TAG_CHUNK_SIZE);
     }
 
-    public TagResponseDTO processAirConditionerTags() {
+    @Transactional
+    public Map<String, Map<String, Double>> processAirConditionerTags() {
 
         List<String> allEHPTags = TagMetadataStore.getAllTagList();
 
         Map<String, Map<String, Double>> groupedTagMap = TagMetadataStore.getGroupedTagMap();
         log.info("allEHPTags : {}\nsize : {}",  allEHPTags, allEHPTags.size());
         log.info("groupedTagMap keys : {}\nsize : {}",  groupedTagMap.keySet(), groupedTagMap.keySet().size());
-        ResponseEntity<String> addRes = tagClientService.addTags(allEHPTags);
-        if (!addRes.getStatusCode().is2xxSuccessful()) {
-            throw new IllegalStateException("addTags 실패: " + addRes.getStatusCode().value());
-        }
 
-        ResponseEntity<String> response = tagClientService.testReadTags(allEHPTags);
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new IllegalStateException("testReadTags 실패: " + response.getStatusCode().value());
-        }
+        processTagsInChunks(allEHPTags, TAG_CHUNK_SIZE);
 
-        if (response.getBody() == null) {
-            throw new IllegalStateException("응답 데이터가 없습니다.");
-        }
-
+        // readTags 한꺼번에 호출
+        ResponseEntity<String> res = tagClientService.testReadTags(allEHPTags);
+        if (!res.getStatusCode().is2xxSuccessful()) {
+                throw new IllegalStateException("testReadTags 실패: " + res.getStatusCode().value());
+            }else{
+                log.info("testReadTags 성공: " + res.getStatusCode().value());
+            }
+        String response = res.getBody();
         try {
-            return objectMapper.readValue(response.getBody(), TagResponseDTO.class);
+            // response(HTTP) → dto 파싱 후
+            TagResponseDTO dto = objectMapper.readValue(response, TagResponseDTO.class);
+
+            // 1) TAG 응답을 tagName → Double 값으로 변환 {태그 : 값}
+            Map<String, Double> valueByTag = new HashMap<>();
+            for (TagData td : dto.tags()) {
+                String t = td.tagName();
+                String v = td.currentValue();
+                if (t == null) continue;
+                Double d = tryParseDouble(v); // 숫자 아니면 null
+                valueByTag.put(t, d);
+            }
+
+            // 2) groupedTagMap 갱신: 내부 맵의 키(태그)가 응답에 있으면 값만 업데이트
+            for (Map.Entry<String, Map<String, Double>> e : groupedTagMap.entrySet()) {
+                Map<String, Double> tags = e.getValue();
+                for (Map.Entry<String, Double> te : tags.entrySet()) {
+                    String tag = te.getKey();
+                    Double newVal = valueByTag.get(tag);
+                    if (newVal != null || valueByTag.containsKey(tag)) {
+                        tags.put(tag, newVal);
+                    }
+                }
+            }
+
+            return groupedTagMap;
 
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("응답 데이터 파싱 실패: " + e.getMessage());
         }
     }
+
+
+    /**
+     * 문자열을 Double로 변환 시도. 실패하면 null 반환.
+     * @param s 변환할 문자열
+     * @return 변환된 Double 값 또는 null
+     */
+    private static Double tryParseDouble(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        if (t.isEmpty()) return null;
+        try { return Double.valueOf(t); }
+        catch (NumberFormatException e) { return null; }
+    }
+
+    /**
+     * 리스트를 지정된 크기의 청크로 분할.
+     * @param list 분할할 리스트
+     * @param partitionSize 청크 크기
+     * @return 분할된 리스트의 리스트
+     */
+    private List<List<String>> partitionList(List<String> list, int partitionSize) {
+        List<List<String>> partitions = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += partitionSize) {
+            partitions.add(list.subList(i, Math.min(i + partitionSize, list.size())));
+        }
+        return partitions;
+    }
+
+    /**
+     * 태그 목록을 청크로 나누어 API에 추가하고 결과를 검증.
+     * @param tagNames 추가할 태그 이름 목록
+     * @param chunkSize 청크 크기
+     * @return 추가된 태그 수의 합계
+     */
+    private int processTagsInChunks(List<String> tagNames, int chunkSize) {
+        List<List<String>> chunks = partitionList(tagNames, chunkSize);
+        int totalAdded = 0;
+
+        for (List<String> chunk : chunks) {
+            ResponseEntity<String> res = tagClientService.addTags(chunk);
+            try {
+                JsonNode node = objectMapper.readTree(res.getBody());
+                int cnt = node.get("AddTags").asInt();
+                if (cnt != chunk.size()) {
+                    throw new IllegalStateException("addTags 실패: " + res.getStatusCode().value() +
+                            ", expected: " + chunk.size() + ", actual: " + cnt);
+                }
+                totalAdded += cnt;
+                log.info("addTags chunk size: {}, response status: {}", chunk.size(), res.getStatusCode());
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("응답 데이터 파싱 실패: " + e.getMessage());
+            }
+        }
+        return totalAdded;
+    }
+
 }

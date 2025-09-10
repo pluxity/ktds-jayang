@@ -2689,38 +2689,23 @@ const layerPopup = (function () {
 
     const setAirTab = () => {
         const buildingBtn = document.querySelector('#airBuildingSelector .select-box__btn');
-        const floorBtn = document.querySelector('#airFloorSelector .select-box__btn');
         const onOffBtn = document.querySelector('#airOnOffSelector .select-box__btn');
         const modeBtn = document.querySelector('#airModeSelector .select-box__btn')
         const volumeBtn = document.querySelector('#airVolumeSelector .select-box__btn');
-        const directionBtn = document.querySelector('#airDirectionSelector .select-box__btn');
-        let buildingList = BuildingManager.findAll();
 
-        const toggleBtnActive = (btn, otherBtn) => {
-            if (!btn.classList.contains('select-box__disabled')) {
-                btn.classList.toggle('select-box__btn--active');
-                otherBtn.classList.remove('select-box__btn--active');
-            }
-        };
 
         const handleSelectItem = (event, buttonElement) => {
             buttonElement.textContent = event.target.textContent;
             buttonElement.classList.remove('select-box__btn--active');
         };
 
-        buildingBtn.onclick = () => toggleBtnActive(buildingBtn, floorBtn);
-        floorBtn.onclick = () => toggleBtnActive(floorBtn, buildingBtn);
+        buildingBtn.onclick = () => buildingBtn.classList.toggle('select-box__btn--active');
         onOffBtn.onclick = () => onOffBtn.classList.toggle('select-box__btn--active');
         modeBtn.onclick = () => modeBtn.classList.toggle('select-box__btn--active');
         volumeBtn.onclick = () => volumeBtn.classList.toggle('select-box__btn--active');
-        directionBtn.onclick = () => directionBtn.classList.toggle('select-box__btn--active');
 
         const buildingUl = document.getElementById('airBuildingUl');
-        const floorUl = document.getElementById('airFloorUl');
-        buildingUl.innerHTML = '';
-        floorUl.innerHTML = '';
-
-
+        buildingUl.onclick = (eve) => handleSelectItem(eve, buildingBtn);
 
         const onOffUl = document.querySelector('#airOnOffSelector ul');
         onOffUl.onclick = (eve) => handleSelectItem(eve, onOffBtn);
@@ -2730,55 +2715,258 @@ const layerPopup = (function () {
 
         const volumeUl = document.querySelector('#airVolumeSelector ul');
         volumeUl.onclick = (eve) => handleSelectItem(eve, volumeBtn);
+    }
 
-        const directionUl = document.querySelector('#airDirectionSelector ul');
-        directionUl.onclick = (eve) => handleSelectItem(eve, directionBtn);
+    async function loadAircons() {
+        const res = await fetch('/api/tags/airConditioner', {headers: {'Accept': 'application/json'}});
+        if (!res.ok) return;
+        const data = await res.json(); // groupedTagMap
 
+        const container = document.querySelector('#ac-list');
+        if (!container) return;
+        const paging = document.querySelector('#airPaging');
+        const leftBtn = paging ? paging.querySelector('.left') : null;
+        const rightBtn = paging ? paging.querySelector('.right') : null;
+        const numberBox = paging ? paging.querySelector('.number') : null;
 
-        const defaultBuilding = buildingList.find(building => building.name == 'A');
-        if (defaultBuilding) {
-            buildingBtn.textContent = defaultBuilding.name;
-            const firstFloor = defaultBuilding.floors[0];
-            if (firstFloor) {
-                floorBtn.textContent = firstFloor.name;
-                // lightPopup.querySelector('.section__head h3').textContent = `${defaultBuilding.name} ${firstFloor.name}`;
+        const opModeText = v => {
+            const n = Number(v);
+            if (Number.isNaN(n)) return '-';
+            return ({0: '대기', 1: '냉방', 2: '난방', 3: '제습', 4: '송풍'}[n]) ?? `${n}`;
+        };
+        const fanText = v => {
+            const n = Number(v);
+            if (Number.isNaN(n)) return '-';
+            return ({0: '자동', 1: '약풍', 2: '중풍', 3: '강풍'}[n]) ?? `${n}`;
+        };
+        const bySuffix = (tags, suffix) => {
+            const key = Object.keys(tags).find(k => k.endsWith(suffix));
+            return key ? tags[key] : null;
+        };
+        const fmtTemp = v => (v == null || isNaN(v)) ? '-' : `${Number(v).toFixed(1)}℃`;
+
+        const groupWing = {};
+        Object.entries(data).forEach(([groupName, tags]) => {
+            const anyKey = Object.keys(tags)[0];
+            if (!anyKey) return;
+            const m = anyKey.match(/^([A-Za-z]+)-null-EHP-EHP-/);
+            groupWing[groupName] = m ? m[1] : '';
+        });
+
+        // 필터 UI 참조(미리 고정된 항목 사용)
+        const buildingUl = document.getElementById('airBuildingUl');
+        const buildingBtn = document.querySelector('#airBuildingSelector .select-box__btn');
+        const onoffUl = document.querySelector('#airOnOffSelector .select-box__content ul');
+        const onoffBtn = document.querySelector('#airOnOffSelector .select-box__btn');
+        const modeUl = document.querySelector('#airModeSelector .select-box__content ul');
+        const modeBtn = document.querySelector('#airModeSelector .select-box__btn');
+        const volumeUl = document.querySelector('#airVolumeSelector .select-box__content ul');
+        const volumeBtn = document.querySelector('#airVolumeSelector .select-box__btn');
+
+        // A/B/C ↔ 한글 라벨 매핑
+        const WING_LABEL = { A: 'A동', B: 'B동', C: '판매시설/주차장' };
+        const LABEL_TO_WING = Object.fromEntries(Object.entries(WING_LABEL).map(([k, v]) => [v, k]));
+
+        const totalCntEl = document.getElementById('totalAirCnt');
+
+        // 필터 상태
+        const filter = { wing: null, power: null, mode: null, fan: null };
+
+        // 라벨 매핑/정규화
+        const MODE_LABEL_BY_CODE = {0: '자동', 1: '냉방', 2: '난방', 3: '송풍', 4: '제습'};
+
+        // 페이지 상태
+        const keys = Object.keys(data);
+        const state = {
+            data,
+            keys,
+            page: 1,
+            size: 20,
+            get totalPages() { return Math.ceil(this.keys.length / this.size) || 1; }
+        };
+
+        const renderList = (entries) => {
+            container.innerHTML = '';
+            entries.forEach(([groupName, tags]) => {
+                const power = bySuffix(tags, '-power');
+                const on = Number(power) === 1;
+
+                if (!on) {
+                    container.insertAdjacentHTML('beforeend', `
+                    <li class="off">
+                        <div class="head">
+                            <div class="head__title"><span class="head__state">OFF</span> <div class="head__detail"><span>${WING_LABEL[groupWing[groupName]]} | ${groupName}</span></div></div>
+                        </div>
+                        <div class="detail">
+                            <div class="detail__empty">대기상태 입니다</div>
+                        </div>
+                    </li>
+                    `);
+                    return;
+                }
+
+                const setTemp = bySuffix(tags, '-setTemp');
+                const roomTemp = bySuffix(tags, '-roomTemp');
+                const opMode = bySuffix(tags, '-opMode');
+                const fanSpeed = bySuffix(tags, '-fanSpeed');
+
+                container.insertAdjacentHTML('beforeend', `
+                    <li>
+                        <div class="head">
+                            <div class="head__title"><span class="head__state">ON</span> <div class="head__detail"><span>${WING_LABEL[groupWing[groupName]]} | ${groupName}</span></div></div>
+                        </div>
+                        <div class="detail">
+                            <div class="detail__state">
+                                <div class="detail__info">
+                                    <div class="temp temp--current">
+                                        <span class="temp__image"><span class="hide">에어컨</span></span>
+                                        <span class="temp__state">
+                                            <span class="temp__text">현재</span>
+                                            <span class="temp__value">${fmtTemp(roomTemp)}</span>
+                                        </span>
+                                    </div>
+                                    <div class="temp temp--set">
+                                        <span class="temp__state">
+                                            <span class="temp__text">설정온도</span>
+                                            <span class="temp__value">${fmtTemp(setTemp)}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="detail__mode">
+                                    <div class="item item">
+                                        <span class="item__image"><span class="hide">모드</span></span>
+                                        <span class="item__label">${opModeText(opMode)}</span>
+                                    </div>
+                                    <div class="item item">
+                                        <span class="item__image item__image--fan"><span class="hide">팬속도</span></span>
+                                        <span class="item__label">${fanText(fanSpeed)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                `);
+            });
+        };
+
+        const renderPagination = () => {
+            if (!paging || !numberBox) return;
+            numberBox.innerHTML = '';
+            for (let i = 1; i <= state.totalPages; i++) {
+                const span = document.createElement('span');
+                span.textContent = String(i);
+                if (i === state.page) span.classList.add('active');
+                span.addEventListener('click', () => renderPage(i));
+                numberBox.appendChild(span);
             }
-            floorUl.innerText = '';
-            defaultBuilding.floors.forEach(floor => {
-                const floorLi = document.createElement('li');
-                floorLi.dataset.id = floor.id;
-                floorLi.textContent = floor.name;
-                floorUl.appendChild(floorLi);
-            })
+            if (leftBtn) leftBtn.onclick = () => { if (state.page > 1) renderPage(state.page - 1); };
+            if (rightBtn) rightBtn.onclick = () => { if (state.page < state.totalPages) renderPage(state.page + 1); };
+        };
+
+        const renderPage = (p) => {
+            state.page = Math.min(Math.max(1, p), state.totalPages);
+            const start = (state.page - 1) * state.size;
+            const end = start + state.size;
+            const sliceKeys = state.keys.slice(start, end);
+            const entries = sliceKeys.map(k => [k, state.data[k]]);
+            // 6개 이상인 것들만 로그 출력
+            // entries.forEach(([key, data]) => {
+            //     const count = Array.isArray(data) ? data.length : (data ? Object.keys(data).length : 0);
+            //     if (count >= 6) {
+            //         console.log(`Key: ${key}, 개수: ${count}`, data);
+            //     }
+            // });
+            renderList(entries);
+            renderPagination();
+        };
+
+        // 필터 적용 로직
+        const applyFilter = () => {
+            const bySuffixVal = (tags, suffix) => {
+                const key = Object.keys(tags).find(k => k.endsWith(suffix));
+                return key ? tags[key] : null;
+            };
+
+            const filtered = Object.entries(data).filter(([groupName, tags]) => {
+                // wing 필터
+                if (filter.wing && groupWing[groupName] !== filter.wing) return false;
+
+                // ON/OFF 필터
+                if (filter.power) {
+                    const p = Number(bySuffixVal(tags, '-power')) === 1 ? 'ON' : 'OFF';
+                    if (p !== filter.power) return false;
+                }
+
+                // 모드 필터
+                if (filter.mode) {
+                    const m = Number(bySuffixVal(tags, '-opMode'));
+                    const label = MODE_LABEL_BY_CODE[m] ?? `${m}`;
+                    if (label !== filter.mode) return false;
+                }
+
+                // 풍량 필터
+                if (filter.fan) {
+                    const f = Number(bySuffixVal(tags, '-fanSpeed'));
+                    const label = fanText(f);
+                    if (label !== filter.fan) return false;
+                }
+
+                return true;
+            });
+
+            state.keys = filtered.map(([k]) => k);
+            if (totalCntEl) totalCntEl.textContent = String(state.keys.length);
+            renderPage(1);
+        };
+
+        // 필터 이벤트 바인딩
+        if (buildingUl) {
+            buildingUl.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (!li) return;
+                const text = li.textContent.trim();
+                filter.wing = (text === '건물 전체') ? null : (LABEL_TO_WING[text] || null);
+                if (buildingBtn) buildingBtn.textContent = text;
+            });
+        }
+        if (onoffUl) {
+            onoffUl.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (!li) return;
+                const text = li.textContent.trim();
+                filter.power = (text === 'ON/OFF 전체') ? null : text;
+                if (onoffBtn) onoffBtn.textContent = text;
+            });
+        }
+        if (modeUl) {
+            modeUl.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (!li) return;
+                const text = li.textContent.trim();
+                filter.mode = (text === '모드 전체') ? null : text;
+                if (modeBtn) modeBtn.textContent = text;
+            });
+        }
+        if (volumeUl) {
+            volumeUl.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (!li) return;
+                const text = li.textContent.trim();
+                filter.fan = (text === '풍량 전체') ? null : text;
+                if (volumeBtn) volumeBtn.textContent = text;
+            });
         }
 
-        buildingList.forEach(building => {
-            const buildingLi = document.createElement('li');
-            buildingLi.dataset.id = building.id;
-            buildingLi.textContent = building.name;
+        // 검색 버튼 클릭 시에만 필터 적용
+        const searchBtn = document.querySelector('#airPop .search-result__filter .button--solid-middle');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                applyFilter();
+            });
+        }
 
-            buildingLi.onclick = () => {
-                buildingBtn.textContent = building.name;
-                buildingBtn.classList.remove('select-box__btn--active');
-
-                floorUl.innerHTML = '';
-
-                building.floors.forEach(floor => {
-                    const floorLi = document.createElement('li');
-                    floorLi.dataset.id = floor.id
-                    floorLi.textContent = floor.name;
-
-                    floorLi.onclick = () => {
-                        floorBtn.textContent = floor.name;
-                        floorBtn.classList.remove('select-box__btn--active');
-                    }
-
-                    floorUl.appendChild(floorLi);
-                });
-            }
-
-            buildingUl.appendChild(buildingLi);
-        })
+        if (totalCntEl) totalCntEl.textContent = String(state.keys.length);
+        renderPage(1);
     }
 
 
@@ -4052,7 +4240,8 @@ const layerPopup = (function () {
         setEscalator,
         clearAllIntervals,
         setParking,
-        resetParkingFilterUI
+        resetParkingFilterUI,
+        loadAircons
     }
 })();
 

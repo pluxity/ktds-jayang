@@ -53,6 +53,7 @@ class Poi {
         property.buildingName = BuildingManager.findById(buildingId)?.name
         property.poiCategoryName = PoiCategoryManager.findById(poiCategoryId)?.name
         property.poiMiddleCategoryName = PoiMiddleCategoryManager.findById(poiMiddleCategoryId)?.name
+        property.subCategory = PoiMiddleCategoryManager.findById(poiMiddleCategoryId)?.id
         this.#property = property;
         this.assignYn = property.assignYn;
         this.#buildingId = buildingId;
@@ -131,7 +132,8 @@ class Poi {
             url: this.#icon3DUrl,
             id: this.id,
             displayText: this.name,
-            group: this.#poiCategory.name,
+            // group: this.#poiCategory.name,
+            group: this.#poiCategory.id,
             lineHeight: SystemSettingManager.find().poiLineLength ?? 10,
             iconUrl: this.iconUrl,
             position: this.position ? this.position : {x:0,y:0,z:0},

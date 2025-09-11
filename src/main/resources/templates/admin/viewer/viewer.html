@@ -314,7 +314,7 @@
                                     <colgroup>
                                         <col style="width:8rem">
                                         <col style="width:8rem">
-                                        <th:block th:each="x : ${#numbers.sequence(1,10)}">
+                                        <th:block th:each="x : ${#numbers.sequence(0,9)}">
                                             <col th:class="'lod_'+${x}">
                                         </th:block>
                                     </colgroup>
@@ -322,9 +322,9 @@
                                     <tr>
                                         <th>대분류</th>
                                         <th>중분류</th>
-                                        <th:block th:each="x : ${#numbers.sequence(1,10)}">
+                                        <th:block th:each="x : ${#numbers.sequence(0,9)}">
                                             <th th:class="'lod_'+${x}">
-                                                [[${x}]]단계
+                                                [[${x+1}]]단계
                                                 <select class="form-select input-sm iconSizeAll" th:id="'iconSizeAll'+${x}" title="아이콘 사이즈">
                                                     <option value="">일괄적용</option>
                                                     <option value="100">100%</option>
@@ -344,7 +344,7 @@
                                     <colgroup>
                                         <col style="width:8rem">
                                         <col style="width:8rem">
-                                        <th:block th:each="x : ${#numbers.sequence(1,10)}">
+                                        <th:block th:each="x : ${#numbers.sequence(0,9)}">
                                             <col th:class="'lod_'+${x}">
                                         </th:block>
                                     </colgroup>
@@ -352,9 +352,9 @@
                                     <tr>
                                         <th>대분류</th>
                                         <th>중분류</th>
-                                        <th:block th:each="x : ${#numbers.sequence(1,10)}">
+                                        <th:block th:each="x : ${#numbers.sequence(0,9)}">
                                             <th th:class="'lod_'+${x}">
-                                                [[${x}]]단계
+                                                [[${x+1}]]단계
                                                 <select class="form-select input-sm lodTypeAll" th:id="'lodTypeAll'+${x}" title="LOD 타입">
                                                     <option value="">일괄적용</option>
                                                     <option value="0">아이콘+텍스트</option>

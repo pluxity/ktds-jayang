@@ -538,6 +538,7 @@ const Init = (function () {
                     Px.Camera.EnableScreenPanning();
                     // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
+                    Px.Lod.SetLodData(building.lod);
                     Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
 
                         const currentTime = new Date().getTime();
@@ -581,7 +582,7 @@ const Init = (function () {
                                 }
                             }
                             if (samePopupOpen) return;
-                            if (poiInfo.group.toLowerCase() === 'cctv') {
+                            if (poiInfo.property.poiCategoryName.toLowerCase() === 'cctv') {
                                 setTimeout(() => {
                                     renderPoiInfo(poiInfo);
                                 }, 100)
@@ -825,7 +826,7 @@ const Init = (function () {
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
-        if (poiInfo.group.toLowerCase() === "cctv") {
+        if (poiInfo.property.poiCategoryName.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
             const cctvTemplate = document.getElementById('cctv-popup-template');
             const popupInfo = cctvTemplate.content.cloneNode(true).querySelector('.popup-info');
@@ -967,7 +968,7 @@ const Init = (function () {
                 // 조명 poi일 때는 선택도 풀리게
                 const poiId = document.querySelector('.popup-info .poi-id')?.value || null;
                 const poiData = Px.Poi.GetData(Number(poiId));
-                if (poiData.group == '조명') {
+                if (poiData.property.poiCategoryName == '조명') {
                     Px.Poi.RestoreColorAll();
                     selectedGroup = null;
                     selectedId = null;

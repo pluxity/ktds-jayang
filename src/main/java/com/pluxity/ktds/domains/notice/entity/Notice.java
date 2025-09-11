@@ -76,4 +76,8 @@ public class Notice extends AuditableEntity {
     public void updateRead(Boolean isRead) {
         this.isRead = isRead;
     }
+
+    public void updateActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 }

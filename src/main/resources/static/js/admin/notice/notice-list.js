@@ -6,11 +6,89 @@ const getBuildingList = () => {
     api.get('/buildings').then((res) => {
         data.Buildings = res.data.result;
         buildingList = data.Buildings;
-        const treeData = createBuildingTreeData(buildingList, "register");
-        const treeContainer = document.getElementById("tree-container-register");
-        treeContainer.innerHTML = "";
-        treeContainer.appendChild(createTree(treeData, [], "register"));
+        const container = document.getElementById("tree-container-register");
+        container.innerHTML = "";
+
+        container.appendChild(
+            createBuildingCheckboxes(buildingList, [], "register")
+        );
     })
+}
+
+// select box로 변경
+function createBuildingCheckboxes(buildingList, selectedValues = [], type) {
+    const ul = document.createElement("ul");
+    ul.style.listStyle = "none";
+    ul.style.margin = "0";
+    ul.style.padding = "0";
+    const allLi = document.createElement("li");
+    const allCheckbox = document.createElement("input");
+    allCheckbox.type = "checkbox";
+    allCheckbox.classList.add("form-check-input");
+    allCheckbox.id = `${type}-building-all`;
+    allCheckbox.value = "ALL";
+    const allLabel = document.createElement("label");
+    allLabel.classList.add("form-check-label");
+    allLabel.setAttribute("for", `${type}-building-all`);
+    allLabel.textContent = "전체";
+
+    allLi.appendChild(allCheckbox);
+    allLi.appendChild(allLabel);
+    ul.appendChild(allLi);
+
+    buildingList.forEach(building => {
+        const li = document.createElement("li");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.classList.add("form-check-input");
+        checkbox.classList.add(`${type}-building-checkbox`);
+        checkbox.id = `${type}-building-${building.id}`;
+        checkbox.value = building.id;
+
+        // 선택값 반영
+        if (selectedValues.includes(String(building.id))) {
+            checkbox.checked = true;
+        }
+
+        const label = document.createElement("label");
+        label.classList.add("form-check-label");
+        label.setAttribute("for", `${type}-building-${building.id}`);
+        label.textContent = building.name;
+
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        ul.appendChild(li);
+    });
+
+    const syncSelectedValues = () => {
+        const buildingCheckboxes = ul.querySelectorAll(`.${type}-building-checkbox`);
+        const selected = Array.from(buildingCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        const inputId = type === "modify" ? "modifySelectedMap" : "registerSelectedMap";
+        const selectedMapInput = document.getElementById(inputId);
+        if (selectedMapInput) {
+            selectedMapInput.value = selected.join(",");
+        }
+    };
+
+    const buildingCheckboxes = ul.querySelectorAll(`.${type}-building-checkbox`);
+    allCheckbox.addEventListener("change", () => {
+        buildingCheckboxes.forEach(cb => cb.checked = allCheckbox.checked);
+        syncSelectedValues();
+    });
+    buildingCheckboxes.forEach(cb => {
+        cb.addEventListener("change", () => {
+            const allChecked = Array.from(buildingCheckboxes).every(c => c.checked);
+            allCheckbox.checked = allChecked;
+            syncSelectedValues();
+        });
+    });
+
+    syncSelectedValues();
+    return ul;
 }
 
 function createTree(data, selectedValue = [], type, selectedBuildings = []) {
@@ -166,8 +244,10 @@ const dataManufacturer = (rowData) =>
             isUrgent ? 'Y' : 'N',
             gridjs.html(`
                     <div class="form-check form-switch" style="display: inline-block">
-                        <input type="checkbox" name="isActive" id="isActiveCheck" class="form-check-input" title="활성화" required data-rules="required" data-tagname="활성화"
-                        ${isActive ? 'checked' : ''} />
+                        <input type="checkbox"
+                           class="form-check-input isActiveToggle"
+                           data-id="${id}"
+                           ${isActive ? 'checked' : ''} />
                     </div>
                     `),
             gridjs.html(`
@@ -336,6 +416,13 @@ const formatDateTime = (isoString) => {
     return date.toISOString().split("T")[0];
 };
 
+// register notice
+const registerModal = document.querySelector('#noticeRegisterModal');
+registerModal.addEventListener('show.bs.modal', () => {
+    const registerForm = document.querySelector('#noticeRegisterForm');
+    registerForm.reset();
+});
+
 const modifyModal = document.querySelector('#noticeModifyModal');
 modifyModal.addEventListener('show.bs.modal', (event) => {
     const modifyForm = document.querySelector('#noticeModifyForm');
@@ -356,11 +443,13 @@ modifyModal.addEventListener('show.bs.modal', (event) => {
 
     const selectedMapValues = modifyNoticeData.buildingIds.map(String);
 
-    const buildingList = data.Buildings;
-    const treeData = createBuildingTreeData(buildingList, "modify");
-    const treeContainer = document.getElementById("tree-container-modify");
-    treeContainer.innerHTML = ""; // 기존 트리 삭제 후 다시 생성
-    treeContainer.appendChild(createTree(treeData, selectedMapValues, "modify"));
+    const container = document.getElementById("tree-container-modify");
+    container.innerHTML = "";
+
+    container.appendChild(
+        createBuildingCheckboxes(data.Buildings, selectedMapValues, "modify")
+    );
+
     const selectedMapInput = document.getElementById("modifySelectedMap");
     if (selectedMapInput) {
         selectedMapInput.value = modifyNoticeData.buildingIds.join(",");
@@ -377,6 +466,24 @@ const searchNoticeInfoList = () => {
 
     renderNotice(filteredList)
 }
+
+document.addEventListener('change', (event) => {
+    if (event.target.classList.contains('isActiveToggle')) {
+        const checkbox = event.target;
+        const isActive = checkbox.checked;
+        const noticeId = checkbox.dataset.id;
+
+        api.patch(`/notices/${noticeId}/active?isActive=${isActive}`, null, {
+            headers: {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+            },
+        }).catch(() => {
+            checkbox.checked = !isActive;
+        });
+    }
+})
+
 document.getElementById('noticeSearchBtn').onclick = () => searchNoticeInfoList();
 document.addEventListener(
     'keydown',

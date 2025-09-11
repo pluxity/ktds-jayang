@@ -46,13 +46,23 @@ public interface PoiRepository extends JpaRepository<Poi, Long> {
     List<Poi> findByPoiMiddleCategoryId(Long id);
     @Query("SELECT p FROM Poi p JOIN p.poiCategory c WHERE c.name = :name")
     List<Poi> findByCategoryName(@Param("name") String categoryName);
-    @Query("SELECT p FROM Poi p JOIN p.poiMiddleCategory c WHERE c.name = :name")
-    List<Poi> findByMiddleCategoryName(@Param("name") String middleCategoryName);
-    @Query("SELECT p FROM Poi p JOIN p.poiMiddleCategory c WHERE c.name = :name AND p.building.id = :buildingId")
-    List<Poi> findByBuildingIdAndMiddleCategoryName(@Param("buildingId") Long buildingId, @Param("name") String middleCategoryName);
+
+    @Query("SELECT p " +
+            "FROM Poi p " +
+            "LEFT JOIN FETCH p.poiTags " +
+            "WHERE p.poiMiddleCategory.name = :middleCategoryName")
+    List<Poi> findByMiddleCategoryName(@Param("middleCategoryName") String middleCategoryName);
 
     @Query("SELECT p FROM Poi p WHERE p.position.x IS NOT NULL AND p.position.y IS NOT NULL AND p.position.z IS NOT NULL")
     List<Poi> findAllWithPositionPresent();
+
+    @Query("SELECT p " +
+            "FROM Poi p " +
+            "LEFT JOIN FETCH p.poiTags " +
+            "LEFT JOIN FETCH p.building " +
+            "WHERE p.building.id = :buildingId " +
+            "AND p.poiMiddleCategory.name = :middleCategoryName")
+    List<Poi> findByBuildingIdAndMiddleCategoryName(@Param("buildingId") Long buildingId, @Param("middleCategoryName") String middleCategoryName);
 
     @Query("SELECT EXISTS (" +
             "SELECT 1 FROM Poi p " +

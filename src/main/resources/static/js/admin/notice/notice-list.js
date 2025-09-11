@@ -21,32 +21,38 @@ function createBuildingCheckboxes(buildingList, selectedValues = [], type) {
     ul.style.listStyle = "none";
     ul.style.margin = "0";
     ul.style.padding = "0";
+
     const allLi = document.createElement("li");
+    const allDiv = document.createElement("div");
+    allDiv.classList.add("form-check");
+
     const allCheckbox = document.createElement("input");
     allCheckbox.type = "checkbox";
     allCheckbox.classList.add("form-check-input");
     allCheckbox.id = `${type}-building-all`;
     allCheckbox.value = "ALL";
+
     const allLabel = document.createElement("label");
     allLabel.classList.add("form-check-label");
     allLabel.setAttribute("for", `${type}-building-all`);
     allLabel.textContent = "전체";
 
-    allLi.appendChild(allCheckbox);
-    allLi.appendChild(allLabel);
+    allDiv.appendChild(allCheckbox);
+    allDiv.appendChild(allLabel);
+    allLi.appendChild(allDiv);
     ul.appendChild(allLi);
 
     buildingList.forEach(building => {
         const li = document.createElement("li");
+        const div = document.createElement("div");
+        div.classList.add("form-check");
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.classList.add("form-check-input");
-        checkbox.classList.add(`${type}-building-checkbox`);
+        checkbox.classList.add("form-check-input", `${type}-building-checkbox`);
         checkbox.id = `${type}-building-${building.id}`;
         checkbox.value = building.id;
 
-        // 선택값 반영
         if (selectedValues.includes(String(building.id))) {
             checkbox.checked = true;
         }
@@ -56,8 +62,9 @@ function createBuildingCheckboxes(buildingList, selectedValues = [], type) {
         label.setAttribute("for", `${type}-building-${building.id}`);
         label.textContent = building.name;
 
-        li.appendChild(checkbox);
-        li.appendChild(label);
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        li.appendChild(div);
         ul.appendChild(li);
     });
 
@@ -90,142 +97,6 @@ function createBuildingCheckboxes(buildingList, selectedValues = [], type) {
     syncSelectedValues();
     return ul;
 }
-
-function createTree(data, selectedValue = [], type, selectedBuildings = []) {
-    const ul = document.createElement("ul");
-    ul.style.listStyle = "none";
-    data.forEach(node => {
-        const li = document.createElement("li");
-
-        const toggleButton = document.createElement("span");
-        if (node.id === `dt-${type}` || node.id === `ktds-${type}` || node.id === `indoor-${type}`) {
-
-            toggleButton.textContent = "-"; // 기본은 펼쳐진 상태
-            toggleButton.style.cursor = "pointer";
-            toggleButton.style.marginRight = "5px";
-            toggleButton.addEventListener("click", function () {
-                const childUl = li.querySelector("ul");
-                if (childUl) {
-                    const isHidden = childUl.style.display === "none";
-                    childUl.style.display = isHidden ? "block" : "none";
-                    toggleButton.textContent = isHidden ? "-" : "+";
-                }
-            });
-        } else {
-            toggleButton.style.visibility = "hidden";
-        }
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = node.id;
-        checkbox.classList.add("form-check-input");
-
-        if (selectedValue.includes(String(node.id))) {
-            checkbox.checked = true;
-            selectedBuildings.push(node.id);
-        }
-
-        checkbox.addEventListener("change", function () {
-            updateChildrenCheckboxes(li, checkbox.checked); // 하위 항목 체크 상태 변경
-            updateParentCheckboxes(li); // 상위 항목 체크 상태 업데이트
-            updateSelectedValues(type); // 선택된 값 반영
-        });
-
-        const label = document.createElement("label");
-        label.textContent = node.text;
-
-        li.appendChild(toggleButton);
-        li.appendChild(checkbox);
-        li.appendChild(label);
-
-        if (node.children && node.children.length > 0) {
-            const childUl = createTree(node.children, selectedValue, type, selectedBuildings);
-            li.appendChild(childUl);
-        }
-
-        ul.appendChild(li);
-    });
-
-    if (type === "modify") {
-        const selectedMapInput = document.getElementById("modifySelectedMap");
-        if (selectedMapInput) {
-            selectedMapInput.value = selectedBuildings.join(",");
-        }
-    }
-
-    return ul;
-}
-
-function updateChildrenCheckboxes(parentLi, isChecked) {
-    const checkboxes = parentLi.querySelectorAll("ul input[type='checkbox']");
-    checkboxes.forEach(cb => cb.checked = isChecked);
-}
-
-function updateParentCheckboxes(childLi) {
-    let parentLi = childLi.closest("ul").parentNode;
-    while (parentLi && parentLi.tagName === "LI") {
-        const parentCheckbox = parentLi.querySelector("input[type='checkbox']");
-        if (parentCheckbox) {
-            const siblingCheckboxes = parentLi.querySelectorAll("ul > li > input[type='checkbox']");
-            const allChecked = Array.from(siblingCheckboxes).every(cb => cb.checked);
-            const someChecked = Array.from(siblingCheckboxes).some(cb => cb.checked);
-
-            if (allChecked) {
-                parentCheckbox.checked = true;
-                parentCheckbox.indeterminate = false; // 상위가 완전히 체크됨
-            } else if (someChecked) {
-                parentCheckbox.checked = false;
-                parentCheckbox.indeterminate = true; // 일부만 체크됨
-            } else {
-                parentCheckbox.checked = false;
-                parentCheckbox.indeterminate = false; // 아무것도 체크 안됨
-            }
-        }
-        parentLi = parentLi.closest("ul").parentNode;
-    }
-}
-
-function updateSelectedValues(type) {
-    const selected = [];
-    document.querySelectorAll(`#tree-container-${type} input[type='checkbox']:checked`)
-        .forEach(checkbox => selected.push(checkbox.value));
-
-    const selectedMapInput = document.getElementById(`${type}SelectedMap`);
-    if (selectedMapInput) {
-        const excludedParentIds = ["dt", "ktds", "indoor"];
-
-        const filteredSelected = selected.filter(value => !excludedParentIds.includes(value) && !isNaN(value));
-        selectedMapInput.value = filteredSelected.join(",");
-    }
-}
-
-const createBuildingTreeData = (buildingList, type) => {
-    return [
-        {
-            id: `dt-${type}`,
-            text: "DT",
-            children: [
-                {
-                    id: `ktds-${type}`,
-                    text: "KT DS",
-                    children: [
-                        {
-                            id: `indoor-${type}`,
-                            text: "실내",
-                            children: buildingList
-                                .filter(building => building.isIndoor === "Y")
-                                .map(building => ({
-                                    id: `${building.id}`,
-                                    text: building.name
-                            }))
-                        }
-                    ]
-                }
-            ]
-        }
-    ];
-};
-
 
 const dataManufacturer = (rowData) =>
     rowData
@@ -473,11 +344,8 @@ document.addEventListener('change', (event) => {
         const isActive = checkbox.checked;
         const noticeId = checkbox.dataset.id;
 
-        api.patch(`/notices/${noticeId}/active?isActive=${isActive}`, null, {
-            headers: {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-            },
+        api.patch(`/notices/${noticeId}/active?isActive=${isActive}`).then(() => {
+            initNoticeList();
         }).catch(() => {
             checkbox.checked = !isActive;
         });

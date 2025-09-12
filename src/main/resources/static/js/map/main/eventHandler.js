@@ -593,7 +593,7 @@
                 Px.Model.Transparent.SetAll(50); // model 투명도
                 EvacRouteHandler.load((isExist) => {
                     Px.Evac.ShowAll();
-                    Px.Evac.SetSize(20);
+                    Px.Evac.SetSize(8);
                     const { floors } = BuildingManager.findById(buildingId);
                     Px.Model.Expand({
                         name: floors[0].id,

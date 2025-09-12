@@ -359,17 +359,23 @@ const EventManager = (() => {
         const poiMenuList = document.getElementById("poiMenuList");
         const poiMenuListMap = document.getElementById("poiMenuListMap");
 
-        elementById.style.display = 'none';
+        if(elementById) {
+            elementById.style.display = 'none';
+        }
 
-        popups.forEach(popup => {
-            if (popup.style.display === 'inline-block') {
-                popup.style.display = 'none';
-            }
-        });
+        if(popups > 0) {
+            popups.forEach(popup => {
+                if (popup.style.display === 'inline-block') {
+                    popup.style.display = 'none';
+                }
+            });
+        }
 
-        poiMenuList.querySelectorAll('.active').forEach(element => {
-            element.classList.remove('active');
-        });
+        if(poiMenuList) {
+            poiMenuList.querySelectorAll('.active').forEach(element => {
+                element.classList.remove('active');
+            });
+        }
 
         if (poiMenuListMap) {
             poiMenuListMap.querySelectorAll('.active').forEach(element => {

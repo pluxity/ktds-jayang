@@ -30,7 +30,7 @@
     const roles = userRole ? userRole.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
-        window.location.href = "/admin/system-setting";
+        window.open("/admin/system-setting", "_blank");
     })
     if (!roles.includes("ADMIN")) {
         adminButton.style.display = "none";

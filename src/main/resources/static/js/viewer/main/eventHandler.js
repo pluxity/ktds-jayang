@@ -67,11 +67,18 @@
             profileBtn.classList.add('profile__btn--active');
         }
     })
-
+    const badge = document.querySelector('#notice .badge');
+    const profileBadge = document.querySelector(".profile__btn .badge")
 
     const noticePopup = document.querySelector('.header__info .profile #notice');
     const noticeAlert = document.getElementById('noticeAlert');
+    const popupNotice = document.getElementById("noticePopup");
     noticePopup.addEventListener('click', async function () {
+        if (popupNotice.style.display === 'inline-block') {
+            console.log("style : ", popupNotice.style.display);
+            popupNotice.style.display = 'none';
+            return;
+        }
         const noticeList = await NoticeManager.getNotices();
         if (noticeList.length === 0) {
             noticeAlert.style.display = 'flex'
@@ -79,23 +86,70 @@
             noticeAlert.style.top = '50%';
             noticeAlert.style.left = '50%';
             noticeAlert.style.transform = 'translate(-50%, -50%)';
-            noticeAlert.style.zIndex = '30';
+            // noticeAlert.style.zIndex = '30';
             const closeButton = noticeAlert.querySelector('button');
             closeButton.removeAttribute('disabled');
             closeButton.addEventListener('click', function () {
                 noticeAlert.style.display = 'none';
             });
         } else {
-            const popup = document.getElementById('noticePopup');
-            popup.style.display = 'inline-block';
-            popup.style.position = 'absolute';
-            popup.style.top = '50%';
-            popup.style.left = '50%';
-            popup.style.transform = 'translate(-50%, -50%)';
-            popup.style.zIndex = '30';
+            popupNotice.style.display = 'inline-block';
+            popupNotice.style.position = 'absolute';
+            popupNotice.style.top = '50%';
+            popupNotice.style.left = '50%';
+            popupNotice.style.transform = 'translate(-50%, -50%)';
+            // popup.style.zIndex = '30';
 
-            layerPopup.pagingNotice(noticeList, 1);
+            pagingNotice(noticeList, 1);
         }
+    });
+
+    function pagingNotice(noticeList, itemsPerPage = 1) {
+        let currentPage = 1; // 초기 페이지
+        const totalPages = Math.ceil(noticeList.length / itemsPerPage);
+
+        const updatePaging = (page) => {
+            const startIndex = (page - 1) * itemsPerPage;
+            const currentNotice = noticeList[startIndex];
+
+            const noticeTitle = document.querySelector('.notice-info__title p');
+            const urgentLabel = document.querySelector('.notice-info__title .label');
+            const noticeDate = document.querySelector('.notice-info__date');
+            const pagingNumber = document.querySelector('.popup-event__paging .number');
+            const noticeContent = document.querySelector('.notice-info__contents p');
+
+            if (currentNotice) {
+                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
+                noticeDate.textContent = formatDate(currentNotice.createdAt);
+                noticeContent.textContent = currentNotice.content;
+            }
+
+            pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
+        };
+
+        updatePaging(currentPage);
+
+        document.querySelector('.popup-event__paging .left').addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePaging(currentPage);
+            }
+        });
+
+        document.querySelector('.popup-event__paging .right').addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePaging(currentPage);
+            }
+        });
+    }
+    const closeBtn = document.querySelector('#noticePopup .close');
+    closeBtn.addEventListener('click', function () {
+        const popup = document.getElementById('noticePopup');
+        profileBadge.style.display = 'none';
+        badge.style.display = 'none';
+        popup.style.display = 'none';
     });
 
     // event 관련

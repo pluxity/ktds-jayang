@@ -517,7 +517,6 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
             Px.Evac.Clear();
             Px.Core.Resize();
             Px.Camera.ExtendView();
-
             Px.Model.Collapse({duration: 1000});
 
             const poiList = PoiManager.findByBuilding(buildingId)
@@ -526,7 +525,7 @@ document.querySelector('.evacRouteBtn').addEventListener('pointerup', (event) =>
             renderingPoiList(poiList);
         })
     } else {
-
+        Px.Poi.HideAll();
         target.classList.add('on');
         target.innerText = '편집 종료';
         evacRouteEditTool.classList.remove('d-none');

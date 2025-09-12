@@ -215,15 +215,21 @@ function changeEventFloor(floorNo) {
         Px.Camera.ExtendView();
         Px.Poi.HideAll();
     } else {
-        Px.Model.Visible.HideAll();
-        Px.Poi.HideAll();
-
         const floor = BuildingManager.findFloorsByHistory().find(
             (floor) => floor.no === Number(floorNo),
         );
+
+        Px.Model.Visible.HideAll();
+        Px.Poi.HideAll();
         Px.Model.Visible.Show(floor.id);
-        Px.Poi.ShowByProperty("floorNo", Number(floorNo));
         Px.Camera.ExtendView();
+
+        if(document.querySelector('.evacRouteBtn').classList.contains('on')){
+            Px.Evac.HideAll();
+            Px.Evac.ShowByProperty('floorId', String(floor.id));
+        }else{
+            Px.Poi.ShowByProperty("floorNo", Number(floorNo));
+        }
     }
     const activeId = document.querySelector(
         '#wrapper > div.viewer-sidebar > ul > li > a.active',

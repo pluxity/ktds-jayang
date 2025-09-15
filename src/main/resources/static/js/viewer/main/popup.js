@@ -1058,83 +1058,85 @@ const layerPopup = (function () {
         }
     });
 
-    // 검색
-    document.getElementById('searchBtn').addEventListener('click', function () {
-        const buildingSelect = document.querySelector('#buildingSelect .select-box__btn').textContent.trim();
-        const floorSelect = document.querySelector('#floorSelect .select-box__btn').textContent.trim();
-        const equipmentName = document.querySelector('input[type="text"]').value.trim();
+    document.querySelectorAll('#searchBtn, #resultRefreshBtn')
+        .forEach(element => element.addEventListener('click', function () {
+            const buildingSelect = document.querySelector('#buildingSelect .select-box__btn').textContent.trim();
+            const floorSelect = document.querySelector('#floorSelect .select-box__btn').textContent.trim();
+            const equipmentName = document.querySelector('input[type="text"]').value.trim();
 
-        const allAccordionBtns = document.querySelectorAll('.accordion__btn');
+            const allAccordionBtns = document.querySelectorAll('.accordion__btn');
 
-        allAccordionBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
+            allAccordionBtns.forEach(btn => btn.classList.remove('accordion__btn--active'));
 
-        const allAccordionDetails = document.querySelectorAll('#viewerResult .accordion__detail');
-        allAccordionDetails.forEach((detail, index) => {
-            const rows = detail.querySelectorAll('tbody > tr');
-            let hasMatch = false;
+            const allAccordionDetails = document.querySelectorAll('#viewerResult .accordion__detail');
+            allAccordionDetails.forEach((detail, index) => {
+                const rows = detail.querySelectorAll('tbody > tr');
+                let hasMatch = false;
 
-            if (!rows)  {
-                return;
-            }
-
-            rows.forEach(row => {
-                const tdBuilding = row.querySelector('td:nth-child(1)')?.textContent.trim() || "";
-                const tdFloor = row.querySelector('td:nth-child(2)')?.textContent.trim() || "";
-                const tdEquipment = row.querySelector('td:nth-child(3)')?.textContent.trim() || "";
-                const matchBuilding = (buildingSelect === '건물 전체' || tdBuilding === buildingSelect);
-                const matchFloor = (floorSelect === '층 전체' || tdFloor === floorSelect);
-                const matchEquipment = (!equipmentName || tdEquipment.includes(equipmentName));
-                if (matchBuilding && matchFloor && matchEquipment) {
-                    row.style.display = "";
-                    hasMatch = true;
-                } else {
-                    row.style.display = "none";
+                if (!rows)  {
+                    return;
                 }
-            })
-            const accordionBtn = detail.previousElementSibling;
 
-            // 검색
-            if (accordionBtn && accordionBtn.classList.contains('accordion__btn')) {
-                if (hasMatch) {
-                    accordionBtn.classList.add('accordion__btn--active');
-                    handleAccordionDetail(detail, true);
-                } else {
-                    accordionBtn.classList.remove('accordion__btn--active');
-                    handleAccordionDetail(detail, false);
-                }
-            }
-        });
+                rows.forEach(row => {
+                    const tdBuilding = row.querySelector('td:nth-child(1)')?.textContent.trim() || "";
+                    const tdFloor = row.querySelector('td:nth-child(2)')?.textContent.trim() || "";
+                    const tdEquipment = row.querySelector('td:nth-child(3)')?.textContent.trim() || "";
+                    const matchBuilding = (buildingSelect === '건물 전체' || tdBuilding === buildingSelect);
+                    const matchFloor = (floorSelect === '층 전체' || tdFloor === floorSelect);
+                    const matchEquipment = (!equipmentName || tdEquipment.includes(equipmentName));
+                    if (matchBuilding && matchFloor && matchEquipment) {
+                        row.style.display = "";
+                        hasMatch = true;
+                    } else {
+                        row.style.display = "none";
+                    }
+                })
+                const accordionBtn = detail.previousElementSibling;
 
-        let totalCount = 0;
-        allAccordionDetails.forEach(detail => {
-            const rows = detail.querySelectorAll('tbody > tr');
-            rows.forEach(row => {
-                if (window.getComputedStyle(row).display !== "none") {
-                    totalCount++;
+                // 검색
+                if (accordionBtn && accordionBtn.classList.contains('accordion__btn')) {
+                    if (hasMatch) {
+                        accordionBtn.classList.add('accordion__btn--active');
+                        handleAccordionDetail(detail, true);
+                    } else {
+                        accordionBtn.classList.remove('accordion__btn--active');
+                        handleAccordionDetail(detail, false);
+                    }
                 }
             });
-        });
-        document.getElementById("totalEqCount").textContent = totalCount.toLocaleString();
 
-        allAccordionDetails.forEach(detail => {
-            const accordionBtn = detail.previousElementSibling;
-            if (accordionBtn && accordionBtn.classList.contains('accordion__btn')) {
-                let count = 0;
-                const rows = Array.from(detail.querySelectorAll('tbody > tr'));
+            let totalCount = 0;
+            allAccordionDetails.forEach(detail => {
+                const rows = detail.querySelectorAll('tbody > tr');
                 rows.forEach(row => {
                     if (window.getComputedStyle(row).display !== "none") {
-                        count++;
+                        totalCount++;
                     }
                 });
-                let baseText = accordionBtn.textContent;
-                const idx = baseText.indexOf('(');
-                if (idx !== -1) {
-                    baseText = baseText.substring(0, idx).trim();
+            });
+            document.getElementById("totalEqCount").textContent = totalCount.toLocaleString();
+
+            allAccordionDetails.forEach(detail => {
+                const accordionBtn = detail.previousElementSibling;
+                if (accordionBtn && accordionBtn.classList.contains('accordion__btn')) {
+                    let count = 0;
+                    const rows = Array.from(detail.querySelectorAll('tbody > tr'));
+                    rows.forEach(row => {
+                        if (window.getComputedStyle(row).display !== "none") {
+                            count++;
+                        }
+                    });
+                    let baseText = accordionBtn.textContent;
+                    const idx = baseText.indexOf('(');
+                    if (idx !== -1) {
+                        baseText = baseText.substring(0, idx).trim();
+                    }
+                    accordionBtn.textContent = `${baseText} (${count})`;
                 }
-                accordionBtn.textContent = `${baseText} (${count})`;
-            }
-        });
-    });
+            });
+        }))
+
+    // 검색
 
     const handleAccordionDetail = (accordionDetail, showTable) => {
         const table = accordionDetail.querySelector('table');
@@ -1202,34 +1204,34 @@ const layerPopup = (function () {
         layerPopup.closePlayers();
     };
 
-    document.querySelector('#resultRefreshBtn').addEventListener('click', event => {
-        if (event.target.closest('.reflesh')) {
-            const buildingSelectBtn = document.querySelector('#buildingSelect .select-box__btn');
-            const floorSelectBtn = document.querySelector('#floorSelect .select-box__btn');
-            const searchInput = document.querySelector('#floorSelect').parentElement.querySelector('input[name="searchText"]');
-
-            if (buildingSelectBtn) {
-                buildingSelectBtn.textContent = '건물 전체';
-            }
-            if (floorSelectBtn) {
-                floorSelectBtn.textContent = '층 전체';
-            }
-            if (searchInput) {
-                searchInput.value = '';
-            }
-
-            const viewerResult = event.target.closest('#viewerResult');
-            const id = viewerResult.getAttribute('data-category-id')
-            const title = document.querySelector('#layerPopup .popup-basic__head .name').textContent;
-
-            const poiList = PoiManager.findAll();
-            const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
-            // const filteringPoiList = poiList.filter(poi =>
-            //     poi.poiCategory === Number(id) && poi.position
-            // );
-            layerPopup.setCategoryData(title, filteringPoiList, null, true);
-        }
-    })
+    // document.querySelector('#resultRefreshBtn').addEventListener('click', event => {
+    //     if (event.target.closest('.reflesh')) {
+    //         const buildingSelectBtn = document.querySelector('#buildingSelect .select-box__btn');
+    //         const floorSelectBtn = document.querySelector('#floorSelect .select-box__btn');
+    //         const searchInput = document.querySelector('#floorSelect').parentElement.querySelector('input[name="searchText"]');
+    //
+    //         if (buildingSelectBtn) {
+    //             buildingSelectBtn.textContent = '건물 전체';
+    //         }
+    //         if (floorSelectBtn) {
+    //             floorSelectBtn.textContent = '층 전체';
+    //         }
+    //         if (searchInput) {
+    //             searchInput.value = '';
+    //         }
+    //
+    //         const viewerResult = event.target.closest('#viewerResult');
+    //         const id = viewerResult.getAttribute('data-category-id')
+    //         const title = document.querySelector('#layerPopup .popup-basic__head .name').textContent;
+    //
+    //         const poiList = PoiManager.findAll();
+    //         const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
+    //         // const filteringPoiList = poiList.filter(poi =>
+    //         //     poi.poiCategory === Number(id) && poi.position
+    //         // );
+    //         layerPopup.setCategoryData(title, filteringPoiList, null, true);
+    //     }
+    // })
 
     let escalatorFilterDirection = '방향 전체';
     let escalatorFilterState = '상태 전체';

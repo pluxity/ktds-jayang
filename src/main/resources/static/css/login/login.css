@@ -770,7 +770,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   margin-bottom: 1.875rem;
   width: 3.4375rem;
   height: 2.8125rem;
-  background: url("/static/images/viewer/icon_kt.svg") no-repeat center/contain;
+  background: url("/static/images/viewer/icon_estpole.svg") no-repeat center/contain;
 }
 .login__box {
   position: relative;

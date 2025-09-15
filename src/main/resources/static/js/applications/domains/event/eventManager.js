@@ -1014,8 +1014,8 @@ const EventManager = (() => {
 
     let allEvents = [];
 
-    // 24시간 이벤트 목록 초기화
-    const initializeLatest24HoursList = async (maxHeight) => {
+    // 24시간 이벤트 목록 초기화 (고정 높이: 30rem)
+    const initializeLatest24HoursList = async () => {
         try {
             const response = await api.get('/events/latest-24-hours');
             allEvents = response.data;
@@ -1039,14 +1039,13 @@ const EventManager = (() => {
                 const wrapper = document.createElement('div');
                 wrapper.classList.add('table-container');
                 wrapper.style.overflowY = 'auto';
-                wrapper.style.maxHeight = `${maxHeight}rem`;
+                wrapper.style.maxHeight = '21rem';
 
                 table.parentNode.insertBefore(wrapper, table);
                 wrapper.appendChild(table);
             } else {
                 const wrapper = table.parentElement;
                 wrapper.style.overflowY = 'auto';
-                wrapper.style.maxHeight = `${maxHeight}rem`;
             }
 
             // const tableContainer = document.querySelector('.event-state .table').parentElement;
@@ -1098,40 +1097,45 @@ const EventManager = (() => {
             // 프로세스 차트
             const processResponse = await api.get('/events/process-counts');
             const processData = processResponse.data.result;
-
+            console.log('Process Data:', processData);
             const refinedData = processData
                 .filter(item => item.count > 0)
                 .map(item => ({
-                    process: item.process?.trim() || '기타',
+                    buildingNm: item.buildingNm?.trim() || '기타',
                     count: item.count
                 }));
 
             const total = refinedData.reduce((sum, item) => sum + item.count, 0);
-            const labels = refinedData.map(item => item.process);
+            const labels = refinedData.map(item => item.buildingNm);
             const data = refinedData.map(item => item.count);
 
-            const colorPalette = [
-                '#00BD5B',
-                '#2581C4',
-                '#06C2C2',
-                '#8E44AD',
-                '#F39C12',
-                '#E74C3C',
-                '#36BF64',
-                '#3498DB'
-            ];
-            const processColorMap = {};
-            let colorIndex = 0;
+            const chartColorMap = {
+                'A동': 'rgba(155, 222, 0, 0.3)',
+                'B동': 'rgba(149, 0, 218, 0.3)',
+                '판매시설': 'rgba(201, 171, 0, 0.3)',
+                '지하주차장': 'rgba(0, 210, 210, 0.3)',
+                '외부 전경': 'rgba(67, 21, 202, 0.3)'
+            };
+            
+            const legendColorMap = {
+                'A동': '#9BDE00',
+                'B동': '#9500DA',
+                '판매시설': '#C9AB00',
+                '지하주차장': '#00D2D2',
+                '외부 전경' : '#4315CA'
 
-            refinedData.forEach(item => {
-                const key = item.process;
-                if (!processColorMap[key]) {
-                    processColorMap[key] = colorPalette[colorIndex % colorPalette.length];
-                    colorIndex++;
-                }
-            });
+            };
 
-            const backgroundColor = refinedData.map(item => processColorMap[item.process]);
+            const legendTextColorMap = {
+                'A동': '#9BDE00',
+                'B동': '#D476FF',
+                '판매시설': '#C9AB00',
+                '지하주차장': '#00D2D2',
+                '외부 전경' : '#B59CFF'
+            };
+
+            const backgroundColor = refinedData.map(item => chartColorMap[item.buildingNm]);
+            const borderColor = refinedData.map(item => chartColorMap[item.buildingNm]);
 
             const getLast7DaysText = () => {
                 const today = new Date();
@@ -1154,8 +1158,9 @@ const EventManager = (() => {
                     labels,
                     datasets: [{
                         data,
+                        borderColor,
                         backgroundColor,
-                        borderWidth: 0
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -1206,7 +1211,7 @@ const EventManager = (() => {
                 }]
             });
 
-            renderCustomLegend(refinedData, processColorMap, total);
+            renderCustomLegend(refinedData, legendColorMap, legendTextColorMap, total);
 
         } catch (error) {
             console.error('차트 초기화 오류:', error);
@@ -1236,22 +1241,23 @@ const EventManager = (() => {
         return contrastWhite >= contrastBlack ? '#fff' : '#000';
     };
 
-    const renderCustomLegend = (refinedData, processColorMap, total) => {
+    const renderCustomLegend = (refinedData, legendColorMap,legendTextColorMap, total) => {
         const container = document.getElementById('custom-legend');
         container.innerHTML = '';
 
         refinedData.forEach(item => {
-            const base = processColorMap[item.process];
+            const base = legendColorMap[item.buildingNm];
             const textColor = getReadableTextColor(base);
             const percent = ((item.count / total) * 100).toFixed(0);
+            const legendTextColor = legendTextColorMap[item.buildingNm];
 
             const row = document.createElement('div');
             row.className = 'legend-row';
             row.innerHTML = `
               <span class="legend-badge" style="background-color:${base}; color:${textColor};">
-                ${item.process}
+                ${item.buildingNm}
               </span>
-              <span class="legend-text">총 ${item.count}개 (${percent}%)</span>
+              <span class="legend-text" style="color:${legendTextColor};">총 ${item.count}개 (${percent}%)</span>
             `;
             container.appendChild(row);
         });

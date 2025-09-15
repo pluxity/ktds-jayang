@@ -184,40 +184,42 @@
                         <span class="hide">이벤트 통계 전체보기</span>
                     </a>
                 </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
-                    <table class="table">
-                        <caption class="hide">출입구</caption>
-                        <thead>
-                        <tr>
-                            <th scope="col">건물</th>
-                            <th scope="col">층</th>
-                            <th scope="col">이벤트명</th>
-                            <th scope="col">장비명</th>
-                            <th scope="col">발생시각</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                <div class="event-container">
+                    <div class="event-state__group">
+                        <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
+                        <table class="table">
+                            <caption class="hide">출입구</caption>
+                            <thead>
+                            <tr>
+                                <th scope="col">건물</th>
+                                <th scope="col">층</th>
+                                <th scope="col">이벤트명</th>
+                                <th scope="col">장비명</th>
+                                <th scope="col">발생시각</th>
+                            </tr>
+                            </thead>
+                            <tbody>
 
-                        </tbody>
-                    </table>
-                </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-chart-wrapper">
-                        <div id="custom-legend" class="custom-legend-container"></div>
-                        <div class="event-state__chart">
-                            <canvas id="chart_doughnut"></canvas>
-                            <div class="douut-inner"></div>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="event-state__group">
+                        <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
+                        <!-- [D] 차트 들어갈 영역 ---->
+                        <div class="event-chart-wrapper">
+                            <div id="custom-legend" class="custom-legend-container"></div>
+                            <div class="event-state__chart">
+                                <canvas id="chart_doughnut"></canvas>
+                                <div class="douut-inner"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart_bar">
-                        <canvas id="chart_bar"></canvas>
+                    <div class="event-state__group">
+                        <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
+                        <!-- [D] 차트 들어갈 영역 ---->
+                        <div class="event-state__chart_bar">
+                            <canvas id="chart_bar"></canvas>
+                        </div>
                     </div>
                 </div>
             </aside>

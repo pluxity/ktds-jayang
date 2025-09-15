@@ -2254,6 +2254,14 @@ input[type=text]:disabled, input[type=password]:disabled {
   margin-top: 0.625rem;
 }
 
+.event-container {
+  display: grid;
+  /*grid-template-rows: repeat(3, 1fr); !* 3행을 동일 비율로 *!*/
+  grid-template-rows: 2fr 1fr 1fr;
+  height: 90%;
+  gap: 10px;
+}
+
 .event-state__title, .event-state__subtitle {
   color: #fff;
 }

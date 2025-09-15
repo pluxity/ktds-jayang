@@ -16,10 +16,12 @@ import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Alarm, Long> {
     @Query("""
-            SELECT new com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO(a.event, COUNT(a.id))
+            SELECT new com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO(p.building.name, COUNT(a.id))
             FROM Alarm a
+            JOIN FETCH PoiTag pt ON a.tagName = pt.tagName
+            JOIN FETCH Poi p ON pt.poi.id = p.id
             WHERE a.occurrenceDate >= :sevenDays
-            GROUP BY a.event
+            GROUP BY p.building.name
          """)
     List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days(@Param("sevenDays") LocalDateTime sevenDays);
     

@@ -1835,7 +1835,7 @@ const layerPopup = (function () {
         setTab('elevator', {
             onBuildingChange: (building) => {
                 const fetchElevatorData = () => {
-                    if (['A', 'B'].includes(building.name)) {
+                    if (['A', 'B'].includes(building.code)) {
                         addABElevatorList(building);
                     } else {
                         addCElevatorList(building);
@@ -2735,18 +2735,22 @@ const layerPopup = (function () {
         const opModeText = v => {
             const n = Number(v);
             if (Number.isNaN(n)) return '-';
-            return ({0: '대기', 1: '냉방', 2: '난방', 3: '제습', 4: '송풍'}[n]) ?? `${n}`;
+            return ({0: '대기', 1: '냉방', 2: '난방', 3: '제습', 4: '송풍'}[n]) ?? `N/A`;
         };
         const fanText = v => {
             const n = Number(v);
             if (Number.isNaN(n)) return '-';
-            return ({0: '자동', 1: '약풍', 2: '중풍', 3: '강풍'}[n]) ?? `${n}`;
+            return ({0: '자동', 1: '약풍', 2: '중풍', 3: '강풍'}[n]) ?? `N/A`;
         };
         const bySuffix = (tags, suffix) => {
             const key = Object.keys(tags).find(k => k.endsWith(suffix));
             return key ? tags[key] : null;
         };
-        const fmtTemp = v => (v == null || isNaN(v)) ? '-' : `${Number(v).toFixed(1)}℃`;
+        const fmtTemp = v => {
+            if (v == null || isNaN(v)) return '-';
+            const num = Number(v);
+            return num < 100 ? `${num.toFixed(1)}℃` : `${Math.round(num)}℃`;
+        };
 
         const groupWing = {};
         Object.entries(data).forEach(([groupName, tags]) => {
@@ -2790,6 +2794,15 @@ const layerPopup = (function () {
 
         const renderList = (entries) => {
             container.innerHTML = '';
+            
+            // 검색 결과가 없을 때 메시지 표시
+            if (entries.length === 0) {
+                container.innerHTML = `
+                    <div class="detail__empty">검색 결과가 없습니다.</div>
+                `;
+                return;
+            }
+            
             entries.forEach(([groupName, tags]) => {
                 const power = bySuffix(tags, '-power');
                 const on = Number(power) === 1;
@@ -2855,15 +2868,47 @@ const layerPopup = (function () {
         const renderPagination = () => {
             if (!paging || !numberBox) return;
             numberBox.innerHTML = '';
-            for (let i = 1; i <= state.totalPages; i++) {
+            
+            // 현재 페이지 그룹 계산 (10페이지 단위)
+            const currentGroup = Math.ceil(state.page / 10);
+            const startPage = (currentGroup - 1) * 10 + 1;
+            const endPage = Math.min(startPage + 9, state.totalPages);
+            
+            // 페이지 번호 생성 (최대 10개)
+            for (let i = startPage; i <= endPage; i++) {
                 const span = document.createElement('span');
                 span.textContent = String(i);
                 if (i === state.page) span.classList.add('active');
                 span.addEventListener('click', () => renderPage(i));
                 numberBox.appendChild(span);
             }
-            if (leftBtn) leftBtn.onclick = () => { if (state.page > 1) renderPage(state.page - 1); };
-            if (rightBtn) rightBtn.onclick = () => { if (state.page < state.totalPages) renderPage(state.page + 1); };
+            
+            // Left 버튼: 이전 10페이지 그룹으로 이동
+            if (leftBtn) {
+                if (currentGroup > 1) {
+                    leftBtn.style.display = '';
+                    leftBtn.onclick = () => {
+                        const prevGroupLastPage = (currentGroup - 2) * 10 + 10;
+                        renderPage(prevGroupLastPage);
+                    };
+                } else {
+                    leftBtn.style.display = 'none';
+                }
+            }
+            
+            // Right 버튼: 다음 10페이지 그룹으로 이동
+            if (rightBtn) {
+                const maxGroup = Math.ceil(state.totalPages / 10);
+                if (currentGroup < maxGroup) {
+                    rightBtn.style.display = '';
+                    rightBtn.onclick = () => {
+                        const nextGroupFirstPage = currentGroup * 10 + 1;
+                        renderPage(nextGroupFirstPage);
+                    };
+                } else {
+                    rightBtn.style.display = 'none';
+                }
+            }
         };
 
         const renderPage = (p) => {
@@ -4104,6 +4149,19 @@ const layerPopup = (function () {
             document.querySelectorAll('#poiMenuList ul li').forEach(li => li.classList.remove('active'));
             document.body.style.overflow = '';
             closeAllPopups();
+
+            if (target.id === 'airPop') {
+                // 에어컨 팝업 닫을 때 모든 select 박스 초기화
+                const buildingBtn = document.querySelector('#airBuildingSelector .select-box__btn');
+                const onoffBtn = document.querySelector('#airOnOffSelector .select-box__btn');
+                const modeBtn = document.querySelector('#airModeSelector .select-box__btn');
+                const volumeBtn = document.querySelector('#airVolumeSelector .select-box__btn');
+
+                if (buildingBtn) buildingBtn.textContent = '건물 전체';
+                if (onoffBtn) onoffBtn.textContent = 'ON/OFF 전체';
+                if (modeBtn) modeBtn.textContent = '모드 전체';
+                if (volumeBtn) volumeBtn.textContent = '풍량 전체';
+            }
         }
     }
 

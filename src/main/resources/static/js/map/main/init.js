@@ -223,7 +223,14 @@
                     Px.Evac.ShowByProperty('floorId', String(floor.id));
                     allCheck.checked = false;
                 }else{
-                    equipmentCategoryActiveHover(floorNo);
+                    let allPois = PoiManager.findByBuilding(buildingId);
+                    allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+                    allPois.forEach(poi => {
+                        Px.Poi.Show(Number(poi.id));
+                    })
+                    equipmentGroup.forEach(equipment => {
+                        equipment.classList.add('active')
+                    });
                 }
 
                 Px.Camera.ExtendView();
@@ -233,7 +240,12 @@
         const allFloor = document.querySelector('.floor-info__ctrl .all');
         allFloor.style.cursor = 'pointer';
         allFloor.addEventListener('click', event => {
-            floorBtns.forEach(btn => btn.classList.remove('active'));
+            floorBtns.forEach(btn =>{
+                    btn.classList.remove('active');
+                    const innerBtn = btn.querySelector('button');
+                    if (innerBtn) innerBtn.classList.remove('active');
+                }
+            );
             allFloor.classList.add('active');
 
             if (document.querySelector('.shelter').classList.contains('active')) {
@@ -338,9 +350,19 @@
     allCheck.addEventListener('change', () => {
         const activeFloor = document.querySelector('.floor-info__detail ul li.active');
         const floorNo = activeFloor?.getAttribute('floor-id');
-
+        let allPois = PoiManager.findByBuilding(buildingId);
         if (allCheck.checked) {
-            equipmentCategoryActiveHover(floorNo);
+            if(floorNo) {
+                allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+                allPois.forEach(poi => {
+                    Px.Poi.Show(Number(poi.id));
+                });
+            }else{
+                Px.Poi.ShowAll();
+            }
+            equipmentGroup.forEach(equipment => {
+                equipment.classList.add('active')
+            });
         } else {
             equipmentGroup.forEach(equipment => {
                 equipment.classList.remove('active')
@@ -349,28 +371,28 @@
         }
     })
 
-    const equipmentCategoryActiveHover = (floorNo) => {
-        const params = new URLSearchParams(window.location.search);
-        const buildingId = params.get('buildingId');
-        const categoryIdSet = new Set();
-        let allPois = PoiManager.findByBuilding(buildingId);
-        if(floorNo) {
-            allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-        }
-        allPois.forEach(poi => {
-            Px.Poi.Show(Number(poi.id));
-            categoryIdSet.add(Number(poi.property.poiCategoryId));
-        });
-
-        equipmentGroup.forEach(equipment => {
-            const categoryId = Number(equipment.getAttribute('data-category-id'));
-            if (categoryIdSet.has(categoryId)) {
-                equipment.classList.add('active');
-            } else {
-                equipment.classList.remove('active');
-            }
-        })
-    }
+    // const equipmentCategoryActiveHover = (floorNo) => {
+    //     const params = new URLSearchParams(window.location.search);
+    //     const buildingId = params.get('buildingId');
+    //     const categoryIdSet = new Set();
+    //     let allPois = PoiManager.findByBuilding(buildingId);
+    //     if(floorNo) {
+    //         allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+    //     }
+    //     allPois.forEach(poi => {
+    //         Px.Poi.Show(Number(poi.id));
+    //         categoryIdSet.add(Number(poi.property.poiCategoryId));
+    //     });
+    //
+    //     equipmentGroup.forEach(equipment => {
+    //         const categoryId = Number(equipment.getAttribute('data-category-id'));
+    //         if (categoryIdSet.has(categoryId)) {
+    //             equipment.classList.add('active');
+    //         } else {
+    //             equipment.classList.remove('active');
+    //         }
+    //     })
+    // }
 
     initFloors();
     initCategory();

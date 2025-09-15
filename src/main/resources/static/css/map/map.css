@@ -1333,7 +1333,7 @@
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  margin-top: auto;
+  margin-top: 40px;
 }
 
 .search-result__footer .download {
@@ -4204,6 +4204,7 @@ canvas {
 }
 
 .system-ac__list .head__title {
+  align-items: center;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

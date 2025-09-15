@@ -884,7 +884,7 @@ const Init = (function () {
             popupInfo.innerHTML =
                 `<div class="popup-info__head">
                     <input type="hidden" class="poi-id" value="${poiInfo.id}">
-                    <h2>${poiProperty.poiCategoryName} ${poiProperty.name}</h2>
+                    <h2>${poiProperty.name}</h2>
                     <button type="button" class="close"><span class="hide">close</span></button>
                 </div>
                 <div class="popup-info__content">

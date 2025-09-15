@@ -967,7 +967,7 @@ const layerPopup = (function () {
         tdFloor.textContent = floorInfo?.name;
 
         const tdEquipment = document.createElement('td');
-        tdEquipment.classList.add('align-left');
+        // tdEquipment.classList.add('align-left');
         tdEquipment.setAttribute('data-poi-id', poi.id);
 
         if (poi.property.poiCategoryName == '조명') {

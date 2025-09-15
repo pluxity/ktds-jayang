@@ -3560,7 +3560,7 @@
             <div class="playback__mode">
                 <!-- default: button--ghost-lower, 클릭 시 button--solid-middle로 변경  -->
                 <button type="button" class="button button--solid-middle">LIVE</button>
-                <button type="button" class="button button--ghost-lower">PLAY BACK</button>
+                <button type="button" class="button button--ghost-lower" id="playbackBtn">PLAY BACK</button>
             </div>
             <!-- 위에 mode의 playback 버튼 클릭 시 playback__action--active 클래스 추가 및 disabled 제거 -->
             <div class="playback__action">
@@ -3612,6 +3612,35 @@
          <div class="controls__reset">
              <button type="button" class="button button--solid-middle" id="resetCamera">카메라 리셋</button>
          </div>
+    </div>
+
+    <!-- Playback Panel -->
+    <div class="ptz-viewer__panel" id="playbackPanel">
+        <div class="inner">
+            <div class="controls">
+                <div class="controls__group">
+                    <span class="controls__label">시작 시간</span>
+                    <div class="controls__playback">
+                        <div class="date-picker">
+                             <!-- [D] 클릭 시 selected 클래스 추가 -->
+                            <input type="date" class="selected">
+                        </div>
+                        <div class="time-picker">
+                             <!-- [D] 클릭 시 selected 클래스 추가 -->
+                            <input type="time" class="selected">
+                        </div>
+                    </div>
+                </div>
+                <div class="controls__group">
+                    <span class="controls__label">재생 시간</span>
+                    <div class="controls__playback">
+                        <input type="text" placeholder="-"> 시간
+                        <input type="text" placeholder="-"> 분
+                        <input type="text" placeholder="-"> 초
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -3876,7 +3905,8 @@
 </div>
 <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">TimePicker</div>
 <div class="time-picker">
-    <input type="time">
+    <!-- [D] 클릭 시 selected 클래스 추가 -->
+    <input type="time" class="selected">
 </div>
 
 

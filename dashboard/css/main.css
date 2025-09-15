@@ -3469,6 +3469,22 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   font-size: 0.875rem;
 }
 
+.ptz-viewer__panel .controls__playback {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 0.31rem;
+  color: var(--color-grayscale02);
+  font-size: 0.75rem;
+}
+
+.ptz-viewer__panel .controls__playback input[type="text"] {
+  width: 3.125rem;
+}
+
 .ptz-viewer__panel .controls__slider {
   -webkit-box-flex: 1;
       -ms-flex: 1;
@@ -3569,6 +3585,10 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 .ptz-viewer__panel .controls__btn--zoom-out {
   -webkit-mask-position: -10px -50px;
   mask-position: -10px -50px;
+}
+
+.ptz-viewer__panel:has(.controls__playback) {
+  padding: 1.88rem;
 }
 
 .system-tap {

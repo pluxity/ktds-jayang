@@ -68,23 +68,46 @@ function PTZViewer() {
     const ptzViewer = document.querySelector('.ptz-viewer');
     if (!ptzViewer) return;
 
-    // PTZ 제어 패널 토글
+    // 현재 모드 상태 저장
+    let currentMode = 'live'; // 기본값
+
+    // 패널 토글 (현재 모드에 따라 다른 패널 표시)
     const handleToggleControlPanel = () => {
-        const panel = document.getElementById('slidePanel');
+        const livePanel = document.getElementById('slidePanel');
+        const playbackPanel = document.getElementById('playbackPanel');
         const container = document.getElementById('ptzContainer');
-        const isActive = panel.classList.contains('ptz-viewer__panel--active');
         
-        if (isActive) {
-            panel.classList.remove('ptz-viewer__panel--active');
-            container.classList.remove('ptz-container--panel-open');
-        } else {
-            panel.classList.add('ptz-viewer__panel--active');
-            container.classList.add('ptz-container--panel-open');
+        if (currentMode === 'live') {
+            // LIVE 모드일 때 slidePanel 토글
+            if (livePanel) {
+                const isActive = livePanel.classList.contains('ptz-viewer__panel--active');
+                if (isActive) {
+                    livePanel.classList.remove('ptz-viewer__panel--active');
+                    if (container) container.classList.remove('ptz-container--panel-open');
+                } else {
+                    livePanel.classList.add('ptz-viewer__panel--active');
+                    if (container) container.classList.add('ptz-container--panel-open');
+                }
+            }
+        } else if (currentMode === 'playback') {
+            // PLAYBACK 모드일 때 playbackPanel 토글
+            if (playbackPanel) {
+                const isActive = playbackPanel.classList.contains('ptz-viewer__panel--active');
+                if (isActive) {
+                    playbackPanel.classList.remove('ptz-viewer__panel--active');
+                    if (container) container.classList.remove('ptz-container--panel-open');
+                } else {
+                    playbackPanel.classList.add('ptz-viewer__panel--active');
+                    if (container) container.classList.add('ptz-container--panel-open');
+                }
+            }
         }
     };
 
     // LIVE/PLAYBACK 모드 전환
     const handleModeSwitch = (mode) => {
+        currentMode = mode; // 현재 모드 업데이트
+        
         const playbackContainer = document.querySelector('.playback');
         const modeBtns = document.querySelectorAll('.playback__mode .button');
         const actionGroup = document.querySelector('.playback__action');
@@ -118,6 +141,15 @@ function PTZViewer() {
                 actionButtons?.forEach(btn => btn.setAttribute('disabled', 'disabled'));
             }
         }
+        
+        // 모드 변경 시 열려있는 패널 닫기
+        const livePanel = document.getElementById('slidePanel');
+        const playbackPanel = document.getElementById('playbackPanel');
+        const container = document.getElementById('ptzContainer');
+        
+        if (livePanel) livePanel.classList.remove('ptz-viewer__panel--active');
+        if (playbackPanel) playbackPanel.classList.remove('ptz-viewer__panel--active');
+        if (container) container.classList.remove('ptz-container--panel-open');
         
         console.log(`Mode switched to: ${mode.toUpperCase()}`);
     };
@@ -239,15 +271,19 @@ function PTZViewer() {
 
     // 이벤트 리스너 설정
     const initEventListeners = () => {
-        // 토글 버튼 이벤트
+        // 토글 버튼 이벤트 (모드에 따라 다른 패널 표시)
         const toggleBtn = document.getElementById('toggleControl');
         if (toggleBtn) {
             toggleBtn.addEventListener('click', handleToggleControlPanel);
             
             // 토글 버튼 상태 업데이트
             const updateToggleButton = () => {
-                const panel = document.getElementById('slidePanel');
-                if (panel && panel.classList.contains('ptz-viewer__panel--active')) {
+                const livePanel = document.getElementById('slidePanel');
+                const playbackPanel = document.getElementById('playbackPanel');
+                const isAnyPanelActive = (livePanel && livePanel.classList.contains('ptz-viewer__panel--active')) ||
+                                       (playbackPanel && playbackPanel.classList.contains('ptz-viewer__panel--active'));
+                
+                if (isAnyPanelActive) {
                     toggleBtn.classList.add('playback__toggle--active');
                 } else {
                     toggleBtn.classList.remove('playback__toggle--active');

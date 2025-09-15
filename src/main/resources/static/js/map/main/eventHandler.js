@@ -1468,7 +1468,7 @@
     // event 관련
     (async function initializeEvent() {
         await Promise.all([
-            EventManager.initializeLatest24HoursList(50)
+            EventManager.initializeLatest24HoursList("50rem")
         ]);
 
         EventManager.eventState();

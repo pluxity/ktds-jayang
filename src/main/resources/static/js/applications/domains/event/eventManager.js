@@ -1015,7 +1015,7 @@ const EventManager = (() => {
     let allEvents = [];
 
     // 24시간 이벤트 목록 초기화 (고정 높이: 30rem)
-    const initializeLatest24HoursList = async () => {
+    const initializeLatest24HoursList = async (maxHeight) => {
         try {
             const response = await api.get('/events/latest-24-hours');
             allEvents = response.data;
@@ -1039,7 +1039,7 @@ const EventManager = (() => {
                 const wrapper = document.createElement('div');
                 wrapper.classList.add('table-container');
                 wrapper.style.overflowY = 'auto';
-                wrapper.style.maxHeight = '21rem';
+                wrapper.style.maxHeight = maxHeight;
 
                 table.parentNode.insertBefore(wrapper, table);
                 wrapper.appendChild(table);

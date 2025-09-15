@@ -404,6 +404,7 @@
   height: 1.6875rem;
   color: var(--color-grayscale01);
   line-height: 0.9375rem;
+  cursor: pointer;
 }
 .select-box__content li:last-child {
   border-bottom: none;
@@ -1044,6 +1045,7 @@
   -webkit-mask-position: -98px -9px;
   mask-position: -98px -9px;
   background-color: var(--color-mint);
+  cursor: pointer;
 }
 .popup-basic__head .arrow {
   width: 1.5rem;
@@ -1248,6 +1250,7 @@
   min-width: 2.8125rem;
   width: 5rem;
   height: 100%;
+  cursor: pointer;
 }
 .search-result__contents {
   margin-top: 1.125rem;
@@ -1265,6 +1268,7 @@
   background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -180px -10px;
   width: 0.875rem;
   height: 0.875rem;
+  cursor: pointer;
 }
 .search-result__checkbox {
   position: relative;
@@ -1772,6 +1776,7 @@
   -webkit-mask-position: -180px -10px;
   mask-position: -180px -10px;
   background-color: var(--color-grayscale02);
+  cursor: pointer;
 }
 
 .popup-info__content .state dl {
@@ -1861,6 +1866,7 @@ input[type="checkbox"] {
   border: 1px solid var(--color-grayscale03);
   background-color: var(--color-black);
   border-radius: 0.1875rem;
+  cursor: pointer;
 }
 
 input[type=checkbox]:checked {
@@ -1914,6 +1920,7 @@ input[type=radio] {
   border: 1px solid var(--color-grayscale03);
   background-color: var(--color-black);
   border-radius: 15px;
+  cursor: pointer;
 }
 input[type=radio]:checked {
   border-color: var(--color-mint-dark);
@@ -2740,6 +2747,7 @@ input[type=text]:disabled, input[type=password]:disabled {
   background-color: var(--color-black);
   width: 1.875rem;
   height: 1.875rem;
+  cursor: pointer;
 }
 .floor-info__ctrl .scale::after {
   content: "";
@@ -2789,6 +2797,7 @@ input[type=text]:disabled, input[type=password]:disabled {
 .facility-area__head .button {
   height: 1.875rem;
   min-width: 5rem;
+  cursor: pointer;
 }
 
 .facility-area__head .text {

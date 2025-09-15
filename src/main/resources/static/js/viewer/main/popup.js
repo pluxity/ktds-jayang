@@ -969,6 +969,7 @@ const layerPopup = (function () {
         const tdEquipment = document.createElement('td');
         // tdEquipment.classList.add('align-left');
         tdEquipment.setAttribute('data-poi-id', poi.id);
+        tdEquipment.style.cursor = 'pointer';
 
         if (poi.property.poiCategoryName == '조명') {
             tdEquipment.innerHTML = `${poi.property.lightGroup}`;

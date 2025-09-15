@@ -41,7 +41,7 @@ const EvacRouteHandler = (() => {
                             }catch(e){
                                 alertSwal('대피로 정보를 불러오는데 실패했습니다. 버전을 확인해주세요.');
                             }
-                            Px.Evac.SetSize(20);
+                            Px.Evac.SetSize(8);
                             if(onComplete) onComplete(true);
                         }
                     });

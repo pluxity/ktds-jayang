@@ -11,10 +11,10 @@
         <div class="poi-menu">
             <div class="poi-menu__all">
                 <!-- [D] 선택 시 active 클래스 추가 -->
-                <div class="all active">
+                <div class="all">
                     <a href="javascript:void(0);" id="toggle-menu">장비보기</a>
                     <!-- 장비 목록 팝업 -->
-                    <div id="equipmentListPop" class="popup-basic popup-basic--small">
+                    <div id="equipmentListPop" class="popup-basic popup-basic--small" style="display: none">
                         <div class="popup-basic__head">
                                 <span class="checkbox-wrap">
                                     <input type="checkbox" id="equipmentCheckBox">
@@ -38,6 +38,7 @@
                             <a href="javascript:void(0)" class="bell">비상벨</a>
                             <a href="javascript:void(0)" class="vav">VAV</a>
                             <a href="javascript:void(0)" class="geo">지열</a>
+                            <a href="javascript:void(0)" class="battery">연료전지</a>
                         </div>
                     </div>
                 </div>
@@ -123,6 +124,12 @@
                         <a href="javascript:void(0)"><span class="hide">지열</span></a>
                         <div class="tool-tip">
                             <span class="tool-tip__text tool-tip__text--bottom">지열</span>
+                        </div>
+                    </li>
+                    <li class="battery">
+                        <a href="javascript:void(0)"><span class="hide">연료전지</span></a>
+                        <div class="tool-tip">
+                            <span class="tool-tip__text tool-tip__text--bottom">연료전지</span>
                         </div>
                     </li>
 
@@ -224,13 +231,6 @@
                 <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
                 <table class="table">
                     <caption class="hide">출입구</caption>
-                    <colgroup>
-                        <col style="width:60px">
-                        <col style="width:25px">
-                        <col style="width:95px">
-                        <col style="width:95px">
-                        <col style="width:70px">
-                    </colgroup>
                     <thead>
                     <tr>
                         <th scope="col">건물</th>
@@ -448,5 +448,6 @@
     </div>
 </template>
 <th:block th:replace="~{map/script :: script} "></th:block>
+<template th:replace="alert/alert :: custom-alert"></template>
 </body>
 </html>

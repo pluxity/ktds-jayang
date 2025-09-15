@@ -362,9 +362,11 @@ const moveToPoi = (id) => {
 
 const renderingPoiList = (filteredList) => {
     Px.Poi.HideAll();
-    filteredList.forEach((poiInfo) => {
-        Px.Poi.Show(poiInfo.id);
-    });
+    if(!document.querySelector('.evacRouteBtn').classList.contains('on')){
+        filteredList.forEach((poiInfo) => {
+            Px.Poi.Show(poiInfo.id);
+        });
+    }
 };
 
 const selectedPoiCategory = (poiCategoryIdList) => (poi) =>

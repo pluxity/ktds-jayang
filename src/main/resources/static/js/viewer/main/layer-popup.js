@@ -747,7 +747,7 @@ const layerPopup_old = (function () {
             if(buildingType === 'outdoor') {
                 await Init.initializeOutdoorBuilding(() => moveToPoi(id, callback, distanceOffset, showEvacRoute));
             } else {
-                await Init.initializeIndoorBuilding(() => moveToPoi(id, callback, distanceOffset, showEvacRoute));
+                // await Init.initializeIndoorBuilding(() => moveToPoi(id, callback, distanceOffset, showEvacRoute));
             }
             Init.setBuildingNameAndFloors();
 

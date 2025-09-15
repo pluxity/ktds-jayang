@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
     <header th:fragment="header" class="header">
-        <h1 class="header__logo"><a href="/viewer">KT 자양 통합운영 플랫폼</a></h1>
+        <h1 class="header__logo"><a href="/viewer">통합운영 플랫폼</a></h1>
 
         <div class="header__info">
             <p class="date" style="font-variant-numeric: tabular-nums;
@@ -13,7 +13,7 @@
                 <a class="profile__btn" href="javascript:void(0);">
                     <img src="/static/images/viewer/icon_profile.svg" alt="profile" width="40" height="40">
                     <span class="hide">profile</span>
-                    <span class="badge">N</span>
+                    <span class="badge" style="display: none">N</span>
                 </a>
 
                 <div class="profile__layer">
@@ -29,7 +29,6 @@
                         <div class="detail__group">
                             <a id="notice" href="javascript:void(0);">공지사항<span style="display: none" class="badge">N</span></a>
                             <a href="javascript:void(0);" class="icon icon--manage" target="_blank">결재 관리</a>
-                            <a href="javascript:void(0);" class="icon icon--download">CCTV 다운로드</a>
                         </div>
                         <div class="detail__group">
                             <a id="logout" href="/logout">로그아웃</a>

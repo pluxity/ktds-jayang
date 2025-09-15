@@ -23,6 +23,10 @@
         <script th:src="@{/static/js/lib/xlsx/xlsx.full.min.js}"></script>
         <script th:src="@{/static/js/lib/pdf/html2pdf.bundle.min.js}"></script>
 
+        <script th:src="@{/static/js/map/cctv/plux-live-worker.js}"></script>
+        <script th:src="@{/static/js/map/cctv/plux-playback-worker.js}"></script>
+        <script th:src="@{/static/js/map/cctv/plux-player.js}"></script>
+
         <!-- DOMAINS -->
         <script th:src="@{/static/js/applications/domains/system-setting/systemSetting.js}"></script>
         <script th:src="@{/static/js/applications/domains/system-setting/systemSettingManager.js}"></script>
@@ -48,19 +52,15 @@
         <script th:src="@{/static/js/common/cron.js}"></script>
         <script th:src="@{/static/js/common/timerHandler.js}"></script>
         <script th:src="@{/static/js/common/customSwal.js}"></script>
-
-        <script th:src="@{/static/js/viewer/main/popup.js}"></script>
+        <script th:src="@{/static/js/common/customAlert.js}"></script>
 
         <!-- MUTATION(상태관리) -->
         <script th:src="@{/static/js/viewer/main/mutations.js}"></script>
 
-        <script th:src="@{/static/js/viewer/main/eventHandler.js}"></script>
-
         <!-- 초기화 -->
         <script th:src="@{/static/js/viewer/main/init.js}"></script>
+        <script th:src="@{/static/js/viewer/main/eventHandler.js}"></script>
+        <script th:src="@{/static/js/viewer/main/popup.js}"></script>
 
-        <script th:src="@{/static/js/map/cctv/plux-live-worker.js}"></script>
-        <script th:src="@{/static/js/map/cctv/plux-playback-worker.js}"></script>
-        <script th:src="@{/static/js/map/cctv/plux-player.js}"></script>
     </body>
 </html>

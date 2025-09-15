@@ -57,10 +57,25 @@ public class NoticeController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
+    @DeleteMapping("/id-list/{ids}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseBody deleteNoticeList(@PathVariable List<Long> ids) {
+        service.deleteNoticeList(ids);
+        return ResponseBody.of(SUCCESS_DELETE);
+    }
+
     @PutMapping("/id-list/{readIds}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseBody readNotices(@PathVariable List<Long> readIds) {
         service.markNoticesAsRead(readIds);
         return ResponseBody.of(SuccessCode.SUCCESS_DELETE);
     }
+
+    @PatchMapping("/{id}/active")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody updateActive(@PathVariable Long id, @RequestParam Boolean isActive) {
+        service.updateActive(id, isActive);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
+
 }

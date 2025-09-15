@@ -172,6 +172,8 @@
     const handleSystemTabClick = (event) => {
         const clickedItem = event.target.closest('li');
         const isActive = clickedItem.classList.contains('active');
+        const popups = document.querySelectorAll('.popup-info');
+        popups.forEach(popup => popup.remove());
 
         const closeAllPopups = () => {
             ['lightPop', 'elevatorPop', 'parkingPop', 'airPop', 'energyPop', 'electricPop'].forEach(id => {
@@ -226,11 +228,11 @@
                 lightPop.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
                 lightPop.style.display = 'block';
             },
-            elevatorTab: () => {
-                // 여기서 elevator 태그 add
-                api.get('/api/tags/elevator/add').then(res => {
-                    console.log("res : ", res);
-                    layerPopup.setElevator();
+            elevatorTab: async () => {
+                showLoading("승강기 정보를 불러오는 중입니다...");
+                try{
+                    await api.get('/api/tags/elevator/add');
+                    await layerPopup.setElevator();
 
                     const elevatorTab = document.querySelector('.elevator-tab');
                     const escalatorTab = document.querySelector('.escalator-tab');
@@ -244,9 +246,10 @@
                         firstContent: elevatorContent,
                         secondContent: escalatorContent,
                     });
-                }).catch(err => {
-                    console.error(err);
-                })
+
+                }finally {
+                    hideLoading();
+                }
             },
             parkingTab: () => {
 
@@ -265,10 +268,15 @@
                 layerPopup.resetParkingFilterUI();
                 layerPopup.setParking();
             },
-            airTab: () => {
-                layerPopup.setAirTab();
-                initPopup(airPop, clickedItem);
-
+            airTab: async () => {
+                showLoading("에어컨 정보를 불러오는 중입니다...");
+                try{
+                    await layerPopup.loadAircons();
+                    layerPopup.setAirTab();
+                    initPopup(airPop, clickedItem);
+                }finally {
+                    hideLoading();
+                }
             },
             energyTab: () => {
                 console.log("energyTab");
@@ -319,7 +327,9 @@
     };
 
     const initPopup = (popup, clickedItem) => {
-        popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+        const titleEl = popup.querySelector('.popup-basic__head h2');
+        titleEl.textContent = '';
+        titleEl.textContent = clickedItem.querySelector('span.hide')?.textContent.trim() || '';
         popup.style.display = 'block';
     };
 
@@ -353,9 +363,18 @@
     }
 
     // side
+    let _lastPoiCategoryId = null;
     const handlePoiMenuClick = (event) => {
         // event.preventDefault();
 
+        const popups = document.querySelectorAll('.popup-info');
+        popups.forEach(popup => popup.remove());
+
+        document.querySelectorAll('.select-box__btn').forEach(btn => {
+            if (btn.classList.contains('select-box__btn--selected')) {
+                btn.classList.remove('select-box__btn--selected');
+            }
+        })
         if (searchText && searchText.value.trim() !== '') {
             searchText.value = '';
         }
@@ -445,8 +464,10 @@
         const titleElement = document.querySelector('#mapLayerPopup .popup-basic__head .name');
         const mapPopup = document.getElementById('mapLayerPopup');
         mapPopup.style.display = 'inline-block';
+
         mapPopup.style.position = 'absolute';
-        mapPopup.style.transform = 'translate(100px, 10%)';
+        mapPopup.style.top = '50%';
+        mapPopup.style.transform = 'translate(25%, -50%)';
         // mapPopup.style.zIndex = '50';
 
         titleElement.textContent = title;
@@ -477,8 +498,25 @@
                 actions.closeAllPopups();
                 const sopPopup = mapPopup.querySelector('#sopPopup');
                 mapPopup.className = '';
-                mapPopup.classList.add('popup-basic', 'popup-basic--middle');
+                mapPopup.classList.add('popup-basic');
                 sopPopup.style.display = 'block';
+
+                api.get('/sop').then(res => {
+                    const sopData = res.data.result[0];
+                    sopPopup.querySelector('.sop-info__title em').textContent = sopData.sopName;
+
+                    const imgSrc = `/2D/${sopData.sopFile.directory}/${sopData.sopFile.storedName}.${sopData.sopFile.extension}`;
+
+                    const imgEl = sopPopup.querySelector('.image img');
+                    imgEl.src = imgSrc;
+                    imgEl.alt = sopData.sopName;
+
+                    sopPopup.querySelector('.image__text.main-manager').textContent =
+                        `(정) ${sopData.mainManagerName} | ${sopData.mainManagerDivision} | ${sopData.mainManagerContact}`;
+
+                    sopPopup.querySelector('.image__text.sub-manager').textContent =
+                        `(부) ${sopData.subManagerName} | ${sopData.subManagerDivision} | ${sopData.subManagerContact}`;
+                })
             },
             maintenance: () => {
                 // maintenance popup
@@ -487,6 +525,68 @@
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 maintenancePopup.style.display = 'block';
+
+                api.get('/maintenance').then(res => {
+                    const maintenanceData = res.data.result
+                    console.log("maintenanceData : ", maintenanceData);
+
+                    const grouped = maintenanceData.reduce((acc, cur) => {
+                        const category = cur.managementCategory;
+                        if (!acc[category]) acc[category] = [];
+                        acc[category].push(cur);
+                        return acc;
+                    }, {});
+
+                    const listEl = maintenancePopup.querySelector('.maintenance-info__list');
+                    listEl.innerHTML = '';
+
+                    Object.entries(grouped).forEach(([category, items]) => {
+                        const li = document.createElement('li');
+
+                        const title = document.createElement('h3');
+                        title.className = 'maintenance-info__title';
+                        title.textContent = category;
+                        li.appendChild(title);
+
+                        const table = document.createElement('table');
+                        table.style.width = '100%';
+                        table.innerHTML = `
+                            <caption class="hide">${category}</caption>
+                            <colgroup>
+                                <col style="width:28%;">
+                                <col style="width:25%;">
+                                <col style="width:20%;">
+                                <col style="width:30%;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th scope="col">유지보수명</th>
+                                    <th scope="col">담당 부서</th>
+                                    <th scope="col">담당자</th>
+                                    <th scope="col">연락처</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(item => `
+                                    <tr>
+                                        <td>${item.maintenanceName}</td>
+                                        <td>${item.mainManagerDivision}</td>
+                                        <td>${item.mainManagerName}</td>
+                                        <td>${item.mainManagerContact}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>${item.maintenanceName}</td>
+                                        <td>${item.subManagerDivision}</td>
+                                        <td>${item.subManagerName}</td>
+                                        <td>${item.subManagerContact}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+                        li.appendChild(table);
+                        listEl.appendChild(li);
+                    });
+                })
             },
             shelter: () => {
 
@@ -498,7 +598,7 @@
                 Px.Model.Transparent.SetAll(50); // model 투명도
                 EvacRouteHandler.load((isExist) => {
                     Px.Evac.ShowAll();
-                    Px.Evac.SetSize(20);
+                    Px.Evac.SetSize(8);
                     const { floors } = BuildingManager.findById(buildingId);
                     Px.Model.Expand({
                         name: floors[0].id,
@@ -601,9 +701,10 @@
             const noticeDate = document.querySelector('.notice-info__date');
             const pagingNumber = document.querySelector('.popup-event__paging .number');
             const noticeContent = document.querySelector('.notice-info__contents p');
+            const badgeText = currentNotice.isRead ? '' : '<span class="badge">N</span>';
 
             if (currentNotice) {
-                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                noticeTitle.innerHTML = `${currentNotice.title} ${badgeText}`;
                 urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
                 noticeDate.textContent = formatDate(currentNotice.createdAt);
                 noticeContent.textContent = currentNotice.content;
@@ -836,15 +937,15 @@
             patrolTimeInput.disabled = disabled;
             patrolHistorySearchBtn.disabled = disabled;
     
-            const cursor = disabled ? "not-allowed" : "pointer";
+            const cursor = disabled ? "" : "pointer";
             patrolTimeInput.style.cursor = cursor;
             patrolDateInput.style.cursor = cursor;
             patrolHistorySearchBtn.style.cursor = cursor;
     
             if (disabled) {
-                patrolHistorySearchBtn.classList.add("button--solid-disabled");
+                patrolHistorySearchBtn.classList.add("button--solid-unselect");
             } else {
-                patrolHistorySearchBtn.classList.remove("button--solid-disabled");
+                patrolHistorySearchBtn.classList.remove("button--solid-unselect");
             }
         }
     
@@ -911,7 +1012,11 @@
         `;
 
         if (patrolList.length === 0) {
-            return patrolContentList.innerHTML += `<div class="error-text" style="color:#FFFFFF;">저장된 가상순찰 목록이 없습니다.</div>`
+            patrolContentList.style.display = 'flex';
+            patrolContentList.style.alignItems = 'center';
+            patrolContentList.style.justifyContent = 'center';
+            patrolContentList.style.textAlign = 'center';
+            return patrolContentList.innerHTML += `<div class="error-text" style="color:#676977;">저장된 가상순찰 목록이 없습니다.</div>`
         }
 
         patrolList.forEach((patrol) => {
@@ -1363,7 +1468,7 @@
     // event 관련
     (async function initializeEvent() {
         await Promise.all([
-            EventManager.initializeLatest24HoursList(17)
+            EventManager.initializeLatest24HoursList("50rem")
         ]);
 
         EventManager.eventState();

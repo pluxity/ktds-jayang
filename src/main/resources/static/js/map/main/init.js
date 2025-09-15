@@ -31,7 +31,7 @@
     const roles = userRole ? userRole.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
-        window.location.href = "/admin/system-setting";
+        window.open("/admin/system-setting", "_blank");
     })
     if (!roles.includes("ADMIN")) {
         adminButton.style.display = "none";
@@ -129,7 +129,12 @@
             floors.forEach(floor => {
                 const floorLi = document.createElement('li');
                 floorLi.setAttribute('floor-id', floor.no);
-                floorLi.textContent = floor.name
+
+                // 버튼 추가
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = floor.name;
+                floorLi.appendChild(btn);
                 floorUl.appendChild(floorLi);
             })
 
@@ -178,8 +183,17 @@
             floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', event => {
                 allCheck.checked = true;
-                floorBtns.forEach(btn => btn.classList.remove('active'));
+
+                floorBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    const innerBtn = btn.querySelector('button');
+                    if (innerBtn) innerBtn.classList.remove('active');
+                });
+
                 floorBtn.classList.add('active');
+                const btnInLi = floorBtn.querySelector('button');
+                if (btnInLi) btnInLi.classList.add('active');
+
                 Px.VirtualPatrol.Clear();
                 Px.Model.Visible.HideAll();
                 Px.Poi.HideAll();
@@ -508,6 +522,9 @@ const Init = (function () {
                     }))
                 );
 
+            let lastTap = 0;
+            const DOUBLE_TAP_DELAY = 300;
+
             Px.Loader.LoadSbmUrlArray({
                 urlDataList: sbmDataArray,
                 center: "",
@@ -515,56 +532,66 @@ const Init = (function () {
                     initPoi(buildingId).then(() => {
                         moveToPoiFromSession();
                     });
-                    Px.Util.SetBackgroundColor('#333333');
+                    Px.Util.SetBackgroundColor('#111316');
                     Px.Camera.FPS.SetHeightOffset(15);
                     Px.Camera.FPS.SetMoveSpeed(500);
                     Px.Camera.EnableScreenPanning();
                     // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
-                    Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {
-                        const clickedPoiId = String(poiInfo.id);
-                        const allPopups = document.querySelectorAll('.popup-info');
-                        let samePopupOpen = false;
-                        allPopups.forEach(popup => {
-                            const poiIdInput = popup.querySelector('.poi-id');
-                            const popupPoiId = poiIdInput?.value;
+                    Px.Lod.SetLodData(building.lod);
+                    Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
 
-                            if (popupPoiId === clickedPoiId) {
-                                popup.remove();
-                                TagManager.clearTags();
-                                layerPopup.closePlayers();
-                                samePopupOpen = true;
-                            } else {
-                                layerPopup.closePlayers();
-                                popup.remove();
-                                TagManager.clearTags();
-                            }
-                        });
-                        if (poiInfo.property.isLight) {
+                        const currentTime = new Date().getTime();
+                        const tapLength = currentTime - lastTap;
 
-                            if (selectedGroup === poiInfo.property.lightGroup) {
-                                if (selectedId === poiInfo.id) {
-                                    Px.Poi.RestoreColorAll();
-                                    selectedGroup = null;
-                                    selectedId = null;
+                        if(tapLength < DOUBLE_TAP_DELAY && tapLength > 0) {
+                            const clickedPoiId = String(poiInfo.id);
+                            const allPopups = document.querySelectorAll('.popup-info');
+                            let samePopupOpen = false;
+                            allPopups.forEach(popup => {
+                                const poiIdInput = popup.querySelector('.poi-id');
+                                const popupPoiId = poiIdInput?.value;
+
+                                if (popupPoiId === clickedPoiId) {
+                                    popup.remove();
+                                    TagManager.clearTags();
+                                    layerPopup.closePlayers();
+                                    samePopupOpen = true;
                                 } else {
+                                    layerPopup.closePlayers();
+                                    popup.remove();
+                                    TagManager.clearTags();
+                                }
+                            });
+                            if (poiInfo.property.isLight) {
+
+                                if (selectedGroup === poiInfo.property.lightGroup) {
+                                    if (selectedId === poiInfo.id) {
+                                        Px.Poi.RestoreColorAll();
+                                        selectedGroup = null;
+                                        selectedId = null;
+                                    } else {
+                                        selectedId = poiInfo.id;
+                                    }
+
+                                } else {
+                                    Px.Poi.RestoreColorAll();
+                                    Px.Poi.SetColorByProperty('lightGroup', poiInfo.property.lightGroup, '#f80606');
+                                    selectedGroup = poiInfo.property.lightGroup;
                                     selectedId = poiInfo.id;
                                 }
-
-                            } else {
-                                Px.Poi.RestoreColorAll();
-                                Px.Poi.SetColorByProperty('lightGroup', poiInfo.property.lightGroup, '#f80606');
-                                selectedGroup = poiInfo.property.lightGroup;
-                                selectedId = poiInfo.id;
                             }
-                        }
-                        if (samePopupOpen) return;
-                        if (poiInfo.group.toLowerCase() === 'cctv') {
-                            setTimeout(() => {
+                            if (samePopupOpen) return;
+                            if (poiInfo.property.poiCategoryName.toLowerCase() === 'cctv') {
+                                setTimeout(() => {
+                                    renderPoiInfo(poiInfo);
+                                }, 100)
+                            } else {
                                 renderPoiInfo(poiInfo);
-                            }, 100)
-                        } else {
-                            renderPoiInfo(poiInfo);
+                            }
+                            lastTap = 0;
+                        }else{
+                            lastTap = currentTime;
                         }
                     });
 
@@ -755,6 +782,7 @@ const Init = (function () {
                 id: poiId,
                 isAnimation: true,
                 duration: 500,
+                heightOffset:200
             });
         } else {
             console.warn("POI 데이터가 없습니다. ID:", poiId);
@@ -798,7 +826,7 @@ const Init = (function () {
     const activePopups = new Map();
 
     const renderPoiInfo = async (poiInfo) => {
-        if (poiInfo.group.toLowerCase() === "cctv") {
+        if (poiInfo.property.poiCategoryName.toLowerCase() === "cctv") {
             const poiProperty = poiInfo.property;
             const cctvTemplate = document.getElementById('cctv-popup-template');
             const popupInfo = cctvTemplate.content.cloneNode(true).querySelector('.popup-info');
@@ -856,7 +884,7 @@ const Init = (function () {
             popupInfo.innerHTML =
                 `<div class="popup-info__head">
                     <input type="hidden" class="poi-id" value="${poiInfo.id}">
-                    <h2>${poiProperty.poiCategoryName} ${poiProperty.name}</h2>
+                    <h2>${poiProperty.name}</h2>
                     <button type="button" class="close"><span class="hide">close</span></button>
                 </div>
                 <div class="popup-info__content">
@@ -940,7 +968,7 @@ const Init = (function () {
                 // 조명 poi일 때는 선택도 풀리게
                 const poiId = document.querySelector('.popup-info .poi-id')?.value || null;
                 const poiData = Px.Poi.GetData(Number(poiId));
-                if (poiData.group == '조명') {
+                if (poiData.property.poiCategoryName == '조명') {
                     Px.Poi.RestoreColorAll();
                     selectedGroup = null;
                     selectedId = null;
@@ -972,31 +1000,20 @@ const Init = (function () {
     }
 
     async function setupCctvControls(popupInfo, poiInfo) {
-        resetPlaybackControls(popupInfo);
 
         // LIVE/PLAYBACK 모드 전환
         const liveBtn = popupInfo.querySelector('.button--solid-middle');
         const playbackBtn = popupInfo.querySelector('.button--ghost-lower');
         const canvasId = `cctv-${poiInfo.id}`;
         const cameraIp = poiInfo.cameraIp;
+        
 
         liveBtn.addEventListener('click', async () => {
-            resetPlaybackControls(popupInfo);
-
-            const player = window.livePlayers[canvasId];
-            if (player) {
-                player.cameraIp = cameraIp; // player에 카메라 IP 설정
-
-                // player 상태 초기화
-                if (player.isPaused === undefined) {
-                    player.isPaused = false;
-                }
-            }
-
+            const player = window.livePlayers?.[canvasId];
             if(player){
-                player.stopPlayback(); // playback 정지
-                player.isLive = true; // player live 상태
+                layerPopup.closePlayer(canvasId);
             }
+
             liveBtn.classList.add('button--solid-middle');
             liveBtn.classList.remove('button--ghost-lower');
             playbackBtn.classList.add('button--ghost-lower');
@@ -1007,47 +1024,17 @@ const Init = (function () {
         });
 
         playbackBtn.addEventListener('click', () => {
-            const player = window.livePlayers[canvasId];
-            if (player) {
-                player.cameraIp = cameraIp; // player에 카메라 IP 설정
-
-                player.onPlaybackError = (errorType, message) => {
-                    console.log("Playback Error:", errorType, message);
-
-                    popupInfo.querySelectorAll('.playback__button').forEach(btn => {
-                        btn.style.backgroundColor = '';
-                    });
-
-                    // 재생 상태 초기화
-                    if (player.isPaused !== undefined) {
-                        player.isPaused = false;
-                    }
-
-                    // 에러 타입별 처리
-                    switch (errorType) {
-                        case "NO_DATA":
-                            console.log("해당 시간에 데이터가 없음");
-                            break;
-                        case "NETWORK_ERROR":
-                            console.log("네트워크 오류");
-                            break;
-                        default:
-                            console.log("알 수 없는 오류");
-                    }
-                };
+            const player = window.livePlayers?.[canvasId];
+            if(player){
+                layerPopup.closePlayer(canvasId);
             }
-            playbackBtn.classList.add('button--solid-middle');
-            playbackBtn.classList.remove('button--ghost-lower');
-            liveBtn.classList.add('button--ghost-lower');
-            liveBtn.classList.remove('button--solid-middle');
 
             resetPlaybackControls(popupInfo); // 재생 버튼 색상과 날짜 초기화
 
-            // PLAYBACK 모드 활성화
-            if(player) {
-                player.cancelDraw && player.cancelDraw(); // live 정지
-                player.isLive = false; // player playback 상태
-            }
+            liveBtn.classList.add('button--ghost-lower');
+            liveBtn.classList.remove('button--solid-middle');
+            playbackBtn.classList.add('button--solid-middle');
+            playbackBtn.classList.remove('button--ghost-lower');
         });
 
         // PTZ 컨트롤 설정
@@ -1826,6 +1813,16 @@ const Init = (function () {
         if(camera3d) Px.Camera.SetState(JSON.parse(camera3d));
 
     }
+
+    document.querySelectorAll('.date-picker input[type="date"], .time-picker input[type="time"]').forEach(input => {
+        input.addEventListener('change', () => {
+            if (input.value) {
+                input.classList.add('selected');
+            } else {
+                input.classList.remove('selected');
+            }
+        });
+    });
 
     return {
         updateButtons,

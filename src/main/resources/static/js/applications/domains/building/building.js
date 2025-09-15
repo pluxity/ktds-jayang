@@ -28,7 +28,7 @@ class Building {
     #version;
 
     constructor(buildingListDto) {
-        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology, isIndoor ,version} =
+        const { id, code, name, description, floors, buildingFile, buildingType, camera2d, camera3d, topology, isIndoor ,version, lodSettings} =
             buildingListDto;
 
         this.#id = id;
@@ -43,6 +43,7 @@ class Building {
         this.#topology = topology;
         this.#isIndoor = isIndoor;
         this.#version = version;
+        this.#lod = lodSettings;
 
     }
 

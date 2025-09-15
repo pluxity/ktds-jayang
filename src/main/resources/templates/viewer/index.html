@@ -10,40 +10,6 @@
         <div id="webGLContainer" style="position:fixed; width: 100%; height:100%; "></div>
         <div class="contents">
             <div class="poi-menu">
-                <div class="poi-menu__all">
-                    <!-- [D] 선택 시 active 클래스 추가 -->
-                    <div class="all">
-                        <a href="javascript:void(0);" id="toggle-menu">장비보기</a>
-                        <!-- 장비 목록 팝업 -->
-                        <div id="equipmentListPop" class="popup-basic popup-basic--small">
-                            <div class="popup-basic__head">
-                                <span class="checkbox-wrap">
-                                    <input type="checkbox" id="check">
-                                    <label for="check">전체선택</label>
-                                </span>
-                            </div>
-                            <!-- 장비 표시 영역 -->
-                            <div class="equip-group">
-                                <!-- [D] 버튼 활성화 시 active 클래스 추가 -->
-                                <a href="javascript:void(0);" class="cctv">CCTV</a>
-                                <a href="javascript:void(0)" class="facility">설비</a>
-                                <a href="javascript:void(0)" class="power">전력</a>
-                                <a href="javascript:void(0)" class="light">조명</a>
-                                <a href="javascript:void(0)" class="fire">소방</a>
-                                <a href="javascript:void(0)" class="elevator">승강기</a>
-                                <a href="javascript:void(0)" class="solar">태양광</a>
-                                <a href="javascript:void(0)" class="air">공기질</a>
-                                <a href="javascript:void(0)" class="obstacle">항공장애</a>
-                                <a href="javascript:void(0)" class="leak">누수</a>
-                                <a href="javascript:void(0)" class="access">출입탐지</a>
-                                <a href="javascript:void(0)" class="bell">비상벨</a>
-                                <a href="javascript:void(0)" class="vav">VAV</a>
-                                <a href="javascript:void(0)" class="geo">지열</a>
-                            </div>
-                        </div>
-<!--                        <template th:replace="viewer/popup :: popup-template"></template>-->
-                    </div>
-                </div>
                 <div class="poi-menu__list" id="poiMenuList">
                     <ul class="default_group">
                         <!-- [D] 선택 시 active 클래스 추가 -->
@@ -130,6 +96,12 @@
                                 <span class="tool-tip__text tool-tip__text--bottom">지열</span>
                             </div>
                         </li>
+                        <li class="battery">
+                            <a href="javascript:void(0)"><span class="hide">연료전지</span></a>
+                            <div class="tool-tip">
+                                <span class="tool-tip__text tool-tip__text--bottom">연료전지</span>
+                            </div>
+                        </li>
                     </ul>
                     <ul class="system_group">
                         <li id="parkingTab" class="parking">
@@ -166,7 +138,7 @@
             <template th:replace="viewer/eventPopup :: popup-template"></template>
             <template th:replace="map/systemPopup :: popup-template"></template>
             <!-- toolBox -->
-            <div class="tool-box tool-box--active">
+            <div class="tool-box tool-box--active" style="display: none">
                 <ul class="tool-box__list">
                     <!-- [D] 선택 시 active 클래스 추가 -->
                     <li class="home active">
@@ -212,44 +184,42 @@
                         <span class="hide">이벤트 통계 전체보기</span>
                     </a>
                 </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
-                    <table class="table">
-                        <caption class="hide">출입구</caption>
-                        <colgroup>
-                            <col style="width:60px">
-                            <col style="width:25px">
-                            <col style="width:95px">
-                            <col style="width:95px">
-                            <col style="width:70px">
-                        </colgroup>
-                        <thead>
-                        <tr>
-                            <th scope="col">건물</th>
-                            <th scope="col">층</th>
-                            <th scope="col">이벤트명</th>
-                            <th scope="col">장비명</th>
-                            <th scope="col">발생시각</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                <div class="event-container">
+                    <div class="event-state__group">
+                        <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
+                        <table class="table">
+                            <caption class="hide">출입구</caption>
+                            <thead>
+                            <tr>
+                                <th scope="col">건물</th>
+                                <th scope="col">층</th>
+                                <th scope="col">이벤트명</th>
+                                <th scope="col">장비명</th>
+                                <th scope="col">발생시각</th>
+                            </tr>
+                            </thead>
+                            <tbody>
 
-                        </tbody>
-                    </table>
-                </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart">
-                        <canvas id="chart_doughnut"></canvas>
-                        <div class="douut-inner"></div>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                <div class="event-state__group">
-                    <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
-                    <div class="event-state__chart">
-                        <canvas id="chart_bar"></canvas>
+                    <div class="event-state__group">
+                        <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
+                        <!-- [D] 차트 들어갈 영역 ---->
+                        <div class="event-chart-wrapper">
+                            <div id="custom-legend" class="custom-legend-container"></div>
+                            <div class="event-state__chart">
+                                <canvas id="chart_doughnut"></canvas>
+                                <div class="douut-inner"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-state__group">
+                        <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
+                        <!-- [D] 차트 들어갈 영역 ---->
+                        <div class="event-state__chart_bar">
+                            <canvas id="chart_bar"></canvas>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -292,5 +262,6 @@
         </div>
     </div>
     <th:block th:replace="viewer/script :: script "></th:block>
+    <template th:replace="alert/alert :: custom-alert"></template>
 </body>
 </html>

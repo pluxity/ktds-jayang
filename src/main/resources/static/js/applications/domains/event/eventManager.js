@@ -359,17 +359,23 @@ const EventManager = (() => {
         const poiMenuList = document.getElementById("poiMenuList");
         const poiMenuListMap = document.getElementById("poiMenuListMap");
 
-        elementById.style.display = 'none';
+        if(elementById) {
+            elementById.style.display = 'none';
+        }
 
-        popups.forEach(popup => {
-            if (popup.style.display === 'inline-block') {
-                popup.style.display = 'none';
-            }
-        });
+        if(popups > 0) {
+            popups.forEach(popup => {
+                if (popup.style.display === 'inline-block') {
+                    popup.style.display = 'none';
+                }
+            });
+        }
 
-        poiMenuList.querySelectorAll('.active').forEach(element => {
-            element.classList.remove('active');
-        });
+        if(poiMenuList) {
+            poiMenuList.querySelectorAll('.active').forEach(element => {
+                element.classList.remove('active');
+            });
+        }
 
         if (poiMenuListMap) {
             poiMenuListMap.querySelectorAll('.active').forEach(element => {
@@ -418,8 +424,7 @@ const EventManager = (() => {
             const response = await api.get(`/poi/tagNames/${alarm.tagName}`);
             const alarmedPoi = response.data.result;
             const cctvList = alarmedPoi.cctvList;
-            console.log("alarmedPoi : ",alarmedPoi);
-            console.log("alarm", alarm);
+            const sop = alarmedPoi.sop;
             const poiData = PoiManager.findById(alarmedPoi.id);
 
             // toast
@@ -440,7 +445,8 @@ const EventManager = (() => {
                 if (mainCctv) {
                     const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                     mainCCTVTemplate.style.top = `${warningRect.bottom + 10}px`;
-                    mainCCTVTemplate.style.left = `${warningRect.left}px`;
+                    mainCCTVTemplate.style.left = `${warningRect.left + (warningRect.width - mainCCTVTemplate.offsetWidth) / 2}px`;
+
                 }
 
                 if (subCctvs.length > 0) {
@@ -451,10 +457,12 @@ const EventManager = (() => {
             }
 
             // sop 팝업 생성
-            const sopTemplate = createSopPopup();
-            sopTemplate.style.position = 'fixed';
-            sopTemplate.style.left = `${warningRect.left - 10 - sopTemplate.offsetWidth}px`;
-            sopTemplate.style.top = `${warningRect.top + (warningRect.height - sopTemplate.offsetHeight) / 2}px`;
+            if(sop){
+                const sopTemplate = createSopPopup(sop);
+                sopTemplate.style.position = 'fixed';
+                sopTemplate.style.left = `${warningRect.left - 100 - sopTemplate.offsetWidth}px`;
+                sopTemplate.style.top = `${warningRect.top + (warningRect.height - sopTemplate.offsetHeight) / 2}px`;
+            }
 
             // 이벤트 해제, 3d맵 이동 이벤트
             const buttons = warningTemplate.querySelector('.buttons');
@@ -508,7 +516,7 @@ const EventManager = (() => {
                     id: alarmPoi.id,
                     isAnimation: true,
                     duration: 500,
-                    heightOffset: 70,
+                    heightOffset: 200,
                     onComplete: async () => {
                         Init.renderPoiInfo(poiData);
                         if (mainCctv) {
@@ -613,6 +621,7 @@ const EventManager = (() => {
             player.cameraIp = cameraIp;
             player.httpRelayUrl = config.httpRelayUrl;
             player.httpRelayPort = config.httpRelayPort;
+            player.isLive = true;
         } catch (error) {
             console.error("재생 에러:", error);
             showCctvError(canvasId);
@@ -628,6 +637,7 @@ const EventManager = (() => {
         try {
             await player.getDeviceInfo((cameraList) => {
                 player.cameraIp = cameraIp;
+                player.isLive = false;
                 let foundCamera = null;
 
                 if (Array.isArray(cameraList)) {
@@ -872,7 +882,7 @@ const EventManager = (() => {
         return `
         <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
             <div class="cctv-header">
-                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.name}</span>
+                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.cctvName}</span>
                 <button type="button" class="cctv-close">×</button>
             </div>
             <div class="cctv-content">
@@ -947,7 +957,7 @@ const EventManager = (() => {
     }
 
     // Sop 팝업 생성
-    function createSopPopup() {
+    function createSopPopup(sop) {
         const sopTemplate = document.createElement('div');
         sopTemplate.className = 'sop-container';
         sopTemplate.innerHTML =
@@ -956,86 +966,13 @@ const EventManager = (() => {
                     <h2 class="name">SOP</h2>
                     <button type="button" class="close"><span class="hide">close</span></button>
                 </div>
-                <!-- SOP 영역 -->
                 <div class="sop-info">
-                    <h3 class="sop-info__title">에스컬레이터 끼임 사고</h3>
+                    <h3 class="sop-info__title">${sop.sopName}</h3>
                     <div class="sop-info__contents">
                         <div class="image">
-                            <img src="/static/img/img_sop.png" alt="에스컬레이터 끼임 사고" width="330">
-                            <p class="image__text">(정) 홍길동 | 가나다라마팀 | 010-123-456</p>
-                            <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
-                        </div>
-                        <div class="manual">
-                            <div class="manual__title">매뉴얼</div>
-                            <div class="sop-accord">
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn sop-accord__btn--active">
-                                    <span class="label">1단계</span>
-                                    사고 위치 파악
-                                </button>
-                                <div class="sop-accord__detail">
-                                    <div class="message">
-                                        <strong class="message__title">방송 송출</strong>
-                                        <p>
-                                            안내 방송 송출 문구 표출 <br>
-                                            문구 없는 경우 영역 미노출
-                                        </p>
-                                    </div>
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">2단계</span>
-                                    안내 방송 송출
-                                </button>     
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">3단계</span>
-                                    초동 조치
-                                </button>  
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">4단계</span>
-                                    사고 상황 전파
-                                </button>     
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div> 
-                                <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                                <button type="button" class="sop-accord__btn">
-                                    <span class="label">5단계</span>
-                                    상황종료
-                                </button>
-                                <div class="sop-accord__detail">
-                                    <ul>
-                                        <li>1. 사고 위치 파악합니다.</li>
-                                        <li>2. 담당 직원을 현장 파견합니다.</li>
-                                        <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                                    </ul>
-                                </div>
-                            </div>
+                            <img src= "/${sop.sopFile.fileEntityType}/${sop.sopFile.directory}/${sop.sopFile.storedName}.${sop.sopFile.extension}" width="330">
+                            <p class="image__text">(정) ${sop.mainManagerName} | ${sop.mainManagerDivision} | ${sop.mainManagerContact}</p>
+                            <p class="image__text">(부) ${sop.subManagerName} | ${sop.subManagerDivision} | ${sop.subManagerContact}</p>
                         </div>
                     </div>
                 </div>
@@ -1075,43 +1012,51 @@ const EventManager = (() => {
     }
 
 
-    let currentPage = 1;
     let allEvents = [];
 
-    // 24시간 이벤트 목록 초기화
-    const initializeLatest24HoursList = async (itemsPerPage) => {
+    // 24시간 이벤트 목록 초기화 (고정 높이: 30rem)
+    const initializeLatest24HoursList = async (maxHeight) => {
         try {
             const response = await api.get('/events/latest-24-hours');
             allEvents = response.data;
 
-            // 페이징 UI 추가
-            const paginationHTML = `
-                <div class="event-state__pagination">
-                    <button class="prev-btn" ${currentPage === 1 ? 'disabled' : ''}>이전</button>
-                    <span class="current-page">${currentPage}</span>
-                    <button class="next-btn" ${currentPage >= Math.ceil(allEvents.result.length / itemsPerPage) ? 'disabled' : ''}>다음</button>
-                </div>
-            `;
+            // 기존 페이징 UI 제거
+            document.querySelector('.event-state__pagination')?.remove();
 
-            const tableContainer = document.querySelector('.event-state .table').parentElement;
-            tableContainer.insertAdjacentHTML('beforeend', paginationHTML);
+            // 컨테이너에 스크롤 적용 (높이는 CSS에서 제어 권장)
+            const table = document.querySelector('.event-state__group .table');
+            if (!table) return;
 
-            // 페이징 버튼 이벤트 리스너
-            document.querySelector('.prev-btn').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPage(itemsPerPage);
-                }
-            });
+            const thead = table.querySelector('thead');
+            if (thead) {
+                thead.style.position = 'sticky';
+                thead.style.top = '0';
+                thead.style.zIndex = '1';
+                thead.style.backgroundColor = getComputedStyle(thead).backgroundColor || '#fff';
+            }
 
-            document.querySelector('.next-btn').addEventListener('click', () => {
-                if (currentPage < Math.ceil(allEvents.result.length / itemsPerPage)) {
-                    currentPage++;
-                    renderPage(itemsPerPage);
-                }
-            });
+            if (!table.parentElement.classList.contains('table-container')) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('table-container');
+                wrapper.style.overflowY = 'auto';
+                wrapper.style.maxHeight = maxHeight;
 
-            renderPage(itemsPerPage);
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            } else {
+                const wrapper = table.parentElement;
+                wrapper.style.overflowY = 'auto';
+            }
+
+            // const tableContainer = document.querySelector('.event-state .table').parentElement;
+            // if (tableContainer) {
+            //     tableContainer.classList.add('table-container');
+            //     tableContainer.style.overflowY = 'auto';
+            //     tableContainer.style.maxHeight = `${maxHeight}rem`; // 필요에 따라 조정
+            // }
+
+            // 전체 렌더
+            renderPage();
 
         } catch (error) {
             console.error('24시간 이벤트 목록 로딩 실패:', error);
@@ -1119,48 +1064,24 @@ const EventManager = (() => {
     };
 
     // 페이지 렌더링 함수
-    const renderPage = (itemsPerPage) => {
+    const renderPage = () => {
         const tableBody = document.querySelector('.event-state .table tbody');
+        if (!tableBody) return;
+
         tableBody.innerHTML = '';
 
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const pageItems = allEvents.result.slice(startIndex, endIndex);
-
-        pageItems.forEach(event => {
+        const items = (allEvents && allEvents.result) ? allEvents.result : [];
+        items.forEach(event => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
-                <td>${event.floorNm + 'F' || '-'}</td>
+                <td>${event.floorNm  || '-'}</td>
                 <td class="ellipsis">${event.event || '-'}</td>
                 <td class="ellipsis">${event.poiName || '-'}</td>
                 <td>${formatTime(event.occurrenceDate)}</td>
             `;
             tableBody.appendChild(row);
         });
-
-        // 빈 행 추가하여 높이 유지
-        const emptyRowsNeeded = itemsPerPage - pageItems.length;
-        for (let i = 0; i < emptyRowsNeeded; i++) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            `;
-            tableBody.appendChild(emptyRow);
-        }
-
-        // 페이징 UI 업데이트
-        const prevBtn = document.querySelector('.prev-btn');
-        const nextBtn = document.querySelector('.next-btn');
-        const currentPageSpan = document.querySelector('.current-page');
-
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage >= Math.ceil(allEvents.result.length / itemsPerPage);
-        currentPageSpan.textContent = currentPage;
     };
 
     // 시간 포맷팅 함수
@@ -1175,52 +1096,172 @@ const EventManager = (() => {
         try {
             // 프로세스 차트
             const processResponse = await api.get('/events/process-counts');
-            const processData = processResponse.data;
+            const processData = processResponse.data.result;
+            console.log('Process Data:', processData);
+            const refinedData = processData
+                .filter(item => item.count > 0)
+                .map(item => ({
+                    buildingNm: item.buildingNm?.trim() || '기타',
+                    count: item.count
+                }));
+
+            const total = refinedData.reduce((sum, item) => sum + item.count, 0);
+            const labels = refinedData.map(item => item.buildingNm);
+            const data = refinedData.map(item => item.count);
+
+            const chartColorMap = {
+                'A동': 'rgba(155, 222, 0, 0.3)',
+                'B동': 'rgba(149, 0, 218, 0.3)',
+                '판매시설': 'rgba(201, 171, 0, 0.3)',
+                '지하주차장': 'rgba(0, 210, 210, 0.3)',
+                '외부 전경': 'rgba(67, 21, 202, 0.3)'
+            };
+            
+            const legendColorMap = {
+                'A동': '#9BDE00',
+                'B동': '#9500DA',
+                '판매시설': '#C9AB00',
+                '지하주차장': '#00D2D2',
+                '외부 전경' : '#4315CA'
+
+            };
+
+            const legendTextColorMap = {
+                'A동': '#9BDE00',
+                'B동': '#D476FF',
+                '판매시설': '#C9AB00',
+                '지하주차장': '#00D2D2',
+                '외부 전경' : '#B59CFF'
+            };
+
+            const backgroundColor = refinedData.map(item => chartColorMap[item.buildingNm]);
+            const borderColor = refinedData.map(item => chartColorMap[item.buildingNm]);
+
+            const getLast7DaysText = () => {
+                const today = new Date();
+                const end = new Date(today);
+                const start = new Date(today);
+                start.setDate(start.getDate() - 6);
+                const format = (date) =>
+                    date.toLocaleDateString('ko-KR', {
+                        month: '2-digit',
+                        day: '2-digit'
+                    }).replace(/\./g, '').replace(/\s/g, '/');
+                return `${format(start)}\n~\n${format(end)}`;
+            };
 
             // 프로세스 차트
-            const chartDoughunt = document.getElementById('chart_doughnut');
-            new Chart(chartDoughunt, {
+            const chartDoughnut = document.getElementById('chart_doughnut').getContext('2d');
+            new Chart(chartDoughnut, {
                 type: 'doughnut',
                 data: {
-                    labels: processData.result.map(item => item.process),
+                    labels,
                     datasets: [{
-                        data: processData.result.map(item => item.count)
+                        data,
+                        borderColor,
+                        backgroundColor,
+                        borderWidth: 1
                     }]
                 },
                 options: {
-                    layout: {
-                        padding: {
-                            left: 20,
-                            right: 20
-                        }
-                    },
+                    layout: { padding: 0 },
+                    cutout: '40%',
                     plugins: {
                         legend: {
-                            position: 'left',
-                            align: 'center',
-                            labels: {
-                                padding: 10,
-                                boxWidth: 10,
-                                generateLabels: function (chart) {
-                                    const data = chart.data;
-                                    return data.labels.map((label, i) => ({
-                                        text: `${label}: ${data.datasets[0].data[i]}`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        index: i,
-                                        fontColor: '#FFFFFF',
-                                    }));
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#000',
+                            callbacks: {
+                                label: function (ctx) {
+                                    const count = ctx.raw;
+                                    const percent = ((count / total) * 100).toFixed(0);
+                                    return `${ctx.label}, ${count}(${percent}%)`;
                                 }
                             }
                         }
                     },
                     responsive: true,
                     maintainAspectRatio: false
-                }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw(chart) {
+                        const ctx = chart.ctx;
+                        ctx.save();
+
+                        const fontSize = 14;
+                        ctx.font = `500 ${fontSize}px 'Noto Sans KR', 'Malgun Gothic', sans-serif`;
+                        ctx.fillStyle = '#999';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        const text = getLast7DaysText();
+                        const lines = text.split('\n');
+
+                        const centerX = chart.chartArea.left + chart.chartArea.width / 2;
+                        const centerY = chart.chartArea.top + chart.chartArea.height / 2;
+
+                        lines.forEach((line, i) => {
+                            ctx.fillText(line, centerX, centerY + (i - 1) * fontSize);
+                        });
+
+                        ctx.restore();
+                    }
+                }]
             });
+
+            renderCustomLegend(refinedData, legendColorMap, legendTextColorMap, total);
+
         } catch (error) {
             console.error('차트 초기화 오류:', error);
         }
-    }
+    };
+
+    const relLum = (c) => {
+        const v = c/255;
+        return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+    };
+
+    const hex2rgb = (hex) => {
+        const h = hex.replace('#','');
+        return {
+            r: parseInt(h.slice(0,2),16),
+            g: parseInt(h.slice(2,4),16),
+            b: parseInt(h.slice(4,6),16)
+        };
+    };
+
+    const getReadableTextColor = (hexBg) => {
+        const {r,g,b} = hex2rgb(hexBg);
+        const Lbg = 0.2126*relLum(r) + 0.7152*relLum(g) + 0.0722*relLum(b);
+        const Lwhite = 1, Lblack = 0;
+        const contrastWhite = (Math.max(Lwhite, Lbg)+0.05)/(Math.min(Lwhite, Lbg)+0.05);
+        const contrastBlack = (Math.max(Lbg, Lblack)+0.05)/(Math.min(Lbg, Lblack)+0.05);
+        return contrastWhite >= contrastBlack ? '#fff' : '#000';
+    };
+
+    const renderCustomLegend = (refinedData, legendColorMap,legendTextColorMap, total) => {
+        const container = document.getElementById('custom-legend');
+        container.innerHTML = '';
+
+        refinedData.forEach(item => {
+            const base = legendColorMap[item.buildingNm];
+            const textColor = getReadableTextColor(base);
+            const percent = ((item.count / total) * 100).toFixed(0);
+            const legendTextColor = legendTextColorMap[item.buildingNm];
+
+            const row = document.createElement('div');
+            row.className = 'legend-row';
+            row.innerHTML = `
+              <span class="legend-badge" style="background-color:${base}; color:${textColor};">
+                ${item.buildingNm}
+              </span>
+              <span class="legend-text" style="color:${legendTextColor};">총 ${item.count}개 (${percent}%)</span>
+            `;
+            container.appendChild(row);
+        });
+    };
 
     // 날짜별 이벤트 통계 차트 초기화
     const initializeDateChart = async () => {
@@ -1252,27 +1293,63 @@ const EventManager = (() => {
 
             // 5. 차트 그리기
             const chartBar = document.getElementById('chart_bar');
-            new Chart(chartBar, {
+            const ctx = chartBar.getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, chartBar.height);
+            gradient.addColorStop(0, '#00F5A0'); // 민트
+            gradient.addColorStop(1, '#007CF0');
+
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: last7Days,
                     datasets: [{
                         data: counts,
-                        borderWidth: 1
+                        borderWidth: 0,
+                        backgroundColor: gradient,
+                        // borderSkipped: false
                     }]
                 },
                 options: {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#000',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 8,
+                            displayColors: false,
+                            callbacks: {
+                                title: () => '',
+                                label: (tooltipItem) => {
+                                    return `${tooltipItem.label}, ${tooltipItem.raw}`;
+                                }
+                            }
                         }
                     },
                     scales: {
+                        x: {
+                            offset: true,
+                            grid: {
+                                color: 'rgba(255,255,255,0.1)'
+                            },
+                            ticks: {
+                                color: '#C8CED6'
+                            },
+                            categoryPercentage: 0.3,
+                            barPercentage: 0.3
+                        },
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1,
-                                precision: 0
+                                stepSize: 20,
+                                color: '#C8CED6'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.12)',
+                                drawBorder: false
                             }
                         }
                     },
@@ -1304,6 +1381,8 @@ const EventManager = (() => {
         if (toastBox) {
             toastBox.remove();
         }
+
+        layerPopup.closePlayers();
     };
 
 

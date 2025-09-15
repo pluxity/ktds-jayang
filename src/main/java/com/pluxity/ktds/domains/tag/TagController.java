@@ -62,9 +62,14 @@ public class TagController {
     }
 
     @GetMapping("/elevator/add")
-    public ResponseEntity<String> addAllElevatorTags() {
-        String body = tagService.addAllElevatorTags();
-        return ResponseEntity.ok(body);
+    public ResponseEntity<Integer> addAllElevatorTags() {
+        return ResponseEntity.ok(tagService.addAllElevatorTags());
     }
 
+    @GetMapping("/airConditioner")
+    public ResponseEntity<Map<String, Map<String, Double>>> getAirConditionerTags() {
+        Map<String, Map<String, Double>> groupedTagMap =  tagService.processAirConditionerTags();
+
+        return ResponseEntity.ok(groupedTagMap);
+    }
 }

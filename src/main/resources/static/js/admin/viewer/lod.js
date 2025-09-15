@@ -21,8 +21,21 @@ document.getElementById('btnLodSetForm').onclick = () => {
                 }
                 // 중분류
                 const tdMiddle = document.createElement('td');
-                tdMiddle.classList.add('middleCategory');
                 tdMiddle.innerHTML = middle.name;
+
+                // input hidden으로 category1No, category2No 값 추가
+                const inputCategory1No = document.createElement('input');
+                inputCategory1No.type = 'hidden';
+                inputCategory1No.name = 'category1No';
+                inputCategory1No.value = category.id;
+                tdMiddle.appendChild(inputCategory1No);
+
+                const inputCategory2No = document.createElement('input');
+                inputCategory2No.type = 'hidden';
+                inputCategory2No.name = 'category2No';
+                inputCategory2No.value = middle.id;
+                tdMiddle.appendChild(inputCategory2No);
+
                 tr.appendChild(tdMiddle);
         
                 // 나머지 lodFormTable1Add(tr) 등 옵션 칸 추가
@@ -94,15 +107,16 @@ document.querySelector('#btnPoiLodRegist').onclick = () => {
     };
 
     const lodInfoList = [...document.querySelectorAll('#lodTab1 > table > tbody > tr.poiSize')].map(tr => {
-        const categoryNo = tr.querySelector('td.category1No div').id;
+        const category1No = tr.querySelector('td input[name="category1No"]').value;
+        const category2No = tr.querySelector('td input[name="category2No"]').value;
 
         let lodInfo = {
             buildingId: BUILDING_ID,
-            category1No: categoryNo,
-            category2No: categoryNo
+            category1No: category1No,
+            category2No: category2No
         };
 
-        for (let j = 1; j <= 10; j++) {
+        for (let j = 0; j < 10; j++) {
             lodInfo[`iconSize${j}`] = document.querySelector(`#iconSize${j}`).value;
             lodInfo[`lodType${j}`] = document.querySelector(`#lodType${j}`).value;
         }
@@ -146,9 +160,9 @@ document.querySelector('#btnLodMaxDist').onclick = () => {
 // LOD 아이콘 사이즈 form
 function lodFormTable1Add(dom) {
     const levelCnt = document.getElementById('levelCnt').value;
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 0; i < 10; i++) {
         let display = '';
-        if (i > parseInt(levelCnt)) {
+        if (i >= parseInt(levelCnt)) {
             display = "style.display = 'none'";
         } else {
             display = '';
@@ -175,10 +189,14 @@ function lodFormTable1Add(dom) {
 // LOD TYPE form
 function lodFormTable2Add(dom) {
     const levelCnt = document.getElementById('levelCnt').value;
-    for (let i = 1; i <= 10; i++) {
+    console.log('levelCnt:', levelCnt, 'type:', typeof levelCnt); // 디버깅 추가
+
+
+    for (let i = 0; i < 10; i++) {
         let display = '';
         if (i >= parseInt(levelCnt)) {
             display = "style.display = 'none'";
+            console.log(`i=${i}, levelCnt=${levelCnt}, hiding`); // 디버깅 추가
         } else {
             display = '';
         }
@@ -202,8 +220,8 @@ function lodFormTable2Add(dom) {
 // poi lod 레벨수 테이블 처리
 document.querySelector('#levelCnt').onchange = (event) => {
     const thisVal = event.target.value;
-    for (let i = 3; i <= 10; i++) {
-        if (i > parseInt(thisVal)) {
+    for (let i = 3; i < 10; i++) {
+        if (i >= parseInt(thisVal)) {
             document.querySelectorAll(`.lod_${i}`).forEach((e) => {
                 e.style.display = 'none';
             });

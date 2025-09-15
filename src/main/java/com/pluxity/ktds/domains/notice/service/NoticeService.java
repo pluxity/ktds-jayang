@@ -64,9 +64,22 @@ public class NoticeService {
 
         notice.update(dto.title(), dto.content(), dto.isUrgent(), dto.isActive(), dto.isRead(), dto.expiredAt(), dto.buildingIds());
     }
+
+    @Transactional
+    public void updateActive(Long id, Boolean isActive) {
+        Notice notice = repository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ID));
+        notice.updateActive(isActive);
+    }
+
     @Transactional
     public void deleteNotice(Long id) {
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteNoticeList(@NotNull List<Long> ids) {
+        repository.deleteAllById(ids);
     }
 
     @Transactional

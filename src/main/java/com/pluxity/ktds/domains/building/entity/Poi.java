@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.building.entity;
 
+import com.pluxity.ktds.domains.building.dto.PoiAlarmDetailDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
@@ -7,6 +8,7 @@ import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
 import com.pluxity.ktds.domains.poi_set.entity.IconSet;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
+import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.util.StringUtils;
@@ -209,6 +211,31 @@ public class Poi {
                 .lightGroup(this.getLightGroup())
                 .cameraIp(this.getCameraIp())
                 .cameraId(this.getCameraId())
+                .build();
+    }
+
+    public PoiAlarmDetailDTO toPoiAlarmDetailDTO(List<PoiCctvDTO> cctvList, SopResponseDTO sopResponseDTO) {
+        return PoiAlarmDetailDTO.builder()
+                .id(this.getId())
+                .buildingId(this.getBuilding().getId())
+                .floorNo(this.getFloorNo())
+                .poiCategoryId(this.getPoiCategory().getId())
+                .poiMiddleCategoryId(Optional.ofNullable(this.getPoiMiddleCategory())
+                        .map(PoiMiddleCategory::getId)
+                        .orElse(null))
+                .iconSetId(this.getIconSet().getId())
+                .position(this.getPosition())
+                .rotation(this.getRotation())
+                .scale(this.getScale())
+                .name(this.getName())
+                .code(this.getCode())
+                .tagNames(this.getTagNames())
+                .cctvList(cctvList)
+                .isLight(this.getIsLight())
+                .lightGroup(this.getLightGroup())
+                .cameraIp(this.getCameraIp())
+                .cameraId(this.getCameraId())
+                .sop(sopResponseDTO)
                 .build();
     }
 

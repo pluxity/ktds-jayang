@@ -22,6 +22,7 @@ import com.pluxity.ktds.domains.poi_set.service.PoiMiddleCategoryService;
 import com.pluxity.ktds.domains.system_setting.dto.SystemSettingRequestDTO;
 import com.pluxity.ktds.domains.system_setting.repository.SystemSettingRepository;
 import com.pluxity.ktds.domains.system_setting.service.SystemSettingService;
+import com.pluxity.ktds.domains.tag.TagMetadataStore;
 import com.pluxity.ktds.domains.user.entity.KioskUser;
 import com.pluxity.ktds.domains.user.entity.User;
 import com.pluxity.ktds.domains.user.entity.UserAuthority;
@@ -70,6 +71,7 @@ public class Initializer implements CommandLineRunner {
     private final PoiMiddleCategoryRepository poiMiddleCategoryRepository;
 
     private final ObjectMapper objectMapper;
+    private final TagMetadataStore tagMetadataStore;
 
     @Value("${root-path.files}")
     private String rootPath;
@@ -77,6 +79,7 @@ public class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         System.out.println("init start");
+        tagMetadataStore.loadFromClasspath("/static/excel/EHP.xlsx");
         if (!userRepository.existsByUsername("admin")) {
             List<UserGroup> userGroups = getUserGroups();
 

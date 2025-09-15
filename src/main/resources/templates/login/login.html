@@ -10,18 +10,18 @@
 <body>
     <div class="container" th:style="'background-image: url(' + @{/static/images/viewer/bg_login.png} + ')'" >
         <div class="login">
-            <h1 class="login__logo"><span class="hide">kt Login</span></h1>
+            <h1 class="login__logo" style="width: 100%"><span class="hide">eastpole Login</span></h1>
             <div class="login__box">
-                <h2 class="title">KT 자양 통합운영 플랫폼</h2>
+                <h2 class="title">이스트폴 통합운영 플랫폼</h2>
                 <div class="login-forms">
                     <!-- [D] 에러메시지 노출 시 input-error--active 추가 -->
-                    <div class="input-error input-error--active">
+                    <div class="input-error">
                         <input id="id" type="text" placeholder="아이디를 입력하세요">
-                        <p class="input-error__text">아이디를 입력하세요.</p>
+                        <p style="display: none" class="input-error__text">아이디를 입력하세요.</p>
                     </div>
-                    <div  class="input-error input-error--active">
+                    <div  class="input-error">
                         <input id="pw" type="password" placeholder="비밀번호를 입력하세요">
-                        <p class="input-error__text">비밀번호를 입력하세요</p>
+                        <p style="display: none" class="input-error__text">비밀번호를 입력하세요</p>
                     </div>
                 </div>
                 <div class="login-footer">
@@ -76,5 +76,6 @@
     </script>
     <th:block th:replace="~{admin/fragments/script :: script }"></th:block>
     <script th:src="@{/static/js/login/login.js}"></script>
+    <template th:replace="alert/alert :: custom-alert"></template>
 </body>
 </html>

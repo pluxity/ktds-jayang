@@ -30,7 +30,7 @@
     const roles = userRole ? userRole.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
-        window.location.href = "/admin/system-setting";
+        window.open("/admin/system-setting", "_blank");
     })
     if (!roles.includes("ADMIN")) {
         adminButton.style.display = "none";
@@ -230,10 +230,8 @@ const Init = (function () {
     const initCategoryId = () => {
         const categoryList = PoiCategoryManager.findAll();
         const poiMenuList = document.querySelectorAll('.poi-menu__list li');
-        const equipmentGroup = document.querySelectorAll('#equipmentListPop a');
 
         setCategoryId(poiMenuList, categoryList);
-        setCategoryId(equipmentGroup, categoryList);
     };
 
     const initBuildingList = () => {
@@ -272,27 +270,12 @@ const Init = (function () {
         })
     }
 
-    const setActiveEquipment = (buildingId) => {
-        const equipmentGroup = document.querySelectorAll('#equipmentListPop a');
-        const allPois = PoiManager.findAll();
-        const filteredPois = allPois.filter(poi => poi.buildingId === Number(buildingId));
-        equipmentGroup.forEach(element => {
-            if (element) {
-                const categoryId = element.getAttribute("data-category-id");
-                filteredPois.forEach(poi => {
-                    if (poi.position && categoryId == poi.poiCategory) {
-                        element.classList.add('active');
-                    }
-                });
-            }
-        });
-    }
-
     const initializeOutdoorBuilding = async (onComplete) => {
         try {
             const container = document.getElementById('webGLContainer');
             container.innerHTML = '';
             const contents = document.querySelector('.contents');
+
             const outdoorBuilding = await BuildingManager.getOutdoorBuilding();
             const version = outdoorBuilding.getVersion();
             await BuildingManager.getFloorsByHistoryVersion(version);
@@ -303,7 +286,6 @@ const Init = (function () {
             document.getElementById("buildingName").setAttribute("building-id", buildingId);
             document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
 
-            setActiveEquipment(buildingId);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (outdoorBuilding) {
@@ -363,7 +345,7 @@ const Init = (function () {
 
                         Px.Model.Visible.ShowAll();
                         Px.Camera.EnableScreenPanning()
-                        Px.Util.SetBackgroundColor('#333333');
+                        Px.Util.SetBackgroundColor('#111316');
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
                         Px.Event.AddEventListener('dblclick', 'poi', (poiInfo) => {

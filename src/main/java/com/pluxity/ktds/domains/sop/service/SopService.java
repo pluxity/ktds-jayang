@@ -66,6 +66,13 @@ public class SopService {
         updateImage(updateSopDTO.sopFileId(), sop::updateSopFile);
     }
 
+    @Transactional(readOnly = true)
+    public SopResponseDTO findFirstByOrderByIdDesc() {
+        Sop sop = sopRepository.findFirstByOrderByIdDesc()
+                .orElseThrow(() -> new RuntimeException("Not found Sop"));
+        return sop.toResponseDTO();
+    }
+
     @Transactional
     public void deleteSop(Long id) {
         sopRepository.deleteById(id);

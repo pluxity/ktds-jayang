@@ -910,6 +910,11 @@
   font-size: 0.875rem;
   letter-spacing: -0.00875rem;
 }
+
+.notice-info__contents p {
+  white-space: pre-line;
+}
+
 .notice-info__contents::-webkit-scrollbar {
   width: 0.375rem;
 }

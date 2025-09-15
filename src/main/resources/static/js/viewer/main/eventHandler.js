@@ -117,9 +117,10 @@
             const noticeDate = document.querySelector('.notice-info__date');
             const pagingNumber = document.querySelector('.popup-event__paging .number');
             const noticeContent = document.querySelector('.notice-info__contents p');
+            const badgeText = currentNotice.isRead ? '' : '<span class="badge">N</span>';
 
             if (currentNotice) {
-                noticeTitle.innerHTML = `${currentNotice.title} <span class="badge">N</span>`;
+                noticeTitle.innerHTML = `${currentNotice.title} ${badgeText}`;
                 urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
                 noticeDate.textContent = formatDate(currentNotice.createdAt);
                 noticeContent.textContent = currentNotice.content;

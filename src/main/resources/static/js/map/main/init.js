@@ -532,7 +532,7 @@ const Init = (function () {
                     initPoi(buildingId).then(() => {
                         moveToPoiFromSession();
                     });
-                    Px.Util.SetBackgroundColor('#333333');
+                    Px.Util.SetBackgroundColor('#111316');
                     Px.Camera.FPS.SetHeightOffset(15);
                     Px.Camera.FPS.SetMoveSpeed(500);
                     Px.Camera.EnableScreenPanning();

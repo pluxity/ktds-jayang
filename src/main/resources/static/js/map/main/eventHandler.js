@@ -172,6 +172,8 @@
     const handleSystemTabClick = (event) => {
         const clickedItem = event.target.closest('li');
         const isActive = clickedItem.classList.contains('active');
+        const popups = document.querySelectorAll('.popup-info');
+        popups.forEach(popup => popup.remove());
 
         const closeAllPopups = () => {
             ['lightPop', 'elevatorPop', 'parkingPop', 'airPop', 'energyPop', 'electricPop'].forEach(id => {
@@ -364,6 +366,9 @@
     let _lastPoiCategoryId = null;
     const handlePoiMenuClick = (event) => {
         // event.preventDefault();
+
+        const popups = document.querySelectorAll('.popup-info');
+        popups.forEach(popup => popup.remove());
 
         document.querySelectorAll('.select-box__btn').forEach(btn => {
             if (btn.classList.contains('select-box__btn--selected')) {

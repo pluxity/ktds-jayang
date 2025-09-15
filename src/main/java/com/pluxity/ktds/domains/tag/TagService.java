@@ -51,7 +51,15 @@ public class TagService {
         for (Poi poi : pois) {
             Long poiId = poi.getId();
             String buildingNm = poi.getBuilding().getName();
-            String mappedBuilding = ("A".equals(buildingNm) || "B".equals(buildingNm)) ? buildingNm : "C";
+//            String mappedBuilding = ("A".equals(buildingNm) || "B".equals(buildingNm)) ? buildingNm : "C";
+            String mappedBuilding;
+            if (buildingNm != null && buildingNm.contains("A")) {
+                mappedBuilding = "A";
+            } else if (buildingNm != null && buildingNm.contains("B")) {
+                mappedBuilding = "B";
+            } else {
+                mappedBuilding = "C";
+            }
             String prefix = type.equals("ELEV")
                     ? String.format("%s-null-EV-ELEV-", mappedBuilding)
                     : String.format("%s-null-EV-ESCL-", mappedBuilding);
@@ -95,7 +103,7 @@ public class TagService {
                         try {
                             if (type.equals("ELEV")) {
                                 // ELEV
-                                if ("A".equals(buildingName) || "B".equals(buildingName)) {
+                                if (buildingName.contains("A") || buildingName.contains("B")) {
                                     // A, B
                                     desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(raw);
                                 } else {

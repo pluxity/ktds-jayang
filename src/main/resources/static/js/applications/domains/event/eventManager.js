@@ -1176,7 +1176,7 @@ const EventManager = (() => {
                                 label: function (ctx) {
                                     const count = ctx.raw;
                                     const percent = ((count / total) * 100).toFixed(0);
-                                    return `${ctx.label} ${count}개 (${percent}%)`;
+                                    return `${ctx.label}, ${count}(${percent}%)`;
                                 }
                             }
                         }

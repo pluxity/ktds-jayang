@@ -1221,6 +1221,11 @@
   mask-position: -270px -70px;
 }
 
+.equip-group a.battery::before {
+  -webkit-mask-position: -520px -70px;
+  mask-position: -520px -70px;
+}
+
 .search-result {
   display: -webkit-box;
   display: -ms-flexbox;

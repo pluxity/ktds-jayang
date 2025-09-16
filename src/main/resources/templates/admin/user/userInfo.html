@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title> 사용자 정보 </title>
+</head>
+<body>
+<div class="wrapper">
+    <aside th:replace="~{admin/fragments/sidebar :: nav}"/>
+    <div class="main">
+        <nav th:replace="~{admin/fragments/navbar :: nav}"/>
+        <main class="content">
+            <div class="mb-3">
+                <h1 class="h3 d-inline align-middle">사용자 정보</h1>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="row">
+                        <div class="col-md">
+                            <div id="wrapper">
+                                <table class="gridjs-table user-info-table">
+                                    <colgroup>
+                                        <col style="width:15%">
+                                        <col style="width:35%">
+                                        <col style="width:15%">
+                                        <col style="width:35%">
+                                    </colgroup>
+                                    <tbody class="gridjs-tbody">
+                                    <tr class="gridjs-tr">
+                                        <th class="gridjs-th user-info-th">아이디</th>
+                                        <td class="gridjs-td" id="user-id"></td>
+                                        <th class="gridjs-th user-info-th">비밀번호</th>
+                                        <td class="gridjs-td">
+                                            <button type="button"
+                                                    class="btn btn-dark btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#changePasswordModal">
+                                                비밀번호 변경
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="gridjs-tr">
+                                        <th class="gridjs-th user-info-th">사용자명</th>
+                                        <td class="gridjs-td" id="user-name"></td>
+                                        <th class="gridjs-th user-info-th">그룹명</th>
+                                        <td class="gridjs-td" id="user-group"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- change password modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">비밀번호 변경</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label">현재 비밀번호</label>
+                    <input type="password" class="form-control" id="currentPasswd">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">변경 비밀번호</label>
+                    <input type="password" class="form-control" id="newPasswd" minlength="8" maxlength="16">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">변경 비밀번호 확인</label>
+                    <input type="password" class="form-control" id="newPasswdConfirm" minlength="8" maxlength="16">
+                </div>
+                <div id="passwordErr" class="text-danger small" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnChangePw" onclick="changePassword()">변경</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center" id="alertMsg" style="white-space:pre-line;"></div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="alertOk">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
+<script th:src="@{/static/js/admin/user/userInfo.js}" ></script>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

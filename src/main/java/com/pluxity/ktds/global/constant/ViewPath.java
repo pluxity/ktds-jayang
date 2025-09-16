@@ -15,6 +15,7 @@ public enum ViewPath {
     ADMIN_BUILDING_INDOOR("/admin/building/indoor", "admin/building/indoor"),
     ADMIN_VIEWER("/admin/viewer", "admin/viewer/viewer"),
     ADMIN_USER("/admin/user", "admin/user/user"),
+    ADMIN_USER_INFO("/admin/userInfo", "admin/user/userInfo"),
     ADMIN_USER_GROUP("/admin/user-group", "admin/user-group/user-group"),
     ADMIN_SYSTEM_SETTING("/admin/system-setting", "admin/system-setting/system-setting"),
     ADMIN_NOTICE("/admin/notice", "admin/notice/notice"),

@@ -19,7 +19,8 @@ const renderBuildingList = (buildingList) => {
         data.buildingFile.originName === null
             ? ''
             : gridjs.html(
-                `<a href="/Building/${data.buildingFile.directory}/${data.version}/${data.buildingFile.storedName}.${data.buildingFile.extension}">
+                `<a href="/Building/${data.buildingFile.directory}/${data.version}/${data.buildingFile.storedName}.${data.buildingFile.extension}"
+                            download="${data.buildingFile.originName}">
                             ${data.buildingFile.originName}
                       </a>`,
             ),

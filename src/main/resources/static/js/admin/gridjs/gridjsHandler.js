@@ -20,7 +20,10 @@ function addHeaderSelectAll(columns) {
         return [
             {
                 ...columns[0],
-                name: gridjs.html(`선택 <input type="checkbox" id="select-all-checkbox" style="margin-left:4px;">`)
+                name: gridjs.html(`
+                    <div style="display:flex; justify-content:center; align-items:center; width:100%;">
+                        <input type="checkbox" id="select-all-checkbox">
+                    </div>`)
             },
             ...columns.slice(1),
         ];

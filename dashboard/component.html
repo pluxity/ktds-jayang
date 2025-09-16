@@ -658,6 +658,74 @@
        </div>
    </div> 
 
+   <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 장비 목록</div>
+   <div class="popup-basic" style="position: relative; z-index: 8; margin-bottom: 50px; top: 40px;">
+        <div class="popup-basic__head">
+        <h2 class="name">CCTV</h2>
+        <button type="button" class="close"><span class="hide">close</span></button>
+        </div>
+        <!-- 장비 목록 영역 -->
+        <div class="search-result">
+            <div class="search-result__filter">
+                <!-- select-box -->
+                <!-- [D] width값 지정 -->
+                <div class="select-box" style="width:100px;">
+                        <!-- [D] 
+                            select-box 선택 완료 시 select-box__btn--selected 클래스 추가 
+                            select-box 클릭 시 select-box__btn--active 클래스 추가 
+                            select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                            -->
+                        <span class="select-box__btn">건물 A</span>
+                        <div class="select-box__content">
+                            <ul>
+                                <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                <li class="selected">건물 A</li>
+                                <li>건물 B</li>
+                                <li>건물 A</li>
+                                <li>건물 B</li>
+                                <li>건물 A</li>
+                                <li>건물 B</li>
+                                <li>건물 A</li>
+                                <li>건물 B</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="select-box" style="width:80px;">
+                        <!-- [D] 
+                            select-box 클릭 시 select-box__btn--active 클래스 추가 
+                            select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                            -->
+                        <span class="select-box__btn -select-box__btn--active">건물 A</span>
+                        <div class="select-box__content">
+                            <ul>
+                                <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                <li class="selected">건물 A</li>
+                                <li>건물 B</li>
+                                <li>건물 A</li>
+                                <li>건물 B</li>
+                                <li>건물 A</li>
+                                <li>건물 B</li>
+                                <li>건물 A</li>
+                                <li>건물 B</li>
+                            </ul>
+                        </div>
+                    </div>
+                <!-- input[type="text"]-->
+                <!-- [D] width값 지정 -->
+                <input type="text" placeholder="장비명" style="width:100px;">
+                <button type="button" class="button button--solid-middle">검색</button>
+            </div>
+            <div class="search-result__contents">
+                <div class="title">
+                    총 233,214,123<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+                </div>
+                <div class="search-result__empty">
+                    <p>검색 결과가 없습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div> 
+
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 가상순찰</div>
    <div class="popup-basic" style="position: relative; z-index: 7; margin-bottom: 50px; top: 60px;">
         <div class="popup-basic__head">
@@ -1308,6 +1376,240 @@
             </div>
         </div>
    </div>
+
+   <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 기본 팝업 - 이벤트 현황 전체</div>
+   <div class="popup-basic popup-basic--wide" style="position: relative; z-index: 4; margin-bottom: 50px; top: 120px;">
+        <div class="popup-basic__head">
+            <h2 class="name">이벤트 현황 전체</h2>
+            <button type="button" class="close"><span class="hide">close</span></button>
+        </div>
+        <div class="search-result">
+            <div class="search-result__filter">
+                <!-- select-box -->
+                <!-- [D] width값 지정 -->
+                <div class="select-box" style="width:100px;">
+                    <!-- [D] 
+                    select-box 클릭 시 select-box__btn--active 클래스 추가 
+                    select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                    -->
+                    <span class="select-box__btn">건물 A</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>건물 A</li>
+                            <li>건물 B</li>
+                            <li>건물 A</li>
+                            <li>건물 B</li>
+                            <li>건물 A</li>
+                            <li>건물 B</li>
+                            <li>건물 A</li>
+                            <li>건물 B</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="select-box" style="width:80px;">
+                    <!-- [D] 
+                    select-box 클릭 시 select-box__btn--active 클래스 추가 
+                    select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                    -->
+                    <span class="select-box__btn -select-box__btn--active">23층</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>1층</li>
+                            <li>2층</li>
+                            <li>3층</li>
+                            <li>4층</li>
+                            <li>5층</li>
+                            <li>6층</li>
+                            <li>7층</li>
+                            <li>8층</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="select-box" style="width:120px;">
+                    <!-- [D] 
+                    select-box 클릭 시 select-box__btn--active 클래스 추가 
+                    select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                    -->
+                    <span class="select-box__btn -select-box__btn--active">공조기</span>
+                    <div class="select-box__content">
+                        <ul>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                            <li>공조기</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="date-pickerwrap">
+                    <div class="date-picker">
+                        <input type="date">
+                    </div>
+                    <span>~</span>
+                    <div class="date-picker">
+                        <input type="date">
+                    </div>
+                </div>
+                <!-- input[type="text"]-->
+                <!-- [D] width값 지정 -->
+                <input type="text" placeholder="화재발생" style="width:277px;">
+                <button type="button" class="button button--solid-middle">검색</button>
+            </div>
+            <div class="search-result__checkbox -search-result__checkbox--active">
+                <div class="inner">
+                    <!-- [D] 아래 펼침 버튼 클릭 시 btn--open 및 부모에 search-result__checkbox--active 클래스 추가 -->
+                    <button type="button" class="btn btn--open"><span class="hide">펼침</span></button>
+                    <ul>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check01">
+                                <label for="check01">이벤트 전체</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check02">
+                                <label for="check02">수위 상승</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check03">
+                                <label for="check03 ">화재감지</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check04">
+                                <label for="check04">온도상승</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check05">
+                                <label for="check05">불꽃감지</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check06">
+                                <label for="check06">정전</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check07">
+                                <label for="check07">엘리베이터 끼임 사고</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check08">
+                                <label for="check08">쓰러짐 발생</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check09">
+                                <label for="check09">침입 탐지</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check10">
+                                <label for="check10">이벤트 명칭 1</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check11">
+                                <label for="check11">이벤트 명칭 B</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check12">
+                                <label for="check12">이벤트 명칭 C</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check13">
+                                <label for="check13">이벤트 명칭 F</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check14">
+                                <label for="check14">이벤트 명칭 5555</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check15">
+                                <label for="check15">이벤트 명칭 6666</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check16">
+                                <label for="check16">이벤트 명칭 7777</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check17">
+                                <label for="check17">이벤트 명칭 8888</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check18">
+                                <label for="check18">이벤트 명칭 9999</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check19">
+                                <label for="check19">이벤트 명칭 101010</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check20">
+                                <label for="check20">이벤트 명칭 B</label>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="checkbox-wrap">
+                                <input type="checkbox" id="check21">
+                                <label for="check21">이벤트 명칭 B</label>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="search-result__contents">
+                <div class="title">
+                    총 233,214,123<button type="button" class="reflesh"><span class="hide">새로고침</span></button>
+                </div>
+                <div class="search-result__empty">
+                    <p>검색 결과가 없습니다.</p>
+                </div>
+            </div>
+            <div class="search-result__footer">
+                <div class="search-result__paging">
+                    <button type="button" class="left"><span class="hide">left</span></button>
+                    <div class="number"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                    <button type="button" class="right"><span class="hide">right</span></button>
+                </div>
+                <button type="button" class="download">데이터 다운로드</button>
+            </div>
+        </div>
+    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#DF1344;">[Popup] 기본 팝업 - 설비 부분 미확정 상태로 작업 보류</div>
    <div class="popup-basic popup-basic--wide" style="position: relative; z-index: 3; margin-bottom: 50px; top: 140px;">

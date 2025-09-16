@@ -306,7 +306,12 @@
                 </div>
                 <div class="event-state__group">
                     <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
-                    <table class="table">
+                    <!-- [D] 이벤트 발생 내역이 없을 경우 노출 -->
+                    <div class="empty">
+                        이벤트 발생 내역이 없습니다.
+                    </div>
+                    <!-- [D] 이벤트 발생 내역이 있을 경우 노출 -->
+                    <!-- <table class="table">
                         <caption class="hide">출입구</caption>
  
                         <thead>
@@ -502,7 +507,7 @@
                                 <td>23:54:12</td>
                             </tr>   
                         </tbody>
-                    </table>
+                    </table> -->
                 </div>
             </aside>
         </div>
@@ -1083,7 +1088,7 @@
         </div>
 
         <!-- 시스템 에어컨 팝업 -->
-        <div class="popup-basic popup-basic--xwide" style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%); display:none;">
+        <div class="popup-basic popup-basic--xwide" style="position:fixed;z-index:10001;top:50%;left:50%;transform:translate(-50%,-50%); display:none">
             <div class="popup-basic__head">
                 <h2 class="name">시스템 에어컨</h2>
                 <button type="button" class="close"><span class="hide">close</span></button>

@@ -119,6 +119,7 @@
   line-height: 1.5rem;
   color: var(--color-grayscale-light);
   font-size: 0.75rem;
+  cursor: pointer;
 }
 
 .button-move::after {
@@ -510,7 +511,13 @@ input[type="text"]:disabled, input[type="password"]:disabled {
 }
 
 .popup-basic--xwide .search-result {
-  height: calc(100% - 3.9rem);
+  height: calc(100% - 4.4rem);
+}
+
+@media (max-width: 1400px) {
+  .popup-basic--xwide .search-result {
+    height: calc(100% - 3.9rem);
+  }
 }
 
 .search-result__filter {
@@ -550,6 +557,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   background: url("/static/images/viewer/icon14/icon14.svg") no-repeat -11.25rem -0.625rem;
   width: 0.875rem;
   height: 0.875rem;
+  cursor: pointer;
 }
 
 .search-result__empty {
@@ -562,11 +570,13 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  height: 100%;
+  border-top: 0.125rem solid var(--color-grayscale02);
+  height: calc(100% - 55%);
 }
 
 .search-result__empty p {
   color: var(--color-grayscale03);
+  font-size: 0.875rem;
 }
 
 .search-result__checkbox {
@@ -653,6 +663,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   line-height: 1.875rem;
   color: var(--color-grayscale01);
   font-size: 0.75rem;
+  cursor: pointer;
 }
 
 .search-result__footer .download::after {

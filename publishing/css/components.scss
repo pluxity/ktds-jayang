@@ -65,7 +65,7 @@ $base-img-path:"/static/images/viewer/";
         position:relative;
         padding:0 0.625rem; border-radius:0.4375rem; background-color:var(--color-grayscale-dark);
         height:1.5rem;
-        line-height:1.5rem; color:var(--color-grayscale-light); font-size:0.75rem;
+        line-height:1.5rem; color:var(--color-grayscale-light); font-size:0.75rem; cursor:pointer;
         &::after{
             content:'';
             display:inline-block; vertical-align:middle;
@@ -83,7 +83,7 @@ $base-img-path:"/static/images/viewer/";
 @mixin badge{
     .badge{
         display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
-        margin:0 0.3125rem; background-color:#cb0000; border-radius:100%; 
+        margin:0 0.3125rem; padding:0.125rem 0.165rem 0.1875rem 0.125rem; background-color:#cb0000; border-radius:100%; box-sizing:border-box;
         width:1.25rem; height:1.1875rem;
         color:#fff; font-size:0.75rem; font-weight:800;
     }
@@ -299,7 +299,10 @@ $base-img-path:"/static/images/viewer/";
                     height:calc(100% - 3.6rem);
                 }
                 .popup-basic--xwide &{
-                    height:calc(100% - 3.9rem);
+                    height:calc(100% - 4.4rem);
+                    @media (max-width: 1400px) {
+                        height:calc(100% - 3.9rem);
+                    }
                 }
                 &__filter{
                     display:flex; grid-gap:0.3125rem;
@@ -317,13 +320,14 @@ $base-img-path:"/static/images/viewer/";
                     .reflesh{
                         display:inline-block;
                         background:url('#{$base-img-path}icon14/icon14.svg') no-repeat -11.25rem -0.625rem;
-                        width:0.875rem; height:0.875rem; 
+                        width:0.875rem; height:0.875rem; cursor:pointer;
                     }
                 }
                 &__empty{
                     display:flex; align-items:center; justify-content:center;
-                    height:100%;
-                    p{color:var(--color-grayscale03);}
+                    border-top:0.125rem solid var(--color-grayscale02);
+                    height:calc(100% - 55%); 
+                    p{color:var(--color-grayscale03); font-size:0.875rem;}
                 }
                 &__checkbox{
                     position:relative;
@@ -364,7 +368,7 @@ $base-img-path:"/static/images/viewer/";
                     .download{
                         position:absolute; right:0;
                         padding:0 0.625rem; background-color:var(--color-grayscale-dark); border-radius:0.4375rem;
-                        line-height:1.875rem; color:var(--color-grayscale01); font-size:0.75rem;
+                        line-height:1.875rem; color:var(--color-grayscale01); font-size:0.75rem; cursor:pointer;
                         &::after{
                             content:'';
                             display:inline-block; vertical-align:middle;
@@ -1104,7 +1108,7 @@ $base-img-path:"/static/images/viewer/";
             position:relative; display:flex;
             padding:0.625rem 1.5rem 0.625rem 0.625rem; background-color:var(--color-black); border-bottom:1px solid var(--color-grayscale-dark); border-top:1px solid var(--color-grayscale02); box-sizing:border-box;
             width:100%; 
-            color:var(--color-grayscale01); text-align:left; font-size:0.75rem;
+            color:var(--color-grayscale01); text-align:left; font-size:0.75rem; cursor:pointer;
             .sub{margin:0 0.625rem 0 auto;}
             &:first-of-type{border-top-width:2px;}
             &::after{
@@ -1714,6 +1718,7 @@ $base-img-path:"/static/images/viewer/";
 @mixin eventState{
     .event-state{
         position:fixed; top:5rem; right:-24.625rem; transition:right 0.3s ease; z-index:50;
+        display:flex; flex-direction:column;
         width:25.625rem; height:calc(100% - 5rem); padding:1.25rem 1.25rem 1.875rem; box-sizing:border-box;
         background-color:#34343C; box-shadow:-0.25rem 0.125rem 0.3125rem 0 rgba(0, 0, 0, 0.35); backdrop-filter:blur(0.625rem); border-bottom-left-radius:1.25rem;
         
@@ -1778,7 +1783,17 @@ $base-img-path:"/static/images/viewer/";
             background:url('#{$base-img-path}icon20/icon_go.svg') no-repeat center center; 
             cursor:pointer;
         }
-        &__group + &__group{margin-top:1.5875rem;}
+        &__group{
+            + .event-state__group{margin-top:1.5875rem;}
+            &:not(:has(.event-state__chart)){
+                height:100%;
+            }
+            .empty{
+                display:flex; align-items:center; justify-content:center;
+                height:100%;
+                font-size:0.875rem; color:var(--color-grayscale02);
+            }
+        }
         &__title, &__subtitle{color:#fff;}
         &__title{
             display:flex; align-items:center; grid-gap:0.3125rem; 

@@ -253,7 +253,6 @@ $base-img-path:"/static/images/viewer/";
                 &--grid5{
                     display:grid; grid-template-columns:repeat(5, 13.75rem); grid-template-rows:repeat(4, 8.125rem);
                     grid-column-gap:0.9375rem; grid-row-gap:1.25rem;
-                    li:nth-child(5n){border-right:0;}
                 }
 
                 li{
@@ -266,7 +265,7 @@ $base-img-path:"/static/images/viewer/";
                     height:1.875rem;
                     &__state{font-weight:900; margin-right:0.62rem;}
                     &__title{
-                        display:flex;
+                        display:flex; align-items:center;
                         color:#fff; font-size:0.875rem;
                     }
                     &__detail{

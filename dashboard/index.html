@@ -242,7 +242,12 @@
                 </div>
                 <div class="event-state__group">
                     <div class="event-state__subtitle">실시간 이벤트(최근 24시간)</div>
-                    <table class="table">
+                    <!-- [D] 이벤트 발생 내역이 없을 경우 노출 -->
+                    <div class="empty">
+                        이벤트 발생 내역이 없습니다.
+                    </div>
+                    <!-- [D] 이벤트 발생 내역이 있을 경우 노출 -->
+                    <!-- <table class="table">
                         <caption class="hide">출입구</caption>
  
                         <thead>
@@ -333,19 +338,35 @@
                                 <td>23:54:12</td>
                             </tr>     
                         </tbody>
-                    </table>
+                    </table> -->
                 </div>
                 <div class="event-state__group">
                     <div class="event-state__subtitle">유형별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
+                    <!-- [D] 이벤트 발생 내역이 없을 경우 노출 -->
                     <div class="event-state__chart">
+                        <div class="empty">
+                            이벤트 발생 내역이 없습니다.
+                        </div>
                     </div>
+                    <!-- [D] 이벤트 발생 내역이 있을 경우 노출 -->
+                    <!-- [D] 차트 들어갈 영역  
+                        <div class="event-state__chart">
+                        </div>
+                    ---->
                 </div>
                 <div class="event-state__group">
                     <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
-                    <!-- [D] 차트 들어갈 영역 ---->
+                    <!-- [D] 이벤트 발생 내역이 없을 경우 노출 -->
                     <div class="event-state__chart">
+                        <div class="empty">
+                            이벤트 발생 내역이 없습니다.
+                        </div>
                     </div>
+                    <!-- [D] 이벤트 발생 내역이 있을 경우 노출 -->
+                    <!-- [D] 차트 들어갈 영역 
+                        <div class="event-state__chart">
+                        </div>
+                     ---->
                 </div>
             </aside>
 

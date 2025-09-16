@@ -104,6 +104,20 @@
         const floor = document.querySelector('#floor-info .floor-info__detail ul li.active');
         const floorNo = floor ? Number(floor.getAttribute('floor-id')) : null;
         const isActive = event.target.classList.toggle('active');
+        const checkBox = document.querySelector('#equipmentCheckBox');
+
+        const equipments = document.querySelectorAll('#equipmentGroup a');
+
+        let isAll = true;
+        for(const a of equipments) {
+            if(!a.classList.contains('active')) {
+                isAll = false;
+                break;
+            }
+        }
+
+        checkBox.checked = isAll;
+
 
         if (floorNo !== null) {
             if (isActive) {

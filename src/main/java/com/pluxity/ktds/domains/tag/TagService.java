@@ -41,7 +41,6 @@ public class TagService {
     @Transactional
     public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
 
-        boolean isAllBuilding = (buildingId == null || buildingName == null);
         List<Poi> pois = poiRepository.findByBuildingIdAndMiddleCategoryName(buildingId, "승강기");
 
         Map<Long, TagResponseDTO> poiTagResponseMap = new HashMap<>();

@@ -1670,7 +1670,7 @@
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-direction: column;
   color: var(--color-grayscale01);
 }

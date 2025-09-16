@@ -13,6 +13,7 @@ function renderUserInfoTable() {
 
     document.getElementById("user-id").textContent = userInfoData.username;
     document.getElementById("user-name").textContent = userInfoData.name;
+    document.getElementById("user-group").textContent = userInfoData.groupName;
 }
 
 function getCookie(name){

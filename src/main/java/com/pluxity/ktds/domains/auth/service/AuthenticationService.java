@@ -9,7 +9,9 @@ import com.pluxity.ktds.domains.user.service.UserService;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.security.CustomUserDetails;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +20,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,12 +59,23 @@ public class AuthenticationService {
   }
 
   @Transactional
-  public SignInResponseDTO signIn(final SignInRequestDTO signInRequestDto, HttpServletResponse response) {
+  public SignInResponseDTO signIn(final SignInRequestDTO signInRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
     try {
       Authentication authentication = authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(signInRequestDto.username(), signInRequestDto.password())
       );
+
+      SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+      securityContext.setAuthentication(authentication);
+      SecurityContextHolder.setContext(securityContext);
+
+//      SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+//      contextRepository.saveContext(securityContext, request, response);
+
+      HttpSession session = request.getSession(true);
+      session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
+
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       User user = userService.findUserByUsername(userDetails.getUsername());
 

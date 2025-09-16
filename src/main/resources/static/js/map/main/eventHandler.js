@@ -309,17 +309,17 @@
                 .forEach(btn => btn.classList.remove('select-box__btn--active'));
         }
 
-        firstTab.addEventListener('click', () => {
+        firstTab.onclick = () => {
             switchTab(firstTab, secondTab, firstContent, secondContent);
             clearActiveBtns(secondContent);
             layerPopup.setElevator();
-        });
+        };
 
-        secondTab.addEventListener('click', () => {
+        secondTab.onclick = () => {
             switchTab(secondTab, firstTab, secondContent, firstContent);
             clearActiveBtns(firstContent);
             layerPopup.setEscalator();
-        });
+        };
 
         // 초기 상태 설정
         switchTab(firstTab, secondTab, firstContent, secondContent);

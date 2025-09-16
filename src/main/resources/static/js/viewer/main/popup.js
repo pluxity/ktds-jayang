@@ -1827,6 +1827,7 @@ const layerPopup = (function () {
                     <div class="head">
                         <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
                         <a class="head__button" href="javascript:void(0);"><span class="hide">도면 이동</span></a>
+                        <input type="hidden" name="poiId" value="${poiInfo.id}">
                     </div>
                     <div class="detail">
                         <div class="detail__state">
@@ -1839,6 +1840,17 @@ const layerPopup = (function () {
                 `;
             elevatorUl.appendChild(elevatorLi);
             renderCount++;
+
+            const moveBtn = elevatorLi.querySelector('.head__button');
+            if (moveBtn) {
+                moveBtn.onclick = () => {
+                    const popup = document.querySelector('#elevatorPop');
+                    if (popup) {
+                        closePopup(popup);
+                    }
+                    movePoi(poiInfo.id);
+                };
+            }
         });
         document.getElementById('totalElevatorCnt').textContent = `총 ${renderCount}대`;
     };
@@ -1999,6 +2011,7 @@ const layerPopup = (function () {
                     <div class="head">
                         <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
                         <a class="head__button" href="javascript:void(0);"><span class="hide">도면 이동</span></a>
+                        <input type="hidden" name="poiId" value="${poiInfo.id}">
                     </div>
                     <div class="detail">  
                         <div class="detail__state ${detailState}">
@@ -2012,6 +2025,17 @@ const layerPopup = (function () {
                 `;
             escalatorUl.appendChild(escalatorLi);
             renderCount++;
+
+            const moveBtn = escalatorLi.querySelector('.head__button');
+            if (moveBtn) {
+                moveBtn.onclick = () => {
+                    const popup = document.querySelector('#elevatorPop');
+                    if (popup) {
+                        closePopup(popup);
+                    }
+                    movePoi(poiInfo.id);
+                };
+            }
         });
         document.getElementById('totalEscalatorCnt').textContent = `총 ${renderCount}대`;
     };
@@ -2020,6 +2044,18 @@ const layerPopup = (function () {
         escalatorFilterDirection = '방향 전체';
         escalatorFilterState = '상태 전체';
         paged.escalator.currentPage = 1;
+        const statusBtn = document.querySelector('#escalatorStatus .select-box__btn');
+        const driveBtn  = document.querySelector('#escalatorDrive .select-box__btn');
+
+        if (statusBtn) {
+            statusBtn.textContent = '상태 전체';
+            statusBtn.classList.remove('select-box__btn--active', 'select-box__btn--selected');
+        }
+        if (driveBtn) {
+            driveBtn.textContent = '방향 전체';
+            driveBtn.classList.remove('select-box__btn--active', 'select-box__btn--selected');
+        }
+
         setTab('escalator');
 
         const fetchEscalatorData = () => {

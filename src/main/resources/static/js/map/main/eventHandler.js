@@ -1021,26 +1021,28 @@
 
         patrolList.forEach((patrol) => {
             // pointName 별로 그룹화된 리스트 생성
-            let pointsHTML = patrol.patrolPoints.map((point) => {
-                // pois 배열을 기반으로 <li> 태그 생성
-                let poisHTML = point.pois
-                    .map((poiId) =>{
-                        const poiData = poiList.find((poi) => poi.id === poiId);
-                        return poiData ? `<li data-id="${poiData.id}">${poiData.name}</li>` : `` ;
-                    })
-                    .join('');
+            let pointsHTML = patrol.patrolPoints
+                .filter((point) => point.pois && point.pois.length > 0)
+                .map((point) => {
+                    // pois 배열을 기반으로 <li> 태그 생성
+                    let poisHTML = point.pois
+                        .map((poiId) =>{
+                            const poiData = poiList.find((poi) => poi.id === poiId);
+                            return poiData ? `<li data-id="${poiData.id}">${poiData.name}</li>` : `` ;
+                        })
+                        .join('');
 
-                return `
-                    <li>
-                        <div class="location">
-                            <div class="location__title" data-id="${point.id}">${point.name}</div>
-                            <ul class="poi__title">
-                                ${poisHTML}
-                            </ul>
-                        </div>
-                    </li>
-                `;
-            }).join('');
+                    return `
+                        <li>
+                            <div class="location">
+                                <div class="location__title" data-id="${point.id}">${point.name}</div>
+                                <ul class="poi__title">
+                                    ${poisHTML}
+                                </ul>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
 
             patrolContentList.innerHTML += `
         <button class="accordion__btn" type="button" data-id="${patrol.id}">

@@ -1629,7 +1629,10 @@ const layerPopup = (function () {
     }
 
     function renderPagedPagination(type, totalCount) {
-        const { entries, currentPage } = paged[type];
+        const p = paged[type];
+        const entries = p.entries;
+        let currentPage = p.currentPage;
+
         const validEntries = entries.filter(([idStr]) =>
             PoiManager.findById(Number(idStr))
         );
@@ -1638,6 +1641,8 @@ const layerPopup = (function () {
         if (paged[type].currentPage > totalPages) {
             paged[type].currentPage = totalPages || 1;
         }
+
+        currentPage = p.currentPage;
 
         const content = document.getElementById(`${type}Content`);
         const paging = content.querySelector('.search-result__paging');
@@ -1653,7 +1658,7 @@ const layerPopup = (function () {
             span.onclick = () => {
                 paged[type].currentPage = i;
                 renderPagedPage(type);
-                renderPagedPagination(type);
+                renderPagedPagination(type, totalCount);
             };
             numberDiv.appendChild(span);
         }
@@ -1664,14 +1669,14 @@ const layerPopup = (function () {
             if (paged[type].currentPage > 1) {
                 paged[type].currentPage--;
                 renderPagedPage(type);
-                renderPagedPagination(type);
+                renderPagedPagination(type, totalCount);
             }
         };
         nextBtn.onclick = () => {
             if (paged[type].currentPage < totalPages) {
                 paged[type].currentPage++;
                 renderPagedPage(type);
-                renderPagedPagination(type);
+                renderPagedPagination(type, totalCount);
             }
         };
     }

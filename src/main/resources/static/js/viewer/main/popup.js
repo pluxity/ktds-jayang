@@ -1238,15 +1238,49 @@ const layerPopup = (function () {
     let escalatorFilterState = '상태 전체';
 
     // set building, floor tab
-    const setTab = (type, { onBuildingChange = () => {}, onFloorChange = () => {}, onStatusChange = () => {} } = {}) => {
+    const setTab = (type, { onBuildingChange = () => {} } = {}) => {
         const buildingBox = document.getElementById(`${type}Building`);
         const buildingBtn = buildingBox?.querySelector('.select-box__btn');
         const statusBox   = document.getElementById(`${type}Status`);
+        const statusBtn   = statusBox?.querySelector('.select-box__btn');
         let buildingList = BuildingManager.findAll();
-        const sysPopup = document.getElementById(`${type}Pop`);
         const buildingUl = document.getElementById(`${type}BuildingUl`);
 
         let currentBuilding = null;
+        let currentStatus = '상태 전체';
+
+        const elevatorSearchBtn = document.getElementById('elevatorSearchBtn');
+        const escalatorSearchBtn = document.getElementById('escalatorSearchBtn');
+        if (elevatorSearchBtn) {
+            elevatorSearchBtn.onclick = () => {
+                const buildingName = buildingBtn?.textContent.trim();
+                const statusName = statusBtn?.textContent.trim();
+
+                if (buildingName) {
+                    const selectedBuilding = BuildingManager.findAll()
+                        .find(b => b.name === buildingName);
+                    if (selectedBuilding) {
+                        currentBuilding = selectedBuilding;
+                        onBuildingChange(currentBuilding);
+                    }
+                }
+                if (statusName) {
+                    filterElevatorByStatus(statusName);
+                }
+            }
+        }
+
+        if (escalatorSearchBtn) {
+            escalatorSearchBtn.onclick = () => {
+                const statusName   = statusBtn?.textContent.trim();
+                const driveBox = document.getElementById('escalatorDrive');
+                const driveBtn = driveBox?.querySelector('.select-box__btn');
+                const driveName = driveBtn?.textContent.trim();
+                console.log("driveName : ", driveName);
+                console.log("statusName : ", statusName);
+                filterEscalator(driveName || '방향 전체', statusName || '상태 전체');
+            };
+        }
 
         const toggleBtnActive = (btn, ...others) => {
             if (!btn.classList.contains('select-box__disabled')) {
@@ -1270,16 +1304,16 @@ const layerPopup = (function () {
             allLi.onclick = () => {
                 statusBtn.textContent = '상태 전체';
                 statusBtn.classList.remove('select-box__btn--active');
-                filterElevatorByStatus('상태 전체');
+                // filterElevatorByStatus('상태 전체');
             };
             newUl.appendChild(allLi);
 
-            const statusItems = ['A', 'B'].includes(buildingName)
+            const statusItems = ['A동', 'B동'].includes(buildingName)
                 ? ['정상운전', '운전휴지', '독립운전', '전용운전', '보수운전', '정전운전', '화재운전', '지진운전', '고장']
                 : ['자동운전', '고장', '점검중', '파킹', '독립운전', '중량초과', '1차소방운전', '2차소방운전', '화재관제운전', '화재관제운전귀착'];
 
             statusBtn.textContent = '상태 전체';
-            filterElevatorByStatus('상태 전체');
+            // filterElevatorByStatus('상태 전체');
 
             statusItems.forEach(text => {
                 const li = document.createElement('li');
@@ -1289,7 +1323,7 @@ const layerPopup = (function () {
                     statusBtn.textContent = text;
                     statusBtn.classList.add('select-box__btn--selected')
                     statusBtn.classList.remove('select-box__btn--active');
-                    filterElevatorByStatus(text);
+                    // filterElevatorByStatus(text);
                 };
                 newUl.appendChild(li);
             });
@@ -1325,11 +1359,11 @@ const layerPopup = (function () {
                     statusBtn.classList.add('select-box__btn--selected');
                     statusBtn.classList.remove('select-box__btn--active');
                     escalatorFilterState = '상태 전체';
-                    filterEscalator(escalatorFilterDirection, escalatorFilterState);
+                    // filterEscalator(escalatorFilterDirection, escalatorFilterState);
                 };
                 statusUl.appendChild(allLi);
 
-                ['자동', '통신이상', '전원차단', '고장'].forEach(text => {
+                ['정지', '자동', '고장'].forEach(text => {
                     const li = document.createElement('li');
                     li.dataset.id  = text;
                     li.textContent = text;
@@ -1338,7 +1372,7 @@ const layerPopup = (function () {
                         statusBtn.classList.add('select-box__btn--selected');
                         statusBtn.classList.remove('select-box__btn--active');
                         escalatorFilterState = text;
-                        filterEscalator(escalatorFilterDirection, escalatorFilterState);
+                        // filterEscalator(escalatorFilterDirection, escalatorFilterState);
                     };
                     statusUl.appendChild(li);
                 });
@@ -1355,7 +1389,7 @@ const layerPopup = (function () {
                     driveBtn.classList.add('select-box__btn--selected');
                     driveBtn.classList.remove('select-box__btn--active');
                     escalatorFilterDirection = '방향 전체';
-                    filterEscalator(escalatorFilterDirection, escalatorFilterState);
+                    // filterEscalator(escalatorFilterDirection, escalatorFilterState);
                 };
                 driveUl.appendChild(allLi);
                 ['상행', '하행'].forEach(text => {
@@ -1367,7 +1401,7 @@ const layerPopup = (function () {
                         driveBtn.classList.add('select-box__btn--selected');
                         driveBtn.classList.remove('select-box__btn--active');
                         escalatorFilterDirection = text;
-                        filterEscalator(escalatorFilterDirection, escalatorFilterState);
+                        // filterEscalator(escalatorFilterDirection, escalatorFilterState);
                     }
                     driveUl.appendChild(li);
                 });
@@ -1380,7 +1414,7 @@ const layerPopup = (function () {
         }
 
         if (type === 'elevator') {
-            const defaultBuilding = buildingList.find(b => b.name === 'A');
+            const defaultBuilding = buildingList.find(b => b.code === 'A');
             if (defaultBuilding) {
                 currentBuilding = defaultBuilding;
                 if (buildingBtn) {
@@ -1403,7 +1437,7 @@ const layerPopup = (function () {
                             buildingBtn.classList.remove('select-box__btn--active');
                             buildingBtn.classList.add('select-box__btn--selected');
                         }
-                        onBuildingChange(building);
+                        // onBuildingChange(building);
                         updateStatusList(building.name);
                     };
                     buildingUl.appendChild(li);
@@ -1528,31 +1562,78 @@ const layerPopup = (function () {
         p.currentPage = 1;
         p.mode = mode;
         renderPagedPage(type);
-        renderPagedPagination(type);
+        // renderPagedPagination(type);
     }
 
     function renderPagedPage(type) {
         const { entries, currentPage, mode } = paged[type];
 
+        // Poi 존재하는 것만
         const validEntries = entries.filter(([idStr]) =>
             PoiManager.findById(Number(idStr))
         );
-        const slice = validEntries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+        // 타입별 필터링
+        let filteredEntries = validEntries;
+        if (type === 'elevator') {
+            if (currentFilterStatus !== '상태 전체') {
+                filteredEntries = validEntries.filter(([idStr, dto]) => {
+                    const tags = dto.TAGs;
+                    const tagMap = tags.reduce((map, t) => {
+                        const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                        map[key] = t.currentValue;
+                        return map;
+                    }, {});
+                    return tagMap['DrivingState'] === currentFilterStatus;
+                });
+            }
+        } else if (type === 'escalator') {
+            filteredEntries = validEntries.filter(([idStr, dto]) => {
+                const tagMap = dto.TAGs.reduce((map, t) => {
+                    const key = t.tagName.substring(t.tagName.lastIndexOf('-') + 1);
+                    map[key] = { value: t.currentValue };
+                    return map;
+                }, {});
+
+                const isUp = tagMap['UpDir']?.value !== 'OFF';
+                const directionText = isUp ? '상행' : '하행';
+
+                const activeKey = ['Stop','Run','Fault'].find(key => tagMap[key]?.value !== 'OFF');
+                let stateText = '';
+                switch (activeKey) {
+                    case 'Stop':  stateText = '정지'; break;
+                    case 'Run':   stateText = '자동'; break;
+                    case 'Fault': stateText = '고장'; break;
+                }
+
+                if (escalatorFilterDirection !== '방향 전체' && directionText !== escalatorFilterDirection) return false;
+                if (escalatorFilterState !== '상태 전체' && stateText !== escalatorFilterState) return false;
+                return true;
+            });
+        }
+
+        const totalCount = filteredEntries.length;
+
+        const slice = filteredEntries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
         const pageData = Object.fromEntries(slice);
 
         if (type === 'elevator') {
-            renderElevatorList(pageData, mode, currentFilterStatus);
+            renderElevatorList(pageData, mode);
+            document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
+            renderPagedPagination('elevator', totalCount);
         } else {
-            renderEscalatorList(pageData, escalatorFilterDirection, escalatorFilterState);
+            renderEscalatorList(pageData);
+            document.getElementById('totalEscalatorCnt').textContent = `총 ${totalCount}대`;
+            renderPagedPagination('escalator', totalCount);
         }
     }
 
-    function renderPagedPagination(type) {
+    function renderPagedPagination(type, totalCount) {
         const { entries, currentPage } = paged[type];
         const validEntries = entries.filter(([idStr]) =>
             PoiManager.findById(Number(idStr))
         );
-        const totalPages = Math.ceil(validEntries.length / pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
 
         if (paged[type].currentPage > totalPages) {
             paged[type].currentPage = totalPages || 1;
@@ -1595,7 +1676,7 @@ const layerPopup = (function () {
         };
     }
 
-    const renderElevatorList = (dataById, mode = null, filterStatus = '상태 전체') => {
+    const renderElevatorList = (dataById, mode = null) => {
         const elevatorUl = document.getElementById('elevatorList');
         elevatorUl.innerHTML = '';
 
@@ -1731,10 +1812,6 @@ const layerPopup = (function () {
                 }
             }
 
-            if (filterStatus !== '상태 전체' && stateText !== filterStatus) {
-                return;
-            }
-
             // DOM 렌더링
             const elevatorLi = document.createElement('li');
             const buildingLabel = `[${poiInfo.property.buildingName}]`;
@@ -1832,6 +1909,8 @@ const layerPopup = (function () {
     }
 
     const setElevator = () => {
+        currentFilterStatus = '상태 전체';
+        paged.elevator.currentPage = 1;
         setTab('elevator', {
             onBuildingChange: (building) => {
                 const fetchElevatorData = () => {
@@ -1857,7 +1936,7 @@ const layerPopup = (function () {
         });
     };
 
-    const renderEscalatorList = (dataById, filterDirection = '방향 전체', filterState = '상태 전체') => {
+    const renderEscalatorList = (dataById) => {
         const escalatorUl = document.getElementById('escalatorList');
         escalatorUl.innerHTML = '';
         let renderCount = 0;
@@ -1911,9 +1990,6 @@ const layerPopup = (function () {
                     stateLabel = '';
             }
 
-            if (filterDirection !== '방향 전체' && directionText !== filterDirection) return;
-            if (filterState !== '상태 전체' && stateText !== filterState) return;
-
             escalatorLi.innerHTML = `
                     <div class="head">
                         <div class="head__title">${buildingLabel} [${poiInfo.property.floorName}] ${poiInfo.name}</div>
@@ -1936,7 +2012,9 @@ const layerPopup = (function () {
     };
 
     const setEscalator = () => {
-
+        escalatorFilterDirection = '방향 전체';
+        escalatorFilterState = '상태 전체';
+        paged.escalator.currentPage = 1;
         setTab('escalator');
 
         const fetchEscalatorData = () => {
@@ -3016,88 +3094,6 @@ const layerPopup = (function () {
         if (totalCntEl) totalCntEl.textContent = String(state.keys.length);
         renderPage(1);
     }
-
-
-    const addElevators = (filteredPoiList) => {
-        const facilityList = document.querySelector('.facility-area__list');
-        facilityList.innerHTML = '';
-
-
-        filteredPoiList.forEach((poi) => {
-            const li = document.createElement('li');
-
-            const canvasId = `canvas_poi_${poi.id}`;
-            const buttonId = `playBtn_${poi.id}`;
-            li.innerHTML = `
-                <div class="head">
-                    <div class="head__title">
-                        <span>${poi.property.buildingName}</span>
-                        <span>${poi.name}</span>
-                    </div>
-                    <div class="head__state">
-                        <span class="label label--standby">대기</span>
-                        <button id="${buttonId}" type="button" class="button-move">도면 이동</button>
-                    </div>
-                </div>
-                <div class="detail">
-                    <div class="elevator-info">
-                        <div class="elevator-info__view">
-                            <canvas id="${canvasId}" width="auto" height="auto"></canvas>  
-                        </div>
-                        <div class="elevator-info__detail">
-                            <div class="info info--floor">
-                                <dl>
-                                    <dt class="info__title">운행층수</dt>
-                                    <dd>
-                                        <strong class="info__floor">B4F ~ 31F</strong>
-                                        <br>
-                                        <span class="info__text">전층운행</span>
-                                    </dd>
-                                </dl>
-                            </div>
-                            <div class="info info--location">
-                                <dl>
-                                    <dt class="info__title">현재 위치</dt>
-                                    <dd class="info__floor">25F</dd>
-                                </dl>
-                                <span class="text text--spare"><i class="text__icon"></i>여유(5/25)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            facilityList.appendChild(li);
-            document.getElementById(buttonId).addEventListener('click', function() {
-                if (poi.position !== null) {
-                    closeAllPopups();
-                    movePoi(poi.id);
-                } else {
-                    alertSwal('POI를 배치해주세요');
-                }
-            });
-
-            const canvasElement = document.getElementById(canvasId);
-            let livePlayer = new PluxPlayer({
-                wsRelayUrl: cctvConfig.wsRelayUrl,
-                wsRelayPort: cctvConfig.wsRelayPort,
-                httpRelayUrl: cctvConfig.httpRelayUrl,
-                httpRelayPort: cctvConfig.httpRelayPort,
-                LG_server_ip: cctvConfig.lgServerIp,
-                LG_server_port: cctvConfig.lgServerPort,
-                LG_live_port: cctvConfig.lgLivePort,
-                LG_playback_port: cctvConfig.lgPlaybackPort,
-                canvasDom: canvasElement, //캔버스 dom
-            })
-
-            let cctvCode = poi.property.code;
-
-            // cctv id를 어떻게....
-            livePlayer.livePlay(cctvCode) // live play
-
-            livePlayers.push({ id: poi.id, player: livePlayer });
-        });
-    }
-
 
     // 설비 popup
     const equipmentPopup = document.getElementById('equipmentPop');

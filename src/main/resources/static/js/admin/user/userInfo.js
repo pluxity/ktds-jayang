@@ -5,6 +5,12 @@ const getUserInfo = (onComplete) => {
         userInfoData = res.data.result;
         console.log("userInfoData : ", userInfoData);
         if(onComplete) onComplete();
+    }).catch((err) => {
+        if (err.status === 401) {
+            window.location.href = '/login?expired=true';
+        } else {
+            console.error("getUserInfo error:", err);
+        }
     });
 }
 

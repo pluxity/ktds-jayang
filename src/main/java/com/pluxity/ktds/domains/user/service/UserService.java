@@ -85,7 +85,7 @@ public class UserService {
         User user = User.builder()
                 .username(dto.username())
                 .name(dto.name())
-                .password(dto.password())
+                .password(passwordEncoder.encode(dto.password()))
                 .build();
 
         repository.save(user);
@@ -98,7 +98,7 @@ public class UserService {
         User user = User.builder()
                 .username(dto.username())
                 .name(dto.name())
-                .password(dto.password())
+                .password(passwordEncoder.encode(dto.password()))
                 .userGroup(userGroup)
                 .build();
 

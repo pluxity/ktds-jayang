@@ -40,7 +40,10 @@ api.interceptors.response.use(
         }
         console.error(error.response.data);
 
-        return Promise.reject(error.response.data);
+        return Promise.reject({
+            status: error.response.status,
+            data: error.response.data
+        });
     },
 );
 

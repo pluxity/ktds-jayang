@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.building.entity;
 
 import com.pluxity.ktds.domains.building.dto.PoiAlarmDetailDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
+import com.pluxity.ktds.domains.building.dto.PoiPagingResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
@@ -236,6 +237,30 @@ public class Poi {
                 .cameraIp(this.getCameraIp())
                 .cameraId(this.getCameraId())
                 .sop(sopResponseDTO)
+                .build();
+    }
+
+    public PoiPagingResponseDTO toPoiPagingDTO(List<PoiCctvDTO> cctvList, List<String> tagNames) {
+        return PoiPagingResponseDTO.builder()
+                .id(this.getId())
+                .buildingId(this.getBuilding().getId())
+                .floorNo(this.getFloorNo())
+                .poiCategoryId(this.getPoiCategory().getId())
+                .poiMiddleCategoryId(Optional.ofNullable(this.getPoiMiddleCategory())
+                        .map(PoiMiddleCategory::getId)
+                        .orElse(null))
+                .iconSetId(this.getIconSet().getId())
+                .position(this.getPosition())
+                .rotation(this.getRotation())
+                .scale(this.getScale())
+                .name(this.getName())
+                .code(this.getCode())
+                .tagNames(tagNames)
+                .cctvList(cctvList)
+                .isLight(this.getIsLight())
+                .lightGroup(this.getLightGroup())
+                .cameraIp(this.getCameraIp())
+                .cameraId(this.getCameraId())
                 .build();
     }
 

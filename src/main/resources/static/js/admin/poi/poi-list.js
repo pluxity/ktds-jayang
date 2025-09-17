@@ -22,8 +22,9 @@ const dataManufacturer = (rowData) =>
         ]
     });
 
-const renderPoi = (rawData = []) => {
+const renderPoi = async (rawData = []) => {
     const dom = document.querySelector('#wrapper');
+    dom.innerHTML = '';
     const columns = [
         {
             id: 'checkbox',
@@ -74,19 +75,139 @@ const renderPoi = (rawData = []) => {
             width: '8%',
         },
     ];
-    const data = dataManufacturer(rawData) ?? [];
-    const option = {
-        dom,
-        columns,
-        data,
-        isPagination: true,
-    };
-    if (document.querySelector('#wrapper').innerHTML === '') {
-        createGrid(option);
-    } else {
-        resizeGrid(option);
-    }
+
+    // 검색 매개변수 처리
+    const apiUrl = '/poi/paging';
+    const withNumbering = true;
+    const isPagination = true;
+    const limit = 10;
+    const buttonsCount = 10;
+    const noRecordsFound = '데이터가 존재하지 않습니다.';
+
+
+    const cols = addHeaderSelectAll(columns);
+    const numberedColumns = withNumbering
+        ? [
+            cols[0],
+            {
+                id: 'number',
+                name: '번호',
+                width: '6%',
+            },
+            ...cols.slice(1)
+        ]
+        : cols;
+
+    grid = new gridjs.Grid({
+        columns: numberedColumns,
+        server: {
+            url: (prev, page, limit) => {
+                const pageParam = page || 0;
+                const limitParam = limit || 10;
+                
+                // 실시간으로 검색 파라미터를 가져옴
+                const additionalParams = getSearchParams();
+                const queryParams = new URLSearchParams(additionalParams).toString();
+                
+                const finalUrl = `${apiUrl}?page=${pageParam}&size=${limitParam}${queryParams ? '&' + queryParams : ''}`;
+                console.log('요청 URL:', finalUrl); // 디버깅용
+                
+                return finalUrl;
+            },
+            then: res => {
+                const response = res.result;
+                console.log("response : ", response);
+                const { content, totalElements, number, size } = response;
+                data.poi = content;
+
+                return response.content.map((poi, index) => {
+                    const { id, name, code, buildingId, floorNo, poiCategoryId, poiMiddleCategoryId, position } = poi;
+                    const building = data.building.find(building => building.id === buildingId);
+                    const floorName = building.floors.find(floor => floor.no === floorNo)?.name;
+                    const category = data.poiCategory.find(category => category.id === poiCategoryId);
+                    const middleCategory = data.poiMiddleCategory.find(category => category.id === poiMiddleCategoryId);
+
+                    const rowNumber = withNumbering
+                        ? totalElements - (number * size + index)
+                        : null;
+
+                    const baseData = [
+                        id,
+                        name,
+                        code,
+                        building.name,
+                        floorName,
+                        category.name,
+                        middleCategory.name,
+                        position === null ? 'N' : 'Y',
+                        gridjs.html(`
+                    <button class="btn btn-warning modifyModalButton" data-bs-toggle="modal" data-bs-target="#poiModifyModal" data-id="${id}">수정</button>
+                    <button class="btn btn-danger deleteButton"  onclick="deletePoi(${id})" data-id="${id}">삭제</button>`),
+                    ];
+
+                    return withNumbering ? [rowNumber, ...baseData] : baseData;
+                });
+            },
+            handle: (res) => {
+                if (!res.ok) {
+                    throw Error('서버 응답 오류');
+                }
+                return res.json();
+            },
+            total: data => data.result.totalElements
+        },
+        pagination: isPagination && {
+            limit,
+            server: {
+                url: (prev, page, limit) => {
+                    const pageParam = page || 0;
+                    const limitParam = limit || 10;
+                    
+                    const additionalParams = getSearchParams();
+                    const queryParams = new URLSearchParams(additionalParams).toString();
+                    
+                    return `${apiUrl}?page=${pageParam}&size=${limitParam}${queryParams ? '&' + queryParams : ''}`;
+                }
+            },
+            buttonsCount
+        },
+        language: {
+            pagination: isPagination && {
+                previous:  '이전',
+                next: '다음'
+            },
+            noRecordsFound,
+        },
+        sort: false,
+        fixedHeader: true,
+        style: {
+            td: {
+                'text-align': 'center',
+                'vertical-align': 'middle',
+            },
+            footer: {
+                color: 'red',
+            },
+        },
+    }).render(dom);
+
+    const root = dom || document.querySelector('#wrapper');
+    requestAnimationFrame(() => wireSelectAll(root));
 };
+
+function wireSelectAll(dom) {
+    if (!dom) return;
+    if (dom.dataset.selectAllWired === '1') return;
+    dom.addEventListener('change', (e) => {
+        if (e.target.id === 'select-all-checkbox') {
+            const on = e.target.checked;
+            dom.querySelectorAll('.gridjs-table tbody td:first-child input[type="checkbox"]').forEach(cb => {
+                if (cb.checked !== on) cb.click();
+            });
+        }
+    });
+    dom.dataset.selectAllWired = '1';
+}
 
 const getBuildingSelectTags = () => [
     document.querySelector('#selectBuildingIdRegister'),
@@ -196,18 +317,14 @@ const initPoiMiddleCategory = async () => {
     });
 };
 
-const initPoiList = () => {
-    api.get('/poi').then((result) => {
-        data.poi = result.data.result;
-        renderPoi(data.poi);
-    });
-};
 
 const initializePoiAndBuildingAndPoiCategory = async () => {
     await initializeBuildings();
     await initPoiCategory();
     await initPoiMiddleCategory();
-    await initPoiList();
+    
+    // 메타데이터 로드 완료 후 그리드 초기화
+    renderPoi();
 };
 
 document.getElementById('selectPoiCategoryIdRegister').addEventListener('change', function() {
@@ -540,7 +657,7 @@ function validateCctvDuplicates(mainCctvValue, subCctvFields) {
                             '#poiRegisterModal > div > div > div.modal-header > button',
                         )
                         .click();
-                    initPoiList();
+                    reloadPoiWithReset(); // 검색 초기화 후 리로드
                     removeAllTags('Register');
                 });
             });
@@ -560,7 +677,7 @@ function validateCctvDuplicates(mainCctvValue, subCctvFields) {
                             '#poiModifyModal > div > div > div.modal-header > button',
                         )
                         .click();
-                    initPoiList();
+                    reloadPoiWithReset(); // 검색 초기화 후 리로드
                     removeAllTags('Modify');
                 });
             });
@@ -574,7 +691,7 @@ const deletePoi = (poiId) => {
     confirmSwal('정말 삭제 하시겠습니까?').then(() => {
         api.delete(`/poi/${id}`).then(() => {
             alertSwal('삭제가 완료 되었습니다.').then(() => {
-                initPoiList();
+                reloadPoiWithReset(); // 검색 초기화 후 리로드
             });
         });
     });
@@ -589,7 +706,7 @@ const deleteAllPoi = () => {
     confirmSwal('체크 하신 항목을 모두 삭제 하시겠습니까?').then(() => {
         api.delete(`/poi/id-list/${idList}`).then(() => {
             alertSwal('삭제가 완료 되었습니다.').then(() => {
-                initPoiList();
+                reloadPoiWithReset(); // 검색 초기화 후 리로드
             });
         });
     });
@@ -609,7 +726,7 @@ const unAllocatePoi = () => {
         () => {
             api.patch(`/poi/un-allocation/${idList}`).then(() => {
                 alertSwal('미배치로 변경이\n완료 되었습니다.').then(() => {
-                    initPoiList();
+                    reloadPoiWithReset(); // 검색 초기화 후 리로드
                 });
             });
         },
@@ -619,115 +736,84 @@ document
     .querySelector('#btnUnAllocatePoi')
     .addEventListener('pointerup', unAllocatePoi);
 
-const searchPoi = () => {
-    let poiList = data.poi;
-    if (document.querySelector('#searchSelectBuilding').value !== '') {
-        poiList = poiList.filter(
-            (poi) =>
-                poi.buildingId ===
-                Number(document.querySelector('#searchSelectBuilding').value),
-        );
+// 검색 파라미터 추출 함수
+const getSearchParams = () => {
+    const params = {};
+    
+    const buildingSelect = document.querySelector('#searchSelectBuilding');
+    const floorSelect = document.querySelector('#searchSelectFloor');
+    const categorySelect = document.querySelector('#searchSelectCategory');
+    const keywordTypeSelect = document.querySelector('#searchSelectKeyword');
+    const keywordInput = document.querySelector('#searchKeyword');
+    
+    if (buildingSelect && buildingSelect.value !== '') {
+        params.buildingId = buildingSelect.value;
     }
-
-    if (document.querySelector('#searchSelectFloor').value !== '') {
-        poiList = poiList.filter(
-            (poi) =>
-                poi.floorNo ===
-                Number(document.querySelector('#searchSelectFloor').value),
-        );
+    
+    if (floorSelect && floorSelect.value !== '') {
+        params.floorNo = floorSelect.value;
     }
-
-    if (document.querySelector('#searchSelectCategory').value !== '') {
-        poiList = poiList.filter(
-            (poi) =>
-                poi.poiCategoryId ===
-                Number(
-                    document.querySelector('#searchSelectCategory').value,
-                ),
-        );
+    
+    if (categorySelect && categorySelect.value !== '') {
+        params.poiCategoryId = categorySelect.value;
     }
-    if (
-        document.querySelector('#searchSelectKeyword').value === 'name' &&
-        document.querySelector('#searchKeyword').value !== ''
-    ) {
-        poiList = poiList.filter((poi) =>
-            poi.name.toLowerCase().includes(document.querySelector('#searchKeyword').value.toLowerCase()),
-        );
+    
+    if (keywordTypeSelect && keywordInput && keywordInput.value !== '') {
+        params.keywordType = keywordTypeSelect.value;
+        params.keyword = keywordInput.value;
     }
-    if (
-        document.querySelector('#searchSelectKeyword').value === 'code' &&
-        document.querySelector('#searchKeyword').value !== ''
-    ) {
-        poiList = poiList.filter((poi) =>
-            poi.code.toLowerCase().includes(
-                document.querySelector('#searchKeyword').value.toLowerCase(),
-            ),
-        );
-    }
-
-    const filteredData = dataManufacturer(poiList) ?? [];
-    const columns = [
-        {
-            id: 'checkbox',
-            name: '체크',
-            width: '4%',
-            plugin: {
-                component: gridjs.plugins.selection.RowSelection,
-                props: {
-                    id: (row) => row.cell(2).data,
-                },
-            },
-        },
-        {
-            id: 'id',
-            name: 'id',
-            hidden: true,
-        },
-        {
-            name: 'POI 이름',
-            width: '10%',
-        },
-        {
-            name: 'POI 코드',
-            width: '10%',
-        },
-        {
-            name: '도면 이름',
-            width: '8%',
-        },
-        {
-            name: '층 이름',
-            width: '5%',
-        },
-        {
-            name: 'POI 카테고리 이름',
-            width: '8%',
-        },
-        {
-            name: '중분류',
-            width: '8%',
-        },
-        {
-            name: '배치 여부',
-            width: '3%',
-        },
-        {
-            name: '관리',
-            width: '8%',
-        },
-    ];
-    resizeGrid({ data: filteredData, columns });
+    
+    return params;
 };
 
-// 검색
+// 검색 초기화 함수
+const resetSearch = () => {
+    const buildingSelect = document.querySelector('#searchSelectBuilding');
+    const floorSelect = document.querySelector('#searchSelectFloor');
+    const categorySelect = document.querySelector('#searchSelectCategory');
+    const keywordTypeSelect = document.querySelector('#searchSelectKeyword');
+    const keywordInput = document.querySelector('#searchKeyword');
+    
+    if (buildingSelect) buildingSelect.value = '';
+    if (floorSelect) floorSelect.value = '';
+    if (categorySelect) categorySelect.value = '';
+    if (keywordTypeSelect) keywordTypeSelect.value = 'name';
+    if (keywordInput) keywordInput.value = '';
+};
+
+const refreshGrid = () => {
+    if (grid) {
+        try {
+            if (grid && grid.config && grid.config.plugin) {
+                const checkboxPlugin = grid.config.plugin.get('checkbox');
+                if (checkboxPlugin && checkboxPlugin.props.store._state) {
+                    checkboxPlugin.props.store._state.rowIds = [];
+                }
+            }
+
+            grid.forceRender();
+        } catch (e) {
+            console.warn('forceRender 실패, Grid 재생성:', e);
+            renderPoi();
+        }
+    } else {
+        renderPoi();
+    }
+};
+
+const reloadPoiWithReset = () => {
+    resetSearch();
+    refreshGrid();
+};
+
 document.querySelector('#searchKeyword').addEventListener('keyup', (event) => {
     if (event.key === 'Enter') {
-        searchPoi();
+        refreshGrid();
     }
 });
 
 document.querySelector('#searchButton').addEventListener('pointerup', () => {
-    searchPoi();
+    refreshGrid();
 });
 
 document
@@ -754,7 +840,7 @@ document.getElementById('btnPoiBatchRegister')
                         '#poiBatchRegisterModal > div > div > div.modal-header > button',
                     )
                     .click();
-                initPoiList();
+                reloadPoiWithReset(); // 검색 초기화 후 리로드
             });
         }).catch(() => {
             document.querySelector('#batchRegisterFile').value = ''

@@ -5,7 +5,8 @@ import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import com.pluxity.ktds.global.repository.BaseRepository;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -72,4 +73,34 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
             "AND p.building.id = :buildingId)")
     boolean existsCctvPoiByNameAndBuildingId(@Param("poiName") String poiName,
                              @Param("buildingId") Long buildingId);
+
+    @Query("SELECT p FROM Poi p " +
+       "JOIN FETCH p.building b " +
+       "JOIN FETCH p.poiCategory pc " +
+       "JOIN FETCH p.poiMiddleCategory pmc " +
+       "JOIN FETCH p.poiTags pt "+
+       "ORDER BY p.id DESC")
+    Page<Poi> findAllForPaging(Pageable pageable);
+
+    @Query("SELECT p FROM Poi p " +
+        "JOIN FETCH p.building b " +
+        "JOIN FETCH p.poiCategory pc " +
+        "JOIN FETCH p.poiMiddleCategory pmc " +
+        "JOIN FETCH p.poiTags pt "+
+        "WHERE (:buildingId IS NULL OR p.building.id = :buildingId) " +
+        "AND (:floorNo IS NULL OR p.floorNo = :floorNo) " +
+        "AND (:poiCategoryId IS NULL OR p.poiCategory.id = :poiCategoryId) " +
+        "AND (:keywordType IS NULL OR :keyword IS NULL OR " +
+        "     (:keywordType = 'name' AND LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) OR " +
+        "     (:keywordType = 'code' AND LOWER(p.code) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
+        "ORDER BY p.id DESC")
+        Page<Poi> findAllForPagingWithSearch(
+        Pageable pageable,
+        @Param("buildingId") Long buildingId,
+        @Param("floorNo") Integer floorNo,
+        @Param("poiCategoryId") Long poiCategoryId,
+        @Param("keywordType") String keywordType,
+        @Param("keyword") String keyword
+);
+
 }

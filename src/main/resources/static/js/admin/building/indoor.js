@@ -112,7 +112,6 @@ function modifyBuildingModal(id) {
         getHistoryList(id)
     ]).then(([buildingRes, historyList]) => {
         const {result: resultData} = buildingRes.data;
-        console.log("resultData = ", resultData);
         form.querySelector('#modifyName').value = resultData.name;
         form.querySelector('#modifyCode').value = resultData.code;
         if (resultData.isIndoor === 'Y') {
@@ -194,7 +193,7 @@ btnBuildingRegist.onclick = () => {
                 buildingRegistModal.querySelector('.btn-close').click();
                 getBuildingInfoList();
             });
-        }).catch(() => {
+        }).catch((res) => {
             document.getElementById('btnBuildingRegist').disabled = false;
             document.getElementById('btnBuildingRegist').innerHTML = '등록';
         })
@@ -345,7 +344,7 @@ const renderHistoryList = (historyList) => {
                 <button class="btn btn-sm btn-primary" onclick="window.open('/admin/viewer?buildingId=${history.buildingId}&version=${history.buildingVersion}')" >
                     <i class="fas fa-map"></i>
                 </button>
-                <button class="btn btn-sm btn-warning" onclick="downloadFile('${history.fileInfo.fileEntityType}', '${history.fileInfo.directory}', '${history.buildingVersion}', '${history.fileInfo.storedName}', '${history.fileInfo.extension}')">
+                <button class="btn btn-sm btn-warning" onclick="downloadFile('${history.fileInfo.fileEntityType}', '${history.fileInfo.directory}', '${history.buildingVersion}', '${history.fileInfo.storedName}', '${history.fileInfo.extension}', '${history.fileInfo.originName}')">
                     <i class="fas fa-download"></i>
                 </button>
                <button class="btn btn-sm btn-danger" onclick="deleteHistory('${history.buildingVersion}', ${history.buildingId}, ${history.historyId})">
@@ -357,13 +356,13 @@ const renderHistoryList = (historyList) => {
     });
 };
 
-function downloadFile(fileEntityType, directory, version, storedName, extension) {
+function downloadFile(fileEntityType, directory, version, storedName, extension, originName) {
     const url = `/${fileEntityType}/${directory}/${version}/${storedName}.${extension}`;
 
     // 다운로드 링크 생성
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${storedName}.${extension}`;  // 다운로드될 파일명
+    link.download = originName;  // 다운로드될 파일명
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

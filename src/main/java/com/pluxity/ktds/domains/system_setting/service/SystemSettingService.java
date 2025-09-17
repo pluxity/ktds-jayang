@@ -49,10 +49,16 @@ public class SystemSettingService {
 
     @Transactional
     public SystemSettingResponseDTO getSystemSettingByBuildingId(Long buildingId) {
-        SystemSetting systemSetting = systemSettingRepository.findByBuildingId(buildingId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_SYSTEM_SETTING));
-
-        return systemSetting.toDto();
+        return systemSettingRepository.findByBuildingId(buildingId)
+                .map(SystemSetting::toDto)
+                .orElseGet(() -> SystemSettingResponseDTO.builder()
+                        .buildingId(buildingId)
+                        .poiLineLength(30)
+                        .poiIconSizeRatio(210)
+                        .poiTextSizeRatio(100)
+                        .nodeDefaultColor("#FF0000")
+                        .build()
+                );
     }
 
     @Transactional

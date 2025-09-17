@@ -3,7 +3,7 @@ const data = {};
 const dataManufacturer = (rowData) =>
     rowData
         .map((vendor, index) => {
-            const { id, vendorName, representativeName, businessNumber, contactNumber, modifier } = vendor;
+            const { id, vendorName, representativeName, businessNumber, contactNumber } = vendor;
 
             return [
                 id,
@@ -11,7 +11,6 @@ const dataManufacturer = (rowData) =>
                 representativeName,
                 businessNumber,
                 contactNumber,
-                modifier,
                 gridjs.html(`
                     <button class="btn btn-warning modifyModalButton" data-bs-toggle="modal" data-bs-target="#vendorModifyModal" data-id="${id}">수정</button>
                     <button class="btn btn-danger deleteButton"  onclick="deleteVendor(${id})" data-id="${id}">삭제</button>`),
@@ -52,10 +51,6 @@ const renderVendor = (rawData = []) => {
         {
             name: '연락처',
             width: '12%',
-        },
-        {
-            name: '수정자',
-            width: '10%',
         },
         {
             name: '관리',

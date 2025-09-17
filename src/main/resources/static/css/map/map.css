@@ -1345,6 +1345,7 @@
   line-height: 1.875rem;
   color: var(--color-grayscale01);
   font-size: 0.75rem;
+  cursor: pointer;
 }
 .search-result__footer .download::after {
   content: "";

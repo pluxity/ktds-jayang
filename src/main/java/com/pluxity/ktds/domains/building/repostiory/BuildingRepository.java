@@ -4,6 +4,7 @@ import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Floor;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -59,6 +60,6 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
 
     Building findByActiveVersion(String activeVersion);
 
-    List<Building> findAllByIsIndoor(String isIndoor);
+    List<Building> findAllByIsIndoor(String isIndoor, Sort sort);
 
 }

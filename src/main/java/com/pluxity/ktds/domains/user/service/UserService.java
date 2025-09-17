@@ -59,6 +59,7 @@ public class UserService {
 
     private UserResponseDTO from(User user) {
         return UserResponseDTO.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .groupName(user.getUserGroup().getName())

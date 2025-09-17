@@ -44,7 +44,7 @@ public class NoticeService {
     }
     @Transactional
     public List<NoticeResponseDTO> getNotices() {
-        var notices = repository.findAllByOrderByExpiredAt();
+        var notices = repository.findAll();
         return notices.stream()
                 .map(NoticeResponseDTO::from)
                 .toList();

@@ -60,8 +60,9 @@ public class User {
 
     public UserResponseDTO toResponseDTO() {
         return UserResponseDTO.builder()
-                .username(username)
-                .name(name)
+                .id(this.id)
+                .username(this.username)
+                .name(this.name)
                 .groupName(getUserGroup().getName())
                 .authorities(getUserGroup().getAuthorities()
                         .stream()

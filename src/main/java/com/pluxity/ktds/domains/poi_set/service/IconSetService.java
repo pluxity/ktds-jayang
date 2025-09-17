@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +50,7 @@ public class IconSetService {
 
     @Transactional
     public List<IconSetResponseDTO> findAll() {
-        return repository.findAll()
+        return repository.findAll(Sort.by(Sort.Direction.DESC, "id"))
                 .stream()
                 .map(IconSet::toDto)
                 .toList();

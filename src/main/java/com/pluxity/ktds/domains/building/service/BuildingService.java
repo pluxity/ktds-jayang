@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,14 +76,14 @@ public class BuildingService {
 
     @Transactional(readOnly = true)
     public List<BuildingResponseDTO> findAll() {
-        return buildingRepository.findAllByIsIndoor("Y").stream()
+        return buildingRepository.findAllByIsIndoor("Y", Sort.by(Sort.Direction.DESC, "id")).stream()
                 .map(Building::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<BuildingDetailResponseDTO> findDetailAll() {
-        return buildingRepository.findAllByIsIndoor("Y").stream()
+        return buildingRepository.findAllByIsIndoor("Y", Sort.by(Sort.Direction.DESC, "id")).stream()
                 .filter(building -> !"store".equals(building.getCode()))
                 .map(Building::toDetailResponseDTO)
                 .toList();
@@ -466,7 +467,7 @@ public class BuildingService {
             Optional<Path> xmlFilePath = paths.filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".xml"))
                     .findFirst();
-            return xmlFilePath.orElseThrow(() -> new CustomException(NOT_FOUND_XML_FILE));
+            return xmlFilePath.orElseThrow(() -> new CustomException(NOT_FOUND_BUILDING_FILE));
         } catch (IOException e) {
             throw new CustomException(NOT_FOUND_XML_FILE);
         }

@@ -15,6 +15,8 @@ import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
+import com.pluxity.ktds.domains.system_setting.entity.SystemSetting;
+import com.pluxity.ktds.domains.system_setting.repository.SystemSettingRepository;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,6 +63,7 @@ public class BuildingService {
     private final PatrolPointRepository patrolPointRepository;
     private final FloorRepository floorRepository;
     private final FloorHistoryRepository floorHistoryRepository;
+    private final SystemSettingRepository systemSettingRepository;
 
     @Value("${root-path.upload}")
     private String uploadRootPath;
@@ -294,6 +297,7 @@ public class BuildingService {
         if (!pois.isEmpty()) {
             poiRepository.deleteAll(pois);
         }
+        systemSettingRepository.findByBuildingId(id).ifPresent(systemSettingRepository::delete);
 
         // 2. 마지막으로 Building 삭제
         buildingRepository.delete(building);

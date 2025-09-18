@@ -103,4 +103,33 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
         @Param("keyword") String keyword
 );
 
+    @Query("SELECT p.id FROM Poi p ORDER BY p.id DESC")
+    Page<Long> findPoiIdsForPaging(Pageable pageable);
+
+    @Query("SELECT p.id FROM Poi p " +
+            "WHERE (:buildingId IS NULL OR p.building.id = :buildingId) " +
+            "AND (:floorNo IS NULL OR p.floorNo = :floorNo) " +
+            "AND (:poiCategoryId IS NULL OR p.poiCategory.id = :poiCategoryId) " +
+            "AND (:keywordType IS NULL OR :keyword IS NULL OR " +
+            "     (:keywordType = 'name' AND LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) OR " +
+            "     (:keywordType = 'code' AND LOWER(p.code) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
+            "ORDER BY p.id DESC")
+    Page<Long> findPoiIdsForPagingWithSearch(
+            Pageable pageable,
+            @Param("buildingId") Long buildingId,
+            @Param("floorNo") Integer floorNo,
+            @Param("poiCategoryId") Long poiCategoryId,
+            @Param("keywordType") String keywordType,
+            @Param("keyword") String keyword
+    );
+
+    @Query("SELECT p FROM Poi p " +
+            "JOIN FETCH p.building b " +
+            "JOIN FETCH p.poiCategory pc " +
+            "JOIN FETCH p.poiMiddleCategory pmc " +
+            "JOIN FETCH p.poiTags pt " +
+            "WHERE p.id IN :poiIds " +
+            "ORDER BY p.id DESC")
+    List<Poi> findByIdsWithJoins(@Param("poiIds") List<Long> poiIds);
+
 }

@@ -220,14 +220,20 @@ public class PoiService {
 public Page<PoiPagingResponseDTO> findAllPaging(int page, int size, Long buildingId, Integer floorNo, Long poiCategoryId, String keywordType, String keyword) {
     Pageable pageable = PageRequest.of(page, size);
     
-    Page<Poi> poiPage;
+    Page<Long> poiIdPage;
     if (hasSearchConditions(buildingId, floorNo, poiCategoryId, keywordType, keyword)) {
-        poiPage = poiRepository.findAllForPagingWithSearch(pageable, buildingId, floorNo, poiCategoryId, keywordType, keyword);
+        poiIdPage = poiRepository.findPoiIdsForPagingWithSearch(pageable, buildingId, floorNo, poiCategoryId, keywordType, keyword);
     } else {
-        poiPage = poiRepository.findAllForPaging(pageable);
+        poiIdPage = poiRepository.findPoiIdsForPaging(pageable);
     }
     
-    List<Poi> poiList = poiPage.getContent();
+    List<Long> poiIds = poiIdPage.getContent();
+
+    if (poiIds.isEmpty()) {
+        return new PageImpl<>(List.of(), pageable, poiIdPage.getTotalElements());
+    }
+    List<Poi> poiList = poiRepository.findByIdsWithJoins(poiIds);
+
     List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
 
     Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
@@ -263,7 +269,7 @@ public Page<PoiPagingResponseDTO> findAllPaging(int page, int size, Long buildin
         })
         .toList();
 
-    return new PageImpl<>(dtoList, pageable, poiPage.getTotalElements());
+    return new PageImpl<>(dtoList, pageable, poiIdPage.getTotalElements());
 }
 
 private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCategoryId, String keywordType, String keyword) {

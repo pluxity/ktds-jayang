@@ -238,12 +238,26 @@ const Init = (function () {
         const buildingList = BuildingManager.findAll();
         const buildingUl = document.querySelector('#systemTab ul')
 
-        buildingList.forEach(building => {
+        const priorityMap = [
+            { keyword: "외부", priority: 1 },
+            { keyword: "A", priority: 2 },
+            { keyword: "B", priority: 3 },
+            { keyword: "판매", priority: 4 },
+            { keyword: "주차장", priority: 5 }
+        ];
+
+        const sortedBuildings = buildingList.sort((buildingA, buildingB) => {
+            const priorityA = priorityMap.find(p => buildingA.name.includes(p.keyword))?.priority ?? 999;
+            const priorityB = priorityMap.find(p => buildingB.name.includes(p.keyword))?.priority ?? 999;
+            return priorityA - priorityB;
+        });
+
+        sortedBuildings.forEach(building => {
             const buildingLi = document.createElement('li');
             buildingLi.setAttribute('building-id', building.id);
-            buildingLi.textContent = building.name
+            buildingLi.textContent = building.name;
             buildingUl.appendChild(buildingLi);
-        })
+        });
         clickBuilding();
     }
 

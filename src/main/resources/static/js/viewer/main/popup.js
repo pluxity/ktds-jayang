@@ -122,8 +122,6 @@ const layerPopup = (function () {
         const popupHeader = document.querySelector('.popup-header');
         const stateName = document.querySelector('.state-name');
 
-
-
         const styleReturn = (state) => {
             switch (state) {
                 case 1:
@@ -3477,9 +3475,9 @@ const layerPopup = (function () {
             return acc.concat(building.floors);
         }, []);
         const liAll = document.createElement('li');
-        liAll.textContent = '전체';
+        liAll.textContent = '건물 전체';
         liAll.onclick = () => {
-            buildingBtn.textContent = '전체';
+            buildingBtn.textContent = '건물 전체';
             buildingBtn.classList.remove("select-box__btn--active");
             buildingBtn.classList.add("select-box__btn--selected");
             buildingSelect.querySelector(".select-box__content").classList.remove("active");
@@ -3509,7 +3507,7 @@ const layerPopup = (function () {
         //     buildingBtn.textContent = buildingList[0].name;
         //     updateFloorSelectBox(buildingList[0].floors, buildingList[0].id);
         // }
-        buildingBtn.textContent = '전체';
+        buildingBtn.textContent = '건물 전체';
         updateFloorSelectBox(allFloors);
         buildingBtn.onclick = (event) => {
             toggleSelectBox(buildingSelect);
@@ -3523,9 +3521,9 @@ const layerPopup = (function () {
         floorContent.innerHTML = '';
         const allPois = PoiManager.findAll();
         const liAll = document.createElement('li');
-        liAll.textContent = "전체";
+        liAll.textContent = "층 전체";
         liAll.onclick = () => {
-            floorBtn.textContent = "전체";
+            floorBtn.textContent = "층 전체";
             floorBtn.classList.remove("select-box__btn--active");
             floorBtn.classList.add("select-box__btn--selected");
             floorSelect.querySelector(".select-box__content").classList.remove("active");
@@ -3562,7 +3560,7 @@ const layerPopup = (function () {
         });
         if (floorList.length > 0) {
             // floorBtn.textContent = floorList[0].name;
-            floorBtn.textContent = "전체";
+            floorBtn.textContent = "층 전체";
             updatePoiSelectBox(allPois);
             // PoiManager.getPoisByFloorId(floorList[0].id).then((pois) => {
             //     updatePoiSelectBox(pois);
@@ -3592,9 +3590,9 @@ const layerPopup = (function () {
             );
 
             const liAll = document.createElement('li');
-            liAll.textContent = "전체";
+            liAll.textContent = "장비 전체";
             liAll.onclick = () => {
-                poiBtn.textContent = "전체";
+                poiBtn.textContent = "장비 전체";
                 poiBtn.classList.remove("select-box__btn--active");
                 poiBtn.classList.add("select-box__btn--selected");
                 poiSelect.querySelector(".select-box__content").classList.remove("active");
@@ -3613,7 +3611,7 @@ const layerPopup = (function () {
                 };
                 poiContent.appendChild(li);
             });
-            poiBtn.textContent = "전체";
+            poiBtn.textContent = "장비 전체";
         }
 
         poiBtn.onclick = () => {
@@ -3820,7 +3818,7 @@ const layerPopup = (function () {
             // let searchedAlarms = filteredAlarms.slice();
             let searchedAlarms = data.slice();
 
-            if (selectedBuilding !== '전체' && selectedBuilding !== '') {
+            if (selectedBuilding !== '건물 전체' && selectedBuilding !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
                     if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
@@ -3831,9 +3829,8 @@ const layerPopup = (function () {
                 });
             }
 
-            if (selectedFloor !== '전체' && selectedFloor !== '') {
+            if (selectedFloor !== '층 전체' && selectedFloor !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
-                    if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
@@ -3841,7 +3838,7 @@ const layerPopup = (function () {
                 });
             }
 
-            if (selectedDeviceType !== '전체' && selectedDeviceType !== '') {
+            if (selectedDeviceType !== '장비 전체' && selectedDeviceType !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
                     if (isEHP(alarm)) return true;
                     const taggedPoi = poiList.find(poi =>

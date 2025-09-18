@@ -10,5 +10,7 @@ public record UserResponseDTO(
         String username,
         String groupName,
         Set<UserAuthorityResponseDTO> authorities,
+        Set<UserGroupBuildingPermissionDTO> buildingPermissions,
+        Set<UserGroupCategoryPermissionDTO> categoryPermissions,
         String name
 ) {}

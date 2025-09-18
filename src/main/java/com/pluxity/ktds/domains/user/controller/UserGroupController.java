@@ -52,4 +52,11 @@ public class UserGroupController {
         return ResponseBody.of(SUCCESS_DELETE);
     }
 
+    @PatchMapping("/{id}/permissions")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseBody patchUserGroupPermissions(@PathVariable Long id,
+                                                  @RequestBody UpdateUserGroupPermissionDTO dto) {
+        service.updatePermissions(id, dto);
+        return ResponseBody.of(SUCCESS_PATCH);
+    }
 }

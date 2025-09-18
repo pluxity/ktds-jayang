@@ -170,15 +170,24 @@ public class Initializer implements CommandLineRunner {
         if (userGroups.isEmpty()) {
             UserGroup userGroup = UserGroup.builder()
                     .name("관리자")
+                    .groupType("ADMIN")
+                    .description("최종관리자")
                     .build();
             UserGroup savedUserGroup = userGroupRepository.save(userGroup);
             userGroups.add(savedUserGroup);
 
             UserAuthority adminAuthority = UserAuthority.builder()
                     .name("ADMIN")
+                    .alias("최종관리자")
+                    .userGroup(userGroup)
                     .build();
-            adminAuthority.assignToUserGroup(savedUserGroup);
             userAuthorityRepository.save(adminAuthority);
+            UserAuthority normalAdminAuthority = UserAuthority.builder()
+                    .name("NORMAL_ADMIN")
+                    .alias("일반관리자")
+                    .userGroup(savedUserGroup)
+                    .build();
+            userAuthorityRepository.save(normalAdminAuthority);
         }
 
         return userGroups;

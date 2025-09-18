@@ -27,7 +27,8 @@
     }
     // 관리자 여부
     const userRole = getCookie("USER_ROLE");
-    const roles = userRole ? userRole.split(",") : [];
+    const decoded = userRole ? decodeURIComponent(userRole) : "";
+    const roles = decoded ? decoded.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
         window.open("/admin/system-setting", "_blank");

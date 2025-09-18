@@ -1,6 +1,8 @@
 package com.pluxity.ktds.domains.user.entity;
 
 import com.pluxity.ktds.domains.user.dto.UserAuthorityResponseDTO;
+import com.pluxity.ktds.domains.user.dto.UserGroupBuildingPermissionDTO;
+import com.pluxity.ktds.domains.user.dto.UserGroupCategoryPermissionDTO;
 import com.pluxity.ktds.domains.user.dto.UserResponseDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -67,6 +69,24 @@ public class User {
                 .authorities(getUserGroup().getAuthorities()
                         .stream()
                         .map(UserAuthorityResponseDTO::from)
+                        .collect(Collectors.toSet()))
+                .buildingPermissions(this.getUserGroup().getBuildingPermissions()
+                        .stream()
+                        .map(bp -> UserGroupBuildingPermissionDTO.builder()
+                                .buildingId(bp.getBuilding().getId())
+                                .canRead(bp.getCanRead())
+                                .canWrite(bp.getCanWrite())
+                                .registeredBy(bp.getRegisteredBy())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .categoryPermissions(this.getUserGroup().getCategoryPermissions()
+                        .stream()
+                        .map(cp -> UserGroupCategoryPermissionDTO.builder()
+                                .poiCategoryId(cp.getPoiCategory().getId())
+                                .canRead(cp.getCanRead())
+                                .canWrite(cp.getCanWrite())
+                                .registeredBy(cp.getRegisteredBy())
+                                .build())
                         .collect(Collectors.toSet()))
                 .build();
     }

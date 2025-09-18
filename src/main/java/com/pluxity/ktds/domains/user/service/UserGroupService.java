@@ -1,9 +1,14 @@
 package com.pluxity.ktds.domains.user.service;
 
-import com.pluxity.ktds.domains.user.dto.CreateUserGroupDTO;
-import com.pluxity.ktds.domains.user.dto.UserGroupResponseDTO;
+import com.pluxity.ktds.domains.building.entity.Building;
+import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
+import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
+import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
+import com.pluxity.ktds.domains.user.dto.*;
 import com.pluxity.ktds.domains.user.entity.User;
 import com.pluxity.ktds.domains.user.entity.UserGroup;
+import com.pluxity.ktds.domains.user.entity.UserGroupBuilding;
+import com.pluxity.ktds.domains.user.entity.UserGroupPoiCategory;
 import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import com.pluxity.ktds.global.exception.CustomException;
@@ -14,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -27,6 +34,8 @@ public class UserGroupService {
     private final UserGroupRepository repository;
 
     private final UserRepository userRepository;
+    private final BuildingRepository buildingRepository;
+    private final PoiCategoryRepository poiCategoryRepository;
 
     @Transactional(readOnly = true)
     public List<UserGroupResponseDTO> findAll() {
@@ -55,6 +64,8 @@ public class UserGroupService {
 
         UserGroup userGroup = UserGroup.builder()
                 .name(dto.name())
+                .groupType(dto.groupType())
+                .description(dto.description())
                 .build();
 
         repository.save(userGroup);
@@ -72,6 +83,8 @@ public class UserGroupService {
         UserGroup userGroup = repository.findById(id).orElseThrow(notFoundIdException(id));
         userGroup.update(UserGroup.builder()
                 .name(dto.name())
+                .groupType(dto.groupType())
+                .description(dto.description())
                 .build());
     }
 
@@ -90,6 +103,49 @@ public class UserGroupService {
         repository.delete(userGroup);
     }
 
+    @Transactional
+    public void updatePermissions(Long id, UpdateUserGroupPermissionDTO dto) {
+        UserGroup group = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 그룹입니다."));
+
+        if (dto.buildingPermissions() != null) {
+            group.getBuildingPermissions().clear();
+
+            for (UserGroupBuildingPermissionDTO b : dto.buildingPermissions()) {
+                Building building = buildingRepository.findById(b.buildingId())
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 건물 ID: " + b.buildingId()));
+
+                UserGroupBuilding permission = UserGroupBuilding.builder()
+                        .userGroup(group)
+                        .building(building)
+                        .canRead(b.canRead())
+                        .canWrite(b.canWrite())
+                        .registeredBy(b.registeredBy())
+                        .build();
+
+                group.getBuildingPermissions().add(permission);
+            }
+        }
+
+        if (dto.categoryPermissions() != null) {
+            group.getCategoryPermissions().clear();
+
+            for (UserGroupCategoryPermissionDTO c : dto.categoryPermissions()) {
+                PoiCategory category = poiCategoryRepository.findById(c.poiCategoryId())
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 ID: " + c.poiCategoryId()));
+
+                UserGroupPoiCategory permission = UserGroupPoiCategory.builder()
+                        .userGroup(group)
+                        .poiCategory(category)
+                        .canRead(c.canRead())
+                        .canWrite(c.canWrite())
+                        .registeredBy(c.registeredBy())
+                        .build();
+
+                group.getCategoryPermissions().add(permission);
+            }
+        }
+    }
 
     private Supplier<CustomException> notFoundIdException(Long id) {
         return () -> new CustomException(NOT_FOUND_USER_GROUP, "id: " + id);

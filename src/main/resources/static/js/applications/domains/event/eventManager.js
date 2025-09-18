@@ -1019,7 +1019,7 @@ const EventManager = (() => {
         try {
             const response = await api.get('/events/latest-24-hours');
             allEvents = response.data;
-            console.log('allEvents', allEvents);
+            console.log('24시간 이벤트 목록 : ', allEvents);
 
             if(allEvents.result.length > 0){
                 // 기존 페이징 UI 제거
@@ -1052,15 +1052,28 @@ const EventManager = (() => {
                 renderPage();
             }else{
                 const eventContainer = document.querySelector('.event-state__group');
-                eventContainer.querySelector('.table').style.display = 'none';
-
-                eventContainer.style.display = 'flex';
-                eventContainer.style.justifyContent = 'center';
-                eventContainer.style.alignItems = 'center';
-                eventContainer.style.height = '100%';
-                eventContainer.innerText = '이벤트 발생 내역이 없습니다.';
-                eventContainer.style.color = 'rgba(117, 118, 128, 1)';
-
+                const table = eventContainer.querySelector('.table');
+                
+                if (table) {
+                    table.style.display = 'none';
+                }
+                
+                const existingMessage = eventContainer.querySelector('.no-data-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                // 새로운 메시지 요소 생성 및 추가
+                const noDataMessage = document.createElement('div');
+                noDataMessage.className = 'no-data-message';
+                noDataMessage.style.display = 'flex';
+                noDataMessage.style.justifyContent = 'center';
+                noDataMessage.style.alignItems = 'center';
+                noDataMessage.style.height = '100%';
+                noDataMessage.style.color = 'rgba(117, 118, 128, 1)';
+                noDataMessage.textContent = '이벤트 발생 내역이 없습니다.';
+                
+                eventContainer.appendChild(noDataMessage);
             }
         } catch (error) {
             console.error('24시간 이벤트 목록 로딩 실패:', error);
@@ -1101,7 +1114,7 @@ const EventManager = (() => {
             // 프로세스 차트
             const processResponse = await api.get('/events/process-counts');
             const processData = processResponse.data.result;
-            console.log('Process Data:', processData);
+            console.log('유형별 통계 :', processData);
 
             if(processData.length > 0){
                 const refinedData = processData
@@ -1288,7 +1301,7 @@ const EventManager = (() => {
         try {
             const response = await api.get('/events/date-counts');
             const dateData = response.data;
-            console.log('Date Data:', dateData);
+            console.log('일자별 통계:', dateData);
 
             if(dateData.result.length > 0){
                 // 2. 최근 7일 날짜 배열 생성

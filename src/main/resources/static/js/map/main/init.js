@@ -1506,10 +1506,15 @@ const Init = (function () {
                 button.classList.add(...defaultStyle);
                 offAction();
             } else {
+                // onAction이 false를 반환하면 활성화하지 않음
+                const result = onAction();
+                if (result === false) {
+                    setButtonIconColor(button, '#919193');
+                    return;
+                }
                 button.classList.add('active');
                 button.classList.remove(...defaultStyle);
                 button.classList.add(...activeStyle);
-                onAction();
             }
         });
     }
@@ -1548,7 +1553,13 @@ const Init = (function () {
         addButtonPointerEvent(
             firstViewButton,
             () => {
+                // 2D 버튼이 활성화되어 있으면 경고 후 차단
+                if (camera2D.classList.contains('active')) {
+                    alertBox('2D 뷰가 활성화되어 있습니다. 먼저 2D 뷰를 해제해주세요.');
+                    return false; // 활성화하지 않음
+                }
                 Px.Camera.FPS.On();
+                return true; // 활성화
             },
             () => {
                 if (Px.Camera.FPS.IsOn()) {
@@ -1565,6 +1576,12 @@ const Init = (function () {
         addButtonPointerEvent(
             camera2D,
             () => {
+                // FirstView 버튼이 활성화되어 있으면 경고 후 차단
+                if (firstViewButton.classList.contains('active')) {
+                    alertBox('1인칭 뷰가 활성화되어 있습니다. 먼저 1인칭 뷰를 해제해주세요.');
+                    return false; // 활성화하지 않음
+                }
+                
                 // TODO: top-view 위치
                 const building = BuildingManager.findById(buildingId);
                 let option = '';
@@ -1583,6 +1600,7 @@ const Init = (function () {
                     Px.Camera.SetOrthographic();
                 };
                 Px.Camera.SetState(option);
+                return true; // 활성화
             },
             () => {
                 const building = BuildingManager.findById(buildingId);
@@ -1595,7 +1613,6 @@ const Init = (function () {
                     Px.Camera.SetPerspective();
                 }
                 Px.Camera.SetState(option);
-
             },
         );
     }

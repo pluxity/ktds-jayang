@@ -296,7 +296,16 @@
     await SystemSettingManager.getSystemSettingByBuildingId(buildingId).then((systemSetting) => {
         const { } = systemSetting;
     })
-    await NoticeManager.getNotices();
+    await NoticeManager.getNoticeIsActive().then((notices) => {
+        notices.forEach(async (notice) => {
+            if(notice.isRead === 'undefined' || notice.isRead === null) {
+                const profileBadge = document.querySelector(".profile__btn .badge")
+                const badge = document.querySelector('#notice .badge');
+                profileBadge.style.display = '';
+                badge.style.display = '';
+            }
+        })
+    });
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
     await PoiMiddleCategoryManager.getPoiMiddleCategoryList();

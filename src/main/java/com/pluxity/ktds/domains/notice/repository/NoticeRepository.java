@@ -15,6 +15,8 @@ public interface NoticeRepository extends BaseRepository<Notice, Long> {
 
     List<Notice>  findAllByOrderByExpiredAt();
 
+    List<Notice> findAllByIsActiveTrueOrderByCreatedAtDesc();
+
     @Modifying
     @Query("UPDATE Notice n SET n.isRead = true WHERE n.id IN :ids")
     int markNoticesAsRead(@Param("ids") List<Long> ids);

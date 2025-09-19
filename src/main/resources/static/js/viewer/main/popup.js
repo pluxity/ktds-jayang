@@ -4276,26 +4276,33 @@ const layerPopup = (function () {
         });
 
         const closeBtn = document.querySelector('#noticePopup .close');
-        closeBtn.addEventListener('click', function () {
-            saveReadNoticesBatch();
-            const popup = document.getElementById('noticePopup');
-            popup.style.display = 'none';
-        });
+        closeBtn.removeEventListener('click', handleNoticeClosePopup);
+        closeBtn.addEventListener('click', handleNoticeClosePopup);
+    }
+
+    function handleNoticeClosePopup() {
+        saveReadNoticesBatch();
+        const popup = document.getElementById('noticePopup');
+        popup.style.display = 'none';
     }
 
     function saveReadNoticesBatch() {
         const readIds = JSON.parse(localStorage.getItem('readNotices')) || [];
 
-        localStorage.setItem('readNotices', JSON.stringify(readIds));
-
-        api.put(`/notices/id-list/${readIds}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-            },
-        }).then(res => {
-            localStorage.removeItem("readNotices");
-        })
+        if(readIds.length > 0){
+            api.put(`/notices/id-list/${readIds}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                },
+            }).then(res => {
+                localStorage.removeItem("readNotices");
+                const profileBadge = document.querySelector(".profile__btn .badge")
+                const badge = document.querySelector('#notice .badge');
+                profileBadge.style.display = 'none';
+                badge.style.display = 'none';
+            })
+        }
     }
 
     // date format

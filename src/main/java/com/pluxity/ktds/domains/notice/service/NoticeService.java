@@ -49,6 +49,15 @@ public class NoticeService {
                 .map(NoticeResponseDTO::from)
                 .toList();
     }
+
+    @Transactional
+    public List<NoticeResponseDTO> getNoticesIsActiveTrue() {
+        var notices = repository.findAllByIsActiveTrueOrderByCreatedAtDesc();
+        return notices.stream()
+                .map(NoticeResponseDTO::from)
+                .toList();
+    }
+
     @Transactional
     public NoticeResponseDTO getNotice(Long id) {
         var notice = repository.findById(id)

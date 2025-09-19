@@ -29,6 +29,12 @@ public class NoticeController {
         return DataResponseBody.of(service.getNotices());
     }
 
+    @GetMapping( "/active")
+    public DataResponseBody<List<NoticeResponseDTO>> getNoticesIsActiveTrue() {
+        return DataResponseBody.of(service.getNoticesIsActiveTrue());
+    }
+
+
     @GetMapping("/{id}")
     public DataResponseBody<NoticeResponseDTO> getNotice(@PathVariable Long id) {
         return DataResponseBody.of(service.getNotice(id));

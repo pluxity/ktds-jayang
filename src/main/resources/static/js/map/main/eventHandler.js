@@ -464,13 +464,8 @@
         viewResult.setAttribute('data-category-id', id);
         const poiList = PoiManager.findAll();
         const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
-        // const filteringPoiList = poiList.filter(poi =>
-        //     poi.poiCategory === Number(id) && poi.position
-        // );
+
         layerPopup.setCategoryData(title, filteringPoiList);
-        // PoiManager.getPoiByCategoryId(id).then(pois => {
-        //     layerPopup.setCategoryData(title, pois);
-        // });
     };
 
     const handlePoiMapClick = (clickedItem, title) => {
@@ -497,15 +492,16 @@
                     }
                 });
             },
-            patrol: () => {
+            patrol: async () => {
                 // patrol popup
                 actions.closeAllPopups();
                 const patrolPopup = mapPopup.querySelector('#patrolPopup')
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 patrolPopup.style.display = 'block';
+                await PatrolManager.getPatrolList();
                 radioLive.checked = true; // live default
-                radioLive.dispatchEvent(new Event("change"));// 강제 실행
+                radioLive.dispatchEvent(new Event("change"));// 강제 실행 후 목록 렌더링
             },
             sop: () => {
                 // sop popup
@@ -981,8 +977,13 @@
             patrolContentList.style.alignItems = 'center';
             patrolContentList.style.justifyContent = 'center';
             patrolContentList.style.textAlign = 'center';
-            return patrolContentList.innerHTML += `<div class="error-text" style="color:#676977;">저장된 가상순찰 목록이 없습니다.</div>`
+            return patrolContentList.innerHTML = `<div class="error-text" style="color:#676977;">저장된 가상순찰 목록이 없습니다.</div>`
         }
+
+        patrolContentList.style.display = 'block';
+        patrolContentList.style.alignItems = 'initial';
+        patrolContentList.style.justifyContent = 'initial';
+        patrolContentList.style.textAlign = 'initial';
 
         patrolList.forEach((patrol) => {
             // pointName 별로 그룹화된 리스트 생성

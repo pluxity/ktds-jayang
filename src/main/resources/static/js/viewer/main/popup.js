@@ -2625,15 +2625,15 @@ const layerPopup = (function () {
             : Array.from(new Set(Array.from(checked, labelFromCb))).filter(Boolean).join(', ');
 
         let mode = 'all', B = null, D = null;
-        if (device && device !== '전체') { mode = 'device';   D = device; }
-        else if (building && building !== '전체') { mode = 'building'; B = building; }
+        if (device && device !== '장비 전체') { mode = 'device';   D = device; }
+        else if (building && building !== '건물 전체') { mode = 'building'; B = building; }
 
         downloadEventReportPdf({ mode, building: B, device: D, event: eventLabel });
 
     });
 
     async function downloadEventReportPdf({ mode = 'all', building = null, device = null, event = null } = {}) {
-        // 데이터 소스
+        // 데이터 소스 - 이미 필터링된 데이터를 사용
         const list = (window._eventExport?.list && Array.isArray(window._eventExport.list))
             ? window._eventExport.list
             : (typeof matchedAlarms !== 'undefined' && Array.isArray(matchedAlarms) ? matchedAlarms : []);
@@ -3791,7 +3791,7 @@ const layerPopup = (function () {
         params.append('startDateString', startDateString);
         params.append('endDateString', endDateString);
 
-        if (selectedDeviceType && selectedDeviceType !== '전체') {
+        if (selectedDeviceType && selectedDeviceType !== '장비 전체') {
             params.append('deviceType', selectedDeviceType);
         }
         if (alarmTypeInput) {
@@ -3901,7 +3901,42 @@ const layerPopup = (function () {
             const paginationContainer = eventLayerPopup.querySelector(".search-result__paging .number");
 
             const renderTable = (page) => {
-                // tableBody.innerHTML = "";
+                const eventInfoEl = eventLayerPopup.querySelector('.event-info');
+                const tableEl = eventInfoEl.querySelector('table');
+                const paginationEl = eventLayerPopup.querySelector('.search-result__paging');
+                const footerEl = eventLayerPopup.querySelector('.search-result__footer');
+                const downloadButtons = footerEl ? footerEl.querySelectorAll('.download') : [];
+                
+                // 기존 메시지 제거
+                const existingMessage = eventInfoEl.querySelector('.no-results-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                // 검색 결과가 없는 경우
+                if (matchedAlarms.length === 0) {
+                    // 테이블, 페이지네이션, 다운로드 버튼들 숨기기
+                    if (tableEl) tableEl.style.display = 'none';
+                    if (paginationEl) paginationEl.style.display = 'none';
+                    downloadButtons.forEach(btn => btn.style.display = 'none');
+                    
+                    // "검색 결과가 없습니다" 메시지 표시
+                    const noResultsDiv = document.createElement('div');
+                    noResultsDiv.className = 'no-results-message';
+                    noResultsDiv.style.textAlign = 'center';
+                    noResultsDiv.style.padding = '50px 20px';
+                    noResultsDiv.style.fontSize = '16px';
+                    noResultsDiv.style.color = '#666';
+                    noResultsDiv.textContent = '검색 결과가 없습니다';
+                    eventInfoEl.appendChild(noResultsDiv);
+                    return;
+                }
+                
+                // 결과가 있는 경우 테이블, 페이지네이션, 다운로드 버튼들 보이기
+                if (tableEl) tableEl.style.display = '';
+                if (paginationEl) paginationEl.style.display = '';
+                downloadButtons.forEach(btn => btn.style.display = '');
+                
                 const startIndex = (page - 1) * itemsPerPage;
                 const pageAlarms = matchedAlarms.slice(startIndex, startIndex + itemsPerPage);
 
@@ -3909,7 +3944,6 @@ const layerPopup = (function () {
                 taggedPoiMap.clear();
 
                 pageAlarms.forEach((data) => {
-
                     const eventRow = document.createElement('tr');
                     const [formattedOccurrenceDate, formattedConfirmTime] =
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
@@ -3952,7 +3986,6 @@ const layerPopup = (function () {
                               </a>
                             </td>
                         `;
-                    // tableBody.appendChild(eventRow);
                     frag.appendChild(eventRow);
 
                     if (taggedPoi) taggedPoiMap.set(taggedPoi.id, taggedPoi);

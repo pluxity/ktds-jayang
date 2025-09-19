@@ -1093,8 +1093,8 @@ const EventManager = (() => {
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
                 <td>${event.floorNm  || '-'}</td>
-                <td class="ellipsis">${event.event || '-'}</td>
-                <td class="ellipsis">${event.poiName || '-'}</td>
+                <td class="ellipsis" title="${event.event}">${event.event || '-'}</td>
+                <td class="ellipsis" title="${event.poiName}">${event.poiName || '-'}</td>
                 <td>${formatTime(event.occurrenceDate)}</td>
             `;
             tableBody.appendChild(row);

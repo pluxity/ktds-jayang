@@ -743,7 +743,7 @@ const layerPopup = (function () {
             
             // 총 개수를 0으로 설정
             document.getElementById("totalEqCount").textContent = "0";
-            return;
+            // return;
         }
 
         const buildingSelectContent = document.querySelector('#buildingSelect .select-box__content');

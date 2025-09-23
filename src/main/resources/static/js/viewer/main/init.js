@@ -305,12 +305,14 @@ const Init = (function () {
             const version = outdoorBuilding.getVersion();
             await BuildingManager.getFloorsByHistoryVersion(version);
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
+            const allBuilding = BuildingManager.findAll();
             let buildingId = outdoorBuilding ? outdoorBuilding.id : null;
             //initFloors(buildingId);
             initBuildingList();
             document.getElementById("buildingName").setAttribute("building-id", buildingId);
             document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
 
+            const buildingNames = allBuilding.map(b => b.name);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (outdoorBuilding) {
@@ -327,7 +329,7 @@ const Init = (function () {
                                 displayName: alias,
                                 baseFloor: sbm.sbmFloorBase,
                                 groupId: sbm.sbmFloorGroup,
-                                isSelectable: alias !== '기타시설',
+                                isSelectable: alias !== '기타시설' && buildingNames.includes(alias),
                                 property: sbm.sbmFloorBase
                             };
                         })

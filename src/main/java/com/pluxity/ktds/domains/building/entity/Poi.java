@@ -30,6 +30,10 @@ import java.util.stream.Collectors;
         parameters = @ParamDef(name = "permittedCategoryIds", type = Long.class)
 )
 @Filter(
+        name = "buildingPermissionFilter",
+        condition = "building_id in (:permittedIds)"
+)
+@Filter(
         name = "poiCategoryPermissionFilter",
         condition = "poi_category_id in (:permittedCategoryIds)"
 )

@@ -10,6 +10,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,10 +29,9 @@ import java.util.stream.Collectors;
 public class PermissionAspect {
     private final EntityManager entityManager;
 
-    @Before(
-            "@within(org.springframework.transaction.annotation.Transactional) || " +
-                    "@annotation(org.springframework.transaction.annotation.Transactional)"
-    )
+    @Before("execution(public * com.pluxity.ktds.domains..service..*(..)) && " +
+            "(@within(org.springframework.transaction.annotation.Transactional) || " +
+            "@annotation(org.springframework.transaction.annotation.Transactional))")
     public void applyBuildingPermissionFilter(JoinPoint jp) throws NoSuchMethodException {
 
         MethodSignature signature = (MethodSignature) jp.getSignature();

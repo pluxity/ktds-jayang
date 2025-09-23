@@ -109,8 +109,6 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
 );
 
     @Query("SELECT p.id FROM Poi p ORDER BY p.id DESC")
-    @IgnorePoiPermission
-    @IgnoreBuildingPermission
     Page<Long> findPoiIdsForPaging(Pageable pageable);
 
     @Query("SELECT p.id FROM Poi p " +
@@ -138,5 +136,8 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
             "WHERE p.id IN :poiIds " +
             "ORDER BY p.id DESC")
     List<Poi> findByIdsWithJoins(@Param("poiIds") List<Long> poiIds);
+
+    @Query("SELECT COUNT(p) FROM Poi p WHERE p.id IN :ids")
+    Long countByIds(@Param("ids") List<Long> ids);
 
 }

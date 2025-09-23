@@ -12,7 +12,13 @@ public interface UserRepository extends BaseRepository<User, Long> {
 
     boolean existsByUsername(String username);
 
-    @EntityGraph(attributePaths = {"userGroup", "userGroup.authorities"})
+    @EntityGraph(attributePaths = {
+            "userGroup",
+            "userGroup.authorities",
+            "userGroup.buildingPermissions",
+            "userGroup.categoryPermissions",
+            "userGroup.menuPermissions"
+    })
     Optional<User> findByUsername(String username);
     List<User> findByUserGroupId(Long id);
 }

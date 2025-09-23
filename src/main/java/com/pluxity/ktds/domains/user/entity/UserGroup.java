@@ -42,6 +42,9 @@ public class UserGroup {
     @OneToMany(mappedBy = "userGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserGroupPoiCategory> categoryPermissions = new HashSet<>();
 
+    @OneToMany(mappedBy = "userGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserGroupMenu> menuPermissions = new HashSet<>();
+
     @OneToMany(mappedBy = "userGroup", orphanRemoval = true)
     @BatchSize(size = 10)
     private Set<User> users = new HashSet<>();
@@ -92,6 +95,9 @@ public class UserGroup {
                                 .canWrite(cp.getCanWrite())
                                 .registeredBy(cp.getRegisteredBy())
                                 .build())
+                        .collect(Collectors.toSet()))
+                .menuPermissions(this.getMenuPermissions().stream()
+                        .map(UserGroupMenu::getMenuType)
                         .collect(Collectors.toSet()))
                 .build();
     }

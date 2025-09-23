@@ -10,7 +10,7 @@ const getUserGroupFindAll = (onComplete) => {
 }
 
 const getBuildingInfoList = () => {
-    api.get('/buildings').then((res) => {
+    api.get('/buildings/all').then((res) => {
         buildingList = res.data.result;
     })
 }
@@ -120,18 +120,28 @@ function modifyUserGroupModal(id) {
     frm.querySelector('#modifyDescription').value = resultData.description || '';
 }
 
+const tbody = document.getElementById("poiCategoryPermissionList");
+
+document.getElementById("poiCategoryReadAll").addEventListener("change", e => {
+    tbody.querySelectorAll('input[name="poiCategoriesRead"]').forEach(cb => cb.checked = e.target.checked);
+});
+document.getElementById("poiCategoryWriteAll").addEventListener("change", e => {
+    tbody.querySelectorAll('input[name="poiCategoriesWrite"]').forEach(cb => cb.checked = e.target.checked);
+});
+
 function modifyUserRoleModal(id) {
     const frm = document.getElementById('userGroupRoleModifyFrm');
     frm.reset();
     const  resultData = userGroupDataAll.find(data => data.id === id);
     frm.querySelector('#roleModifyId').value = resultData.id;
 
+    console.log("resultData : ", resultData);
     const buildingContainer = document.getElementById('buildingPermissionList');
     buildingContainer.innerHTML = '';
     buildingList.forEach(b => {
+        const checked = resultData.buildingPermissions?.some(p => p.buildingId === b.id) ? 'checked' : '';
         const div = document.createElement('div');
         div.classList.add('form-check');
-        const checked = resultData.buildingIds?.includes(b.id) ? 'checked' : '';
         div.innerHTML = `
             <input type="checkbox" class="form-check-input" id="building_${b.id}" 
                    name="buildings" value="${b.id}" ${checked}>
@@ -144,13 +154,40 @@ function modifyUserRoleModal(id) {
     const poiContainer = document.getElementById('poiCategoryPermissionList');
     poiContainer.innerHTML = '';
     poiCategoryList.forEach(c => {
-        const checked = resultData.poiCategoryIds?.includes(c.id) ? 'checked' : '';
+        const perm = resultData.categoryPermissions?.find(p => p.poiCategoryId === c.id);
+        const readChecked = perm?.canRead ? 'checked' : '';
+        const writeChecked = perm?.canWrite ? 'checked' : '';
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${c.name}</td>
-            <td><input type="checkbox" name="poiCategories" value="${c.id}" ${checked}></td>
+            <td class="text-center"><input type="checkbox" name="poiCategoriesRead" value="${c.id}" ${readChecked}></td>
+            <td class="text-center"><input type="checkbox" name="poiCategoriesWrite" value="${c.id}" ${writeChecked}></td>
         `;
         poiContainer.appendChild(row);
+    });
+
+    ["Read","Write"].forEach(type => {
+        const all = document.getElementById("poiCategory"+type+"All");
+        if (!all) return;
+
+        const selector = `#poiCategoryPermissionList input[name="poiCategories${type}"]`;
+
+        all.onchange = e => {
+            document.querySelectorAll(selector)
+                .forEach(cb => cb.checked = e.target.checked);
+        };
+
+        document.querySelectorAll(selector).forEach(cb => {
+            cb.onchange = () => {
+                const total = document.querySelectorAll(selector).length;
+                const checkedCount = document.querySelectorAll(selector + ":checked").length;
+                all.checked = (total > 0 && total === checkedCount);
+            };
+        });
+
+        const total = document.querySelectorAll(selector).length;
+        const checkedCount = document.querySelectorAll(selector + ":checked").length;
+        all.checked = (total > 0 && total === checkedCount);
     });
 
     // 메뉴 권한
@@ -159,13 +196,35 @@ function modifyUserRoleModal(id) {
     const menuPermissionList = ['building', 'poi', 'sop', 'management', 'notice', 'user'];
 
     menuPermissionList.forEach(p => {
+        const menuChecked = resultData.menuPermissions?.includes(p.toUpperCase()) ? 'checked' : '';
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${p}</td>
-            <td><input type="checkbox" name="menuPermissions" value="${p}"></td>
+            <td><input type="checkbox" name="menuPermissions" value="${p.toUpperCase()}" ${menuChecked}></td>
         `;
         menuContainer.appendChild(row);
     });
+
+    const allMenu = document.getElementById("menuAll");
+    if (allMenu) {
+        const selector = `#menuPermissionList input[name="menuPermissions"]`;
+        allMenu.onchange = e => {
+            document.querySelectorAll(selector)
+                .forEach(cb => cb.checked = e.target.checked);
+        };
+
+        document.querySelectorAll(selector).forEach(cb => {
+            cb.onchange = () => {
+                const total = document.querySelectorAll(selector).length;
+                const checkedCount = document.querySelectorAll(selector + ":checked").length;
+                allMenu.checked = (total > 0 && total === checkedCount);
+            };
+        });
+
+        const total = document.querySelectorAll(selector).length;
+        const checkedCount = document.querySelectorAll(selector + ":checked").length;
+        allMenu.checked = (total > 0 && total === checkedCount);
+    }
 }
 
 const btnRoleGroupModify = document.getElementById('btnUserGroupRoleModify');
@@ -177,12 +236,25 @@ btnRoleGroupModify.onclick = () => {
     const buildingPermissions = Array.from(form.querySelectorAll('input[name="buildings"]:checked'))
         .map(cb => ({ buildingId: Number(cb.value) }));
 
-    const categoryPermissions = Array.from(form.querySelectorAll('input[name="poiCategories"]:checked'))
-        .map(cb => ({ poiCategoryId: Number(cb.value) }));
+    const categoryPermissions = poiCategoryList.map(c => {
+        const canRead = form.querySelector(`input[name="poiCategoriesRead"][value="${c.id}"]`)?.checked || false;
+        const canWrite = form.querySelector(`input[name="poiCategoriesWrite"][value="${c.id}"]`)?.checked || false;
+        return {
+            poiCategoryId: c.id,
+            canRead: canRead,
+            canWrite: canWrite,
+            registeredBy: null
+        };
+    });
+
+    // menu 권한
+    const menuPermissions = Array.from(form.querySelectorAll('input[name="menuPermissions"]:checked'))
+        .map(cb => cb.value.toUpperCase());
 
     const payload = {
         buildingPermissions: buildingPermissions,
-        categoryPermissions: categoryPermissions
+        categoryPermissions: categoryPermissions,
+        menuPermissions: menuPermissions
     };
 
     api.patch(`/user-groups/${groupId}/permissions`, payload).then((res) => {

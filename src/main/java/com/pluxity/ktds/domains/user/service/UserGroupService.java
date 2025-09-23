@@ -4,11 +4,9 @@ import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.repostiory.BuildingRepository;
 import com.pluxity.ktds.domains.poi_set.entity.PoiCategory;
 import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
+import com.pluxity.ktds.domains.user.constant.MenuType;
 import com.pluxity.ktds.domains.user.dto.*;
-import com.pluxity.ktds.domains.user.entity.User;
-import com.pluxity.ktds.domains.user.entity.UserGroup;
-import com.pluxity.ktds.domains.user.entity.UserGroupBuilding;
-import com.pluxity.ktds.domains.user.entity.UserGroupPoiCategory;
+import com.pluxity.ktds.domains.user.entity.*;
 import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.domains.user.repository.UserRepository;
 import com.pluxity.ktds.global.exception.CustomException;
@@ -143,6 +141,13 @@ public class UserGroupService {
                         .build();
 
                 group.getCategoryPermissions().add(permission);
+            }
+        }
+        if (dto.menuPermissions() != null) {
+            group.getMenuPermissions().clear();
+            for (MenuType menuType : dto.menuPermissions()) {
+                UserGroupMenu permission = new UserGroupMenu(menuType, group);
+                group.getMenuPermissions().add(permission);
             }
         }
     }

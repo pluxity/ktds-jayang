@@ -46,6 +46,7 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
 
     @Query("""
             SELECT distinct new com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO(
+                p.id,
                 p.building.name,
                 f.name,
                 a.event,

@@ -1094,9 +1094,20 @@ const EventManager = (() => {
                 <td>${event.buildingNm || '-'}</td>
                 <td>${event.floorNm  || '-'}</td>
                 <td class="ellipsis" title="${event.event}">${event.event || '-'}</td>
-                <td class="ellipsis" title="${event.poiName}">${event.poiName || '-'}</td>
+                <td class="ellipsis poi-name" style="cursor:pointer; title="${event.poiName}">
+                    ${event.poiName || '-'}
+                    <input type="hidden" name="poiId" value="${event.poiId || ''}">
+                </td>
                 <td>${formatTime(event.occurrenceDate)}</td>
             `;
+
+            const poiNameCell = row.querySelector('.poi-name');
+            poiNameCell.addEventListener('click', () => {
+                const poiId = poiNameCell.querySelector('input[name="poiId"]').value;
+                layerPopup.movePoi(poiId);
+                console.log("Clicked poiName:", event.poiName, "poiId:", poiId);
+            });
+
             tableBody.appendChild(row);
         });
     };

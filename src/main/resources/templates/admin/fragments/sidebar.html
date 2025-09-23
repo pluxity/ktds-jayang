@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <nav id="sidebar" class="sidebar js-sidebar">
     <div class="sidebar-content js-simplebar" style="height: auto;">
       <a class="sidebar-brand" href="">
         <span class="align-middle"></span>
       </a>
 
-      <ul class="sidebar-nav">
+      <ul class="sidebar-nav" sec:authorize="hasRole('BUILDING')">
         <li class="sidebar-header">
           도면 관리
         </li>
@@ -18,7 +20,7 @@
         </li>
       </ul>
 
-      <ul class="sidebar-nav">
+      <ul class="sidebar-nav" sec:authorize="hasRole('POI')">
         <li class="sidebar-header">
           POI 관리
         </li>
@@ -42,7 +44,7 @@
         </li>
       </ul>
       <!-- SOP 관리 -->
-      <ul class="sidebar-nav">
+      <ul class="sidebar-nav" sec:authorize="hasRole('SOP')">
         <li class="sidebar-header">
           SOP 관리
         </li>
@@ -53,7 +55,7 @@
         </li>
       </ul>
       <!-- 업체 관리 -->
-      <ul class="sidebar-nav">
+      <ul class="sidebar-nav" sec:authorize="hasRole('MANAGEMENT')">
         <li class="sidebar-header">
           업체 관리
         </li>
@@ -70,7 +72,7 @@
       </ul>
 
       <!-- 공지사항 관리 -->
-      <ul class="sidebar-nav">
+      <ul class="sidebar-nav" sec:authorize="hasRole('NOTICE')">
         <li class="sidebar-header">
           공지사항 관리
         </li>
@@ -83,7 +85,7 @@
       </ul>
 
       <!-- 계정관리 -->
-      <ul class="sidebar-nav">
+      <ul class="sidebar-nav" sec:authorize="hasRole('USER')">
         <li class="sidebar-header">
           사용자 관리
         </li>

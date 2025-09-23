@@ -28,6 +28,8 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -73,14 +75,20 @@ public class AuthenticationService {
 //      SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
 //      contextRepository.saveContext(securityContext, request, response);
 
-      HttpSession session = request.getSession(true);
-      session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
+      SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+      contextRepository.saveContext(securityContext, request, response);
 
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       User user = userService.findUserByUsername(userDetails.getUsername());
 
       Cookie cookie = new Cookie("USER_ID", userDetails.getUsername());
-      Cookie cookieRole = new Cookie("USER_ROLE", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+
+      String roleValue = userDetails.getAuthorities().stream()
+              .map(GrantedAuthority::getAuthority)
+              .collect(Collectors.joining(","));
+      String encoded = URLEncoder.encode(roleValue, StandardCharsets.UTF_8);
+
+      Cookie cookieRole = new Cookie("USER_ROLE", encoded);
       cookieRole.setMaxAge(60 * 60 * 24);
       cookieRole.setPath("/");
       //      cookie.setHttpOnly(true);
@@ -88,6 +96,12 @@ public class AuthenticationService {
       cookie.setPath("/");
       response.addCookie(cookie);
       response.addCookie(cookieRole);
+
+      String userType = userDetails.user().getUserGroup().getGroupType();
+      Cookie cookieType = new Cookie("USER_TYPE", userType);
+      cookieType.setPath("/");
+      cookieType.setMaxAge(60 * 60 * 24);
+      response.addCookie(cookieType);
 
       return SignInResponseDTO.builder()
               .username(user.getUsername())

@@ -1,24 +1,36 @@
 package com.pluxity.ktds.global.config;
 
+import com.pluxity.ktds.global.security.CustomUserDetailsService;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     @Bean
@@ -36,14 +48,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomUserDetailsService customUserDetailsService) throws Exception {
         http.csrf().disable().cors().disable()
                 .authorizeHttpRequests(request -> request
                         .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-                        .requestMatchers("/status/**","/resources/**","/error", "/login").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/static/js/**").permitAll()
-                        .anyRequest().permitAll()	// 어떠한 요청이라도 인증필요
+                        .requestMatchers(
+                                "/status/**",
+                                "/resources/**",
+                                "/error",
+                                "/login",
+                                "/login/**",
+                                "/auth/**",
+                                "/h2-console/**",
+                                "/static/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()	// 어떠한 요청이라도 인증필요
                 )
                 .formLogin(login -> login	// form 방식 로그인 사용
                                 .loginPage("/login")
@@ -88,21 +111,46 @@ public class SecurityConfig {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse res = (HttpServletResponse) response;
 
-            Cookie[] cookies = req.getCookies();
-            boolean isLoggedIn = false;
+            var context = SecurityContextHolder.getContext();
+            Authentication auth = context.getAuthentication();
+            boolean needRestore = (auth == null
+                    || auth instanceof AnonymousAuthenticationToken
+                    || "anonymousUser".equals(auth.getName()));
 
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if ("USER_ID".equals(cookie.getName())) {
-                        isLoggedIn = true;
-                        break;
-                    }
+
+            if (req.getCookies() != null) {
+                for (Cookie c : req.getCookies()) {
+                    log.debug("쿠키: {} = {}", c.getName(), c.getValue());
                 }
-            }
 
-            if (isLoggedIn && req.getRequestURI().equals("/")) {
-                res.sendRedirect("/viewer");
-                return;
+                Arrays.stream(req.getCookies())
+                        .filter(c -> {
+                            log.debug("검사 중인 쿠키 이름: {}", c.getName());
+                            return "USER_ID".equals(c.getName());
+                        })
+                        .findFirst()
+                        .ifPresent(c -> {
+                            try {
+                                String username = c.getValue();
+                                log.debug("USER_ID 쿠키 발견, username={}", username);
+
+                                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+
+                                UsernamePasswordAuthenticationToken token =
+                                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                                var newContext = SecurityContextHolder.createEmptyContext();
+                                newContext.setAuthentication(token);
+                                SecurityContextHolder.setContext(newContext);
+
+                                SecurityContextRepository repo = new HttpSessionSecurityContextRepository();
+                                repo.saveContext(newContext, req, res);
+
+                                log.debug("SecurityContext 복원 완료: {}", username);
+                            } catch (Exception ex) {
+                                log.warn("USER_ID 쿠키 인증 복원 실패: {}", ex.getMessage());
+                            }
+                        });
             }
 
             chain.doFilter(request, response);

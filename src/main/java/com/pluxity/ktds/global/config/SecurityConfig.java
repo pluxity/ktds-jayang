@@ -64,7 +64,8 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/vms-event"
                         ).permitAll()
                         .anyRequest().authenticated()	// 어떠한 요청이라도 인증필요
                 )

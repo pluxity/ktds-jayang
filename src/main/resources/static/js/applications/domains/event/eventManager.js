@@ -34,7 +34,6 @@ const EventManager = (() => {
         try {
             // SSE 연결 시작
             connectToSSE();
-            connectToVmsEventSSE();
 
         } catch (error) {
             console.error('미해제 알람 조회 실패:', error);
@@ -100,154 +99,6 @@ const EventManager = (() => {
         }
     }
 
-    const connectToVmsEventSSE = () => {
-        console.log('try connectToVmsEventSSE');
-        const eventSource = new EventSource('/vms-event/subscribe');
-
-        eventSource.onopen = () => {
-            console.log("onopen");
-        }
-
-        eventSource.addEventListener('vmsEvent', async (event) => {
-            const dto = JSON.parse(event.data);
-            console.log('vmsEvent :', dto);
-
-            // 최신 roi_event_list.stream_url 선택 (fallback은 dto.stream_url)
-            let streamUrl = dto.stream_url;
-            if (Array.isArray(dto.roi_event_list) && dto.roi_event_list.length > 0) {
-                const latest = dto.roi_event_list.reduce((prev, curr) =>
-                    prev.event_time >= curr.event_time ? prev : curr
-                );
-                if (latest && latest.stream_url) {
-                    streamUrl = latest.stream_url;
-                }
-            }
-
-            // mixed-content / dynamic upstream 처리
-            let usedUrl;
-            if (streamUrl.toLowerCase().includes('.m3u8')) {
-                usedUrl = await getRewrittenManifestUrl(streamUrl);
-            } else {
-                usedUrl = proxiedStreamUrl(streamUrl);
-            }
-
-            let video = document.getElementById('vmsLatestStream');
-
-            // 중앙 컨테이너
-            let container = document.getElementById('vms-video-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'vms-video-container';
-                Object.assign(container.style, {
-                    position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '640px',
-                    maxWidth: '100%',
-                    aspectRatio: '16/9',
-                    zIndex: '9999',
-                    background: 'black',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    padding: '0',
-                    margin: '0',
-                    borderRadius: '6px',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                });
-                document.body.appendChild(container);
-            } else {
-                Object.assign(container.style, {
-                    position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: '9999',
-                });
-            }
-
-            // video + close 버튼 생성 보장
-            const ensureVideo = () => {
-                if (!video) {
-                    video = document.createElement('video');
-                    video.id = 'vmsLatestStream';
-                    video.setAttribute('playsinline', '');
-                    video.setAttribute('controls', '');
-                    video.autoplay = true;
-                    video.muted = true;
-                    video.playsInline = true;
-                    Object.assign(video.style, {
-                        width: '100%',
-                        height: '100%',
-                        display: 'block',
-                        background: 'black',
-                    });
-                    container.appendChild(video);
-
-                    const closeBtn = document.createElement('button');
-                    closeBtn.innerHTML = '&times;';
-                    closeBtn.setAttribute('aria-label', 'Close video');
-                    Object.assign(closeBtn.style, {
-                        position: 'absolute',
-                        top: '6px',
-                        right: '6px',
-                        background: 'rgba(0,0,0,0.6)',
-                        border: 'none',
-                        color: '#fff',
-                        fontSize: '20px',
-                        lineHeight: '1',
-                        padding: '4px 10px',
-                        cursor: 'pointer',
-                        borderRadius: '4px',
-                        zIndex: '10000',
-                    });
-                    closeBtn.addEventListener('click', () => {
-                        if (video) {
-                            video.pause();
-                            if (video._hls) {
-                                video._hls.destroy();
-                            }
-                        }
-                        container.remove();
-                    });
-                    container.appendChild(closeBtn);
-                }
-            };
-            ensureVideo();
-
-            // 재생 처리
-            if (usedUrl.toLowerCase().includes('.m3u8') && window.Hls && Hls.isSupported()) {
-                if (video._hls) {
-                    video._hls.destroy();
-                }
-                const hls = new Hls();
-                video._hls = hls;
-                hls.loadSource(usedUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().catch(() => {});
-                });
-            } else {
-                if (video.src !== usedUrl) {
-                    video.src = usedUrl;
-                    video.load();
-                    video.play().catch(() => {});
-                }
-            }
-        });
-
-        eventSource.onmessage  = e => {
-            console.log("e : ", e);
-        }
-
-        eventSource.onerror  = err => {
-            console.log("err : ", err);
-        }
-    };
-
-    // SSE 연결
     const connectToSSE = () => {
         // 이미 연결 중이면 중복 실행 방지
         if (eventSource && (eventSource.readyState === EventSource.CONNECTING || eventSource.readyState === EventSource.OPEN)) {
@@ -263,6 +114,168 @@ const EventManager = (() => {
 
         try {
             eventSource = new EventSource(`/events/subscribe`);
+
+            // 공지사항 발생
+            eventSource.addEventListener('notice', async (event) => {
+
+                const notice = JSON.parse(event.data);
+                const badge = document.querySelector('#notice .badge');
+                const profileBadge = document.querySelector(".profile__btn .badge")
+                const param = new URLSearchParams(window.location.search);
+                const buildingIdParam = param.get("buildingId")
+                if (buildingIdParam) {
+                    const buildingId = parseInt(buildingIdParam, 10);
+                    console.log("notice.buildingIds : ", notice.buildingIds);
+                    console.log("buildingId : ", buildingId);
+                    // console.log("includes :", notice.buildingIds.includes(buildingId));
+                    if (!notice.buildingIds.includes(buildingId)) {
+                        return;
+                    }
+                }
+
+                profileBadge.style.display = '';
+                badge.style.display = '';
+                const popup = document.getElementById('noticePopup');
+                popup.style.display = 'inline-block';
+                popup.style.position = 'absolute';
+                popup.style.top = '50%';
+                popup.style.left = '50%';
+                popup.style.transform = 'translate(-50%, -50%)';
+                popup.style.zIndex = '999';
+
+                layerPopup.pagingNotice([notice], 1);
+            });
+
+            // vms 이벤트 발생
+            eventSource.addEventListener('vmsEvent', async (event) => {
+                const dto = JSON.parse(event.data);
+                console.log('vmsEvent :', dto);
+
+                // 최신 roi_event_list.stream_url 선택 (fallback은 dto.stream_url)
+                let streamUrl = dto.stream_url;
+                if (Array.isArray(dto.roi_event_list) && dto.roi_event_list.length > 0) {
+                    const latest = dto.roi_event_list.reduce((prev, curr) =>
+                        prev.event_time >= curr.event_time ? prev : curr
+                    );
+                    if (latest && latest.stream_url) {
+                        streamUrl = latest.stream_url;
+                    }
+                }
+
+                // mixed-content / dynamic upstream 처리
+                let usedUrl;
+                if (streamUrl.toLowerCase().includes('.m3u8')) {
+                    usedUrl = await getRewrittenManifestUrl(streamUrl);
+                } else {
+                    usedUrl = proxiedStreamUrl(streamUrl);
+                }
+
+                let video = document.getElementById('vmsLatestStream');
+
+                // 중앙 컨테이너
+                let container = document.getElementById('vms-video-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'vms-video-container';
+                    Object.assign(container.style, {
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '640px',
+                        maxWidth: '100%',
+                        aspectRatio: '16/9',
+                        zIndex: '9999',
+                        background: 'black',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        padding: '0',
+                        margin: '0',
+                        borderRadius: '6px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                    });
+                    document.body.appendChild(container);
+                } else {
+                    Object.assign(container.style, {
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: '9999',
+                    });
+                }
+
+                // video + close 버튼 생성 보장
+                const ensureVideo = () => {
+                    if (!video) {
+                        video = document.createElement('video');
+                        video.id = 'vmsLatestStream';
+                        video.setAttribute('playsinline', '');
+                        video.setAttribute('controls', '');
+                        video.autoplay = true;
+                        video.muted = true;
+                        video.playsInline = true;
+                        Object.assign(video.style, {
+                            width: '100%',
+                            height: '100%',
+                            display: 'block',
+                            background: 'black',
+                        });
+                        container.appendChild(video);
+
+                        const closeBtn = document.createElement('button');
+                        closeBtn.innerHTML = '&times;';
+                        closeBtn.setAttribute('aria-label', 'Close video');
+                        Object.assign(closeBtn.style, {
+                            position: 'absolute',
+                            top: '6px',
+                            right: '6px',
+                            background: 'rgba(0,0,0,0.6)',
+                            border: 'none',
+                            color: '#fff',
+                            fontSize: '20px',
+                            lineHeight: '1',
+                            padding: '4px 10px',
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            zIndex: '10000',
+                        });
+                        closeBtn.addEventListener('click', () => {
+                            if (video) {
+                                video.pause();
+                                if (video._hls) {
+                                    video._hls.destroy();
+                                }
+                            }
+                            container.remove();
+                        });
+                        container.appendChild(closeBtn);
+                    }
+                };
+                ensureVideo();
+
+                // 재생 처리
+                if (usedUrl.toLowerCase().includes('.m3u8') && window.Hls && Hls.isSupported()) {
+                    if (video._hls) {
+                        video._hls.destroy();
+                    }
+                    const hls = new Hls();
+                    video._hls = hls;
+                    hls.loadSource(usedUrl);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        video.play().catch(() => {});
+                    });
+                } else {
+                    if (video.src !== usedUrl) {
+                        video.src = usedUrl;
+                        video.load();
+                        video.play().catch(() => {});
+                    }
+                }
+            });
 
             // 이벤트 발생 시
             eventSource.addEventListener('newAlarm', async (event) => {

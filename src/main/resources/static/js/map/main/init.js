@@ -28,13 +28,14 @@
     }
     // 관리자 여부
     const userRole = getCookie("USER_ROLE");
+    const userType = getCookie("USER_TYPE");
     const decoded = userRole ? decodeURIComponent(userRole) : "";
     const roles = decoded ? decoded.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
         window.open("/admin/system-setting", "_blank");
     })
-    if (!roles.includes("ADMIN")) {
+    if (!userType.includes("ADMIN")) {
         adminButton.style.display = "none";
     }
 
@@ -758,7 +759,7 @@ const Init = (function () {
 
         if (selectedPoiId) {
             const poiData = Px.Poi.GetData(selectedPoiId);
-            const floorNo = poiData.property.floorNo;
+            const floorNo = poiData?.property.floorNo;
             Init.moveToFloorPage(floorNo);
             const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
             if (floorElement) {

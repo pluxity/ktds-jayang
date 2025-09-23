@@ -982,15 +982,15 @@ const layerPopup = (function () {
         const tbody = accordionDetail.querySelector('tbody');
         const tr = document.createElement('tr');
 
-        const buildingInfo = BuildingManager.findById(poi.buildingId);
-        const floorInfo = buildingInfo.floors.find(floor => floor.no === poi.floorNo);
+        const buildingInfo = BuildingManager.findById(poi.buildingId) ?? null;
+        const floorInfo = buildingInfo?.floors?.find(floor => floor.no === poi.floorNo) ?? null;
 
         const tdBuilding = document.createElement('td');
-        tdBuilding.textContent = buildingInfo.name;
+        tdBuilding.textContent = buildingInfo?.name ?? null;
 
         const tdFloor = document.createElement('td');
 
-        tdFloor.textContent = floorInfo?.name;
+        tdFloor.textContent = floorInfo?.name ?? null;
 
         const tdEquipment = document.createElement('td');
         // tdEquipment.classList.add('align-left');
@@ -4393,6 +4393,7 @@ const layerPopup = (function () {
         newRecentEvent,
         setCategoryData,
         moveToPoi,
+        movePoi,
         setPoiEvent,
         createEventPopup,
         pagingNotice,

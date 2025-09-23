@@ -730,20 +730,8 @@ const layerPopup = (function () {
             noPoiDiv.textContent = '배치된 장비가 없습니다.';
             accordionContainer.appendChild(noPoiDiv);
             
-            // 팝업 표시
-            if ((refresh || currentTitle !== newTitle)) {
-                titleElement.textContent = newTitle;
-                popup.style.display = 'inline-block';
-            } else {
-                popup.style.display = popup.style.display === 'none' ? 'inline-block' : 'none';
-            }
-            popup.style.position = 'absolute';
-            popup.style.top = '50%';
-            popup.style.transform = 'translate(25%, -50%)';
-            
             // 총 개수를 0으로 설정
             document.getElementById("totalEqCount").textContent = "0";
-            // return;
         }
 
         const buildingSelectContent = document.querySelector('#buildingSelect .select-box__content');

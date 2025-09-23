@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,12 +64,15 @@ public class PermissionAspect {
                     .map(a -> a.substring("BUILDING_".length()))
                     .map(Long::valueOf)
                     .collect(Collectors.toSet());
-            log.info("permittedBuildingIds={}", permittedBuildingIds);
 
-            if (!permittedBuildingIds.isEmpty()) {
-                session.enableFilter("buildingPermissionFilter")
-                        .setParameterList("permittedIds", permittedBuildingIds);
-            }
+            List<Long> appliedBuildingIds = permittedBuildingIds.isEmpty()
+                    ? List.of(-1L)
+                    : permittedBuildingIds.stream().toList();
+
+            log.info("permittedBuildingIds={}, appliedBuildingIds={}", permittedBuildingIds, appliedBuildingIds);
+
+            session.enableFilter("buildingPermissionFilter")
+                    .setParameterList("permittedIds", appliedBuildingIds);
         }
 
         // 장비 권한
@@ -79,12 +83,15 @@ public class PermissionAspect {
                     .map(a -> a.substring("POI_".length()))
                     .map(Long::valueOf)
                     .collect(Collectors.toSet());
-            log.info("permittedCategoryIds={}", permittedCategoryIds);
 
-            if (!permittedCategoryIds.isEmpty()) {
-                session.enableFilter("poiCategoryPermissionFilter")
-                        .setParameterList("permittedCategoryIds", permittedCategoryIds);
-            }
+            List<Long> appliedCategoryIds = permittedCategoryIds.isEmpty()
+                    ? List.of(-1L)
+                    : permittedCategoryIds.stream().toList();
+
+            log.info("permittedCategoryIds={}, appliedCategoryIds={}", permittedCategoryIds, appliedCategoryIds);
+
+            session.enableFilter("poiCategoryPermissionFilter")
+                    .setParameterList("permittedCategoryIds", appliedCategoryIds);
         }
     }
 }

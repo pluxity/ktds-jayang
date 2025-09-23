@@ -1094,7 +1094,7 @@ const EventManager = (() => {
                 <td>${event.buildingNm || '-'}</td>
                 <td>${event.floorNm  || '-'}</td>
                 <td class="ellipsis" title="${event.event}">${event.event || '-'}</td>
-                <td class="ellipsis poi-name" style="cursor:pointer; title="${event.poiName}">
+                <td class="ellipsis poi-name" style="cursor:pointer;" title="${event.poiName}">
                     ${event.poiName || '-'}
                     <input type="hidden" name="poiId" value="${event.poiId || ''}">
                 </td>

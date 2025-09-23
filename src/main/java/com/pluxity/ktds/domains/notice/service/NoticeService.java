@@ -38,7 +38,7 @@ public class NoticeService {
 
         var notice = CreateNoticeDTO.toEntity(dto);
         Notice savedNotice = repository.save(notice);
-        if (savedNotice.getIsUrgent()) {
+        if (savedNotice.getIsUrgent() && savedNotice.getIsActive()) {
             rabbitTemplate.convertAndSend(noticeExchangeName, "", savedNotice);
         }
     }

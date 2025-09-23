@@ -10,12 +10,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface BuildingRepository extends JpaRepository<Building, Long> {
     boolean existsByCode(String code);
-
 
     @EntityGraph(attributePaths = {"fileInfo", "lodSettings"})
     @Override
@@ -61,5 +62,7 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
     Building findByActiveVersion(String activeVersion);
 
     List<Building> findAllByIsIndoor(String isIndoor, Sort sort);
+
+    List<Building> findByIsIndoorAndCodeNotAndIdIn(String isIndoor, String code, Set<Long> ids, Sort sort);
 
 }

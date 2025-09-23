@@ -32,6 +32,10 @@ public class BuildingController {
 //        return DataResponseBody.of(service.findAll());
 //    }
 
+    @GetMapping("/all")
+    public DataResponseBody<List<BuildingResponseDTO>> getAllBuildings() {
+        return DataResponseBody.of(service.findAll());
+    }
     @GetMapping
     public DataResponseBody<List<BuildingDetailResponseDTO>> getBuildings() {
         return DataResponseBody.of(service.findDetailAll());

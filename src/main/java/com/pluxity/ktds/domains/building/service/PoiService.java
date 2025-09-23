@@ -14,6 +14,8 @@ import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
 import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
 import com.pluxity.ktds.domains.sop.service.SopService;
+import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
+import com.pluxity.ktds.global.annotation.IgnorePoiPermission;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;

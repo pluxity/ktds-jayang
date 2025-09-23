@@ -15,8 +15,8 @@ import com.pluxity.ktds.domains.plx_file.entity.FileInfo;
 import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
-import com.pluxity.ktds.domains.system_setting.entity.SystemSetting;
 import com.pluxity.ktds.domains.system_setting.repository.SystemSettingRepository;
+import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
 import com.pluxity.ktds.global.exception.CustomException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +25,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,14 +81,31 @@ public class BuildingService {
     }
 
     @Transactional(readOnly = true)
+    @IgnoreBuildingPermission
     public List<BuildingResponseDTO> findAll() {
         return buildingRepository.findAllByIsIndoor("Y", Sort.by(Sort.Direction.DESC, "id")).stream()
+                .filter(building -> !"store".equals(building.getCode()))
                 .map(Building::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<BuildingDetailResponseDTO> findDetailAll() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            log.info("Principal: {}", auth.getName());
+            auth.getAuthorities().forEach(granted ->
+                    log.info("==> GrantedAuthority: {}", granted.getAuthority())
+            );
+        }
+        Set<Long> permittedBuildingIds = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("BUILDING_"))
+                .map(a -> a.substring("BUILDING_".length()))
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
+
+        log.info("User {} permitted buildings: {}", auth.getName(), permittedBuildingIds);
         return buildingRepository.findAllByIsIndoor("Y", Sort.by(Sort.Direction.DESC, "id")).stream()
                 .filter(building -> !"store".equals(building.getCode()))
                 .map(Building::toDetailResponseDTO)
@@ -93,6 +113,7 @@ public class BuildingService {
     }
 
     @Transactional(readOnly = true)
+    @IgnoreBuildingPermission
     public BuildingDetailResponseDTO findOutdoorDetail() {
 
         Building building = buildingRepository.findTop1ByIsIndoorOrderByIdDesc("N")

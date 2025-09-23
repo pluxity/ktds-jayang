@@ -3,6 +3,8 @@ package com.pluxity.ktds.domains.building.repostiory;
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
+import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
+import com.pluxity.ktds.global.annotation.IgnorePoiPermission;
 import com.pluxity.ktds.global.repository.BaseRepository;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
@@ -10,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface PoiRepository extends BaseRepository<Poi, Long> {
     boolean existsByCode(String code);
@@ -37,10 +41,11 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
             "where pc.cctvName IN :cctvNames")
     List<PoiCctvDTO> findByCctvNames(List<String> cctvNames);
 
-
     boolean existsByName(String name);
 
     boolean existsByPoiMiddleCategoryId(Long id);
+
+    List<Poi> findByPoiCategoryIdIn(Set<Long> poiCategoryIds);
 
     @Query("SELECT DISTINCT p FROM Poi p JOIN p.poiTags pt WHERE pt.tagName IN :tagNames")
     List<Poi> findByTagNamesIn(@Param("tagNames") List<String> tagNames);
@@ -104,6 +109,8 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
 );
 
     @Query("SELECT p.id FROM Poi p ORDER BY p.id DESC")
+    @IgnorePoiPermission
+    @IgnoreBuildingPermission
     Page<Long> findPoiIdsForPaging(Pageable pageable);
 
     @Query("SELECT p.id FROM Poi p " +

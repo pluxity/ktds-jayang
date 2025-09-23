@@ -12,6 +12,9 @@ import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -22,6 +25,14 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 @Table(name = "poi")
+@FilterDef(
+        name = "poiCategoryPermissionFilter",
+        parameters = @ParamDef(name = "permittedCategoryIds", type = Long.class)
+)
+@Filter(
+        name = "poiCategoryPermissionFilter",
+        condition = "poi_category_id in (:permittedCategoryIds)"
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Poi {
     @Id

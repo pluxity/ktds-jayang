@@ -193,14 +193,24 @@ function modifyUserRoleModal(id) {
     // 메뉴 권한
     const menuContainer = document.getElementById('menuPermissionList');
     menuContainer.innerHTML = '';
-    const menuPermissionList = ['building', 'poi', 'sop', 'management', 'notice', 'user'];
+
+    const menuPermissionList = [
+        { key: 'building', label: '도면 관리' },
+        { key: 'poi', label: '장비 관리' },
+        { key: 'sop', label: 'SOP 관리' },
+        { key: 'management', label: '업체 관리' },
+        { key: 'notice', label: '공지사항 관리' },
+        { key: 'user', label: '사용자 관리' }
+    ];
+
+    // const menuPermissionList = ['building', 'poi', 'sop', 'management', 'notice', 'user'];
 
     menuPermissionList.forEach(p => {
-        const menuChecked = resultData.menuPermissions?.includes(p.toUpperCase()) ? 'checked' : '';
+        const menuChecked = resultData.menuPermissions?.includes(p.key.toUpperCase()) ? 'checked' : '';
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${p}</td>
-            <td><input type="checkbox" name="menuPermissions" value="${p.toUpperCase()}" ${menuChecked}></td>
+            <td>${p.label}</td>
+            <td><input type="checkbox" name="menuPermissions" value="${p.key.toUpperCase()}" ${menuChecked}></td>
         `;
         menuContainer.appendChild(row);
     });

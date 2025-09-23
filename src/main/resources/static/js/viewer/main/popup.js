@@ -3810,9 +3810,9 @@ const layerPopup = (function () {
         if (selectedDeviceType && selectedDeviceType !== '장비 전체') {
             params.append('deviceType', selectedDeviceType);
         }
-        if (alarmTypeInput) {
-            params.append('searchValue', alarmTypeInput);
-        }
+        // if (alarmTypeInput) {
+        //     params.append('searchValue', alarmTypeInput);
+        // }
 
         api.get(`/events/alarms?${params.toString()}`).then((res) => {
             const { result: data } = res.data;
@@ -4014,12 +4014,10 @@ const layerPopup = (function () {
                 paginationContainer.innerHTML = "";
                 if (totalPages <= 1) return;
 
-                const maxWindow = 5;
-                let start = Math.max(1, currentPage - Math.floor(maxWindow / 2));
-                let end = Math.min(totalPages, start + maxWindow - 1);
-                if (end - start + 1 < maxWindow) {
-                    start = Math.max(1, end - (maxWindow - 1));
-                }
+                const groupSize = 10;
+                const currentGroup = Math.ceil(currentPage / groupSize);
+                const start = (currentGroup - 1) * groupSize + 1;
+                const end = Math.min(totalPages, currentGroup * groupSize);
 
                 const createPage = (page, text = page) => {
                     const span = document.createElement('span');
@@ -4036,43 +4034,59 @@ const layerPopup = (function () {
                     paginationContainer.appendChild(span);
                 };
 
-                if (start > 1) {
-                    createPage(1);
-                    if (start > 2) {
-                        const dots = document.createElement('span');
-                        dots.textContent = "...";
-                        dots.classList.add("dots");
-                        paginationContainer.appendChild(dots);
-                    }
-                }
+                // if (start > 1) {
+                //     createPage(1);
+                //     if (start > 2) {
+                //         const dots = document.createElement('span');
+                //         dots.textContent = "...";
+                //         dots.classList.add("dots");
+                //         paginationContainer.appendChild(dots);
+                //     }
+                // }
 
                 for (let i = start; i <= end; i++) {
                     createPage(i);
                 }
 
-                if (end < totalPages) {
-                    if (end < totalPages - 1) {
-                        const dots = document.createElement('span');
-                        dots.textContent = "...";
-                        dots.classList.add("dots");
-                        paginationContainer.appendChild(dots);
-                    }
-                    createPage(totalPages);
-                }
-            };
+                // if (end < totalPages) {
+                //     if (end < totalPages - 1) {
+                //         const dots = document.createElement('span');
+                //         dots.textContent = "...";
+                //         dots.classList.add("dots");
+                //         paginationContainer.appendChild(dots);
+                //     }
+                //     createPage(totalPages);
+                // }
 
-            eventLayerPopup.querySelector(".search-result__paging .left").onclick = () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderTable(currentPage);
-                    renderPagination();
+                const leftBtn = eventLayerPopup.querySelector(".search-result__paging .left");
+                if (leftBtn) {
+                    if (currentGroup > 1) {
+                        leftBtn.style.display = "";
+                        leftBtn.onclick = () => {
+                            const prevGroupLastPage = (currentGroup - 1) * groupSize;
+                            currentPage = prevGroupLastPage;
+                            renderTable(currentPage);
+                            renderPagination();
+                        };
+                    } else {
+                        leftBtn.style.display = "none";
+                    }
                 }
-            };
-            eventLayerPopup.querySelector(".search-result__paging .right").onclick = () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTable(currentPage);
-                    renderPagination();
+
+                const rightBtn = eventLayerPopup.querySelector(".search-result__paging .right");
+                if (rightBtn) {
+                    const maxGroup = Math.ceil(totalPages / groupSize);
+                    if (currentGroup < maxGroup) {
+                        rightBtn.style.display = "";
+                        rightBtn.onclick = () => {
+                            const nextGroupFirstPage = currentGroup * groupSize + 1;
+                            currentPage = nextGroupFirstPage;
+                            renderTable(currentPage);
+                            renderPagination();
+                        };
+                    } else {
+                        rightBtn.style.display = "none";
+                    }
                 }
             };
 
@@ -4088,7 +4102,7 @@ const layerPopup = (function () {
                 const keySet = new Set(selectedEventKeys);
 
                 const filteredAlarmList = selectedEventKeys.length === 0
-                    ? baseAlarms.slice()
+                    ? []
                     : baseAlarms.filter(a => {
                         if (isEHP(a)) return true;
                         const evKey = toKey(a.event);

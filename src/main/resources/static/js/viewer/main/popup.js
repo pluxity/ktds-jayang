@@ -3850,7 +3850,8 @@ const layerPopup = (function () {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
-                    return taggedPoi && String(taggedPoi.property.floorNo) === selectedFloor;
+
+                    return taggedPoi && String(taggedPoi.property.floorName) === selectedFloor;
                 });
             }
 
@@ -3872,7 +3873,11 @@ const layerPopup = (function () {
                     const taggedPoi = poiList.find(poi =>
                         poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
                     );
-                    return taggedPoi && taggedPoi.name && taggedPoi.name.toLowerCase().includes(searchTerm);
+
+                    const poiNameMatch = taggedPoi && taggedPoi.name && taggedPoi.name.toLowerCase().includes(searchTerm);
+                    const eventNameMatch = alarm.event && alarm.event.toLowerCase().includes(searchTerm);
+
+                    return poiNameMatch || eventNameMatch;
                 });
             }
 

@@ -26,6 +26,24 @@ const leftPoiListInit = async () => {
 
         document
             .querySelector('#largePoiCategorySelectSearchForm')
+            .addEventListener('change', (event) => {
+                const selectedCategoryId = event.target.value;
+                const middleSelect = document.querySelector('#middlePoiCategorySelectSearchForm');
+                middleSelect.innerHTML = '<option value="">중분류 전체</option>';
+
+                const middleCategories = PoiMiddleCategoryManager.findAll();
+
+                middleCategories
+                    .filter(middleCate => middleCate.poiCategory && middleCate.poiCategory.id == selectedCategoryId)
+                    .forEach(middleCate => {
+                        middleSelect.appendChild(new Option(middleCate.name, middleCate.id));
+                    });
+
+                getPoiRenderingAndList();
+            });
+
+        document
+            .querySelector('#middlePoiCategorySelectSearchForm')
             .addEventListener('change', () => {
                 getPoiRenderingAndList();
             });
@@ -208,12 +226,24 @@ const getPoiRenderingAndList = async (type) => {
         return;
     }
 
+    // 대분류
     const largePoiCategoryId = Number(
         document.querySelector('#largePoiCategorySelectSearchForm').value,
     );
     if (largePoiCategoryId) {
         filteredList = filteredList.filter(
             (poi) => poi.poiCategory === largePoiCategoryId,
+        );
+    }
+
+    // 중분류
+    const middlePoiCategoryId = Number(
+        document.querySelector('#middlePoiCategorySelectSearchForm').value,
+    );
+
+    if (middlePoiCategoryId) {
+        filteredList = filteredList.filter(
+            (poi) => poi.poiMiddleCategory === middlePoiCategoryId,
         );
     }
 

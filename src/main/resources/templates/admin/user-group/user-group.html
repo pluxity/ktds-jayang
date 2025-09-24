@@ -65,8 +65,21 @@
 								</colgroup>
 								<tbody>
 									<tr>
-										<th>그룹 이름</th>
-										<td ><input type="text" name="name" id="registName" class="form-control input-sm" maxlength="16" title="이름" required data-rules="required" data-tagname="그룹이름"></td>
+										<th>그룹명</th>
+										<td ><input type="text" name="name" id="registName" class="form-control input-sm" maxlength="16" title="그룹명" required data-rules="required" data-tagname="그룹명"></td>
+									</tr>
+									<tr>
+										<th>그룹타입</th>
+										<td >
+											<select id="registGroupType" name="groupType" class="form-select" required data-rules="required" data-tagname="그룹타입">
+												<option value="NORMAL_ADMIN">일반관리자</option>
+												<option value="ADMIN">최종관리자</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th>설명</th>
+										<td ><textarea type="text" name="description" id="registDescription" class="form-control input-sm" title="설명" required data-rules="required" data-tagname="설명"></textarea></td>
 									</tr>
 								</tbody>
 							</table>
@@ -105,6 +118,19 @@
 										<input type="text" name="name" id="modifyName" class="form-control input-sm" maxlength="16" title="이름" required data-rules="required" data-tagname="그룹이름">
 									</td>
 								</tr>
+								<tr>
+									<th>그룹타입</th>
+									<td >
+										<select id="modifyGroupType" name="groupType" class="form-select" required data-rules="required" data-tagname="그룹타입">
+											<option value="NORMAL_ADMIN">일반관리자</option>
+											<option value="ADMIN">최종관리자</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<th>설명</th>
+									<td ><textarea type="text" name="description" id="modifyDescription" class="form-control input-sm" title="설명" required data-rules="required" data-tagname="설명"></textarea></td>
+								</tr>
 								</tbody>
 							</table>
 						</fieldset>
@@ -117,6 +143,76 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- role modify -->
+	<div class="modal fade" id="userGroupRoleModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		<div class="modal-dialog" role="document" style="max-width:700px;top:15%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">그룹 수정</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					</button>
+				</div>
+				<div class="modal-body">
+					<form name="userGroupRoleModifyFrm" id="userGroupRoleModifyFrm" method="post" enctype="multipart/form-data" autocomplete="off">
+						<input type="hidden" name="id" id="roleModifyId">
+						<fieldset>
+							<div class="row" style="height:600px; display:flex;">
+								<!-- 도면 권한 -->
+								<div class="col-6 border-end d-flex flex-column" style="flex:1;">
+									<h4 class="mb-2">도면 권한</h4>
+									<div class="flex-fill p-2 border rounded" style="overflow-y:auto;">
+										<div id="buildingPermissionList"></div>
+									</div>
+								</div>
+
+								<div class="col-6 d-flex flex-column" style="flex:1; min-height:0;">
+
+									<!-- 장비 권한 -->
+									<div class="d-flex flex-column mb-2" style="height:300px; min-height:0;">
+										<h4 class="mb-2">장비 권한</h4>
+										<div class="flex-fill p-2 border rounded" style="overflow-y:auto; min-height:0;">
+											<table class="table table-sm mb-0">
+												<thead>
+												<tr>
+													<th>장비 분류</th>
+													<th style="width:20%">표출 <input type="checkbox" id="poiCategoryReadAll"></th>
+													<th style="width:20%">제어 <input type="checkbox" id="poiCategoryWriteAll"></th>
+												</tr>
+												</thead>
+												<tbody id="poiCategoryPermissionList"></tbody>
+											</table>
+										</div>
+									</div>
+
+									<!-- 메뉴 권한 -->
+									<div class="d-flex flex-column" style="height:300px; min-height:0;">
+										<h4 class="mb-2">메뉴 권한</h4>
+										<div class="flex-fill p-2 border rounded" style="overflow-y:auto; min-height:0;">
+											<table class="table table-sm mb-0">
+												<thead>
+												<tr>
+													<th>권한 항목</th>
+													<th style="width:20%"><input type="checkbox" id="menuAll"></th>
+												</tr>
+												</thead>
+												<tbody id="menuPermissionList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" id="btnUserGroupRoleModify">저장</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<th:block th:replace="~{admin/fragments/script :: script }"></th:block>
 	<script th:src="@{/static/js/admin/user-group/user-group.js}" ></script>
 

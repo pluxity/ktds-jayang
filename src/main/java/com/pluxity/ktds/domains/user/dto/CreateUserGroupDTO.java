@@ -17,7 +17,7 @@ public record CreateUserGroupDTO(
         @NotBlank(message = "그룹명은 공백이 될 수 없습니다.")
         @Size(max = 20, message = "그룹명은 20자 이하 여야 합니다.")
         String name,
-        Set<User> users,
-        Set<UserAuthority> authorities
+        String groupType,
+        String description
 ) {
 }

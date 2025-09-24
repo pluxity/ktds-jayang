@@ -12,21 +12,18 @@ import com.pluxity.ktds.domains.event.entity.Alarm;
 import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
-import com.pluxity.ktds.global.client.PollingClientService;
 import com.pluxity.ktds.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.Collator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.INVALID_REQUEST;
@@ -51,14 +48,26 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days() {
-        LocalDateTime sevenDays = LocalDateTime.now().minusDays(7);
-        return eventRepository.findProcessCountsForLast7Days(sevenDays);
+        LocalDate today = LocalDate.now();
+        LocalDate sevenDaysAgo = today.minusDays(6); // 오늘 포함 7일
+        
+        LocalDateTime startDate = sevenDaysAgo.atStartOfDay();
+        LocalDateTime endDate = today.atTime(LocalTime.MAX); // 23:59:59.999999999
+        
+        log.info("유형별 통계 : {} ~ {}", startDate, endDate);
+        return eventRepository.findProcessCountsForLast7Days(startDate, endDate);
     }
 
     @Transactional(readOnly = true)
     public List<Last7DaysDateCountDTO> findDateCountsForLast7Days() {
-        LocalDateTime sevenDays = LocalDateTime.now().minusDays(7);
-        return eventRepository.findDateCountsForLast7Days(sevenDays);
+        LocalDate today = LocalDate.now();
+        LocalDate sevenDaysAgo = today.minusDays(6); // 오늘 포함 7일
+        
+        LocalDateTime startDate = sevenDaysAgo.atStartOfDay();
+        LocalDateTime endDate = today.atTime(LocalTime.MAX); // 23:59:59.999999999
+        
+        log.info("일자별 통계 : {} ~ {}", startDate, endDate);
+        return eventRepository.findDateCountsForLast7Days(startDate, endDate);
     }
 
     @Transactional(readOnly = true)

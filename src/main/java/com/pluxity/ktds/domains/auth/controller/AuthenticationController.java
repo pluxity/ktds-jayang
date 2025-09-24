@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 import static com.pluxity.ktds.global.constant.SuccessCode.*;
 
 @RestController
@@ -28,7 +30,7 @@ public class AuthenticationController {
 
   @PostMapping(value = "/sign-in")
   public DataResponseBody<SignInResponseDTO> signIn(
-          @RequestBody SignInRequestDTO signInRequestDto, HttpServletResponse response) {
-    return DataResponseBody.of(authenticationService.signIn(signInRequestDto, response));
+          @RequestBody SignInRequestDTO signInRequestDto, HttpServletRequest request, HttpServletResponse response) {
+    return DataResponseBody.of(authenticationService.signIn(signInRequestDto, request, response));
   }
 }

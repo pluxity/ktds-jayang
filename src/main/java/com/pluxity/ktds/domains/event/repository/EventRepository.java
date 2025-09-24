@@ -20,10 +20,13 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             FROM Alarm a
             JOIN FETCH PoiTag pt ON a.tagName = pt.tagName
             JOIN FETCH Poi p ON pt.poi.id = p.id
-            WHERE a.occurrenceDate >= :sevenDays
+            WHERE a.occurrenceDate >= :startDate AND a.occurrenceDate <= :endDate
             GROUP BY p.building.name
          """)
-    List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days(@Param("sevenDays") LocalDateTime sevenDays);
+    List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days(
+        @Param("startDate") LocalDateTime startDate, 
+        @Param("endDate") LocalDateTime endDate
+    );
     
     @Query("""
             SELECT new com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO(
@@ -31,14 +34,19 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
                 COUNT(a.id)
             )
             FROM Alarm a
-            WHERE a.occurrenceDate >= :sevenDays
+            JOIN PoiTag pt ON a.tagName = pt.tagName
+            WHERE a.occurrenceDate >= :startDate AND a.occurrenceDate <= :endDate
             GROUP BY DATE_FORMAT(a.occurrenceDate, '%m/%d')
             ORDER BY MIN(a.occurrenceDate)
             """)
-    List<Last7DaysDateCountDTO> findDateCountsForLast7Days(@Param("sevenDays") LocalDateTime sevenDays);
+    List<Last7DaysDateCountDTO> findDateCountsForLast7Days(
+        @Param("startDate") LocalDateTime startDate, 
+        @Param("endDate") LocalDateTime endDate
+    );
 
     @Query("""
             SELECT distinct new com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO(
+                p.id,
                 p.building.name,
                 f.name,
                 a.event,

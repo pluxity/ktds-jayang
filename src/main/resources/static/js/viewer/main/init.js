@@ -27,12 +27,14 @@
     }
     // 관리자 여부
     const userRole = getCookie("USER_ROLE");
-    const roles = userRole ? userRole.split(",") : [];
+    const userType = getCookie("USER_TYPE");
+    const decoded = userRole ? decodeURIComponent(userRole) : "";
+    const roles = decoded ? decoded.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
         window.open("/admin/system-setting", "_blank");
     })
-    if (!roles.includes("ADMIN")) {
+    if (!userType.includes("ADMIN")) {
         adminButton.style.display = "none";
     }
 
@@ -40,7 +42,16 @@
     await SystemSettingManager.getSystemSetting().then((systemSetting) => {
         const { } = systemSetting;
     });
-    await NoticeManager.getNotices();
+    await NoticeManager.getNoticeIsActive().then((notices) => {
+        notices.forEach(async (notice) => {
+            if(notice.isRead === 'undefined' || notice.isRead === null) {
+                const profileBadge = document.querySelector(".profile__btn .badge")
+                const badge = document.querySelector('#notice .badge');
+                profileBadge.style.display = '';
+                badge.style.display = '';
+            }
+        })
+    });
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
     await PoiMiddleCategoryManager.getPoiMiddleCategoryList();
@@ -238,12 +249,26 @@ const Init = (function () {
         const buildingList = BuildingManager.findAll();
         const buildingUl = document.querySelector('#systemTab ul')
 
-        buildingList.forEach(building => {
+        const priorityMap = [
+            { keyword: "외부", priority: 1 },
+            { keyword: "A", priority: 2 },
+            { keyword: "B", priority: 3 },
+            { keyword: "판매", priority: 4 },
+            { keyword: "주차장", priority: 5 }
+        ];
+
+        const sortedBuildings = buildingList.sort((buildingA, buildingB) => {
+            const priorityA = priorityMap.find(p => buildingA.name.includes(p.keyword))?.priority ?? 999;
+            const priorityB = priorityMap.find(p => buildingB.name.includes(p.keyword))?.priority ?? 999;
+            return priorityA - priorityB;
+        });
+
+        sortedBuildings.forEach(building => {
             const buildingLi = document.createElement('li');
             buildingLi.setAttribute('building-id', building.id);
-            buildingLi.textContent = building.name
+            buildingLi.textContent = building.name;
             buildingUl.appendChild(buildingLi);
-        })
+        });
         clickBuilding();
     }
 
@@ -280,12 +305,14 @@ const Init = (function () {
             const version = outdoorBuilding.getVersion();
             await BuildingManager.getFloorsByHistoryVersion(version);
             const firstIndoorBuilding = BuildingManager.findAll().find(value => value.isIndoor === 'Y');
+            const allBuilding = BuildingManager.findAll();
             let buildingId = outdoorBuilding ? outdoorBuilding.id : null;
             //initFloors(buildingId);
             initBuildingList();
             document.getElementById("buildingName").setAttribute("building-id", buildingId);
             document.getElementById("buildingName").setAttribute("building-name", outdoorBuilding.name);
 
+            const buildingNames = allBuilding.map(b => b.name);
             Px.Core.Initialize(container, async () => {
                 let sbmDataArray = [];
                 if (outdoorBuilding) {
@@ -302,7 +329,7 @@ const Init = (function () {
                                 displayName: alias,
                                 baseFloor: sbm.sbmFloorBase,
                                 groupId: sbm.sbmFloorGroup,
-                                isSelectable: alias !== '기타시설',
+                                isSelectable: alias !== '기타시설' && buildingNames.includes(alias),
                                 property: sbm.sbmFloorBase
                             };
                         })

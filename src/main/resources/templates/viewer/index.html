@@ -179,9 +179,9 @@
             <aside class="event-state event-state--active">
                 <button type="button" class=event-state__ctrl><span class="hide">ctrl button</span></button>
                 <div class="event-state__title">
-                    이벤트 통계
+                    이벤트 현황
                     <a href="javascript:void(0)" class="event-state__button">
-                        <span class="hide">이벤트 통계 전체보기</span>
+                        <span class="hide">이벤트 현황 전체보기</span>
                     </a>
                 </div>
                 <div class="event-container">
@@ -217,8 +217,10 @@
                     <div class="event-state__group">
                         <div class="event-state__subtitle">일자별 통계(최근 7일)</div>
                         <!-- [D] 차트 들어갈 영역 ---->
-                        <div class="event-state__chart_bar">
-                            <canvas id="chart_bar"></canvas>
+                        <div class="event-bar-wrapper">
+                            <div class="event-state__chart_bar">
+                                <canvas id="chart_bar"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>

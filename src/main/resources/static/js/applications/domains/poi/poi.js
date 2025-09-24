@@ -49,7 +49,7 @@ class Poi {
         this.rotation = rotation;
         this.#icon3DUrl = this.#iconSet.iconFile3D !== null ? this.getIcon3DUrl() : '';
         property.floorNo = floorNo;
-        property.floorName = BuildingManager.findById(buildingId).floors.find(floor => floor.no === floorNo)?.name;
+        property.floorName = BuildingManager.findById(buildingId)?.floors.find(floor => floor.no === floorNo)?.name;
         property.buildingName = BuildingManager.findById(buildingId)?.name
         property.poiCategoryName = PoiCategoryManager.findById(poiCategoryId)?.name
         property.poiMiddleCategoryName = PoiMiddleCategoryManager.findById(poiMiddleCategoryId)?.name

@@ -223,7 +223,7 @@
   background-color: #cb0000;
   border-radius: 100%;
   width: 1.25rem;
-  height: 1.1875rem;
+  height: 1.25rem;
   color: #fff;
   font-size: 0.75rem;
   font-weight: 800;
@@ -1003,6 +1003,7 @@
 }
 
 .popup-event__head .close {
+  cursor: pointer;
   width: 1.5rem;
   height: 1.5rem;
   -webkit-mask-image: url("/static/images/viewer/icon24/icon24.svg");
@@ -1038,11 +1039,12 @@
   -webkit-mask-position: -186px -9px;
   mask-position: -186px -9px;
   background-color: var(--color-grayscale03);
+    cursor: pointer;
 }
 
 .popup-event__paging button.right {
-  -webkit-mask-position: -230px -9px;
-  mask-position: -230px -9px;
+    -webkit-mask-position: -230px -9px;
+    mask-position: -230px -9px;
 }
 
 .popup-event__paging .active {
@@ -1150,7 +1152,7 @@
   height: auto;
   object-fit: contain;
   display: block;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.2rem;
 }
 
 .sop-info__contents .image__text {
@@ -1579,6 +1581,7 @@
   line-height: 1.875rem;
   color: var(--color-grayscale01);
   font-size: 0.75rem;
+  cursor: pointer;
 }
 
 .search-result__footer .download::after {
@@ -1955,18 +1958,10 @@
   position: relative;
   padding: 0 0 0 1.75rem;
   display: flex;
-  -ms-flex-wrap: nowrap;
-      flex-wrap: nowrap;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: column;
   color: var(--color-grayscale01);
 }
 
@@ -2795,7 +2790,7 @@ input[type="text"]:disabled, input[type="password"]:disabled {
   padding: 1.25rem 1.25rem 1.875rem;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  background-color: #34343C;
+  background-color: rgba(52, 52, 60, 0.9);
   -webkit-box-shadow: -0.25rem 0.125rem 0.3125rem 0 rgba(0, 0, 0, 0.35);
   box-shadow: -0.25rem 0.125rem 0.3125rem 0 rgba(0, 0, 0, 0.35);
   -webkit-backdrop-filter: blur(0.625rem);
@@ -4603,6 +4598,7 @@ canvas {
 }
 
 .system-ac__list .head__title {
+  align-items: center;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

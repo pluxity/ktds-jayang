@@ -38,17 +38,26 @@ public class NoticeService {
 
         var notice = CreateNoticeDTO.toEntity(dto);
         Notice savedNotice = repository.save(notice);
-        if (savedNotice.getIsUrgent()) {
+        if (savedNotice.getIsUrgent() && savedNotice.getIsActive()) {
             rabbitTemplate.convertAndSend(noticeExchangeName, "", savedNotice);
         }
     }
     @Transactional
     public List<NoticeResponseDTO> getNotices() {
-        var notices = repository.findAllByOrderByExpiredAt();
+        var notices = repository.findAll();
         return notices.stream()
                 .map(NoticeResponseDTO::from)
                 .toList();
     }
+
+    @Transactional
+    public List<NoticeResponseDTO> getNoticesIsActiveTrue() {
+        var notices = repository.findAllByIsActiveTrueOrderByCreatedAtDesc();
+        return notices.stream()
+                .map(NoticeResponseDTO::from)
+                .toList();
+    }
+
     @Transactional
     public NoticeResponseDTO getNotice(Long id) {
         var notice = repository.findById(id)

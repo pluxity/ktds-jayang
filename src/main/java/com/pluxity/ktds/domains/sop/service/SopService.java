@@ -12,6 +12,7 @@ import com.pluxity.ktds.domains.sop.entity.Sop;
 import com.pluxity.ktds.domains.sop.repository.SopRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,7 +47,7 @@ public class SopService {
 
     @Transactional(readOnly = true)
     public List<SopResponseDTO> findAll() {
-        return sopRepository.findAll().stream()
+        return sopRepository.findAll(Sort.by(Sort.Direction.DESC, "id")).stream()
                 .map(Sop::toResponseDTO)
                 .toList();
     }

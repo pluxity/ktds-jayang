@@ -23,6 +23,27 @@ const NoticeManager = (function () {
         });
     };
 
+    const getNoticeIsActive = () => {
+        const uri = `/notices/active`;
+
+        return new Promise((resolve) => {
+            api.get(uri).then((result) => {
+                const { result: data } = result.data;
+                noticeList = data.map((notice) =>
+                    new Notice(notice.id,
+                        notice.title,
+                        notice.content,
+                        notice.isUrgent,
+                        notice.isActive,
+                        notice.isRead,
+                        notice.expiredAt,
+                        notice.createdAt,
+                        notice.buildingIds));
+                resolve(noticeList);
+            });
+        });
+    }
+
     const findAll = () => {
         return noticeList;
     };
@@ -30,5 +51,6 @@ const NoticeManager = (function () {
     return {
         getNotices,
         findAll,
+        getNoticeIsActive,
     };
 })();

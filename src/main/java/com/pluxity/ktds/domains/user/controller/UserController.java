@@ -7,15 +7,25 @@ import com.pluxity.ktds.domains.user.dto.UserResponseDTO;
 import com.pluxity.ktds.domains.user.service.UserService;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import com.pluxity.ktds.global.response.ResponseBody;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.pluxity.ktds.global.constant.SuccessCode.*;
 
@@ -25,6 +35,7 @@ import static com.pluxity.ktds.global.constant.SuccessCode.*;
 public class UserController {
 
     private final UserService service;
+    private final UserDetailsService userDetailsService;
 
     @GetMapping
     public DataResponseBody<List<UserResponseDTO>> getUsers() {
@@ -38,8 +49,40 @@ public class UserController {
 
     @GetMapping(value = "/me")
     public DataResponseBody<UserResponseDTO> getMe(
-            Principal principal
-    ) {
+            Principal principal,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        if (principal == null) {
+            String userId = Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+                    .filter(c -> "USER_ID".equals(c.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+
+            if (userId != null) {
+                try {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    principal = authentication;
+                } catch (Exception e) {
+                    new SecurityContextLogoutHandler().logout(request, response, null);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\":\"SESSION_EXPIRED\"}");
+                    return null;
+                }
+            } else {
+                new SecurityContextLogoutHandler().logout(request, response, null);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\":\"SESSION_EXPIRED\"}");
+                return null;
+            }
+        }
         return DataResponseBody.of(service.findMe(principal));
     }
 

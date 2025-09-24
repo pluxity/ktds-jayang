@@ -59,12 +59,31 @@ public class UserService {
 
     private UserResponseDTO from(User user) {
         return UserResponseDTO.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .groupName(user.getUserGroup().getName())
                 .authorities(user.getUserGroup().getAuthorities()
                         .stream()
                         .map(UserAuthorityResponseDTO::from)
+                        .collect(Collectors.toSet()))
+                .buildingPermissions(user.getUserGroup().getBuildingPermissions()
+                        .stream()
+                        .map(bp -> UserGroupBuildingPermissionDTO.builder()
+                                .buildingId(bp.getBuilding().getId())
+                                .canRead(bp.getCanRead())
+                                .canWrite(bp.getCanWrite())
+                                .registeredBy(bp.getRegisteredBy())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .categoryPermissions(user.getUserGroup().getCategoryPermissions()
+                        .stream()
+                        .map(cp -> UserGroupCategoryPermissionDTO.builder()
+                                .poiCategoryId(cp.getPoiCategory().getId())
+                                .canRead(cp.getCanRead())
+                                .canWrite(cp.getCanWrite())
+                                .registeredBy(cp.getRegisteredBy())
+                                .build())
                         .collect(Collectors.toSet()))
                 .build();
     }
@@ -84,7 +103,7 @@ public class UserService {
         User user = User.builder()
                 .username(dto.username())
                 .name(dto.name())
-                .password(dto.password())
+                .password(passwordEncoder.encode(dto.password()))
                 .build();
 
         repository.save(user);
@@ -97,7 +116,7 @@ public class UserService {
         User user = User.builder()
                 .username(dto.username())
                 .name(dto.name())
-                .password(dto.password())
+                .password(passwordEncoder.encode(dto.password()))
                 .userGroup(userGroup)
                 .build();
 

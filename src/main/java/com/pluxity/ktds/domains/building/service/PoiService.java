@@ -14,6 +14,8 @@ import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
 import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
 import com.pluxity.ktds.domains.sop.service.SopService;
+import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
+import com.pluxity.ktds.global.annotation.IgnorePoiPermission;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -24,6 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -56,6 +62,7 @@ public class PoiService {
     private final PoiCctvRepository poiCctvRepository;
     private final BuildingFileHistoryRepository buildingFileHistoryRepository;
     private final FloorHistoryRepository floorHistoryRepository;
+    private final PoiTagRepository poiTagRepository;
     private final SopService sopService;
 
 
@@ -210,6 +217,68 @@ public class PoiService {
         log.info(sw.prettyPrint());
         return result;
     }
+
+@Transactional(readOnly = true)
+public Page<PoiPagingResponseDTO> findAllPaging(int page, int size, Long buildingId, Integer floorNo, Long poiCategoryId, String keywordType, String keyword) {
+    Pageable pageable = PageRequest.of(page, size);
+    
+    Page<Long> poiIdPage;
+    if (hasSearchConditions(buildingId, floorNo, poiCategoryId, keywordType, keyword)) {
+        poiIdPage = poiRepository.findPoiIdsForPagingWithSearch(pageable, buildingId, floorNo, poiCategoryId, keywordType, keyword);
+    } else {
+        poiIdPage = poiRepository.findPoiIdsForPaging(pageable);
+    }
+    
+    List<Long> poiIds = poiIdPage.getContent();
+
+    if (poiIds.isEmpty()) {
+        return new PageImpl<>(List.of(), pageable, poiIdPage.getTotalElements());
+    }
+    List<Poi> poiList = poiRepository.findByIdsWithJoins(poiIds);
+
+    List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
+
+    Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
+        .collect(Collectors.groupingBy(poiCctv -> poiCctv.getPoi().getId()));
+    
+    List<PoiPagingResponseDTO> dtoList = poiList.stream()
+        .map(poi -> {
+            List<PoiCctvDTO> cctvDtoList = cctvMap.getOrDefault(poi.getId(), List.of()).stream()
+                .map(PoiCctvDTO::from)
+                .toList();
+
+            return PoiPagingResponseDTO.builder()
+                    .id(poi.getId())
+                    .buildingId(poi.getBuilding().getId())
+                    .floorNo(poi.getFloorNo())
+                    .poiCategoryId(poi.getPoiCategory().getId())
+                    .poiMiddleCategoryId(Optional.ofNullable(poi.getPoiMiddleCategory())
+                            .map(PoiMiddleCategory::getId)
+                            .orElse(null))
+                    .iconSetId(poi.getIconSet().getId())
+                    .position(poi.getPosition())
+                    .rotation(poi.getRotation())
+                    .scale(poi.getScale())
+                    .name(poi.getName())
+                    .code(poi.getCode())
+                    .tagNames(poi.getTagNames())
+                    .cctvList(cctvDtoList)
+                    .isLight(poi.getIsLight())
+                    .lightGroup(poi.getLightGroup())
+                    .cameraIp(poi.getCameraIp())
+                    .cameraId(poi.getCameraId())
+                    .build();
+        })
+        .toList();
+
+    return new PageImpl<>(dtoList, pageable, poiIdPage.getTotalElements());
+}
+
+private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCategoryId, String keywordType, String keyword) {
+    return buildingId != null || floorNo != null || poiCategoryId != null ||
+           (StringUtils.hasText(keywordType) && StringUtils.hasText(keyword));
+}
+
 
     @Transactional(readOnly = true)
     public PoiAlarmDetailDTO findPoiDTOByTagName(String tagName){

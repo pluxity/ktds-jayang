@@ -2,6 +2,7 @@ package com.pluxity.ktds.domains.building.entity;
 
 import com.pluxity.ktds.domains.building.dto.PoiAlarmDetailDTO;
 import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
+import com.pluxity.ktds.domains.building.dto.PoiPagingResponseDTO;
 import com.pluxity.ktds.domains.building.dto.PoiResponseDTO;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
 import com.pluxity.ktds.domains.cctv.entity.PoiCctv;
@@ -11,6 +12,9 @@ import com.pluxity.ktds.domains.poi_set.entity.PoiMiddleCategory;
 import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -21,6 +25,18 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 @Table(name = "poi")
+@FilterDef(
+        name = "poiCategoryPermissionFilter",
+        parameters = @ParamDef(name = "permittedCategoryIds", type = Long.class)
+)
+@Filter(
+        name = "buildingPermissionFilter",
+        condition = "building_id in (:permittedIds)"
+)
+@Filter(
+        name = "poiCategoryPermissionFilter",
+        condition = "poi_category_id in (:permittedCategoryIds)"
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Poi {
     @Id
@@ -236,6 +252,30 @@ public class Poi {
                 .cameraIp(this.getCameraIp())
                 .cameraId(this.getCameraId())
                 .sop(sopResponseDTO)
+                .build();
+    }
+
+    public PoiPagingResponseDTO toPoiPagingDTO(List<PoiCctvDTO> cctvList, List<String> tagNames) {
+        return PoiPagingResponseDTO.builder()
+                .id(this.getId())
+                .buildingId(this.getBuilding().getId())
+                .floorNo(this.getFloorNo())
+                .poiCategoryId(this.getPoiCategory().getId())
+                .poiMiddleCategoryId(Optional.ofNullable(this.getPoiMiddleCategory())
+                        .map(PoiMiddleCategory::getId)
+                        .orElse(null))
+                .iconSetId(this.getIconSet().getId())
+                .position(this.getPosition())
+                .rotation(this.getRotation())
+                .scale(this.getScale())
+                .name(this.getName())
+                .code(this.getCode())
+                .tagNames(tagNames)
+                .cctvList(cctvList)
+                .isLight(this.getIsLight())
+                .lightGroup(this.getLightGroup())
+                .cameraIp(this.getCameraIp())
+                .cameraId(this.getCameraId())
                 .build();
     }
 

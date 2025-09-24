@@ -24,9 +24,6 @@ function getUserInfoList() {
     const value = from.querySelector(`#searchName`).value;
     const groupId = from.querySelector(`#searchGroupId`).value;
 
-
-
-
     const filter = userDataAll.filter(user => user[type].toLowerCase().includes(value.toLowerCase()) && (groupId === '' ? true :  user.userGroupId === Number(groupId)));
 
     const gridData = filter.map((data) => [
@@ -35,13 +32,25 @@ function getUserInfoList() {
             `<a data-bs-toggle="modal" data-bs-target="#userModifyModal" id="showModifyModalButton" onclick="modifyUserModal(${data.id})">${data.username}</a>`,
         ),
         data.name,
-        data.authorities[0].name,
+        data.groupName,
         gridjs.html(
             `<button class="btn btn-warning modify me-1" data-bs-toggle="modal" data-bs-target="#userModifyModal" id="showModifyModalButton" onclick="modifyUserModal(${data.id})">수정</button>
             <button class="btn btn-danger delete"  onclick="deleteUser(${data.id})" >삭제</button>`,
         ),
     ]);
     const columns = [
+        {
+            id: 'checkbox',
+            name: '선택',
+            width: '8%',
+            plugin: {
+                component: gridjs.plugins.selection.RowSelection,
+                props: {
+                    id: (row) => row.cell(2).data,
+                },
+            },
+            hidden: true
+        },
         {
             id: 'id',
             name: 'id',
@@ -56,7 +65,7 @@ function getUserInfoList() {
             width: '15%',
         },
         {
-            name: '권한',
+            name: '그룹명',
             width: '20%',
         },
         {

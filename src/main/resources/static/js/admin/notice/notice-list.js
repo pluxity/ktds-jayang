@@ -3,7 +3,7 @@ const RECORD_SIZE = 10;
 let buildingList = [];
 
 const getBuildingList = () => {
-    api.get('/buildings').then((res) => {
+    api.get('/buildings/all').then((res) => {
         data.Buildings = res.data.result;
         buildingList = data.Buildings;
         const container = document.getElementById("tree-container-register");

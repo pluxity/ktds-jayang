@@ -12,6 +12,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,14 @@ import static com.pluxity.ktds.global.utils.PxUtil.validString;
 @Entity
 @Getter
 @Table(name = "building")
+@FilterDef(
+        name = "buildingPermissionFilter",
+        parameters = @ParamDef(name = "permittedIds", type = Long.class)
+)
+@Filter(
+        name = "buildingPermissionFilter",
+        condition = "id in (:permittedIds)"
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Building {
 

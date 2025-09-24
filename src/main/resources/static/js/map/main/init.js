@@ -28,12 +28,14 @@
     }
     // 관리자 여부
     const userRole = getCookie("USER_ROLE");
-    const roles = userRole ? userRole.split(",") : [];
+    const userType = getCookie("USER_TYPE");
+    const decoded = userRole ? decodeURIComponent(userRole) : "";
+    const roles = decoded ? decoded.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
         window.open("/admin/system-setting", "_blank");
     })
-    if (!roles.includes("ADMIN")) {
+    if (!userType.includes("ADMIN")) {
         adminButton.style.display = "none";
     }
 
@@ -223,7 +225,14 @@
                     Px.Evac.ShowByProperty('floorId', String(floor.id));
                     allCheck.checked = false;
                 }else{
-                    equipmentCategoryActiveHover(floorNo);
+                    let allPois = PoiManager.findByBuilding(buildingId);
+                    allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+                    allPois.forEach(poi => {
+                        Px.Poi.Show(Number(poi.id));
+                    })
+                    equipmentGroup.forEach(equipment => {
+                        equipment.classList.add('active')
+                    });
                 }
 
                 Px.Camera.ExtendView();
@@ -233,7 +242,12 @@
         const allFloor = document.querySelector('.floor-info__ctrl .all');
         allFloor.style.cursor = 'pointer';
         allFloor.addEventListener('click', event => {
-            floorBtns.forEach(btn => btn.classList.remove('active'));
+            floorBtns.forEach(btn =>{
+                    btn.classList.remove('active');
+                    const innerBtn = btn.querySelector('button');
+                    if (innerBtn) innerBtn.classList.remove('active');
+                }
+            );
             allFloor.classList.add('active');
 
             if (document.querySelector('.shelter').classList.contains('active')) {
@@ -283,7 +297,16 @@
     await SystemSettingManager.getSystemSettingByBuildingId(buildingId).then((systemSetting) => {
         const { } = systemSetting;
     })
-    await NoticeManager.getNotices();
+    await NoticeManager.getNoticeIsActive().then((notices) => {
+        notices.forEach(async (notice) => {
+            if(notice.isRead === 'undefined' || notice.isRead === null) {
+                const profileBadge = document.querySelector(".profile__btn .badge")
+                const badge = document.querySelector('#notice .badge');
+                profileBadge.style.display = '';
+                badge.style.display = '';
+            }
+        })
+    });
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
     await PoiMiddleCategoryManager.getPoiMiddleCategoryList();
@@ -297,8 +320,6 @@
         })
     });
 
-    // await PoiManager.getFilteredPoiList();
-    await PatrolManager.getPatrolList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.header__info .date');
 
@@ -338,9 +359,19 @@
     allCheck.addEventListener('change', () => {
         const activeFloor = document.querySelector('.floor-info__detail ul li.active');
         const floorNo = activeFloor?.getAttribute('floor-id');
-
+        let allPois = PoiManager.findByBuilding(buildingId);
         if (allCheck.checked) {
-            equipmentCategoryActiveHover(floorNo);
+            if(floorNo) {
+                allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+                allPois.forEach(poi => {
+                    Px.Poi.Show(Number(poi.id));
+                });
+            }else{
+                Px.Poi.ShowAll();
+            }
+            equipmentGroup.forEach(equipment => {
+                equipment.classList.add('active')
+            });
         } else {
             equipmentGroup.forEach(equipment => {
                 equipment.classList.remove('active')
@@ -349,28 +380,28 @@
         }
     })
 
-    const equipmentCategoryActiveHover = (floorNo) => {
-        const params = new URLSearchParams(window.location.search);
-        const buildingId = params.get('buildingId');
-        const categoryIdSet = new Set();
-        let allPois = PoiManager.findByBuilding(buildingId);
-        if(floorNo) {
-            allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-        }
-        allPois.forEach(poi => {
-            Px.Poi.Show(Number(poi.id));
-            categoryIdSet.add(Number(poi.property.poiCategoryId));
-        });
-
-        equipmentGroup.forEach(equipment => {
-            const categoryId = Number(equipment.getAttribute('data-category-id'));
-            if (categoryIdSet.has(categoryId)) {
-                equipment.classList.add('active');
-            } else {
-                equipment.classList.remove('active');
-            }
-        })
-    }
+    // const equipmentCategoryActiveHover = (floorNo) => {
+    //     const params = new URLSearchParams(window.location.search);
+    //     const buildingId = params.get('buildingId');
+    //     const categoryIdSet = new Set();
+    //     let allPois = PoiManager.findByBuilding(buildingId);
+    //     if(floorNo) {
+    //         allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+    //     }
+    //     allPois.forEach(poi => {
+    //         Px.Poi.Show(Number(poi.id));
+    //         categoryIdSet.add(Number(poi.property.poiCategoryId));
+    //     });
+    //
+    //     equipmentGroup.forEach(equipment => {
+    //         const categoryId = Number(equipment.getAttribute('data-category-id'));
+    //         if (categoryIdSet.has(categoryId)) {
+    //             equipment.classList.add('active');
+    //         } else {
+    //             equipment.classList.remove('active');
+    //         }
+    //     })
+    // }
 
     initFloors();
     initCategory();
@@ -728,7 +759,7 @@ const Init = (function () {
 
         if (selectedPoiId) {
             const poiData = Px.Poi.GetData(selectedPoiId);
-            const floorNo = poiData.property.floorNo;
+            const floorNo = poiData?.property.floorNo;
             Init.moveToFloorPage(floorNo);
             const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
             if (floorElement) {
@@ -1476,10 +1507,15 @@ const Init = (function () {
                 button.classList.add(...defaultStyle);
                 offAction();
             } else {
+                // onAction이 false를 반환하면 활성화하지 않음
+                const result = onAction();
+                if (result === false) {
+                    setButtonIconColor(button, '#919193');
+                    return;
+                }
                 button.classList.add('active');
                 button.classList.remove(...defaultStyle);
                 button.classList.add(...activeStyle);
-                onAction();
             }
         });
     }
@@ -1518,7 +1554,13 @@ const Init = (function () {
         addButtonPointerEvent(
             firstViewButton,
             () => {
+                // 2D 버튼이 활성화되어 있으면 경고 후 차단
+                if (camera2D.classList.contains('active')) {
+                    alertBox('2D 뷰가 활성화되어 있습니다. 먼저 2D 뷰를 해제해주세요.');
+                    return false; // 활성화하지 않음
+                }
                 Px.Camera.FPS.On();
+                return true; // 활성화
             },
             () => {
                 if (Px.Camera.FPS.IsOn()) {
@@ -1535,6 +1577,12 @@ const Init = (function () {
         addButtonPointerEvent(
             camera2D,
             () => {
+                // FirstView 버튼이 활성화되어 있으면 경고 후 차단
+                if (firstViewButton.classList.contains('active')) {
+                    alertBox('1인칭 뷰가 활성화되어 있습니다. 먼저 1인칭 뷰를 해제해주세요.');
+                    return false; // 활성화하지 않음
+                }
+                
                 // TODO: top-view 위치
                 const building = BuildingManager.findById(buildingId);
                 let option = '';
@@ -1553,6 +1601,7 @@ const Init = (function () {
                     Px.Camera.SetOrthographic();
                 };
                 Px.Camera.SetState(option);
+                return true; // 활성화
             },
             () => {
                 const building = BuildingManager.findById(buildingId);
@@ -1565,7 +1614,6 @@ const Init = (function () {
                     Px.Camera.SetPerspective();
                 }
                 Px.Camera.SetState(option);
-
             },
         );
     }

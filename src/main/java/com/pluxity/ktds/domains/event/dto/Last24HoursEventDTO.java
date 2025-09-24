@@ -5,6 +5,7 @@ import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
 import java.time.LocalDateTime;
 
 public record Last24HoursEventDTO(
+    Long poiId,
     String buildingNm,
     String floorNm,
     String event,

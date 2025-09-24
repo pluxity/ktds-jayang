@@ -19,13 +19,18 @@ public class UserAuthority {
     @Column(name = "name", nullable = false, length = 20)
     private String name;
 
+    @Column(name = "alias", nullable = false, length = 50)
+    private String alias;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_group_id", nullable = false)
     private UserGroup userGroup;
 
     @Builder
-    public UserAuthority(String name) {
+    public UserAuthority(String name, String alias, UserGroup userGroup) {
         this.name = name;
+        this.alias = alias;
+        this.userGroup = userGroup;
     }
     public void assignToUserGroup(UserGroup userGroup) {
         this.userGroup = userGroup;

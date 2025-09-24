@@ -104,6 +104,20 @@
         const floor = document.querySelector('#floor-info .floor-info__detail ul li.active');
         const floorNo = floor ? Number(floor.getAttribute('floor-id')) : null;
         const isActive = event.target.classList.toggle('active');
+        const checkBox = document.querySelector('#equipmentCheckBox');
+
+        const equipments = document.querySelectorAll('#equipmentGroup a');
+
+        let isAll = true;
+        for(const a of equipments) {
+            if(!a.classList.contains('active')) {
+                isAll = false;
+                break;
+            }
+        }
+
+        checkBox.checked = isAll;
+
 
         if (floorNo !== null) {
             if (isActive) {
@@ -309,17 +323,17 @@
                 .forEach(btn => btn.classList.remove('select-box__btn--active'));
         }
 
-        firstTab.addEventListener('click', () => {
+        firstTab.onclick = () => {
             switchTab(firstTab, secondTab, firstContent, secondContent);
             clearActiveBtns(secondContent);
             layerPopup.setElevator();
-        });
+        };
 
-        secondTab.addEventListener('click', () => {
+        secondTab.onclick = () => {
             switchTab(secondTab, firstTab, secondContent, firstContent);
             clearActiveBtns(firstContent);
             layerPopup.setEscalator();
-        });
+        };
 
         // 초기 상태 설정
         switchTab(firstTab, secondTab, firstContent, secondContent);
@@ -450,13 +464,8 @@
         viewResult.setAttribute('data-category-id', id);
         const poiList = PoiManager.findAll();
         const filteringPoiList = poiList.filter(poi => poi.poiCategory === Number(id));
-        // const filteringPoiList = poiList.filter(poi =>
-        //     poi.poiCategory === Number(id) && poi.position
-        // );
+
         layerPopup.setCategoryData(title, filteringPoiList);
-        // PoiManager.getPoiByCategoryId(id).then(pois => {
-        //     layerPopup.setCategoryData(title, pois);
-        // });
     };
 
     const handlePoiMapClick = (clickedItem, title) => {
@@ -483,15 +492,16 @@
                     }
                 });
             },
-            patrol: () => {
+            patrol: async () => {
                 // patrol popup
                 actions.closeAllPopups();
                 const patrolPopup = mapPopup.querySelector('#patrolPopup')
                 mapPopup.className = '';
                 mapPopup.classList.add('popup-basic');
                 patrolPopup.style.display = 'block';
+                await PatrolManager.getPatrolList();
                 radioLive.checked = true; // live default
-                radioLive.dispatchEvent(new Event("change"));// 강제 실행
+                radioLive.dispatchEvent(new Event("change"));// 강제 실행 후 목록 렌더링
             },
             sop: () => {
                 // sop popup
@@ -663,7 +673,7 @@
             popupNotice.style.display = 'none';
             return;
         }
-        const noticeList = await NoticeManager.getNotices();
+        const noticeList = await NoticeManager.getNoticeIsActive();
         if (noticeList.length === 0) {
             noticeAlert.style.display = 'flex'
             noticeAlert.style.position = 'absolute';
@@ -684,57 +694,8 @@
             popupNotice.style.transform = 'translate(-50%, -50%)';
             // popup.style.zIndex = '30';
 
-            pagingNotice(noticeList, 1);
+            layerPopup.pagingNotice(noticeList, 1);
         }
-    });
-
-    function pagingNotice(noticeList, itemsPerPage = 1) {
-        let currentPage = 1; // 초기 페이지
-        const totalPages = Math.ceil(noticeList.length / itemsPerPage);
-
-        const updatePaging = (page) => {
-            const startIndex = (page - 1) * itemsPerPage;
-            const currentNotice = noticeList[startIndex];
-
-            const noticeTitle = document.querySelector('.notice-info__title p');
-            const urgentLabel = document.querySelector('.notice-info__title .label');
-            const noticeDate = document.querySelector('.notice-info__date');
-            const pagingNumber = document.querySelector('.popup-event__paging .number');
-            const noticeContent = document.querySelector('.notice-info__contents p');
-            const badgeText = currentNotice.isRead ? '' : '<span class="badge">N</span>';
-
-            if (currentNotice) {
-                noticeTitle.innerHTML = `${currentNotice.title} ${badgeText}`;
-                urgentLabel.style.display = currentNotice.isUrgent ? 'inline' : 'none';
-                noticeDate.textContent = formatDate(currentNotice.createdAt);
-                noticeContent.textContent = currentNotice.content;
-            }
-
-            pagingNumber.innerHTML = `<span class="active">${page}</span>/<span>${totalPages}</span>`;
-        };
-
-        updatePaging(currentPage);
-
-        document.querySelector('.popup-event__paging .left').addEventListener('click', function () {
-            if (currentPage > 1) {
-                currentPage--;
-                updatePaging(currentPage);
-            }
-        });
-
-        document.querySelector('.popup-event__paging .right').addEventListener('click', function () {
-            if (currentPage < totalPages) {
-                currentPage++;
-                updatePaging(currentPage);
-            }
-        });
-    }
-    const closeBtn = document.querySelector('#noticePopup .close');
-    closeBtn.addEventListener('click', function () {
-        const popup = document.getElementById('noticePopup');
-        profileBadge.style.display = 'none';
-        badge.style.display = 'none';
-        popup.style.display = 'none';
     });
 
     // date format
@@ -1016,31 +977,38 @@
             patrolContentList.style.alignItems = 'center';
             patrolContentList.style.justifyContent = 'center';
             patrolContentList.style.textAlign = 'center';
-            return patrolContentList.innerHTML += `<div class="error-text" style="color:#676977;">저장된 가상순찰 목록이 없습니다.</div>`
+            return patrolContentList.innerHTML = `<div class="error-text" style="color:#676977;">저장된 가상순찰 목록이 없습니다.</div>`
         }
+
+        patrolContentList.style.display = 'block';
+        patrolContentList.style.alignItems = 'initial';
+        patrolContentList.style.justifyContent = 'initial';
+        patrolContentList.style.textAlign = 'initial';
 
         patrolList.forEach((patrol) => {
             // pointName 별로 그룹화된 리스트 생성
-            let pointsHTML = patrol.patrolPoints.map((point) => {
-                // pois 배열을 기반으로 <li> 태그 생성
-                let poisHTML = point.pois
-                    .map((poiId) =>{
-                        const poiData = poiList.find((poi) => poi.id === poiId);
-                        return poiData ? `<li data-id="${poiData.id}">${poiData.name}</li>` : `` ;
-                    })
-                    .join('');
+            let pointsHTML = patrol.patrolPoints
+                .filter((point) => point.pois && point.pois.length > 0)
+                .map((point) => {
+                    // pois 배열을 기반으로 <li> 태그 생성
+                    let poisHTML = point.pois
+                        .map((poiId) =>{
+                            const poiData = poiList.find((poi) => poi.id === poiId);
+                            return poiData ? `<li data-id="${poiData.id}">${poiData.name}</li>` : `` ;
+                        })
+                        .join('');
 
-                return `
-                    <li>
-                        <div class="location">
-                            <div class="location__title" data-id="${point.id}">${point.name}</div>
-                            <ul class="poi__title">
-                                ${poisHTML}
-                            </ul>
-                        </div>
-                    </li>
-                `;
-            }).join('');
+                    return `
+                        <li>
+                            <div class="location">
+                                <div class="location__title" data-id="${point.id}">${point.name}</div>
+                                <ul class="poi__title">
+                                    ${poisHTML}
+                                </ul>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
 
             patrolContentList.innerHTML += `
         <button class="accordion__btn" type="button" data-id="${patrol.id}">

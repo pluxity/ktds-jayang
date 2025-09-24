@@ -1019,45 +1019,62 @@ const EventManager = (() => {
         try {
             const response = await api.get('/events/latest-24-hours');
             allEvents = response.data;
+            console.log('24시간 이벤트 목록 : ', allEvents);
 
-            // 기존 페이징 UI 제거
-            document.querySelector('.event-state__pagination')?.remove();
+            if(allEvents.result.length > 0){
+                // 기존 페이징 UI 제거
+                document.querySelector('.event-state__pagination')?.remove();
 
-            // 컨테이너에 스크롤 적용 (높이는 CSS에서 제어 권장)
-            const table = document.querySelector('.event-state__group .table');
-            if (!table) return;
+                // 컨테이너에 스크롤 적용 (높이는 CSS에서 제어 권장)
+                const table = document.querySelector('.event-state__group .table');
+                if (!table) return;
 
-            const thead = table.querySelector('thead');
-            if (thead) {
-                thead.style.position = 'sticky';
-                thead.style.top = '0';
-                thead.style.zIndex = '1';
-                thead.style.backgroundColor = getComputedStyle(thead).backgroundColor || '#fff';
+                const thead = table.querySelector('thead');
+                if (thead) {
+                    thead.style.position = 'sticky';
+                    thead.style.top = '0';
+                    thead.style.zIndex = '1';
+                    thead.style.backgroundColor = getComputedStyle(thead).backgroundColor || '#fff';
+                }
+
+                if (!table.parentElement.classList.contains('table-container')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.classList.add('table-container');
+                    wrapper.style.overflowY = 'auto';
+                    wrapper.style.maxHeight = maxHeight;
+
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                } else {
+                    const wrapper = table.parentElement;
+                    wrapper.style.overflowY = 'auto';
+                }
+                renderPage();
+            }else{
+                const eventContainer = document.querySelector('.event-state__group');
+                const table = eventContainer.querySelector('.table');
+                
+                if (table) {
+                    table.style.display = 'none';
+                }
+                
+                const existingMessage = eventContainer.querySelector('.no-data-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                // 새로운 메시지 요소 생성 및 추가
+                const noDataMessage = document.createElement('div');
+                noDataMessage.className = 'no-data-message';
+                noDataMessage.style.display = 'flex';
+                noDataMessage.style.justifyContent = 'center';
+                noDataMessage.style.alignItems = 'center';
+                noDataMessage.style.height = '100%';
+                noDataMessage.style.color = 'rgba(117, 118, 128, 1)';
+                noDataMessage.textContent = '이벤트 발생 내역이 없습니다.';
+                
+                eventContainer.appendChild(noDataMessage);
             }
-
-            if (!table.parentElement.classList.contains('table-container')) {
-                const wrapper = document.createElement('div');
-                wrapper.classList.add('table-container');
-                wrapper.style.overflowY = 'auto';
-                wrapper.style.maxHeight = maxHeight;
-
-                table.parentNode.insertBefore(wrapper, table);
-                wrapper.appendChild(table);
-            } else {
-                const wrapper = table.parentElement;
-                wrapper.style.overflowY = 'auto';
-            }
-
-            // const tableContainer = document.querySelector('.event-state .table').parentElement;
-            // if (tableContainer) {
-            //     tableContainer.classList.add('table-container');
-            //     tableContainer.style.overflowY = 'auto';
-            //     tableContainer.style.maxHeight = `${maxHeight}rem`; // 필요에 따라 조정
-            // }
-
-            // 전체 렌더
-            renderPage();
-
         } catch (error) {
             console.error('24시간 이벤트 목록 로딩 실패:', error);
         }
@@ -1076,10 +1093,21 @@ const EventManager = (() => {
             row.innerHTML = `
                 <td>${event.buildingNm || '-'}</td>
                 <td>${event.floorNm  || '-'}</td>
-                <td class="ellipsis">${event.event || '-'}</td>
-                <td class="ellipsis">${event.poiName || '-'}</td>
+                <td class="ellipsis" title="${event.event}">${event.event || '-'}</td>
+                <td class="ellipsis poi-name" style="cursor:pointer;" title="${event.poiName}">
+                    ${event.poiName || '-'}
+                    <input type="hidden" name="poiId" value="${event.poiId || ''}">
+                </td>
                 <td>${formatTime(event.occurrenceDate)}</td>
             `;
+
+            const poiNameCell = row.querySelector('.poi-name');
+            poiNameCell.addEventListener('click', () => {
+                const poiId = poiNameCell.querySelector('input[name="poiId"]').value;
+                layerPopup.movePoi(poiId);
+                console.log("Clicked poiName:", event.poiName, "poiId:", poiId);
+            });
+
             tableBody.appendChild(row);
         });
     };
@@ -1097,121 +1125,137 @@ const EventManager = (() => {
             // 프로세스 차트
             const processResponse = await api.get('/events/process-counts');
             const processData = processResponse.data.result;
-            console.log('Process Data:', processData);
-            const refinedData = processData
-                .filter(item => item.count > 0)
-                .map(item => ({
-                    buildingNm: item.buildingNm?.trim() || '기타',
-                    count: item.count
-                }));
+            console.log('유형별 통계 :', processData);
 
-            const total = refinedData.reduce((sum, item) => sum + item.count, 0);
-            const labels = refinedData.map(item => item.buildingNm);
-            const data = refinedData.map(item => item.count);
+            if(processData.length > 0){
+                const refinedData = processData
+                    .filter(item => item.count > 0)
+                    .map(item => ({
+                        buildingNm: item.buildingNm?.trim() || '기타',
+                        count: item.count
+                    }));
 
-            const chartColorMap = {
-                'A동': 'rgba(155, 222, 0, 0.3)',
-                'B동': 'rgba(149, 0, 218, 0.3)',
-                '판매시설': 'rgba(201, 171, 0, 0.3)',
-                '지하주차장': 'rgba(0, 210, 210, 0.3)',
-                '외부 전경': 'rgba(67, 21, 202, 0.3)'
-            };
-            
-            const legendColorMap = {
-                'A동': '#9BDE00',
-                'B동': '#9500DA',
-                '판매시설': '#C9AB00',
-                '지하주차장': '#00D2D2',
-                '외부 전경' : '#4315CA'
+                const total = refinedData.reduce((sum, item) => sum + item.count, 0);
+                const labels = refinedData.map(item => item.buildingNm);
+                const data = refinedData.map(item => item.count);
 
-            };
+                const chartColorMap = {
+                    'A동': 'rgba(155, 222, 0, 0.3)',
+                    'B동': 'rgba(149, 0, 218, 0.3)',
+                    '판매시설': 'rgba(201, 171, 0, 0.3)',
+                    '지하주차장': 'rgba(0, 210, 210, 0.3)',
+                    '외부 전경': 'rgba(67, 21, 202, 0.3)'
+                };
 
-            const legendTextColorMap = {
-                'A동': '#9BDE00',
-                'B동': '#D476FF',
-                '판매시설': '#C9AB00',
-                '지하주차장': '#00D2D2',
-                '외부 전경' : '#B59CFF'
-            };
+                const legendColorMap = {
+                    'A동': '#9BDE00',
+                    'B동': '#9500DA',
+                    '판매시설': '#C9AB00',
+                    '지하주차장': '#00D2D2',
+                    '외부 전경' : '#4315CA'
 
-            const backgroundColor = refinedData.map(item => chartColorMap[item.buildingNm]);
-            const borderColor = refinedData.map(item => chartColorMap[item.buildingNm]);
+                };
 
-            const getLast7DaysText = () => {
-                const today = new Date();
-                const end = new Date(today);
-                const start = new Date(today);
-                start.setDate(start.getDate() - 6);
-                const format = (date) =>
-                    date.toLocaleDateString('ko-KR', {
-                        month: '2-digit',
-                        day: '2-digit'
-                    }).replace(/\./g, '').replace(/\s/g, '/');
-                return `${format(start)}\n~\n${format(end)}`;
-            };
+                const legendTextColorMap = {
+                    'A동': '#9BDE00',
+                    'B동': '#D476FF',
+                    '판매시설': '#C9AB00',
+                    '지하주차장': '#00D2D2',
+                    '외부 전경' : '#B59CFF'
+                };
 
-            // 프로세스 차트
-            const chartDoughnut = document.getElementById('chart_doughnut').getContext('2d');
-            new Chart(chartDoughnut, {
-                type: 'doughnut',
-                data: {
-                    labels,
-                    datasets: [{
-                        data,
-                        borderColor,
-                        backgroundColor,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    layout: { padding: 0 },
-                    cutout: '40%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: '#000',
-                            callbacks: {
-                                label: function (ctx) {
-                                    const count = ctx.raw;
-                                    const percent = ((count / total) * 100).toFixed(0);
-                                    return `${ctx.label}, ${count}(${percent}%)`;
+                const backgroundColor = refinedData.map(item => chartColorMap[item.buildingNm]);
+                const borderColor = refinedData.map(item => chartColorMap[item.buildingNm]);
+
+                const getLast7DaysText = () => {
+                    const today = new Date();
+                    const end = new Date(today);
+                    const start = new Date(today);
+                    start.setDate(start.getDate() - 6);
+                    const format = (date) =>
+                        date.toLocaleDateString('ko-KR', {
+                            month: '2-digit',
+                            day: '2-digit'
+                        }).replace(/\./g, '').replace(/\s/g, '/');
+                    return `${format(start)}\n~\n${format(end)}`;
+                };
+
+                // 프로세스 차트
+                const chartDoughnut = document.getElementById('chart_doughnut').getContext('2d');
+                new Chart(chartDoughnut, {
+                    type: 'doughnut',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            borderColor,
+                            backgroundColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        layout: { padding: 0 },
+                        cutout: '40%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#000',
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const count = ctx.raw;
+                                        const percent = ((count / total) * 100).toFixed(0);
+                                        return `${ctx.label}, ${count}(${percent}%)`;
+                                    }
                                 }
                             }
-                        }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
                     },
-                    responsive: true,
-                    maintainAspectRatio: false
-                },
-                plugins: [{
-                    id: 'centerText',
-                    beforeDraw(chart) {
-                        const ctx = chart.ctx;
-                        ctx.save();
+                    plugins: [{
+                        id: 'centerText',
+                        beforeDraw(chart) {
+                            const ctx = chart.ctx;
+                            ctx.save();
 
-                        const fontSize = 14;
-                        ctx.font = `500 ${fontSize}px 'Noto Sans KR', 'Malgun Gothic', sans-serif`;
-                        ctx.fillStyle = '#999';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
+                            const fontSize = 14;
+                            ctx.font = `500 ${fontSize}px 'Noto Sans KR', 'Malgun Gothic', sans-serif`;
+                            ctx.fillStyle = '#999';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
 
-                        const text = getLast7DaysText();
-                        const lines = text.split('\n');
+                            const text = getLast7DaysText();
+                            const lines = text.split('\n');
 
-                        const centerX = chart.chartArea.left + chart.chartArea.width / 2;
-                        const centerY = chart.chartArea.top + chart.chartArea.height / 2;
+                            const centerX = chart.chartArea.left + chart.chartArea.width / 2;
+                            const centerY = chart.chartArea.top + chart.chartArea.height / 2;
 
-                        lines.forEach((line, i) => {
-                            ctx.fillText(line, centerX, centerY + (i - 1) * fontSize);
-                        });
+                            lines.forEach((line, i) => {
+                                ctx.fillText(line, centerX, centerY + (i - 1) * fontSize);
+                            });
 
-                        ctx.restore();
-                    }
-                }]
-            });
+                            ctx.restore();
+                        }
+                    }]
+                });
 
-            renderCustomLegend(refinedData, legendColorMap, legendTextColorMap, total);
+                renderCustomLegend(refinedData, legendColorMap, legendTextColorMap, total);
+
+            }else{
+                const eventContainer = document.querySelector('.event-chart-wrapper');
+                eventContainer.querySelector('.event-state__chart').style.display = 'none';
+
+                eventContainer.style.display = 'flex';
+                eventContainer.style.justifyContent = 'center';
+                eventContainer.style.alignItems = 'center';
+                eventContainer.style.height = '100%';
+                eventContainer.innerText = '이벤트 발생 내역이 없습니다.';
+                eventContainer.style.color = 'rgba(117, 118, 128, 1)';
+            }
+
+
 
         } catch (error) {
             console.error('차트 초기화 오류:', error);
@@ -1268,95 +1312,109 @@ const EventManager = (() => {
         try {
             const response = await api.get('/events/date-counts');
             const dateData = response.data;
+            console.log('일자별 통계:', dateData);
 
-            // 2. 최근 7일 날짜 배열 생성
-            const last7Days = Array.from({length: 7}, (_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - (6 - i));
-                return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-            });
+            if(dateData.result.length > 0){
+                // 2. 최근 7일 날짜 배열 생성
+                const last7Days = Array.from({length: 7}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (6 - i));
+                    return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+                });
 
-            // 3. 데이터 매핑 (없는 날짜는 0으로)
-            const countMap = new Map(
-                dateData.result.map(item => {
-                    const date = new Date(item.occurrenceDate);
-                    const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-                    return [formattedDate, item.count];
-                })
-            );
+                // 3. 데이터 매핑 (없는 날짜는 0으로)
+                const countMap = new Map(
+                    dateData.result.map(item => {
+                        const date = new Date(item.occurrenceDate);
+                        const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+                        return [formattedDate, item.count];
+                    })
+                );
 
-            // 4. 최종 데이터 준비
-            const counts = last7Days.map(date => {
-                const count = countMap.get(date) || 0;
-                return count;
-            });
+                // 4. 최종 데이터 준비
+                const counts = last7Days.map(date => {
+                    const count = countMap.get(date) || 0;
+                    return count;
+                });
 
-            // 5. 차트 그리기
-            const chartBar = document.getElementById('chart_bar');
-            const ctx = chartBar.getContext('2d');
+                // 5. 차트 그리기
+                const chartBar = document.getElementById('chart_bar');
+                const ctx = chartBar.getContext('2d');
 
-            const gradient = ctx.createLinearGradient(0, 0, 0, chartBar.height);
-            gradient.addColorStop(0, '#00F5A0'); // 민트
-            gradient.addColorStop(1, '#007CF0');
+                const gradient = ctx.createLinearGradient(0, 0, 0, chartBar.height);
+                gradient.addColorStop(0, '#00F5A0'); // 민트
+                gradient.addColorStop(1, '#007CF0');
 
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: last7Days,
-                    datasets: [{
-                        data: counts,
-                        borderWidth: 0,
-                        backgroundColor: gradient,
-                        // borderSkipped: false
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: '#000',
-                            titleColor: '#fff',
-                            bodyColor: '#fff',
-                            padding: 8,
-                            displayColors: false,
-                            callbacks: {
-                                title: () => '',
-                                label: (tooltipItem) => {
-                                    return `${tooltipItem.label}, ${tooltipItem.raw}`;
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: last7Days,
+                        datasets: [{
+                            data: counts,
+                            borderWidth: 0,
+                            backgroundColor: gradient,
+                            // borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#000',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                padding: 8,
+                                displayColors: false,
+                                callbacks: {
+                                    title: () => '',
+                                    label: (tooltipItem) => {
+                                        return `${tooltipItem.label}, ${tooltipItem.raw}`;
+                                    }
                                 }
                             }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            offset: true,
-                            grid: {
-                                color: 'rgba(255,255,255,0.1)'
-                            },
-                            ticks: {
-                                color: '#C8CED6'
-                            },
-                            categoryPercentage: 0.3,
-                            barPercentage: 0.3
                         },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 20,
-                                color: '#C8CED6'
+                        scales: {
+                            x: {
+                                offset: true,
+                                grid: {
+                                    color: 'rgba(255,255,255,0.1)'
+                                },
+                                ticks: {
+                                    color: '#C8CED6'
+                                },
+                                categoryPercentage: 0.3,
+                                barPercentage: 0.3
                             },
-                            grid: {
-                                color: 'rgba(255,255,255,0.12)',
-                                drawBorder: false
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 20,
+                                    color: '#C8CED6'
+                                },
+                                grid: {
+                                    color: 'rgba(255,255,255,0.12)',
+                                    drawBorder: false
+                                }
                             }
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }else{
+                const eventContainer = document.querySelector('.event-bar-wrapper');
+                eventContainer.querySelector('.event-state__chart_bar').style.display = 'none';
+
+                eventContainer.style.display = 'flex';
+                eventContainer.style.justifyContent = 'center';
+                eventContainer.style.alignItems = 'center';
+                eventContainer.style.height = '100%';
+                eventContainer.innerText = '이벤트 발생 내역이 없습니다.';
+                eventContainer.style.color = 'rgba(117, 118, 128, 1)';
+            }
+
         } catch (error) {
             console.error('차트 초기화 오류:', error);
         }

@@ -9,7 +9,9 @@ import com.pluxity.ktds.domains.user.service.UserService;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.security.CustomUserDetails;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +20,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import static com.pluxity.ktds.global.constant.ErrorCode.*;
@@ -53,17 +61,34 @@ public class AuthenticationService {
   }
 
   @Transactional
-  public SignInResponseDTO signIn(final SignInRequestDTO signInRequestDto, HttpServletResponse response) {
+  public SignInResponseDTO signIn(final SignInRequestDTO signInRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
     try {
       Authentication authentication = authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(signInRequestDto.username(), signInRequestDto.password())
       );
+
+      SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+      securityContext.setAuthentication(authentication);
+      SecurityContextHolder.setContext(securityContext);
+
+//      SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+//      contextRepository.saveContext(securityContext, request, response);
+
+      SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+      contextRepository.saveContext(securityContext, request, response);
+
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       User user = userService.findUserByUsername(userDetails.getUsername());
 
       Cookie cookie = new Cookie("USER_ID", userDetails.getUsername());
-      Cookie cookieRole = new Cookie("USER_ROLE", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+
+      String roleValue = userDetails.getAuthorities().stream()
+              .map(GrantedAuthority::getAuthority)
+              .collect(Collectors.joining(","));
+      String encoded = URLEncoder.encode(roleValue, StandardCharsets.UTF_8);
+
+      Cookie cookieRole = new Cookie("USER_ROLE", encoded);
       cookieRole.setMaxAge(60 * 60 * 24);
       cookieRole.setPath("/");
       //      cookie.setHttpOnly(true);
@@ -71,6 +96,12 @@ public class AuthenticationService {
       cookie.setPath("/");
       response.addCookie(cookie);
       response.addCookie(cookieRole);
+
+      String userType = userDetails.user().getUserGroup().getGroupType();
+      Cookie cookieType = new Cookie("USER_TYPE", userType);
+      cookieType.setPath("/");
+      cookieType.setMaxAge(60 * 60 * 24);
+      response.addCookie(cookieType);
 
       return SignInResponseDTO.builder()
               .username(user.getUsername())

@@ -16,8 +16,14 @@ import com.pluxity.ktds.domains.plx_file.repository.FileInfoRepository;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveZipFile;
 import com.pluxity.ktds.domains.system_setting.repository.SystemSettingRepository;
+import com.pluxity.ktds.domains.user.entity.User;
+import com.pluxity.ktds.domains.user.entity.UserGroup;
+import com.pluxity.ktds.domains.user.entity.UserGroupBuilding;
+import com.pluxity.ktds.domains.user.repository.UserGroupBuildingRepository;
+import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
 import com.pluxity.ktds.global.exception.CustomException;
+import com.pluxity.ktds.global.security.CustomUserDetails;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
@@ -67,6 +73,8 @@ public class BuildingService {
     private final FloorRepository floorRepository;
     private final FloorHistoryRepository floorHistoryRepository;
     private final SystemSettingRepository systemSettingRepository;
+    private final UserGroupBuildingRepository userGroupBuildingRepository;
+    private final UserGroupRepository userGroupRepository;
 
     @Value("${root-path.upload}")
     private String uploadRootPath;
@@ -178,6 +186,23 @@ public class BuildingService {
         createHistory(fileInfo, building, dto.version());
 
         buildingRepository.save(building);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails principal) {
+            User currentUser = principal.user();
+            UserGroup group = currentUser.getUserGroup();
+
+            UserGroupBuilding permission = UserGroupBuilding.builder()
+                    .userGroup(group)
+                    .building(building)
+                    .canRead(true)
+                    .canWrite(true)
+                    .registeredBy(currentUser.getUsername())
+                    .build();
+
+            group.getBuildingPermissions().add(permission);
+            userGroupRepository.save(group);
+        }
 
         return building.getId();
     }
@@ -292,6 +317,7 @@ public class BuildingService {
     public void delete(@NotNull final Long id) {
         Building building = getBuildingById(id);
 
+        userGroupBuildingRepository.deleteByBuildingId(building.getId());
         // 1. 먼저 연관된 모든 엔티티들을 삭제
         List<BuildingFileHistory> buildingFileHistories = buildingFileHistoryRepository.findByBuildingId(building.getId());
         

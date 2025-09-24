@@ -9,10 +9,19 @@ import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.plx_file.constant.FileEntityType;
 import com.pluxity.ktds.domains.plx_file.service.FileInfoService;
 import com.pluxity.ktds.domains.plx_file.starategy.SaveImage;
+import com.pluxity.ktds.domains.user.entity.User;
+import com.pluxity.ktds.domains.user.entity.UserGroup;
+import com.pluxity.ktds.domains.user.entity.UserGroupBuilding;
+import com.pluxity.ktds.domains.user.entity.UserGroupPoiCategory;
+import com.pluxity.ktds.domains.user.repository.UserGroupPoiCategoryRepository;
+import com.pluxity.ktds.domains.user.repository.UserGroupRepository;
 import com.pluxity.ktds.global.exception.CustomException;
+import com.pluxity.ktds.global.security.CustomUserDetails;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +42,8 @@ public class PoiCategoryService {
 
     private final SaveImage imageStrategy;
     private final PoiRepository poiRepository;
+    private final UserGroupRepository userGroupRepository;
+    private final UserGroupPoiCategoryRepository userGroupPoiCategoryRepository;
 
     public PoiCategoryResponseDTO findById(Long id) {
         PoiCategory fetchPoiCategory = repository.findById(id)
@@ -66,6 +77,24 @@ public class PoiCategoryService {
                 .build();
 
         PoiCategory savePoiCategory = repository.save(poiCategory);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails principal) {
+            User currentUser = principal.user();
+            UserGroup group = currentUser.getUserGroup();
+
+            UserGroupPoiCategory permission = UserGroupPoiCategory.builder()
+                    .userGroup(group)
+                    .poiCategory(poiCategory)
+                    .canRead(true)
+                    .canWrite(true)
+                    .registeredBy(currentUser.getUsername())
+                    .build();
+
+            group.getCategoryPermissions().add(permission);
+            userGroupRepository.save(group);
+        }
+
         return savePoiCategory.getId();
     }
 
@@ -83,6 +112,7 @@ public class PoiCategoryService {
     @Transactional
     public void delete(Long id) {
 
+        userGroupPoiCategoryRepository.deleteByPoiCategoryId(id);
         poiRepository.findByPoiCategoryId(id).ifPresent(poiCategory -> {
             throw new CustomException(EXIST_POI_CONTAINING_CATEGORY);
         });

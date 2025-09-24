@@ -76,7 +76,11 @@ public class UserGroupService {
         validateUserGroup(dto);
         notExistIdException(id);
 
-        repository.findByName(dto.name()).ifPresent(throwIfExistGroup());
+        repository.findByName(dto.name())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new CustomException(DUPLICATE_USER_GROUP_NAME);
+                });
 
         UserGroup userGroup = repository.findById(id).orElseThrow(notFoundIdException(id));
         userGroup.update(UserGroup.builder()

@@ -132,7 +132,7 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
             "JOIN FETCH p.building b " +
             "JOIN FETCH p.poiCategory pc " +
             "JOIN FETCH p.poiMiddleCategory pmc " +
-            "JOIN FETCH p.poiTags pt " +
+            "LEFT JOIN FETCH p.poiTags pt " +
             "WHERE p.id IN :poiIds " +
             "ORDER BY p.id DESC")
     List<Poi> findByIdsWithJoins(@Param("poiIds") List<Long> poiIds);

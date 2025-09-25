@@ -1,5 +1,6 @@
 package com.pluxity.ktds.global.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -14,7 +15,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class RabbitMqConfig {
+
+    @Value("${rabbitmq.instance}")
+    private String wasInstance;
+
     @Value("${rabbitmq.host}")
     private String rabbitMqHost;
     @Value("${rabbitmq.port}")
@@ -70,12 +76,10 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Queue was1AlarmQueue() {
-        return new Queue(was1AlarmQueueName, true);
-    }
-    @Bean
-    public Queue was2AlarmQueue() {
-        return new Queue(was2AlarmQueueName, true);
+    public Queue wasAlarmQueue() {
+        String queueName = wasInstance.equals("was1") ? was1AlarmQueueName : was2AlarmQueueName;
+        log.info("wasAlarmQueue : {}", queueName);
+        return new Queue(queueName, true);
     }
 
     @Bean
@@ -84,21 +88,16 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding was1AlarmBinding(Queue was1AlarmQueue, FanoutExchange alarmExchange) {
-        return BindingBuilder.bind(was1AlarmQueue).to(alarmExchange);
-    }
-    @Bean
-    public Binding was2AlarmBinding(Queue was2AlarmQueue, FanoutExchange alarmExchange) {
-        return BindingBuilder.bind(was2AlarmQueue).to(alarmExchange);
+    public Binding wasAlarmBinding(Queue wasAlarmQueue, FanoutExchange alarmExchange) {
+        log.info("wasAlarmBinding : {}, alarmExchange : {}", wasAlarmQueue, alarmExchange);
+        return BindingBuilder.bind(wasAlarmQueue).to(alarmExchange);
     }
 
     @Bean
-    public Queue was1NoticeQueue() {
-        return new Queue(was1NoticeQueueName, true);
-    }
-    @Bean
-    public Queue was2NoticeQueue() {
-        return new Queue(was2NoticeQueueName, true);
+    public Queue wasNoticeQueue() {
+        String queueName = wasInstance.equals("was1") ? was1NoticeQueueName : was2NoticeQueueName;
+        log.info("wasNoticeQueue : {}", queueName);
+        return new Queue(queueName, true);
     }
 
     @Bean
@@ -107,12 +106,8 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding was1NoticeBinding(Queue was1NoticeQueue, FanoutExchange noticeExchange) {
-        return BindingBuilder.bind(was1NoticeQueue).to(noticeExchange);
-    }
-    @Bean
-    public Binding was2NoticeBinding(Queue was2NoticeQueue, FanoutExchange noticeExchange) {
-        return BindingBuilder.bind(was2NoticeQueue).to(noticeExchange);
+    public Binding wasNoticeBinding(Queue wasNoticeQueue, FanoutExchange noticeExchange) {
+        return BindingBuilder.bind(wasNoticeQueue).to(noticeExchange);
     }
 
     @Bean
@@ -121,23 +116,18 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Queue was1AlarmDisableQueue() {
-        return new Queue(was1AlarmDisableQueueName, true);
-    }
-    @Bean
-    public Queue was2AlarmDisableQueue() {
-        return new Queue(was2AlarmDisableQueueName, true);
+    public Queue wasAlarmDisableQueue() {
+        String queueName = wasInstance.equals("was1") ? was1AlarmDisableQueueName : was2AlarmDisableQueueName;
+        log.info("wasAlarmDisableQueue : {}", queueName);
+        return new Queue(queueName, true);
     }
     @Bean
     public FanoutExchange alarmDisableExchange() {
         return new FanoutExchange(alarmDisableExchangeName, true, false);
     }
     @Bean
-    public Binding was1AlarmDisableBinding(Queue was1AlarmDisableQueue, FanoutExchange alarmDisableExchange) {
-        return BindingBuilder.bind(was1AlarmDisableQueue).to(alarmDisableExchange);
-    }
-    @Bean
-    public Binding was2AlarmDisableBinding(Queue was2AlarmDisableQueue, FanoutExchange alarmDisableExchange) {
-        return BindingBuilder.bind(was2AlarmDisableQueue).to(alarmDisableExchange);
+    public Binding was1AlarmDisableBinding(Queue wasAlarmDisableQueue, FanoutExchange alarmDisableExchange) {
+        log.info("was1AlarmDisableBinding : {}, alarmDisableExchange : {}", wasAlarmDisableQueue, alarmDisableExchange);
+        return BindingBuilder.bind(wasAlarmDisableQueue).to(alarmDisableExchange);
     }
 }

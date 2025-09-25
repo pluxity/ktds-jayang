@@ -15,14 +15,13 @@ public class EventConsumer {
 
     private final EventEmitterService eventEmitterService;
 
-    //    알람 consumer
-    @RabbitListener(queues = "${rabbitmq.queue.alarm-was2}")
+    @RabbitListener(queues = "#{@wasAlarmQueue.name}")
     public void receiveEvent(AlarmResponseDTO alarm) {
-            log.info("alarmResponseDTO: {}", alarm);
-            eventEmitterService.sendAlarm(alarm);
+        log.info("alarmResponseDTO: {}", alarm);
+        eventEmitterService.sendAlarm(alarm);
     }
-    // 알람 해제 consumer(mq)
-    @RabbitListener(queues = "${rabbitmq.queue.alarm-disable-was2}")
+
+    @RabbitListener(queues = "#{@wasAlarmDisableQueue.name}")
     public void receiveDisableAlarm(Long id){
         log.info("receiveDisableAlarm: {}", id);
         eventEmitterService.sendDisableAlarm(id);

@@ -15,7 +15,7 @@ public class NoticeConsumer {
 
     private final EventEmitterService eventEmitterService;
 
-    @RabbitListener(queues = "${rabbitmq.queue.notice-was1}")
+    @RabbitListener(queues = "#{@wasNoticeQueue.name}")
     public void receiveNotice(Notice notice) {
         eventEmitterService.sendNotice(notice);
         log.debug("Received notice from queue : {}", notice);

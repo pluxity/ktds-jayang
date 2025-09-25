@@ -8,6 +8,7 @@ public enum ExcelHeaderNameCode {
     POI_NAME("장비 이름"),
     TAG_NAME("태그명"),
     LIGHT_GROUP("릴레이 그룹"),
+    CAMERA_IP("카메라IP"),
     MAIN_CCTV("지정카메라"),
     SUB_CCTV1("주변카메라1"),
     SUB_CCTV2("주변카메라2"),

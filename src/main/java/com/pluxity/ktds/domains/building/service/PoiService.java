@@ -23,6 +23,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -221,14 +222,14 @@ public class PoiService {
 @Transactional(readOnly = true)
 public Page<PoiPagingResponseDTO> findAllPaging(int page, int size, Long buildingId, Integer floorNo, Long poiCategoryId, String keywordType, String keyword) {
     Pageable pageable = PageRequest.of(page, size);
-    
+
     Page<Long> poiIdPage;
     if (hasSearchConditions(buildingId, floorNo, poiCategoryId, keywordType, keyword)) {
         poiIdPage = poiRepository.findPoiIdsForPagingWithSearch(pageable, buildingId, floorNo, poiCategoryId, keywordType, keyword);
     } else {
         poiIdPage = poiRepository.findPoiIdsForPaging(pageable);
     }
-    
+
     List<Long> poiIds = poiIdPage.getContent();
 
     if (poiIds.isEmpty()) {
@@ -240,7 +241,7 @@ public Page<PoiPagingResponseDTO> findAllPaging(int page, int size, Long buildin
 
     Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
         .collect(Collectors.groupingBy(poiCctv -> poiCctv.getPoi().getId()));
-    
+
     List<PoiPagingResponseDTO> dtoList = poiList.stream()
         .map(poi -> {
             List<PoiCctvDTO> cctvDtoList = cctvMap.getOrDefault(poi.getId(), List.of()).stream()
@@ -611,6 +612,7 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
                 CreatePoiDTO.CreatePoiDTOBuilder poiDTOBuilder = CreatePoiDTO.builder()
                         .code(poiMap.get(POI_CODE.value))
                         .name(poiMap.get(POI_NAME.value))
+                        .cameraIp(poiMap.get(CAMERA_IP.value))
                         .buildingId(building.getId())
                         .floorNo(floorNo)
                         .poiCategoryId(poiCategory.getId())
@@ -620,7 +622,8 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
 
                 Poi.PoiBuilder poiBuilder = Poi.builder()
                         .code(poiMap.get(POI_CODE.value))
-                        .name(poiMap.get(POI_NAME.value));
+                        .name(poiMap.get(POI_NAME.value))
+                        .cameraIp(poiMap.get(CAMERA_IP.value));
 
                 String lightGroup = poiMap.get(LIGHT_GROUP.value);
                 boolean isLight = lightGroup != null && !lightGroup.isBlank();

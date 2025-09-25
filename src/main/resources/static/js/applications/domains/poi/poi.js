@@ -47,6 +47,9 @@ class Poi {
         this.#icon2DUrl = this.#iconSet.iconFile2D !== null ? this.getIcon2DUrl() : '/static/img/icon_2d_default.svg';
         this.position = position;
         this.rotation = rotation;
+        if (scale) {
+            this.scale = scale;
+        }
         this.#icon3DUrl = this.#iconSet.iconFile3D !== null ? this.getIcon3DUrl() : '';
         property.floorNo = floorNo;
         property.floorName = BuildingManager.findById(buildingId)?.floors.find(floor => floor.no === floorNo)?.name;
@@ -127,12 +130,11 @@ class Poi {
     }
     // Px.Poi.Add 용
     get poiOptions() {
-        return {
-            type: this.#icon3DUrl ? 'gltf': '',  // type 없을 경우 기본 모델(빨간점) 로드
+        const options = {
+            type: this.#icon3DUrl ? 'gltf' : '',  // type 없을 경우 기본 모델(빨간점) 로드
             url: this.#icon3DUrl,
             id: this.id,
             displayText: this.name,
-            // group: this.#poiCategory.name,
             group: this.#poiCategory.id,
             lineHeight: SystemSettingManager.find().poiLineLength ?? 10,
             iconUrl: this.iconUrl,
@@ -140,6 +142,12 @@ class Poi {
             rotation: this.rotation ? this.rotation : {x:0,y:0,z:0},
             property: this.property,
         };
+
+        if (this.scale) {
+            options.scale = this.scale;
+        }
+
+        return options;
     }
 
     removeOn3D(onComplete) {

@@ -589,7 +589,10 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
 //                    continue;
 //                }
                 if (poiRepository.existsByCode(poiMap.get(POI_CODE.value))) {
-                    throw new CustomException(ErrorCode.DUPLICATED_POI_CODE, "Duplcate Poi Code: " + poiMap.get(POI_CODE.value));
+                    throw new CustomException(
+                            ErrorCode.DUPLICATED_POI_CODE,
+                            "중복된 POI 코드입니다. (" + poiMap.get(POI_CODE.value) + ")"
+                    );
                 }
 
                 PoiCategory poiCategory = poiCategoryList.stream()

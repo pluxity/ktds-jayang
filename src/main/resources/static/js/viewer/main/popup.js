@@ -3757,6 +3757,7 @@ const layerPopup = (function () {
     let poiList = [];
     let matchedAlarms = [];
     const taggedPoiMap = new Map();
+    let tagMap = new Map();
     const createEventPopup = async (reinitializeSelectBoxes = false) => {
         if (reinitializeSelectBoxes) {
             document.querySelectorAll('.select-box__btn').forEach(btn => {
@@ -3764,7 +3765,7 @@ const layerPopup = (function () {
                     btn.classList.remove('select-box__btn--selected');
                 }
             })
-            const buildingList = await BuildingManager.getBuildingList();
+            const buildingList = BuildingManager.findAll();
             updateBuildingSelectBox(buildingList);
             const poiListData = PoiManager.findAll();
             updatePoiSelectBox(poiListData);
@@ -3808,6 +3809,14 @@ const layerPopup = (function () {
         const alarmTypeInput = document.getElementById('eventSearchInput').value.trim();
         // poiList = await PoiManager.getFilteredPoiList();
         poiList = PoiManager.findAll();
+
+        const tagMap = new Map();
+        poiList.forEach(poi => {
+            (poi.tagNames || []).forEach(tag => {
+                if (tag) tagMap.set(tag.toLowerCase(), poi);
+            });
+        });
+
         const eventLayerPopup = document.getElementById('eventLayerPopup');
         const tableBody  = eventLayerPopup.querySelector('.event-info table tbody');
         const alarmCountEl = document.getElementById('alarmCount');
@@ -3831,12 +3840,6 @@ const layerPopup = (function () {
             const { result: data } = res.data;
             globalAlarmList = data;
 
-            const filteredAlarms = data.filter(alarm =>
-                poiList.some(poi =>
-                    poi.tagNames.some(tag => tag?.toLowerCase() === alarm.tagName.toLowerCase())
-                )
-            );
-
             const isEHP = a => String(a?.equipment ?? '').trim().toUpperCase() === 'EHP';
 
             // let searchedAlarms = filteredAlarms.slice();
@@ -3845,9 +3848,7 @@ const layerPopup = (function () {
             if (selectedBuilding !== '건물 전체' && selectedBuilding !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
                     if (isEHP(alarm)) return true;
-                    const taggedPoi = poiList.find(poi =>
-                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
-                    );
+                    const taggedPoi = tagMap.get(alarm.tagName.toLowerCase());
 
                     return taggedPoi && taggedPoi.property.buildingName === selectedBuilding;
                 });
@@ -3855,9 +3856,7 @@ const layerPopup = (function () {
 
             if (selectedFloor !== '층 전체' && selectedFloor !== '') {
                 searchedAlarms = searchedAlarms.filter((alarm) => {
-                    const taggedPoi = poiList.find(poi =>
-                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
-                    );
+                    const taggedPoi = tagMap.get(alarm.tagName.toLowerCase());
 
                     return taggedPoi && String(taggedPoi.property.floorName) === selectedFloor;
                 });
@@ -3878,9 +3877,7 @@ const layerPopup = (function () {
                 const searchTerm = deviceNmInput.toLowerCase();
                 searchedAlarms = searchedAlarms.filter((alarm) => {
                     if (isEHP(alarm)) return true;
-                    const taggedPoi = poiList.find(poi =>
-                        poi.tagNames.some(tag => tag.toLowerCase() === alarm.tagName.toLowerCase())
-                    );
+                    const taggedPoi = tagMap.get(alarm.tagName.toLowerCase());
 
                     const poiNameMatch = taggedPoi && taggedPoi.name && taggedPoi.name.toLowerCase().includes(searchTerm);
                     const eventNameMatch = alarm.event && alarm.event.toLowerCase().includes(searchTerm);
@@ -3909,12 +3906,7 @@ const layerPopup = (function () {
             eventLayerPopup.style.display = 'inline-block';
 
             matchedAlarms = searchedAlarms.filter(data =>
-                isEHP(data) ||
-                poiList.some(poi =>
-                    poi.tagNames.some(tag =>
-                        tag?.toLowerCase() === data.tagName.toLowerCase()
-                    )
-                )
+                isEHP(data) || tagMap.has(data.tagName.toLowerCase())
             );
 
             const baseAlarms = matchedAlarms.slice();
@@ -3934,20 +3926,20 @@ const layerPopup = (function () {
                 const paginationEl = eventLayerPopup.querySelector('.search-result__paging');
                 const footerEl = eventLayerPopup.querySelector('.search-result__footer');
                 const downloadButtons = footerEl ? footerEl.querySelectorAll('.download') : [];
-                
+
                 // 기존 메시지 제거
                 const existingMessage = eventInfoEl.querySelector('.no-results-message');
                 if (existingMessage) {
                     existingMessage.remove();
                 }
-                
+
                 // 검색 결과가 없는 경우
                 if (matchedAlarms.length === 0) {
                     // 테이블, 페이지네이션, 다운로드 버튼들 숨기기
                     if (tableEl) tableEl.style.display = 'none';
                     if (paginationEl) paginationEl.style.display = 'none';
                     downloadButtons.forEach(btn => btn.style.display = 'none');
-                    
+
                     // "검색 결과가 없습니다" 메시지 표시
                     const noResultsDiv = document.createElement('div');
                     noResultsDiv.className = 'no-results-message';
@@ -3959,12 +3951,12 @@ const layerPopup = (function () {
                     eventInfoEl.appendChild(noResultsDiv);
                     return;
                 }
-                
+
                 // 결과가 있는 경우 테이블, 페이지네이션, 다운로드 버튼들 보이기
                 if (tableEl) tableEl.style.display = '';
                 if (paginationEl) paginationEl.style.display = '';
                 downloadButtons.forEach(btn => btn.style.display = '');
-                
+
                 const startIndex = (page - 1) * itemsPerPage;
                 const pageAlarms = matchedAlarms.slice(startIndex, startIndex + itemsPerPage);
 
@@ -3976,9 +3968,7 @@ const layerPopup = (function () {
                     const [formattedOccurrenceDate, formattedConfirmTime] =
                         [data.occurrenceDate, data.confirmTime].map(formatDateTime);
 
-                    const taggedPoi = poiList.find(poi =>
-                        poi.tagNames?.some(tag => tag && data.tagName && tag.toLowerCase() === data.tagName.toLowerCase())
-                    );
+                    const taggedPoi = tagMap.get(data.tagName?.toLowerCase());
 
                     let buildingName = taggedPoi?.property?.buildingName ?? '-';
                     let floorName = taggedPoi?.property?.floorName ?? '-';

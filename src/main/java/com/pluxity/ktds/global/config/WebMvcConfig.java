@@ -6,8 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+
+import java.util.concurrent.TimeUnit;
 
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
@@ -32,12 +35,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/")
-                .setCachePeriod(20)
+                .setCacheControl(CacheControl
+                        .maxAge(1, TimeUnit.DAYS)
+                        .cachePublic()
+                        .immutable())
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
         registry.addResourceHandler("/**")
                 .addResourceLocations("file:" + resourcePath)
-                .setCachePeriod(9600)
+                .setCacheControl(CacheControl
+                        .maxAge(1, TimeUnit.DAYS)
+                        .cachePublic()
+                        .immutable())
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
         registry.addResourceHandler("/favicon.ico")

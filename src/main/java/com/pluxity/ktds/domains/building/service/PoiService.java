@@ -166,7 +166,17 @@ public class PoiService {
         StopWatch sw = new StopWatch();
 
         sw.start("findAll");
-        List<Poi> poiList = poiRepository.findAllWithPositionPresent();
+        List<PoiDetailResponseDTO> result = poiRepository.findAllDetailProjection();
+        sw.stop();
+
+        List<Long> poiIds = result.stream().map(PoiDetailResponseDTO::id).toList();
+        sw.start("batchTagFetch");
+        List<Object[]> tagRows = poiTagRepository.findTagNamesByPoiIds(poiIds);
+        Map<Long, List<String>> tagMap = tagRows.stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0],
+                        Collectors.mapping(row -> (String) row[1], Collectors.toList())
+                ));
         sw.stop();
 
         sw.start("batchCctvFetch");
@@ -175,23 +185,25 @@ public class PoiService {
 //                        Poi::getId,
 //                        poi -> poiCctvRepository.findAllByPoi(poi)
 //                ));
+        List<Poi> poiList = poiRepository.findAllWithPositionPresent();
         List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
         Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
-                        .collect(Collectors.groupingBy(cctv -> cctv.getPoi().getId()));
+                .collect(Collectors.groupingBy(cctv -> cctv.getPoi().getId()));
         sw.stop();
+
 
         sw.start("dto start");
 
-        List<PoiDetailResponseDTO> result = new ArrayList<>(poiList.size());
-        for (Poi poi : poiList) {
+        List<PoiDetailResponseDTO> finalResult = new ArrayList<>(result.size());
+        for (PoiDetailResponseDTO base : result) {
+            List<String> tagNames = tagMap.getOrDefault(base.id(), Collections.emptyList());
             List<PoiCctvDTO> cctvDtoList = cctvMap
-                    .getOrDefault(poi.getId(), Collections.emptyList())
+                    .getOrDefault(base.id(), Collections.emptyList())
                     .stream()
                     .map(PoiCctvDTO::from)
                     .toList();
 
-            PoiDetailResponseDTO base = poi.toDetailResponseDTO();
-            result.add(
+            finalResult.add(
                     PoiDetailResponseDTO.builder()
                             .id(base.id())
                             .buildingId(base.buildingId())
@@ -204,7 +216,7 @@ public class PoiService {
                             .scale(base.scale())
                             .name(base.name())
                             .code(base.code())
-                            .tagNames(base.tagNames())
+                            .tagNames(tagNames)
                             .cctvList(cctvDtoList)
                             .isLight(base.isLight())
                             .lightGroup(base.lightGroup())
@@ -213,10 +225,9 @@ public class PoiService {
                             .build()
             );
         }
-
         sw.stop();
         log.info(sw.prettyPrint());
-        return result;
+        return finalResult;
     }
 
 @Transactional(readOnly = true)

@@ -1,5 +1,6 @@
 package com.pluxity.ktds.domains.building.repostiory;
 
+import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
@@ -140,4 +141,28 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
     @Query("SELECT COUNT(p) FROM Poi p WHERE p.id IN :ids")
     Long countByIds(@Param("ids") List<Long> ids);
 
+    @Query("""
+        SELECT new com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO(
+            p.id,
+            p.building.id,
+            p.floorNo,
+            p.poiCategory.id,
+            p.poiMiddleCategory.id,
+            p.iconSet.id,
+            p.position,
+            p.rotation,
+            p.scale,
+            p.name,
+            p.code,
+            null,
+            null,
+            p.isLight,
+            p.lightGroup,
+            p.cameraIp,
+            p.cameraId
+        )
+        FROM Poi p
+        WHERE p.position IS NOT NULL
+        """)
+    List<PoiDetailResponseDTO> findAllDetailProjection();
 }

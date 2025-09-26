@@ -1290,8 +1290,7 @@ const layerPopup = (function () {
                 const driveBox = document.getElementById('escalatorDrive');
                 const driveBtn = driveBox?.querySelector('.select-box__btn');
                 const driveName = driveBtn?.textContent.trim();
-                console.log("driveName : ", driveName);
-                console.log("statusName : ", statusName);
+
                 filterEscalator(driveName || '방향 전체', statusName || '상태 전체');
             };
         }
@@ -3759,6 +3758,9 @@ const layerPopup = (function () {
             const poiListData = PoiManager.findAll();
             updatePoiSelectBox(poiListData);
             setDatePicker();
+            if (eventSearchInput) {
+                eventSearchInput.value = '';
+            }
             const alarmTypes = [
                 { value: 0,  label: "경보" },
                 { value: 1,  label: "Alarm" },
@@ -3818,16 +3820,11 @@ const layerPopup = (function () {
             const { result: data } = res.data;
             globalAlarmList = data;
 
-            console.log("globalAlarmList : ", globalAlarmList.length);
             const filteredAlarms = data.filter(alarm =>
                 poiList.some(poi =>
                     poi.tagNames.some(tag => tag?.toLowerCase() === alarm.tagName.toLowerCase())
                 )
             );
-
-            console.log('EHP/PARK in data:', data.filter(a =>
-                /^(EHP|PARK)$/i.test(String(a?.equipment ?? a?.process ?? ''))
-            ).length);
 
             const isEHP = a => String(a?.equipment ?? '').trim().toUpperCase() === 'EHP';
 
@@ -3900,7 +3897,6 @@ const layerPopup = (function () {
             eventLayerPopup.style.transform = 'translate(-50%, -50%)';
             eventLayerPopup.style.display = 'inline-block';
 
-            console.log("searchedAlarms : ", searchedAlarms);
             matchedAlarms = searchedAlarms.filter(data =>
                 isEHP(data) ||
                 poiList.some(poi =>

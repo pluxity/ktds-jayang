@@ -2482,7 +2482,7 @@ const layerPopup = (function () {
     if (parkRefreshBtn) {
         parkRefreshBtn.addEventListener('click', async (event) => {
             try {
-                resetParkingFilterUI();
+                // resetParkingFilterUI();
                 const params = buildParams() || {};
                 const result = await getParkingSearch(params);
                 renderResultHeader(result);
@@ -2528,7 +2528,7 @@ const layerPopup = (function () {
             item.addEventListener('click', () => {
                 document.getElementById('systemPopup').style.display = 'none';
                 document.getElementById('parkingPop').style.display = 'none';
-                document.getElementById('parkingTab').classList.remove = 'active'
+                document.getElementById('parkingTab').classList.remove('active');
 
                 const label = item.dataset.label;
                 if (String(currentId) !== String(parkingMap.id)) {
@@ -2536,6 +2536,17 @@ const layerPopup = (function () {
                     window.location.href = `/map?buildingId=${parkingMap.id}`;
                 }
                 const floor = (parkingMap?.floors || []).find(f => f?.name === label);
+                const container = document.querySelector('.floor-info__detail');
+                if (container) {
+                    container.querySelectorAll('ul li button').forEach(btn => btn.classList.remove('active'));
+
+                    const targetBtn = container.querySelector(`ul li[floor-id="${floor.no}"] button`);
+                    if (targetBtn) {
+                        targetBtn.classList.add('active');
+                    }
+                }
+                Px.Poi.HideAll();
+                Px.Poi.ShowByProperty("floorNo", floor.no);
                 Px.Model.Visible.HideAll();
                 Px.Model.Visible.Show(floor.id);
             })

@@ -562,6 +562,7 @@ const Init = (function () {
                 onLoad: function() {
                     initPoi(buildingId).then(() => {
                         moveToPoiFromSession();
+                        moveFloor();
                     });
                     Px.Util.SetBackgroundColor('#111316');
                     Px.Camera.FPS.SetHeightOffset(15);
@@ -719,6 +720,31 @@ const Init = (function () {
         }
 
         return false;
+    }
+
+    const moveFloor = async () => {
+        const savedFloor = sessionStorage.getItem('parkingFloor');
+        if (savedFloor) {
+            const buildingList = BuildingManager.findAll();
+            const parkingMap = (buildingList || []).find(building => building?.name?.includes('주차장'));
+            const floor = (parkingMap?.floors || []).find(f => f?.name === savedFloor);
+
+            const container = document.querySelector('.floor-info__detail');
+            if (container) {
+                container.querySelectorAll('ul li button').forEach(btn => btn.classList.remove('active'));
+                const targetBtn = container.querySelector(`ul li[floor-id="${floor.no}"] button`);
+                if (targetBtn) {
+                    targetBtn.classList.add('active');
+                }
+            }
+
+            Px.Poi.HideAll();
+            Px.Poi.ShowByProperty("floorNo", floor.no);
+            Px.Model.Visible.HideAll();
+            Px.Model.Visible.Show(floor.id);
+
+            sessionStorage.removeItem('parkingFloor');
+        }
     }
 
     const moveToPoiFromSession = async () => {

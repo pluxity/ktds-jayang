@@ -973,6 +973,49 @@ const TagManager = (() => {
                             </tr>
                         `;
                     }).join('');
+                } else if (['지열'].includes(poiProperty.poiCategoryName)) {
+                    tbody.innerHTML = data.TAGs.map(tag => {
+                        const name = tag.tagName || '';
+                        const value = tag.currentValue;
+                        let label = '';
+                        let statusText = '';
+                        let unit = '';
+
+                        if (/경보/.test(name)) {
+                            label = '경보';
+                            statusText = { 0: 'Normal', 1: 'Alarm' }[value] ?? 'Unknown';
+                        } else if (/자동수동/.test(name)) {
+                            label = '자동/수동';
+                            statusText = { 0: '수동', 1: '자동' }[value] ?? 'Unknown';
+                        } else if (/냉방난방/.test(name)) {
+                            label = '냉방/난방';
+                            statusText = { 0: '냉방', 1: '난방' }[value] ?? 'Unknown';
+                        } else if (/상태|운전정지/.test(name)) {
+                            label = '상태';
+                            statusText = { 0: 'OFF', 1: 'ON' }[value] ?? 'Unknown';
+                        } else {
+                            const parts = name.split('_');
+                            const lastPart = parts[parts.length - 1] || name;
+                            label = lastPart;
+
+                            if (/온도/.test(lastPart)) unit = '℃';
+                            else if (/유량/.test(lastPart)) unit = 'm³/h';
+                            else if (/전력/.test(lastPart)) unit = 'kW';
+                            else if (/열량/.test(lastPart)) unit = 'kcal';
+                            else if (/시간/.test(lastPart)) unit = 'h';
+                            else if (/COP/.test(lastPart)) unit = '';
+                            else unit = '';
+
+                            statusText = `${value}${unit}`;
+                        }
+
+                        return `
+                            <tr>
+                                <td>${label}</td>
+                                <td>${statusText}</td>
+                            </tr>
+                        `;
+                    }).join('');
                 } else {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         const statusCell = poiProperty.poiCategoryName === '공기질'

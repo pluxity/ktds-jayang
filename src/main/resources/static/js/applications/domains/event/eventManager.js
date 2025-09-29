@@ -983,7 +983,7 @@ const EventManager = (() => {
                     <h3 class="sop-info__title">${sop.sopName}</h3>
                     <div class="sop-info__contents">
                         <div class="image">
-                            <img src= "/${sop.sopFile.fileEntityType}/${sop.sopFile.directory}/${sop.sopFile.storedName}.${sop.sopFile.extension}" width="330">
+                            <img src= "/${sop.sopFile.fileEntityType}/${sop.sopFile.directory}/${sop.sopFile.storedName}.${sop.sopFile.extension}">
                             <p class="image__text">(정) ${sop.mainManagerName} | ${sop.mainManagerDivision} | ${sop.mainManagerContact}</p>
                             <p class="image__text">(부) ${sop.subManagerName} | ${sop.subManagerDivision} | ${sop.subManagerContact}</p>
                         </div>

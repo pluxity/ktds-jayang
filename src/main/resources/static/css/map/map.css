@@ -957,6 +957,7 @@
   object-fit: contain;
   display: block;
   margin-bottom: 0.2rem;
+    max-width: 95%;
 }
 
 .sop-info__contents .image__text {

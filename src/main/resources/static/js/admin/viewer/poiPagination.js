@@ -204,6 +204,13 @@ function poiPaging(records) {
             dropdownContentDiv.classList.add('dropdown-content');
             dropdownContentDiv.classList.add('d-none');
 
+            const dropdownItemEditA = document.createElement('a');
+            dropdownItemEditA.classList.add('dropdown-item');
+            dropdownItemEditA.textContent = 'POI 속성 보기';
+            dropdownItemEditA.addEventListener('click', () => {
+                editPoi(records[index].id);
+            });
+
             const dropdownItemAllocateA = document.createElement('a');
             dropdownItemAllocateA.classList.add('dropdown-item');
             dropdownItemAllocateA.textContent = 'POI 배치하기';
@@ -225,6 +232,7 @@ function poiPaging(records) {
                 unAllocatePoi([records[index].id]);
             });
 
+            dropdownContentDiv.appendChild(dropdownItemEditA);
             dropdownContentDiv.appendChild(dropdownItemAllocateA);
             dropdownContentDiv.appendChild(dropdownItemDeleteA);
             dropdownContentDiv.appendChild(dropdownItemUnAllocateA);

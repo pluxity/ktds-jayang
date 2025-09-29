@@ -329,6 +329,17 @@ function initBuilding() {
                             parentElement.remove();
                         };
 
+                        const dropdownItemEditA = document.createElement('a');
+                        dropdownItemEditA.classList.add('dropdown-item');
+                        dropdownItemEditA.textContent = 'POI 속성 보기'
+                        dropdownItemEditA.addEventListener(
+                            'pointerup',
+                            (event) => {
+                                editPoi(poiInfo.id);
+                                removePoiPopup(event);
+                            },
+                        );
+
                         const dropdownItemAllocateA = document.createElement('a');
                         dropdownItemAllocateA.classList.add('dropdown-item');
                         dropdownItemAllocateA.textContent = 'POI 이동';
@@ -362,6 +373,7 @@ function initBuilding() {
                             },
                         );
 
+                        popup.appendChild(dropdownItemEditA);
                         popup.appendChild(dropdownItemAllocateA);
                         popup.appendChild(dropdownItemDeleteA);
                         popup.appendChild(dropdownItemUnAllocateA);

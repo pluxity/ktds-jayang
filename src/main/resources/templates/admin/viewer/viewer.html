@@ -699,6 +699,132 @@
     </div>
 </div>
 
+<div class="modal fade" id="poiModifyModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:700px;top:11%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">POI 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="poiModifyForm" id="poiModifyForm" method="post" enctype="multipart/form-data" autocomplete="off">
+                    <fieldset>
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col style="width:25%">
+                                <col style="width:35%">
+                                <col style="width:15%">
+                                <col style="width:35%">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>도면 선택</th>
+                                <td colspan="3">
+                                    <select name="buildingId" id="selectBuildingIdModify" class="form-select" title="도면 선택" required data-rules="required" data-tagname="도면">
+                                        <option class="dropdown-headerDisable selected" value="">도면 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>층 선택</th>
+                                <td colspan="3">
+                                    <select name="floorId" id="selectFloorIdModify" class="form-select" title="층 선택" required data-rules="required" data-tagname="층">
+                                        <option class="dropdown-headerDisable selected" value="">층 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>POI 카테고리 선택</th>
+                                <td colspan="3">
+                                    <select name="poiCategoryId" id="selectPoiCategoryIdModify" class="form-select" title="POI 카테고리 선택" required data-rules="required" data-tagname="POI 카테고리">
+                                        <option class="selected" value="">POI 카테고리 선택</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>중분류</th>
+                                <td colspan="3">
+                                    <select name="poiMiddleCategoryId" id="selectPoiMiddleCategoryIdModify" class="form-select" title="중분류" required data-rules="required" data-tagname="중분류">
+                                        <option class="selected" value="">중분류</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>POI 이름</th>
+                                <td colspan="3">
+                                    <input type="text" name="poiName" id="poiNameModify" class="form-control" placeholder="POI 이름을 입력해주세요." required data-rules="required" data-tagname="POI 이름">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>POI 코드</th>
+                                <td colspan="3">
+                                    <input type="text" name="code" id="poiCodeModify" class="form-control" placeholder="POI 코드를 입력해주세요." required data-rules="required" data-tagname="POI 코드">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>조명 여부</th>
+                                <td>
+                                    <input type="checkbox" name="isLight" id="isLightPoiModify" class="form-check-input" data-tagname="조명 여부">
+                                </td>
+                                <th>그룹</th>
+                                <td>
+                                    <input type="text" name="lightGroup" id="lightGroupModify" class="form-control input-sm" data-tagname="그룹" disabled>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>태그</th>
+                                <td colspan="3">
+                                    <textarea name="tagName" id="tagModify" class="form-control input-sm" placeholder="태그를 입력해주세요." style="height:200px;" title="태그 이름" data-tagname="태그 이름"></textarea>
+                                </td>
+                            </tr>
+
+                            <tr class="cameraIp hidden">
+                                <th>카메라 IP</th>
+                                <td colspan="3">
+                                    <input type="text" name="cameraIp" id="cameraIpModify" class="form-control" placeholder="" data-tagname="카메라 IP">
+                                </td>
+                            </tr>
+
+                            <tr class="selectCctv hidden">
+                                <th>지정카메라</th>
+                                <td colspan="3">
+                                    <input type="text" name="mainCctv" id="mainCctvModify" class="form-control" placeholder="지정카메라를 입력해주세요." data-tagname="지정카메라">
+                                </td>
+                            </tr>
+                            <tr class="selectCctv hidden">
+                                <th>주변카메라</th>
+                                <td colspan="3">
+                                    <input type="text" name="subCctv1" id="subCctv1Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 1"
+                                           data-tagname="주변카메라 1">
+                                    <br>
+                                    <input type="text" name="subCctv2" id="subCctv2Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 2"
+                                           data-tagname="주변카메라 2">
+                                    <br>
+                                    <input type="text" name="subCctv3" id="subCctv3Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 3"
+                                           data-tagname="주변카메라 3">
+                                    <br>
+                                    <input type="text" name="subCctv4" id="subCctv4Modify" class="form-control sub-cctv"
+                                           placeholder="주변카메라 4"
+                                           data-tagname="주변카메라 4">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="btnPoiModify">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <th:block th:replace="~{admin/fragments/script :: script }"></th:block>
 <script th:inline="javascript">

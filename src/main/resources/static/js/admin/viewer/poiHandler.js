@@ -204,6 +204,308 @@ const unAllocatePoi = (ids) => {
     });
 };
 
+const removeAllChildElements = (selectTags) => {
+    selectTags.forEach((select) => {
+        while (select.childElementCount > 1) {
+            select.removeChild(select.lastChild);
+        }
+    });
+};
+
+const addFloorOptionToSelect = (data, selectTag) => {
+    data.forEach((floor) => {
+        selectTag.forEach((select) => {
+            select.appendChild(new Option(floor.name, floor.no));
+        });
+    });
+};
+
+const addOptionToSelect = (data, selectTag) => {
+    data.forEach((d) => {
+        selectTag.forEach((select) => {
+            select.appendChild(new Option(d.name, d.id));
+        });
+    });
+};
+
+const initializeSelectTag = (data, selectTag) => {
+    removeAllChildElements(selectTag);
+    if(selectTag[0].id.indexOf('Floor') > -1) {
+        addFloorOptionToSelect(data, selectTag);
+    } else {
+        addOptionToSelect(data, selectTag);
+    }
+};
+
+const toggleCctvSectionByCategory = (categoryName, type) => {
+    const isCctv = categoryName.toLowerCase() === 'cctv';
+    const form = document.querySelector(`#poi${type}Form`);
+    const cctvRows = form.querySelectorAll('.selectCctv');
+
+    const cameraIpRow = form.querySelector('.cameraIp');
+
+    cctvRows.forEach(row => {
+        row.classList.toggle('hidden', isCctv);
+        row.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = isCctv;
+        });
+    });
+
+    if (cameraIpRow) {
+        cameraIpRow.classList.toggle('hidden', !isCctv);
+        cameraIpRow.querySelectorAll('input, select, textarea').forEach(field => {
+            field.disabled = !isCctv;
+        });
+    }
+};
+
+const getTagNames = (type) => {
+    const tagInput = document.querySelector(`#tag${type}`);
+    if (!tagInput) return [];
+    return tagInput.value
+        .split(/[\n,]/)
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+};
+
+
+const editPoi = async (id) => {
+    try {
+        // 필요한 데이터 가져오기
+        const data = {
+            poi: PoiManager.findAll(),
+            building: BuildingManager.findAll(),
+            poiCategory: PoiCategoryManager.findAll(),
+            poiMiddleCategory: PoiMiddleCategoryManager.findAll()
+        };
+
+        // POI 데이터 찾기
+        const modifyPoiData = data.poi.find(poi => poi.id === Number(id));
+        if (!modifyPoiData) {
+            console.error('POI를 찾을 수 없습니다:', id);
+            return;
+        }
+
+        // 모달 요소 가져오기
+        const modifyModal = document.querySelector('#poiModifyModal');
+        if (!modifyModal) {
+            console.error('POI 수정 모달을 찾을 수 없습니다');
+            return;
+        }
+
+        // 모달 데이터 설정
+        modifyModal.dataset.id = modifyPoiData.id;
+        modifyModal.querySelector('#poiNameModify').value = modifyPoiData.name;
+        modifyModal.querySelector('#poiCodeModify').value = modifyPoiData.code;
+
+        // 건물 정보 설정
+        const building = data.building.find(building => building.id === modifyPoiData.buildingId);
+        if (building) {
+            // 건물 select 옵션 채우기
+            const buildingSelect = modifyModal.querySelector('#selectBuildingIdModify');
+            if (buildingSelect.options.length <= 1) {
+                data.building.forEach(b => buildingSelect.appendChild(new Option(b.name, b.id)));
+            }
+            buildingSelect.value = building.id;
+            
+            // 층수 정보 설정
+            initializeSelectTag(building.floors, [modifyModal.querySelector('#selectFloorIdModify')]);
+            
+            if (modifyPoiData.floorNo) {
+                modifyModal.querySelector('#selectFloorIdModify').value = 
+                    building.floors.find(floor => floor.no === modifyPoiData.floorNo)?.no ?? '';
+            } else {
+                modifyModal.querySelector('#selectFloorIdModify').value = '';
+            }
+        }
+
+        // 카테고리 정보 설정
+        const categorySelect = modifyModal.querySelector('#selectPoiCategoryIdModify');
+        if (categorySelect.options.length <= 1) {
+            data.poiCategory.forEach(c => categorySelect.appendChild(new Option(c.name, c.id)));
+        }
+        categorySelect.value = modifyPoiData.property.poiCategoryId;
+        
+        const poiCategory = data.poiCategory.find(category => category.id === modifyPoiData.property.poiCategoryId);
+        const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == modifyPoiData.property.poiCategoryId);
+        
+        // 중분류 select 옵션 채우기
+        const middleSelect = modifyModal.querySelector('#selectPoiMiddleCategoryIdModify');
+        removeAllChildElements([middleSelect]);
+        filteredMiddleCategories.forEach(m => middleSelect.appendChild(new Option(m.name, m.id)));
+        middleSelect.value = modifyPoiData.property.poiMiddleCategoryId;
+        modifyModal.querySelector('#tagModify').value = modifyPoiData.tagNames || '';
+
+        const form = document.querySelector('#poiModifyForm');
+        form.dataset.id = modifyPoiData.id;
+
+        // 조명 관련 설정
+        const isLightCheck = modifyModal.querySelector('#isLightPoiModify');
+        const lightGroup = modifyModal.querySelector('#lightGroupModify');
+        
+        if (modifyPoiData.property.isLight) {
+            isLightCheck.checked = true;
+            lightGroup.disabled = false;
+            lightGroup.value = modifyPoiData.property.lightGroup || '';
+        } else {
+            isLightCheck.checked = false;
+            lightGroup.disabled = true;
+            lightGroup.value = '';
+        }
+
+        // 조명 체크박스 변경 이벤트 리스너 추가
+        const lightChangeHandler = (e) => {
+            lightGroup.disabled = !isLightCheck.checked;
+        };
+        isLightCheck.addEventListener('change', lightChangeHandler);
+
+        // CCTV 관련 설정
+        const cctvRows = form.querySelectorAll('.selectCctv');
+        const cameraIpRow = modifyModal.querySelector('.cameraIp');
+        
+        if (poiCategory && poiCategory.name.toLowerCase() !== 'cctv') {
+            // CCTV가 아닌 경우
+            if (!cameraIpRow.classList.contains('hidden')) {
+                cameraIpRow.classList.add('hidden');
+            }
+
+            cctvRows.forEach(row => {
+                row.classList.remove('hidden');
+                row.querySelectorAll('input, select, textarea').forEach(field => {
+                    field.disabled = false;
+                });
+            });
+
+            const cctvList = modifyPoiData.cctvList || [];
+            const mainCctv = cctvList.find(c => c.isMain === "Y");
+            modifyModal.querySelector("#mainCctvModify").value = mainCctv ? mainCctv.cctvName : "";
+
+            const subCctvs = cctvList.filter(c => c.isMain !== "Y");
+            const subCctvInputs = modifyModal.querySelectorAll('.sub-cctv');
+            subCctvInputs.forEach((input, index) => {
+                input.value = subCctvs[index] ? subCctvs[index].cctvName : "";
+            });
+        } else {
+            // CCTV인 경우
+            if (cameraIpRow.classList.contains('hidden')) {
+                cameraIpRow.classList.remove('hidden');
+            }
+            cctvRows.forEach(row => {
+                if (row !== cameraIpRow) {
+                    row.classList.add('hidden');
+                    row.querySelectorAll('input, select, textarea').forEach(field => {
+                        field.disabled = true;
+                        field.value = "";
+                    });
+                }
+            });
+            modifyModal.querySelector('#cameraIpModify').value = modifyPoiData.property.cameraIp || '';
+        }
+
+        // 카테고리 변경 이벤트 리스너 추가
+        const poiCategorySelect = modifyModal.querySelector('#selectPoiCategoryIdModify');
+        const categoryChangeHandler = (e) => {
+            const selectedValue = poiCategorySelect.options[poiCategorySelect.selectedIndex].value;
+            const selectedText = poiCategorySelect.options[poiCategorySelect.selectedIndex].text.trim().toLowerCase();
+            if (!selectedValue) {
+                return;
+            }
+            
+            // 중분류 옵션 업데이트
+            const middleSelect = modifyModal.querySelector('#selectPoiMiddleCategoryIdModify');
+            removeAllChildElements([middleSelect]);
+            const filteredMiddleCategories = data.poiMiddleCategory.filter(middle => middle.poiCategory.id == selectedValue);
+            filteredMiddleCategories.forEach(m => middleSelect.appendChild(new Option(m.name, m.id)));
+            
+            toggleCctvSectionByCategory(selectedText, "Modify");
+        };
+        poiCategorySelect.addEventListener('change', categoryChangeHandler);
+
+        // 모달이 닫힐 때 이벤트 리스너 정리
+        modifyModal.addEventListener('hidden.bs.modal', () => {
+            poiCategorySelect.removeEventListener('change', categoryChangeHandler);
+        });
+
+        // 수정 버튼 이벤트 리스너 추가
+        const modifyButton = modifyModal.querySelector('#btnPoiModify');
+        const modifyHandler = async (event) => {
+            const form = document.getElementById('poiModifyForm');
+            if (typeof validationForm === 'function' && !validationForm(form)) return;
+
+            const params = {};
+            params.buildingId = Number(document.querySelector('#selectBuildingIdModify').value);
+            const floorValue = document.querySelector('#selectFloorIdModify').value;
+            params.floorNo = floorValue ? Number(floorValue) : null;
+            params.poiCategoryId = Number(document.querySelector('#selectPoiCategoryIdModify').value);
+            params.poiMiddleCategoryId = Number(document.querySelector('#selectPoiMiddleCategoryIdModify').value);
+            params.name = document.querySelector('#poiNameModify').value;
+            params.code = document.querySelector('#poiCodeModify').value;
+            params.isLight = document.querySelector('#isLightPoiModify').checked;
+            params.lightGroup = document.querySelector('#lightGroupModify').value;
+            params.tagNames = getTagNames('Modify');
+
+            // CCTV 관련 처리
+            const poiCategory = data.poiCategory.find(category => category.id === params.poiCategoryId);
+            if (poiCategory && poiCategory.name.toLowerCase() === 'cctv') {
+                params.cameraIp = document.querySelector('#cameraIpModify').value;
+            } else {
+                const cctvList = [];
+                const mainCctv = document.querySelector('#mainCctvModify').value;
+                if (mainCctv) {
+                    cctvList.push({ cctvName: mainCctv, isMain: "Y" });
+                }
+                const subCctvs = document.querySelectorAll('.sub-cctv');
+                subCctvs.forEach(input => {
+                    if (input.value) {
+                        cctvList.push({ cctvName: input.value, isMain: "N" });
+                    }
+                });
+                params.cctvList = cctvList;
+            }
+
+            try {
+                const id = Number(form.dataset.id);
+                await api.put(`/poi/${id}`, params, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    },
+                });
+                
+                alertSwal('수정이 완료 되었습니다.').then(() => {
+                    modal.hide();
+                    // POI 목록 새로고침
+                    getPoiRenderingAndList(true);
+                });
+            } catch (error) {
+                console.error('POI 수정 중 오류 발생:', error);
+                alertSwal('수정 중 오류가 발생했습니다.');
+            }
+        };
+        
+        modifyButton.addEventListener('click', modifyHandler);
+
+        // 모달이 닫힐 때 이벤트 리스너 정리
+        modifyModal.addEventListener('hidden.bs.modal', () => {
+            poiCategorySelect.removeEventListener('change', categoryChangeHandler);
+            modifyButton.removeEventListener('click', modifyHandler);
+            isLightCheck.removeEventListener('change', lightChangeHandler);
+            modifyModal.setAttribute('aria-hidden', 'true');
+        });
+
+        modifyModal.addEventListener('shown.bs.modal', () => {
+            modifyModal.removeAttribute('aria-hidden');
+        });
+
+        // 모달 띄우기
+        const modal = new bootstrap.Modal(modifyModal);
+        modal.show();
+
+    } catch (error) {
+        console.error('POI 수정 모달 설정 중 오류 발생:', error);
+    }
+}
+
 const pagination = (list, page, recordSize) => {
     const start = (page - 1) * recordSize;
     const end = start + recordSize;

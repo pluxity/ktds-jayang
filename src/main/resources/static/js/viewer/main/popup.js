@@ -2103,7 +2103,7 @@ const layerPopup = (function () {
               <td>${start + idx + 1}</td>
               <td>${item.deviceId || ''}</td>
               <td>${item.deviceName || ''}</td>
-              <td>${item.inoutType === 0 ? '입구' : '출구'}</td>
+              <td>${item.inoutType === 0 || item.inoutType === '0' ? '입구' : '출구'}</td>
               <td>${item.gateDatetime}</td>
               <td>${item.carNo || ''}</td>
               <td>${item.inoutCarId || ''}</td>

@@ -4250,6 +4250,7 @@ const layerPopup = (function () {
             closeAllPopups();
 
             if (target.id === 'airPop') {
+                TagManager.clearTags();
                 // 에어컨 팝업 닫을 때 모든 select 박스 초기화
                 const buildingBtn = document.querySelector('#airBuildingSelector .select-box__btn');
                 const onoffBtn = document.querySelector('#airOnOffSelector .select-box__btn');
@@ -4260,6 +4261,8 @@ const layerPopup = (function () {
                 if (onoffBtn) onoffBtn.textContent = 'ON/OFF 전체';
                 if (modeBtn) modeBtn.textContent = '모드 전체';
                 if (volumeBtn) volumeBtn.textContent = '풍량 전체';
+            }else if(target.id === 'elevatorPop'){
+                TagManager.clearTags();
             }
         }
     }

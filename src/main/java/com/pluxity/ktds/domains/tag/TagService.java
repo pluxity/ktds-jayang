@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,10 +30,15 @@ public class TagService {
     private final PoiTagRepository poiTagRepository;
     private final TagClientService tagClientService;
     private final ObjectMapper objectMapper;
+
     @Value("${event.server.base-url}")
     private String baseUrl;
 
-    private static final int TAG_CHUNK_SIZE = 30;
+    @Value("${tag.chunk-size}")
+    private int TAG_CHUNK_SIZE ;
+
+    @Value("${tag.read-strategy}")
+    private String readStrategy;
 
     @Transactional
     public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
@@ -76,13 +78,18 @@ public class TagService {
         }
 
         if (!allTagNamesToFetch.isEmpty()) {
-            String tagNamesParam = String.join(",", allTagNamesToFetch);
 
-            TagResponseDTO all = restTemplate.postForObject(
-                    baseUrl + "/?ReadTags",
-                    allTagNamesToFetch,
-                    TagResponseDTO.class
-            );
+            TagResponseDTO all = null;
+
+            if ("CHUNK".equals(readStrategy)) {
+                all = readTagsInChunks(allTagNamesToFetch);
+            }else{
+                all = restTemplate.postForObject(
+                        baseUrl + "/?ReadTags",
+                        allTagNamesToFetch,
+                        TagResponseDTO.class
+                );
+            }
 
             if (all != null && all.tags() != null) {
                 Map<Long, List<TagData>> groupedTagData = all.tags().stream()
@@ -153,13 +160,19 @@ public class TagService {
         }
 
         if (!allTagNamesToFetch.isEmpty()) {
-            String tagNamesParam = String.join(",", allTagNamesToFetch);
 
-            TagResponseDTO all = restTemplate.postForObject(
-                    baseUrl + "/?ReadTags",
-                    allTagNamesToFetch,
-                    TagResponseDTO.class
-            );
+            TagResponseDTO all = null;
+
+            if ("CHUNK".equals(readStrategy)) {
+                all = readTagsInChunks(allTagNamesToFetch);
+            }else{
+                all = restTemplate.postForObject(
+                        baseUrl + "/?ReadTags",
+                        allTagNamesToFetch,
+                        TagResponseDTO.class
+                );
+            }
+
 
             if (all != null && all.tags() != null) {
                 Map<Long, List<TagData>> groupedTagData = all.tags().stream()
@@ -264,17 +277,56 @@ public class TagService {
         log.info("allEHPTags : {}\nsize : {}",  allEHPTags, allEHPTags.size());
         log.info("groupedTagMap keys : {}\nsize : {}",  groupedTagMap.keySet(), groupedTagMap.keySet().size());
 
-
         processTagsInChunks(allEHPTags, TAG_CHUNK_SIZE);
 
+        if ("CHUNK".equals(readStrategy)) {
+            return processTagsInChunksRead(allEHPTags, groupedTagMap);
+        } else {
+            return processTagsBatchRead(allEHPTags, groupedTagMap);
+        }
+    }
+
+    private Map<String, Map<String, Double>> processTagsInChunksRead(
+            List<String> allEHPTags, 
+            Map<String, Map<String, Double>> groupedTagMap) {
+        
+        for (int i = 0; i < allEHPTags.size(); i += TAG_CHUNK_SIZE) {
+            int endIndex = Math.min(i + TAG_CHUNK_SIZE, allEHPTags.size());
+            List<String> chunk = allEHPTags.subList(i, endIndex);
+            
+            log.info("청크 읽기 처리 중: {}/{} (크기: {})", 
+                    i + chunk.size(), allEHPTags.size(), chunk.size());
+            
+            ResponseEntity<String> res = tagClientService.testReadTags(chunk);
+            if (!res.getStatusCode().is2xxSuccessful()) {
+                throw new IllegalStateException("testReadTags 실패: " + res.getStatusCode().value());
+            } else {
+                log.info("testReadTags 성공: " + res.getStatusCode().value());
+            }
+            
+            updateGroupedTagMap(res.getBody(), groupedTagMap);
+        }
+        
+        return groupedTagMap;
+    }
+    
+    private Map<String, Map<String, Double>> processTagsBatchRead(
+            List<String> allEHPTags, 
+            Map<String, Map<String, Double>> groupedTagMap) {
+        
         // readTags 한꺼번에 호출
         ResponseEntity<String> res = tagClientService.testReadTags(allEHPTags);
         if (!res.getStatusCode().is2xxSuccessful()) {
-                throw new IllegalStateException("testReadTags 실패: " + res.getStatusCode().value());
-            }else{
-                log.info("testReadTags 성공: " + res.getStatusCode().value());
-            }
-        String response = res.getBody();
+            throw new IllegalStateException("testReadTags 실패: " + res.getStatusCode().value());
+        } else {
+            log.info("testReadTags 성공: " + res.getStatusCode().value());
+        }
+        
+        updateGroupedTagMap(res.getBody(), groupedTagMap);
+        return groupedTagMap;
+    }
+    
+    private void updateGroupedTagMap(String response, Map<String, Map<String, Double>> groupedTagMap) {
         try {
             // response(HTTP) → dto 파싱 후
             TagResponseDTO dto = objectMapper.readValue(response, TagResponseDTO.class);
@@ -301,13 +353,38 @@ public class TagService {
                 }
             }
 
-            return groupedTagMap;
-
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("응답 데이터 파싱 실패: " + e.getMessage());
         }
     }
 
+    private TagResponseDTO readTagsInChunks(List<String> allTagNamesToFetch) {
+        String requestId = UUID.randomUUID().toString().substring(0, 8);
+        List<TagData> allTags = new ArrayList<>();
+        long lastTimestamp = 0L;
+        int totalCount = 0;
+
+        for (int i = 0; i < allTagNamesToFetch.size(); i += TAG_CHUNK_SIZE) {
+            int endIndex = Math.min(i + TAG_CHUNK_SIZE, allTagNamesToFetch.size());
+            List<String> chunk = allTagNamesToFetch.subList(i, endIndex);
+            
+            log.info("[{}] 태그 청크 읽기 처리 중: {}/{} (크기: {})", 
+            requestId, i + chunk.size(), allTagNamesToFetch.size(), chunk.size());
+
+            TagResponseDTO chunkResponse = restTemplate.postForObject(
+                    baseUrl + "/?ReadTags",
+                    chunk,
+                    TagResponseDTO.class
+            );
+
+            if (chunkResponse != null && chunkResponse.tags() != null) {
+                allTags.addAll(chunkResponse.tags());
+                totalCount += chunkResponse.tagCnt();
+            }
+        }
+
+        return new TagResponseDTO(totalCount, lastTimestamp, allTags);
+    }
 
     /**
      * 문자열을 Double로 변환 시도. 실패하면 null 반환.

@@ -4,8 +4,6 @@ import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
 import com.pluxity.ktds.domains.building.entity.Building;
 import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.cctv.dto.PoiCctvDTO;
-import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
-import com.pluxity.ktds.global.annotation.IgnorePoiPermission;
 import com.pluxity.ktds.global.repository.BaseRepository;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
@@ -13,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +58,17 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
             "WHERE p.poiMiddleCategory.name = :middleCategoryName")
     List<Poi> findByMiddleCategoryName(@Param("middleCategoryName") String middleCategoryName);
 
-    @Query("SELECT p FROM Poi p WHERE p.position.x IS NOT NULL AND p.position.y IS NOT NULL AND p.position.z IS NOT NULL")
+    @Query("""
+    SELECT p
+    FROM Poi p
+    JOIN FETCH p.building
+    JOIN FETCH p.poiCategory
+    JOIN FETCH p.poiMiddleCategory
+    JOIN FETCH p.iconSet
+    WHERE p.position.x IS NOT NULL
+      AND p.position.y IS NOT NULL
+      AND p.position.z IS NOT NULL
+""")
     List<Poi> findAllWithPositionPresent();
 
     @Query("SELECT p " +

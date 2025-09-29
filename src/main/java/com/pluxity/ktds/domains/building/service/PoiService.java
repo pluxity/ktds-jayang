@@ -14,8 +14,6 @@ import com.pluxity.ktds.domains.poi_set.repository.PoiCategoryRepository;
 import com.pluxity.ktds.domains.poi_set.repository.PoiMiddleCategoryRepository;
 import com.pluxity.ktds.domains.sop.dto.SopResponseDTO;
 import com.pluxity.ktds.domains.sop.service.SopService;
-import com.pluxity.ktds.global.annotation.IgnoreBuildingPermission;
-import com.pluxity.ktds.global.annotation.IgnorePoiPermission;
 import com.pluxity.ktds.global.constant.ErrorCode;
 import com.pluxity.ktds.global.exception.CustomException;
 import com.pluxity.ktds.global.utils.ExcelUtil;
@@ -23,7 +21,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -119,9 +116,13 @@ public class PoiService {
 
         sw.start("poiCctvRepository.findAllByPoiIn");
         List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
+        List<PoiTag> allTags = poiTagRepository.findAllByPoiIn(poiList);
 
         Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
                 .collect(Collectors.groupingBy(poiCctv -> poiCctv.getPoi().getId()));
+        Map<Long, List<PoiTag>> tagMap = allTags.stream()
+                        .collect(Collectors.groupingBy(tag -> tag.getPoi().getId()));
+
         sw.stop();
 
         sw.start("DTO mapping");
@@ -130,26 +131,28 @@ public class PoiService {
                     List<PoiCctvDTO> cctvDtoList = cctvMap.getOrDefault(poi.getId(), List.of()).stream()
                             .map(PoiCctvDTO::from)
                             .toList();
+                    List<String> poiTagNames = tagMap.getOrDefault(poi.getId(), List.of()).stream()
+                            .map(PoiTag::getTagName)
+                            .toList();
 
-                    PoiDetailResponseDTO base = poi.toDetailResponseDTO();
                     return PoiDetailResponseDTO.builder()
-                            .id(base.id())
-                            .buildingId(base.buildingId())
-                            .floorNo(base.floorNo())
-                            .poiCategoryId(base.poiCategoryId())
-                            .poiMiddleCategoryId(base.poiMiddleCategoryId())
-                            .iconSetId(base.iconSetId())
-                            .position(base.position())
-                            .rotation(base.rotation())
-                            .scale(base.scale())
-                            .name(base.name())
-                            .code(base.code())
-                            .tagNames(base.tagNames())
+                            .id(poi.getId())
+                            .buildingId(poi.getBuilding().getId())
+                            .floorNo(poi.getFloorNo())
+                            .poiCategoryId(poi.getPoiCategory().getId())
+                            .poiMiddleCategoryId(poi.getPoiMiddleCategory().getId())
+                            .iconSetId(poi.getIconSet().getId())
+                            .position(poi.getPosition())
+                            .rotation(poi.getRotation())
+                            .scale(poi.getScale())
+                            .name(poi.getName())
+                            .code(poi.getCode())
+                            .tagNames(poiTagNames)
                             .cctvList(cctvDtoList)
-                            .isLight(base.isLight())
-                            .lightGroup(base.lightGroup())
-                            .cameraIp(base.cameraIp())
-                            .cameraId(base.cameraId())
+                            .isLight(poi.getIsLight())
+                            .lightGroup(poi.getLightGroup())
+                            .cameraIp(poi.getCameraIp())
+                            .cameraId(poi.getCameraId())
                             .build();
                 })
                 .toList();

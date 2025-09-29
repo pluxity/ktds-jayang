@@ -4,18 +4,16 @@
     await IconSetManager.getIconSetList();
     await PoiCategoryManager.getPoiCategoryList();
     await PoiMiddleCategoryManager.getPoiMiddleCategoryList();
-    await BuildingManager.getBuildingList().then(() => {
-        loadBuildingInfo(BUILDING_ID, async () => {
-            // camPos.setData(mapInfo.camPosJson);
-            await leftPoiListInit();
-            initBuilding();
-            // 도면 휠 이벤트
-            document
-                .querySelector('canvas')
-                .addEventListener('mousedown wheel resize ', () => {
-                    hidePoiMenu();
-                });
-        });
+    loadBuildingInfo(BUILDING_ID, async () => {
+        // camPos.setData(mapInfo.camPosJson);
+        await leftPoiListInit();
+        await initBuilding();
+        // 도면 휠 이벤트
+        document
+            .querySelector('canvas')
+            .addEventListener('mousedown wheel resize ', () => {
+                hidePoiMenu();
+            });
     });
     await PatrolManager.getPatrolList();
 
@@ -266,10 +264,9 @@ function changeEventFloor(floorNo) {
 
 // 도면 정보 로딩
 function loadBuildingInfo(buildingId, callback) {
-    BuildingManager.getBuildingById(buildingId).then((building) => {
+    BuildingManager.getBuildingById(buildingId).then(building => {
         const buildingList = BuildingManager.findAll();
-        const index = buildingList.findIndex(building => building.id === Number(buildingId));
-        buildingList[index] = building;
+        buildingList.push(building);
 
         if (callback) callback();
     });

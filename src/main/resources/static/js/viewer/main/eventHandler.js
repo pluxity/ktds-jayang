@@ -109,50 +109,6 @@
 
     })();
 
-    // 추 후 공통으로 합칠 예정
-    function createSseConnection(url, eventName, onEvent, onError) {
-        const eventSource = new EventSource(url);
-
-        eventSource.addEventListener(eventName, (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                onEvent(data);
-            } catch (err) {
-                console.error("SSE 이벤트 데이터 파싱 오류:", err);
-            }
-        });
-
-        eventSource.onerror = (error) => {
-            if (typeof onError === 'function') {
-                onError(error);
-            } else {
-                console.error("SSE 오류 발생:", error);
-            }
-        };
-
-        return eventSource;
-    }
-
-    // 여기서 popup 1회 호출(
-    const sse = createSseConnection(
-        '/sse/notice',
-        'notice',
-        function (notice) {
-            const popup = document.getElementById('noticePopup');
-            popup.style.display = 'inline-block';
-            popup.style.position = 'absolute';
-            popup.style.top = '50%';
-            popup.style.left = '50%';
-            popup.style.transform = 'translate(-50%, -50%)';
-            popup.style.zIndex = '999';
-
-            layerPopup.pagingNotice([notice], 1);
-        },
-        function (error) {
-            console.error('SSE Connection Error:', error);
-        }
-    );
-
     const eventStateBtn = document.querySelector(".event-state__title .event-state__button");
     eventStateBtn.addEventListener('click', async event => {
         await layerPopup.createEventPopup(true);

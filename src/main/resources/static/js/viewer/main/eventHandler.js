@@ -267,20 +267,28 @@
                 .forEach(btn => btn.classList.remove('select-box__btn--active'));
         }
 
-        firstTab.addEventListener('click', () => {
-            switchTab(firstTab, secondTab, firstContent, secondContent);
+        // 기존 이벤트 리스너 제거
+        firstTab.replaceWith(firstTab.cloneNode(true));
+        secondTab.replaceWith(secondTab.cloneNode(true));
+        
+        // 새로운 참조 가져오기
+        const newFirstTab = document.querySelector('.elevator-tab');
+        const newSecondTab = document.querySelector('.escalator-tab');
+
+        newFirstTab.addEventListener('click', () => {
+            switchTab(newFirstTab, newSecondTab, firstContent, secondContent);
             clearActiveBtns(secondContent);
             layerPopup.setElevator();
         });
 
-        secondTab.addEventListener('click', () => {
-            switchTab(secondTab, firstTab, secondContent, firstContent);
+        newSecondTab.addEventListener('click', () => {
+            switchTab(newSecondTab, newFirstTab, secondContent, firstContent);
             clearActiveBtns(firstContent);
             layerPopup.setEscalator();
         });
 
         // 초기 상태 설정
-        switchTab(firstTab, secondTab, firstContent, secondContent);
+        switchTab(newFirstTab, newSecondTab, firstContent, secondContent);
         // layerPopup.setElevator();
     };
 

@@ -2211,6 +2211,10 @@
                                     </div>
                                 </li>
                             </ul>
+                            <!-- [D] 검색 결과가 없을 때 
+                            <div class="left-info__empty">
+                                <p>검색 결과가 없습니다.</p>
+                            </div> -->
                         </div>
                     </div>
                     <div class="search-result__footer">
@@ -2601,7 +2605,77 @@
             </div>
         </div>
     </div>   
-</div>
+    </div>
+
+    <div class="popup-basic popup-basic--xwide" style="position: relative; z-index: 1; margin-bottom: 50px; top: 180px;">
+        <div class="popup-basic__head">
+            <h2 class="name">승강</h2>
+            <ul class="tab" role="tablist">
+                <!-- [D] 선택 시 aria-selected="true"로 변경 및 class="active" 추가 -->
+                <li role="tab" id="tab1" aria-controls="tabpanel1" aria-selected="true" tabindex="0"><a href="#tab1">엘리베이터</a></li>
+                <li class="active" role="tab" id="tab2" aria-controls="tabpanel2" aria-selected="false" tabindex="0"><a href="#tab2">에스컬레이터</a></li>
+            </ul>
+            <button type="button" class="close"><span class="hide">close</span></button>
+        </div>
+        <div class="search-result search-result--space">
+            <div class="search-result__space">
+                <div class="section section--contents">
+                    <div class="facility-area">
+                        <div class="facility-area__head">
+                            <div class="search">
+                                <div class="select-box" style="width:100px;">
+                                    <!-- [D] 
+                                        select-box 클릭 시 select-box__btn--active 클래스 추가 
+                                        select-box 비활성화 시 select__btn--disabled 클래스 추가 
+                                        -->
+                                    <span class="select-box__btn -select-box__btn--active">전체동</span>
+                                    <div class="select-box__content">
+                                        <ul>
+                                            <!-- [D] 리스트 클릭 시 selected 클래스 추가 -->
+                                            <li class="selected">전체동</li>
+                                            <li>전체동</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="select-box" style="width:100px;">
+                                    <span class="select-box__btn -select-box__btn--active">전체 층</span>
+                                    <div class="select-box__content">
+                                        <ul>
+                                            <li class="selected">전체 층</li>
+                                            <li>전체 층</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="select-box" style="width:100px;">
+                                    <span class="select-box__btn -select-box__btn--active">상태 전체</span>
+                                    <div class="select-box__content">
+                                        <ul>
+                                            <li class="selected">상태 전체</li>
+                                            <li>상테 전체</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button type="button" class="button button--solid-middle">검색</button>
+                            </div>
+                            <span class="text">총 20대</span>
+                        </div>
+                        <div class="left-info">
+                            <div class="left-info__empty">
+                                <p>검색 결과가 없습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-result__footer">
+                        <div class="search-result__paging">
+                            <button type="button" class="left"><span class="hide">left</span></button>
+                            <div class="number"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                            <button type="button" class="right"><span class="hide">right</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+    </div>
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 이벤트 팝업 - 공지사항</div>
    <div class="popup-event" style="position: relative; margin-bottom: 50px; top: 200px;">
@@ -2636,7 +2710,7 @@
 
 
    <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">[Popup] 이벤트 팝업 - Sop</div>
-   <div class="popup-event" style="position: relative; margin-bottom: 50px; top: 220px;">
+   <div class="popup-event popup-event--middle" style="position: relative; margin-bottom: 50px; top: 220px;">
      <div class="popup-event__head">
          <h2 class="name">SOP</h2>
          <button type="button" class="close"><span class="hide">close</span></button>
@@ -2646,83 +2720,13 @@
          <h3 class="sop-info__title">에스컬레이터 끼임 사고</h3>
          <div class="sop-info__contents">
              <div class="image">
-                 <img src="/static/images/viewer/img_sop.png" alt="에스컬레이터 끼임 사고" width="330">
-                 <p class="image__text">(정) 홍길동 | 가나다라마팀 | 010-123-456</p>
-                 <p class="image__text">(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
-             </div>
-             <div class="manual">
-                 <div class="sop-accord">
-                     <div class="sop-accord__title">매뉴얼</div>
-                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                     <div class="sop-accord__btn sop-accord__btn--active">
-                         <span class="label">1단계</span>
-                         사고 위치 파악
-                     </div>
-                     <div class="sop-accord__detail">
-                         <div class="message">
-                             <strong class="message__title">방송 송출</strong>
-                             <p>
-                                 안내 방송 송출 문구 표출 <br>
-                                 문구 없는 경우 영역 미노출
-                             </p>
-                         </div>
-                         <ul>
-                             <li>1. 사고 위치 파악합니다.</li>
-                             <li>2. 담당 직원을 현장 파견합니다.</li>
-                             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                         </ul>
-                     </div>
-                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                     <div class="sop-accord__btn">
-                         <span class="label">2단계</span>
-                         안내 방송 송출
-                     </div>     
-                     <div class="sop-accord__detail">
-                         <ul>
-                             <li>1. 사고 위치 파악합니다.</li>
-                             <li>2. 담당 직원을 현장 파견합니다.</li>
-                             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                         </ul>
-                     </div>
-                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                     <div class="sop-accord__btn">
-                         <span class="label">3단계</span>
-                         초동 조치
-                     </div>  
-                     <div class="sop-accord__detail">
-                         <ul>
-                             <li>1. 사고 위치 파악합니다.</li>
-                             <li>2. 담당 직원을 현장 파견합니다.</li>
-                             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                         </ul>
-                     </div>
-                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                     <div class="sop-accord__btn">
-                         <span class="label">4단계</span>
-                         사고 상황 전파
-                     </div>     
-                     <div class="sop-accord__detail">
-                         <ul>
-                             <li>1. 사고 위치 파악합니다.</li>
-                             <li>2. 담당 직원을 현장 파견합니다.</li>
-                             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                         </ul>
-                     </div> 
-                     <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-                     <div class="sop-accord__btn">
-                         <span class="label">5단계</span>
-                         상황종료
-                     </div>
-                     <div class="sop-accord__detail">
-                         <ul>
-                             <li>1. 사고 위치 파악합니다.</li>
-                             <li>2. 담당 직원을 현장 파견합니다.</li>
-                             <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-                         </ul>
-                     </div>
-                 </div>
-             </div>
-         </div>
+                <img src="./static/images/viewer/img_sop_manual.png" alt="에스컬레이터 끼임 사고" width="500">
+            </div>
+        </div>
+        <div class="sop-info__text">
+            <p>(정) 홍길동 | 가나다라마팀 | 010-123-456</p>
+            <p>(부) 홍길동 | 가나다라마팀 | 010-123-456</p>
+        </div>
      </div>
    </div>
 
@@ -3727,78 +3731,6 @@
             </table>           
         </div>
     </div>
-
-<div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">Sop Accordion</div>
-<div class="sop-accord">
-    <div class="sop-accord__title">메뉴얼</div>
-    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-    <div class="sop-accord__btn sop-accord__btn--active">
-        <span class="label">1단계</span>
-        사고 위치 파악
-    </div>
-    <div class="sop-accord__detail">
-        <div class="message">
-            <strong class="message__title">방송 송출</strong>
-            <p>
-                안내 방송 송출 문구 표출 <br>
-                문구 없는 경우 영역 미노출
-            </p>
-        </div>
-        <ul>
-            <li>1. 사고 위치 파악합니다.</li>
-            <li>2. 담당 직원을 현장 파견합니다.</li>
-            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-        </ul>
-    </div>
-    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-    <div class="sop-accord__btn">
-        <span class="label">2단계</span>
-        안내 방송 송출
-    </div>     
-    <div class="sop-accord__detail">
-        <ul>
-            <li>1. 사고 위치 파악합니다.</li>
-            <li>2. 담당 직원을 현장 파견합니다.</li>
-            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-        </ul>
-    </div>
-    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-    <div class="sop-accord__btn">
-        <span class="label">3단계</span>
-        초동 조치
-    </div>  
-    <div class="sop-accord__detail">
-        <ul>
-            <li>1. 사고 위치 파악합니다.</li>
-            <li>2. 담당 직원을 현장 파견합니다.</li>
-            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-        </ul>
-    </div>
-    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-    <div class="sop-accord__btn">
-        <span class="label">4단계</span>
-        사고 상황 전파
-    </div>     
-    <div class="sop-accord__detail">
-        <ul>
-            <li>1. 사고 위치 파악합니다.</li>
-            <li>2. 담당 직원을 현장 파견합니다.</li>
-            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-        </ul>
-    </div> 
-    <!-- [D] 아코디언 클릭 시 sop-accord__btn--active 추가 -->
-    <div class="sop-accord__btn">
-        <span class="label">5단계</span>
-        상황종료
-    </div>
-    <div class="sop-accord__detail">
-        <ul>
-            <li>1. 사고 위치 파악합니다.</li>
-            <li>2. 담당 직원을 현장 파견합니다.</li>
-            <li>3. 사고 범위 및 피해 상황을 보고합니다.</li>
-        </ul>
-    </div>
-</div>     
    
 <div style="height:20px; padding:10px; background-color:#ddd; font-size:20px; color:#000;">tool-box</div>
 <div class="tool-box">

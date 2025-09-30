@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link href="../publishing/css/common.css" rel="stylesheet"/>
+    <link href="./css/navigation.css" rel="stylesheet"/>
+    <title>길찾기</title>
+</head>
+<body>
+    <div class="navigation-wrap">
+        <div class="navigation-header">
+            <button type="button" class="navigation-header__back"><span class="hide">뒤로가기</span></button>
+            <h1 class="navigation-header__title">매장 찾기</h1>
+            <button type="button" class="navigation-header__close"><span class="hide">닫기</span></button>
+        </div>
+
+        <!-- 기본 컨텐츠 영역 -->
+        <div class="navigation-content" id="search-content">
+            <!-- 
+            [D] input focus 시 navigation-search에 navigation-search--active 추가 
+                입력 완료 시 navigation-search에 navigation-search--complete 추가 
+            -->
+            <div class="navigation-search">
+                <input type="text" name="search" placeholder="매장명을 검색해주세요.">
+                <button type="button" class="navigation-search__button">
+                    <span class="hide">검색</span>
+                </button>
+            </div>
+
+            <div class="navigation-category">
+                <ul class="navigation-category__list" id="category-floor">
+                    <li>
+                        <!-- [D] 카테고리 클릭 시 navigation-category__button--active 추가 -->
+                        <button type="button" class="navigation-category__button" id="floor-all">전체층</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">B1</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">1F</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">2F</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">3F</button>
+                    </li>
+                </ul>
+                <ul class="navigation-category__list" id="category-store">
+                    <li>
+                        <button type="button" class="navigation-category__button" id="store-all">전체</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">F&B</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">라이프스타일</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">편의서비스</button>
+                    </li>
+                    <li>
+                        <button type="button" class="navigation-category__button">패션</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="navigation-list">
+                <!-- 검색 결과가 없을 때 -->
+                <!-- <div class="navigation-list__empty">
+                    <p>검색 결과가 없습니다.</p>
+                </div> -->
+                <!-- 검색 결과가 있을 때 -->
+                 <ul>
+                    <li class="navigation-list__item">
+                        <div class="navigation-list__info">
+                            <div class="title">
+                                <span class="title__location">[B1] F&B</span>
+                                <span class="title__name">갓잇</span>
+                            </div>
+                            <button type="button" class="view" id="view-button">위치보기</button>
+                        </div>
+                        <div class="navigation-list__buttons">
+                            <button type="button">출발</button>
+                            <button type="button">도착</button>
+                        </div>
+                    </li>
+                    <li class="navigation-list__item">
+                        <div class="navigation-list__info">
+                            <div class="title">
+                                <span class="title__location">[B1] F&B</span>
+                                <span class="title__name">이디아</span>
+                            </div>
+                            <button type="button" class="view" id="view-button">위치보기</button>
+                        </div>
+                        <div class="navigation-list__buttons">
+                            <button type="button">출발</button>
+                            <button type="button">도착</button>
+                        </div>
+                    </li>
+                    <li class="navigation-list__item">
+                        <div class="navigation-list__info">
+                            <div class="title">
+                                <span class="title__location">[B1] 라이프스타일</span>
+                                <span class="title__name">모던하우스</span>
+                            </div>
+                            <button type="button" class="view" id="view-button">위치보기</button>
+                        </div>
+                        <div class="navigation-list__buttons">
+                            <button type="button">출발</button>
+                            <button type="button">도착</button>
+                        </div>
+                        <div class="navigation-list__banner">
+                            <button type="button" class="button button--left"><span class="hide">좌측 화살표</span></button>
+                            <ul class="slider">
+                                <li>
+                                    <button type="button">
+                                        <img class="slider__image" src="../dashboard/img/img_kiosk_layer01.png" alt="이미지1">
+                                    </button>
+                                </li>
+                                <li>    
+                                    <button type="button">
+                                        <img class="slider__image" src="../dashboard/img/img_kiosk_layer03.png" alt="이미지2">
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button">
+                                        <img class="slider__image" src="../dashboard/img/img_kiosk_layer02.png" alt="이미지3">
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button">
+                                        <img class="slider__image" src="../dashboard/img/img_kiosk_layer03.png" alt="이미지4">
+                                    </button>
+                                </li>
+                                
+                            </ul>
+                            <button type="button" class="button button--right"><span class="hide">우측 화살표</span></button>
+                        </div>
+                    </li>
+                    <li class="navigation-list__item">
+                        <div class="navigation-list__info">
+                            <div class="title">
+                                <span class="title__location">[1F] 편의시설</span>
+                                <span class="title__name">1층 입구 화장실 A</span>
+                            </div>
+                            <button type="button" class="view" id="view-button">위치보기</button>
+                        </div>
+                        <div class="navigation-list__buttons">
+                            <button type="button">출발</button>
+                            <button type="button">도착</button>
+                        </div>
+                    </li>
+                    <li class="navigation-list__item">
+                        <div class="navigation-list__info">
+                            <div class="title">
+                                <span class="title__location">[3F] 패션</span>
+                                <span class="title__name">나이키</span>
+                            </div>
+                            <button type="button" class="view" id="view-button">위치보기</button>
+                        </div>
+                        <div class="navigation-list__buttons">
+                            <button type="button">출발</button>
+                            <button type="button">도착</button>
+                        </div>
+                    </li>
+                </ul> 
+            </div>
+        </div>
+
+        <!-- 위치보기 화면 영역 -->
+         <div class="navigation-content navigation-content--location" id="location-content" style="display:none;">
+             <!-- [D] 영역 노출 시 display:flex 스타일로 노출 부탁드립니다. -->
+             <div class="navigation-location" id="location-view">
+                <div class="navigation-content__image" style="background-image:url(../dashboard/img/bg_navigation.png)" id="location-image"></div>
+                <span class="navigation-location__label">B3</span>
+                <div class="navigation-location__info">
+                    <div class="title">
+                        <span class="title__location">[B1] F&B</span>
+                        <span class="title__name">갓잇</span>
+                    </div>
+                    <div class="buttons">
+                        <button type="button" class="view" id="start-button">출발</button>
+                        <button type="button" class="view" id="end-button">도착</button>
+                    </div>
+                </div>
+            </div>
+            <!-- [D] 영역 노출 시 display:flex 스타일로 노출 부탁드립니다. -->
+            <div class="navigation-location" id="location-search" style="display:none;">
+                <div class="navigation-location__search">
+                    <div class="location-search">
+                        <div class="location-search__list">
+                            <ul>
+                                <!-- 
+                                    [D] input focus 시 item에 item--active 추가 
+                                        입력 완료 시 item에 item--complete 추가 
+                                    -->
+                                <li class="item">
+                                    <span class="item__icon">출발</span>
+                                    <input type="text" name="search" placeholder="출발지를 검색하세요." class="item__input">
+                                    <button type="button" class="item__close" style="display:none;"><span class="hide">닫기</span></button>
+                                </li>
+                                <li class="item">
+                                    <span class="item__icon">도착</span>
+                                    <input type="text" name="search" placeholder="도착지를 검색하세요." class="item__input">
+                                    <button type="button" class="item__close" style="display:none;"><span class="hide">닫기</span></button>
+                                </li>
+                            </ul>
+                            <!-- [D] 출발지 입력 완료 시 출발지 버튼 활성화 .change--active 추가 -->
+                            <button type="button" class="change">
+                                <span class="hide">출도착지 전환</span>
+                            </button>
+                        </div>
+                        <!-- [D] 검색 결과가 있을 때 길 안내 시작 버튼 활성화 .location-search__button--active 추가 -->
+                        <button class="location-search__button" id="navigation-start">길 안내 시작</button>
+                        <div class="location-search__result">
+                            <p class="total"> 검색 결과 <em>5건</em></p>
+                            <ul>
+                                <li><button type="button">갓잇 <span class="floor">B1</span></button></li>
+                                <li><button type="button">이디아 <span class="floor">B1</span></button></li>
+                                <li><button type="button">모던하우스 <span class="floor">1F</span></button></li>
+                                <li><button type="button">1층 입구 화장실 A <span class="floor">1F</span></button></li>
+                                <li><button type="button">나이키 <span class="floor">3F</span></button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            
+            </div>
+            <!-- [D] 영역 노출 시 display:flex 스타일로 노출 부탁드립니다. -->
+            <div class="navigation-location" id="location-route" style="display:none;">
+                <div class="navigation-content__image" style="background-image:url(../dashboard/img/bg_navigation.png)" id="location-image"></div>
+                <span class="navigation-location__label">B3</span>
+                <div class="navigation-location__route">
+                    <div class="location-route">
+                        <div class="location-route__header">
+                            <div class="location-route__search">
+                                <div class="search">
+                                    <input type="text" name="search" class="search__input" value="텍스트가 들어가면 텍스트가 들어가면 텍스트가 들어가면 텍스트가 들어가면">
+                                    <span class="search__icon"><span class="hide">경로 안내</span></span>
+                                    <input type="text" name="search" class="search__input" value="텍스트가 들어가면 텍스트가 들어가면 텍스트가 들어가면 텍스트가 들어가면">
+                                </div>
+                                <button type="button" class="close" id="route-close">
+                                    <span class="hide">닫기</span>
+                                </button>
+                            </div>
+                            <div class="location-route__category" id="route-category">
+                                <ul>
+                                    <!-- [D] 버튼 클릭 시 li에 active 추가 -->
+                                    <li class="active">
+                                        <button type="button">1인칭</button>
+                                    </li>
+                                    <li>
+                                        <button type="button">2인칭</button>
+                                    </li>
+                                    <li>
+                                        <!-- [D] 재생 버튼 클릭 시 icon--play 추가 
+                                            정지 버튼 클릭 시 icon--pause 추가 
+                                        -->
+                                        <button type="button" class="icon icon--play">
+                                            <span class="hide">재생</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="icon icon--replay"><span class="hide">경로 재안내</span></button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <span class="location-route__message">2F으로 이동합니다.</span>
+                    </div>
+                </div>
+            </div>
+         </div>
+
+        <!-- 매장 할인 정보 레이어 -->
+        <!-- [D] 레이어 열림 시 display:flex 스타일로 노출 부탁드립니다. -->
+        <div class="navigation-layer" id="layer-store" style="display:none;">
+            <div class="navigation-layer__content">
+                <button type="button" class="close"><span class="hide">닫기</span></button>
+                <div class="list"> 
+                    <button type="button" class="list__button list__button--left"><span class="hide">좌측 화살표</span></button>
+                    <ul>
+                        <li>    
+                            <img class="list__image" src="../dashboard/img/img_kiosk_layer01.png" alt="매장 할인 정보">
+                        </li>
+                        <li>    
+                            <img class="list__image" src="../dashboard/img/img_kiosk_layer02.png" alt="매장 할인 정보">
+                        </li>
+                        <li>    
+                            <img class="list__image" src="../dashboard/img/img_kiosk_layer03.png" alt="매장 할인 정보">
+                        </li>
+                    </ul>
+                    <button type="button" class="list__button list__button--right"><span class="hide">우측 화살표</span></button>
+                    <span class="list__count">1/3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 길찾기 멈춤 -->
+        <div class="navigation-alert" id="alert-stop" style="display:none;">
+            <div class="navigation-alert__inner">
+                <div class="navigation-alert__content">
+                    <p>길 안내를 종료하시겠습니까?</p>
+                </div>
+                <div class="navigation-alert__buttons">
+                    <button type="button" class="button button--confirm">확인</button>
+                    <button type="button" class="button button--cancel">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/index.js"></script>
+</body>
+</html>

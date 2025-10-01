@@ -21,11 +21,13 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             JOIN FETCH PoiTag pt ON a.tagName = pt.tagName
             JOIN FETCH Poi p ON pt.poi.id = p.id
             WHERE a.occurrenceDate >= :startDate AND a.occurrenceDate <= :endDate
+            AND a.event IN :eventTypes
             GROUP BY p.building.name
          """)
     List<Last7DaysProcessCountDTO> findProcessCountsForLast7Days(
         @Param("startDate") LocalDateTime startDate, 
-        @Param("endDate") LocalDateTime endDate
+        @Param("endDate") LocalDateTime endDate,
+        @Param("eventTypes") List<String> eventTypes
     );
     
     @Query("""
@@ -36,12 +38,14 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             FROM Alarm a
             JOIN PoiTag pt ON a.tagName = pt.tagName
             WHERE a.occurrenceDate >= :startDate AND a.occurrenceDate <= :endDate
+            AND a.event IN :eventTypes
             GROUP BY DATE_FORMAT(a.occurrenceDate, '%m/%d')
             ORDER BY MIN(a.occurrenceDate)
             """)
     List<Last7DaysDateCountDTO> findDateCountsForLast7Days(
         @Param("startDate") LocalDateTime startDate, 
-        @Param("endDate") LocalDateTime endDate
+        @Param("endDate") LocalDateTime endDate,
+        @Param("eventTypes") List<String> eventTypes
     );
 
     @Query("""
@@ -59,9 +63,12 @@ public interface EventRepository extends JpaRepository<Alarm, Long> {
             JOIN Floor f ON p.floorNo = f.floorNo
             WHERE a.occurrenceDate >= :last24Hours
             AND f.building.id = p.building.id
+            AND a.event IN :eventTypes
             ORDER BY a.occurrenceDate DESC
        """)
-    List<Last24HoursEventDTO> findLatest24HoursEventList(@Param("last24Hours") LocalDateTime last24Hours);
+    List<Last24HoursEventDTO> findLatest24HoursEventList(
+            @Param("last24Hours") LocalDateTime last24Hours,
+            @Param("eventTypes") List<String> eventTypes);
 
     @Query("SELECT a FROM Alarm a WHERE (:startDate IS NULL OR a.occurrenceDate >= :startDate) AND (:endDate IS NULL OR a.occurrenceDate <= :endDate)")
     List<Alarm> getAlarmsByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);

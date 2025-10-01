@@ -1,12 +1,10 @@
 package com.pluxity.ktds.domains.event.controller;
 
-import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
-import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
-import com.pluxity.ktds.domains.event.entity.Alarm;
+import com.pluxity.ktds.domains.event.entity.AllowedEventType;
 import com.pluxity.ktds.domains.event.service.EventService;
 import com.pluxity.ktds.global.response.DataResponseBody;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +39,11 @@ public class AlarmEventController {
     @GetMapping("/latest-24-hours")
     public DataResponseBody<List<Last24HoursEventDTO>> getLatest24HoursEventList() {
         return DataResponseBody.of(eventService.findLatest24HoursEventList());
+    }
+
+    @GetMapping("/allowed-event-types")
+    public DataResponseBody<List<String>> getAllowedEventTypes() {
+        return DataResponseBody.of(AllowedEventType.getAllLabels());
     }
 
     @PatchMapping("/disable/{id}")

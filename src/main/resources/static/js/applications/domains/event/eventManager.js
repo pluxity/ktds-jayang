@@ -1,5 +1,29 @@
 const EventManager = (() => {
 
+    let ALLOWED_EVENT_TYPES = [];
+
+    const isAllowedEventType = (eventType) => {
+        return ALLOWED_EVENT_TYPES.includes(String(eventType || "").trim());
+    };
+
+    const loadAllowedEventTypes = async () => {
+        try {
+            const response = await api.get('/events/allowed-event-types');
+            ALLOWED_EVENT_TYPES = response.data.result || [];
+            console.log('허용된 이벤트 타입:', ALLOWED_EVENT_TYPES);
+        } catch (error) {
+            console.error('허용된 이벤트 타입 로드 실패:', error);
+            // 실패 시 기본값 사용
+            ALLOWED_EVENT_TYPES = [
+                "경보", "Alarm", "강제문열림", "장시간 문열림",
+                "1차폐쇄", "2차폐쇄", "고장", "점검중", "파킹",
+                "독립운전", "중량초과", "화재관제운전", "화재관제운전 귀착",
+                "1차소방운전", "2차소방운전", "전용운전", "보수운전",
+                "정전운전", "화재운전", "지진운전", "배회이벤트"
+            ];
+        }
+    };
+
     // 전역 변수로 연결 상태 관리
     let eventSource = null;
     let reconnectAttempts = 0;
@@ -32,6 +56,9 @@ const EventManager = (() => {
     // 알람 초기화
     async function initializeAlarms() {
         try {
+
+            await loadAllowedEventTypes();
+
             // SSE 연결 시작
             connectToSSE();
 
@@ -282,7 +309,12 @@ const EventManager = (() => {
                 try {
                     const alarm = JSON.parse(event.data);
                     console.log("alarm : ", alarm);
-
+                    
+                    // 허용되지 않은 이벤트 타입은 무시
+                    if(!isAllowedEventType(alarm.event)){
+                        console.log('허용되지 않은 이벤트: ', alarm.event);
+                        return;
+                    }
                     removeWarningElements();
                     Px.VirtualPatrol.Clear();
                     // Px.Poi.ShowAll();
@@ -895,7 +927,7 @@ const EventManager = (() => {
         return `
         <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
             <div class="cctv-header">
-                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.cctvName}</span>
+                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.name}</span>
                 <button type="button" class="cctv-close">×</button>
             </div>
             <div class="cctv-content">
@@ -1328,14 +1360,14 @@ const EventManager = (() => {
             console.log('일자별 통계:', dateData);
 
             if(dateData.result.length > 0){
-                // 2. 최근 7일 날짜 배열 생성
+                // 최근 7일 날짜 배열 생성
                 const last7Days = Array.from({length: 7}, (_, i) => {
                     const date = new Date();
                     date.setDate(date.getDate() - (6 - i));
                     return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
                 });
 
-                // 3. 데이터 매핑 (없는 날짜는 0으로)
+                // 데이터 매핑 (없는 날짜는 0으로)
                 const countMap = new Map(
                     dateData.result.map(item => {
                         const date = new Date(item.occurrenceDate);
@@ -1344,13 +1376,13 @@ const EventManager = (() => {
                     })
                 );
 
-                // 4. 최종 데이터 준비
+                // 최종 데이터 준비
                 const counts = last7Days.map(date => {
                     const count = countMap.get(date) || 0;
                     return count;
                 });
 
-                // 5. 차트 그리기
+                // 차트 그리기
                 const chartBar = document.getElementById('chart_bar');
                 const ctx = chartBar.getContext('2d');
 

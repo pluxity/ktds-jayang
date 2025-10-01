@@ -1,14 +1,12 @@
 package com.pluxity.ktds.domains.event.service;
 
-import com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO;
-import com.pluxity.ktds.domains.building.entity.Poi;
-import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.event.constant.DeviceType;
 import com.pluxity.ktds.domains.event.dto.AlarmResponseDTO;
 import com.pluxity.ktds.domains.event.dto.Last24HoursEventDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysDateCountDTO;
 import com.pluxity.ktds.domains.event.dto.Last7DaysProcessCountDTO;
 import com.pluxity.ktds.domains.event.entity.Alarm;
+import com.pluxity.ktds.domains.event.entity.AllowedEventType;
 import com.pluxity.ktds.domains.event.repository.EventRepository;
 import com.pluxity.ktds.domains.tag.TagClientService;
 import com.pluxity.ktds.domains.tag.constant.AlarmStatus;
@@ -36,10 +34,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final TagClientService tagClientService;
-//    private final PollingClientService pollingClientService;
     private final AlarmDisablePublisher alarmDisablePublisher;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final PoiRepository poiRepository;
 
     @Transactional(readOnly = true)
     public AlarmResponseDTO findUnDisableAlarms() {
@@ -53,9 +49,9 @@ public class EventService {
         
         LocalDateTime startDate = sevenDaysAgo.atStartOfDay();
         LocalDateTime endDate = today.atTime(LocalTime.MAX); // 23:59:59.999999999
-        
-        log.info("유형별 통계 : {} ~ {}", startDate, endDate);
-        return eventRepository.findProcessCountsForLast7Days(startDate, endDate);
+
+        List<String> allLabels = AllowedEventType.getAllLabels();
+        return eventRepository.findProcessCountsForLast7Days(startDate, endDate, allLabels);
     }
 
     @Transactional(readOnly = true)
@@ -65,15 +61,16 @@ public class EventService {
         
         LocalDateTime startDate = sevenDaysAgo.atStartOfDay();
         LocalDateTime endDate = today.atTime(LocalTime.MAX); // 23:59:59.999999999
-        
-        log.info("일자별 통계 : {} ~ {}", startDate, endDate);
-        return eventRepository.findDateCountsForLast7Days(startDate, endDate);
+
+        List<String> allLabels = AllowedEventType.getAllLabels();
+        return eventRepository.findDateCountsForLast7Days(startDate, endDate, allLabels);
     }
 
     @Transactional(readOnly = true)
     public List<Last24HoursEventDTO> findLatest24HoursEventList() {
         LocalDateTime last24Hours = LocalDateTime.now().minusHours(24);
-        return eventRepository.findLatest24HoursEventList(last24Hours);
+        List<String> allLabels = AllowedEventType.getAllLabels();
+        return eventRepository.findLatest24HoursEventList(last24Hours, allLabels);
     }
 
     @Transactional

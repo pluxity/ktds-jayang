@@ -1736,7 +1736,7 @@ const layerPopup = (function () {
 
             // 문 상태 처리
             const doorRaw = tagMap[mode === 'AB' ? 'Door' : 'Door opened'];
-            const doorState = doorRaw.toUpperCase() === '문닫힘' || doorRaw.toUpperCase() === 'OFF' ? '문닫힘' : '문열림';
+            const doorState = doorRaw?.toUpperCase() === '문닫힘' || doorRaw.toUpperCase() === 'OFF' ? '문닫힘' : '문열림';
             const doorClass = doorState === '문닫힘' ? 'detail__text detail__text--off' : 'detail__text';
             // 방향 처리
             let directionText = '';

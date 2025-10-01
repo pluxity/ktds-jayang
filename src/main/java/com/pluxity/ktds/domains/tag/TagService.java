@@ -7,12 +7,13 @@ import com.pluxity.ktds.domains.building.entity.Poi;
 import com.pluxity.ktds.domains.building.entity.PoiTag;
 import com.pluxity.ktds.domains.building.repostiory.PoiRepository;
 import com.pluxity.ktds.domains.building.repostiory.PoiTagRepository;
+import com.pluxity.ktds.domains.tag.constant.TagStatus;
 import com.pluxity.ktds.domains.tag.dto.TagData;
 import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -40,8 +41,14 @@ public class TagService {
     @Value("${tag.read-strategy}")
     private String readStrategy;
 
+    @Value("${event.server.access-key}")
+    private String accessKey;
+
+    @Value("${tag.client.max-retries}")
+    private int maxRetries;
+
     @Transactional
-    public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) {
+    public Map<Long, TagResponseDTO> processElevTagDataByPoi(String type, Long buildingId, String buildingName) throws JsonProcessingException {
 
         List<Poi> pois = poiRepository.findByBuildingIdAndMiddleCategoryName(buildingId, "승강기");
 
@@ -52,7 +59,7 @@ public class TagService {
         for (Poi poi : pois) {
             Long poiId = poi.getId();
             String buildingNm = poi.getBuilding().getName();
-//            String mappedBuilding = ("A".equals(buildingNm) || "B".equals(buildingNm)) ? buildingNm : "C";
+
             String mappedBuilding;
             if (buildingNm != null && buildingNm.contains("A")) {
                 mappedBuilding = "A";
@@ -61,6 +68,7 @@ public class TagService {
             } else {
                 mappedBuilding = "C";
             }
+
             String prefix = type.equals("ELEV")
                     ? String.format("%s-null-EV-ELEV-", mappedBuilding)
                     : String.format("%s-null-EV-ESCL-", mappedBuilding);
@@ -68,7 +76,6 @@ public class TagService {
             List<String> tagNamesList = poi.getTagNames();
             if (tagNamesList != null) {
                 for (String tagName : tagNamesList) {
-
                     if (tagName.startsWith(prefix)) {
                         allTagNamesToFetch.add(tagName);
                         tagNamePoiIdMap.put(tagName, poiId);
@@ -77,66 +84,113 @@ public class TagService {
             }
         }
 
-        if (!allTagNamesToFetch.isEmpty()) {
+        allTagNamesToFetch.forEach(s -> log.info("tag = {}", s));
+
+        int retryCount = 0;
+
+        while (retryCount < maxRetries) {
+            if (allTagNamesToFetch.isEmpty()) {
+                break; // 처리할 태그가 없으면 종료
+            }
 
             TagResponseDTO all = null;
 
             if ("CHUNK".equals(readStrategy)) {
                 all = readTagsInChunks(allTagNamesToFetch);
-            }else{
-                all = restTemplate.postForObject(
+            } else {
+                String requestStr = objectMapper.writeValueAsString(allTagNamesToFetch);
+                HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
+                ResponseEntity<String> response = restTemplate.exchange(
                         baseUrl + "/?ReadTags",
-                        allTagNamesToFetch,
-                        TagResponseDTO.class
+                        HttpMethod.POST,
+                        request,
+                        String.class
                 );
+
+                all = objectMapper.readValue(response.getBody(), TagResponseDTO.class);
             }
+
+            boolean hasAbnormalStatus = false;
 
             if (all != null && all.tags() != null) {
                 Map<Long, List<TagData>> groupedTagData = all.tags().stream()
                         .filter(td -> tagNamePoiIdMap.containsKey(td.tagName()))
                         .collect(Collectors.groupingBy(td -> tagNamePoiIdMap.get(td.tagName())));
 
+                Map<Long, TagResponseDTO> tempResponseMap = new HashMap<>();
+
+                outer:
                 for (Map.Entry<Long, List<TagData>> poiEntry : groupedTagData.entrySet()) {
                     Long poiId = poiEntry.getKey();
                     List<TagData> result = new ArrayList<>();
                     List<TagData> tagsForPoi = poiEntry.getValue();
 
                     for (TagData td : tagsForPoi) {
+
+                        if (td.tagStatus() != TagStatus.NORMAL) {
+                            log.info("retry : {} 시도", retryCount);
+                            hasAbnormalStatus = true;
+                            break outer; // 비정상 상태 발견 시 전체 재시도 위해 외부 루프 탈출
+                        }
+
                         String full = td.tagName();
                         String raw = td.currentValue();
                         String enumName = full.substring(full.lastIndexOf('-') + 1);
                         String desc = null;
+
                         try {
                             if (type.equals("ELEV")) {
-                                // ELEV
                                 if (buildingName.contains("A") || buildingName.contains("B")) {
-                                    // A, B
                                     desc = ElevatorTagManager.ElevatorABTag.valueOf(enumName).getValueDescription(raw);
                                 } else {
-                                    // C
                                     desc = ElevatorTagManager.ElevatorCTag.fromTagName(enumName).getValueDescription(raw);
                                 }
                             } else {
-                                // ESCL(C)
                                 desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(raw);
                             }
                         } catch (IllegalArgumentException e) {
                             e.printStackTrace();
                             desc = raw;
                         }
+
                         result.add(new TagData(full, desc, td.tagStatus(), td.alarmStatus()));
                     }
+
                     if (!result.isEmpty()) {
-                        poiTagResponseMap.put(poiId, new TagResponseDTO(result.size(), all.timestamp(), result));
+                        tempResponseMap.put(poiId, new TagResponseDTO(result.size(), all.timestamp(), result));
                     }
                 }
+
+                if (!hasAbnormalStatus) {
+                    poiTagResponseMap.putAll(tempResponseMap);
+                    break; // 정상 상태면 반복 종료
+                }
+            }
+
+            // 비정상 상태면 재시도
+            retryCount++;
+            try {
+                Thread.sleep(1000L * retryCount); // 점진적 재시도 간격
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error(e.getMessage());
             }
         }
+
         return poiTagResponseMap;
     }
 
+
+    private HttpHeaders setHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("access-key", accessKey);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        return headers;
+    }
+
     @Transactional
-    public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type) {
+    public Map<Long, TagResponseDTO> processEsclTagDataByPoi(String type) throws JsonProcessingException {
 
         String prefix = "C-null-EV-ESCL-";
 
@@ -159,25 +213,39 @@ public class TagService {
             }
         }
 
-        if (!allTagNamesToFetch.isEmpty()) {
+        int retryCount = 0;
+
+        while (retryCount < maxRetries) {
+
+            if (allTagNamesToFetch.isEmpty()) {
+                break;  // 처리할 태그가 없으면 바로 종료
+            }
 
             TagResponseDTO all = null;
 
             if ("CHUNK".equals(readStrategy)) {
                 all = readTagsInChunks(allTagNamesToFetch);
-            }else{
-                all = restTemplate.postForObject(
+            } else {
+                String requestStr = objectMapper.writeValueAsString(allTagNamesToFetch);
+                HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
+                ResponseEntity<String> response = restTemplate.exchange(
                         baseUrl + "/?ReadTags",
-                        allTagNamesToFetch,
-                        TagResponseDTO.class
+                        HttpMethod.POST,
+                        request,
+                        String.class
                 );
+
+                all = objectMapper.readValue(response.getBody(), TagResponseDTO.class);
             }
 
+            boolean hasAbnormalStatus = false;
 
             if (all != null && all.tags() != null) {
                 Map<Long, List<TagData>> groupedTagData = all.tags().stream()
                         .filter(td -> tagNamePoiIdMap.containsKey(td.tagName()))
                         .collect(Collectors.groupingBy(td -> tagNamePoiIdMap.get(td.tagName())));
+
+                Map<Long, TagResponseDTO> tempResponseMap = new HashMap<>();
 
                 for (Map.Entry<Long, List<TagData>> poiEntry : groupedTagData.entrySet()) {
                     Long poiId = poiEntry.getKey();
@@ -185,13 +253,18 @@ public class TagService {
                     List<TagData> tagsForPoi = poiEntry.getValue();
 
                     for (TagData td : tagsForPoi) {
+
+                        if (td.tagStatus() != TagStatus.NORMAL) {
+                            log.info("retry : {} 시도", retryCount);
+                            hasAbnormalStatus = true;
+                            break; // 현재 POI에서 비정상 태그 발견시 루프 탈출
+                        }
+
                         String full = td.tagName();
                         String raw = td.currentValue();
                         String enumName = full.substring(full.lastIndexOf('-') + 1);
                         String desc = null;
-                        if (type.equals("ESCL")) {
-                            desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(raw);
-                        }
+
                         try {
                             if (type.equals("ESCL")) {
                                 desc = ElevatorTagManager.EscalatorTag.valueOf(enumName).getValueDescription(raw);
@@ -200,17 +273,40 @@ public class TagService {
                             e.printStackTrace();
                             desc = raw;
                         }
+
                         result.add(new TagData(full, desc, td.tagStatus(), td.alarmStatus()));
                     }
+
                     if (!result.isEmpty()) {
-                        poiTagResponseMap.put(poiId, new TagResponseDTO(result.size(), all.timestamp(), result));
+                        tempResponseMap.put(poiId, new TagResponseDTO(result.size(), all.timestamp(), result));
+                    }
+
+                    if (hasAbnormalStatus) {
+                        break;  // 태그 중 하나라도 비정상 상태가 있으면 전체 재시도 하도록 루프 탈출
                     }
                 }
+
+                if (!hasAbnormalStatus) {
+                    // 비정상 상태가 없으면 결과 반영하고 루프 종료
+                    poiTagResponseMap.putAll(tempResponseMap);
+                    break;
+                }
+            }
+
+            // 비정상 상태가 있으면 재시도 준비
+            retryCount++;
+            try {
+                Thread.sleep(1000L * retryCount);  // 점진적으로 재시도 간격 증가
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error(e.getMessage());
             }
         }
+
         System.out.println("poiTagResponseMap : " + poiTagResponseMap);
         return poiTagResponseMap;
     }
+
 
     @Transactional
     public TagResponseDTO processParkingTags(boolean register) {
@@ -287,33 +383,33 @@ public class TagService {
     }
 
     private Map<String, Map<String, Double>> processTagsInChunksRead(
-            List<String> allEHPTags, 
+            List<String> allEHPTags,
             Map<String, Map<String, Double>> groupedTagMap) {
-        
+
         for (int i = 0; i < allEHPTags.size(); i += TAG_CHUNK_SIZE) {
             int endIndex = Math.min(i + TAG_CHUNK_SIZE, allEHPTags.size());
             List<String> chunk = allEHPTags.subList(i, endIndex);
-            
-            log.info("청크 읽기 처리 중: {}/{} (크기: {})", 
+
+            log.info("청크 읽기 처리 중: {}/{} (크기: {})",
                     i + chunk.size(), allEHPTags.size(), chunk.size());
-            
+
             ResponseEntity<String> res = tagClientService.testReadTags(chunk);
             if (!res.getStatusCode().is2xxSuccessful()) {
                 throw new IllegalStateException("testReadTags 실패: " + res.getStatusCode().value());
             } else {
                 log.info("testReadTags 성공: " + res.getStatusCode().value());
             }
-            
+
             updateGroupedTagMap(res.getBody(), groupedTagMap);
         }
-        
+
         return groupedTagMap;
     }
-    
+
     private Map<String, Map<String, Double>> processTagsBatchRead(
-            List<String> allEHPTags, 
+            List<String> allEHPTags,
             Map<String, Map<String, Double>> groupedTagMap) {
-        
+
         // readTags 한꺼번에 호출
         ResponseEntity<String> res = tagClientService.testReadTags(allEHPTags);
         if (!res.getStatusCode().is2xxSuccessful()) {
@@ -321,11 +417,11 @@ public class TagService {
         } else {
             log.info("testReadTags 성공: " + res.getStatusCode().value());
         }
-        
+
         updateGroupedTagMap(res.getBody(), groupedTagMap);
         return groupedTagMap;
     }
-    
+
     private void updateGroupedTagMap(String response, Map<String, Map<String, Double>> groupedTagMap) {
         try {
             // response(HTTP) → dto 파싱 후
@@ -367,9 +463,9 @@ public class TagService {
         for (int i = 0; i < allTagNamesToFetch.size(); i += TAG_CHUNK_SIZE) {
             int endIndex = Math.min(i + TAG_CHUNK_SIZE, allTagNamesToFetch.size());
             List<String> chunk = allTagNamesToFetch.subList(i, endIndex);
-            
-            log.info("[{}] 태그 청크 읽기 처리 중: {}/{} (크기: {})", 
-            requestId, i + chunk.size(), allTagNamesToFetch.size(), chunk.size());
+
+            log.info("[{}] 태그 청크 읽기 처리 중: {}/{} (크기: {})",
+                    requestId, i + chunk.size(), allTagNamesToFetch.size(), chunk.size());
 
             TagResponseDTO chunkResponse = restTemplate.postForObject(
                     baseUrl + "/?ReadTags",

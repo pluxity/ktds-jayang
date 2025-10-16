@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import javax.swing.text.StyledEditorKit;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -52,7 +53,7 @@ public class NoticeService {
 
     @Transactional
     public List<NoticeResponseDTO> getNoticesIsActiveTrue() {
-        var notices = repository.findAllByIsActiveTrueOrderByCreatedAtDesc();
+        var notices = repository.findActiveNotExpired(LocalDateTime.now());
         return notices.stream()
                 .map(NoticeResponseDTO::from)
                 .toList();

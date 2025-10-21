@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -16,6 +17,15 @@ public interface NoticeRepository extends BaseRepository<Notice, Long> {
     List<Notice>  findAllByOrderByExpiredAt();
 
     List<Notice> findAllByIsActiveTrueOrderByCreatedAtDesc();
+
+    @Query("""
+           select n
+           from Notice n
+           where n.isActive = true
+             and (n.expiredAt is null or n.expiredAt >= :now)
+           order by n.createdAt desc
+           """)
+    List<Notice> findActiveNotExpired(@Param("now") LocalDateTime now);
 
     @Modifying
     @Query("UPDATE Notice n SET n.isRead = true WHERE n.id IN :ids")

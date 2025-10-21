@@ -294,7 +294,9 @@
 
     const initPopup = (popup, clickedItem) => {
         console.log("viewer initPoup")
-        popup.querySelector('.popup-basic__head h2').textContent = clickedItem.textContent;
+        const titleEl = popup.querySelector('.popup-basic__head h2');
+        titleEl.textContent = '';
+        titleEl.textContent = clickedItem.querySelector('span.hide')?.textContent.trim() || '';
         popup.style.display = 'block';
     };
 

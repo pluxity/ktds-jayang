@@ -1651,20 +1651,42 @@ const layerPopup = (function () {
         );
         const totalPages = Math.ceil(totalCount / pageSize);
 
-        if (paged[type].currentPage > totalPages) {
-            paged[type].currentPage = totalPages || 1;
-        }
-
-        currentPage = p.currentPage;
-
         const content = document.getElementById(`${type}Content`);
         const paging = content.querySelector('.search-result__paging');
         const numberDiv = paging.querySelector('.number');
         const prevBtn = paging.querySelector('button.left');
         const nextBtn = paging.querySelector('button.right');
 
+        if (!totalPages) {
+            numberDiv.innerHTML = '';
+            paging.style.display = 'none';
+            if (prevBtn) { prevBtn.style.display = 'none'; prevBtn.onclick = null; }
+            if (nextBtn) { nextBtn.style.display = 'none'; nextBtn.onclick = null; }
+            return;
+        } else {
+            paging.style.display = '';
+        }
+
+        if (paged[type].currentPage > totalPages) {
+            paged[type].currentPage = totalPages || 1;
+        }
+
+        if (paged[type].currentPage < 1) {
+            paged[type].currentPage = 1;
+        }
+
+        currentPage = p.currentPage;
+
         numberDiv.innerHTML = '';
-        for (let i = 1; i <= totalPages; i++) {
+
+        const PAGES_PER_GROUP = 10;
+        const currentGroup = Math.ceil(currentPage / PAGES_PER_GROUP);
+        const startPage = (currentGroup - 1) * PAGES_PER_GROUP + 1;
+        const endPage = Math.min(startPage + PAGES_PER_GROUP - 1, totalPages);
+        const maxGroup = Math.ceil(totalPages / PAGES_PER_GROUP);
+
+
+        for (let i = startPage; i <= endPage; i++) {
             const span = document.createElement('span');
             span.textContent = i;
             if (i === currentPage) span.classList.add('active');
@@ -1676,33 +1698,62 @@ const layerPopup = (function () {
             numberDiv.appendChild(span);
         }
 
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages;
-        prevBtn.onclick = () => {
-            if (paged[type].currentPage > 1) {
-                paged[type].currentPage--;
-                renderPagedPage(type);
-                renderPagedPagination(type, totalCount);
+        if (prevBtn) {
+            if (currentGroup > 1) {
+                prevBtn.style.display = '';
+                prevBtn.onclick = () => {
+                    const prevGroupFirst = Math.max(1, startPage - PAGES_PER_GROUP);
+                    paged[type].currentPage = prevGroupFirst;
+                    renderPagedPage(type);
+                    renderPagedPagination(type, totalCount);
+                };
+            } else {
+                prevBtn.style.display = 'none';
+                prevBtn.onclick = null;
             }
-        };
-        nextBtn.onclick = () => {
-            if (paged[type].currentPage < totalPages) {
-                paged[type].currentPage++;
-                renderPagedPage(type);
-                renderPagedPagination(type, totalCount);
+        }
+
+        if (nextBtn) {
+            if (currentGroup < maxGroup) {
+                nextBtn.style.display = '';
+                nextBtn.onclick = () => {
+                    const nextGroupFirst = startPage + PAGES_PER_GROUP;
+                    paged[type].currentPage = nextGroupFirst;
+                    renderPagedPage(type);
+                    renderPagedPagination(type, totalCount);
+                };
+            } else {
+                nextBtn.style.display = 'none';
+                nextBtn.onclick = null;
             }
-        };
+        }
     }
 
     const renderElevatorList = (dataById, mode = null) => {
         const elevatorUl = document.getElementById('elevatorList');
         elevatorUl.innerHTML = '';
-
-        let renderCount = 0;
+        const elevatorInfo = document.querySelector('.left-info--elevator')
 
         // const totalCount = Object.keys(dataById).length;
         // document.getElementById('totalElevatorCnt').textContent = `총 ${totalCount}대`;
-        Object.entries(dataById).forEach(([idStr, dto]) => {
+        const entries = Object.entries(dataById || {});
+        if (entries.length === 0) {
+            elevatorInfo.innerHTML = '';
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results-message';
+            noResultsDiv.style.textAlign = 'center';
+            noResultsDiv.style.padding = '50px 20px';
+            noResultsDiv.style.fontSize = '16px';
+            noResultsDiv.style.color = '#666';
+            noResultsDiv.textContent = '검색 결과가 없습니다';
+            elevatorInfo.appendChild(noResultsDiv);
+            // document.getElementById('totalElevatorCnt').textContent = '총 0대';
+            return;
+        }
+
+        let renderCount = 0;
+
+        entries.forEach(([idStr, dto]) => {
             const poiInfo = PoiManager.findById(Number(idStr));
             if (!poiInfo) return;
             const tags = dto.TAGs;
@@ -2868,6 +2919,7 @@ const layerPopup = (function () {
         if (!res.ok) return;
         const data = await res.json(); // groupedTagMap
 
+        const systemAc = document.querySelector('.system-ac');
         const container = document.querySelector('#ac-list');
         if (!container) return;
         const paging = document.querySelector('#airPaging');
@@ -2940,9 +2992,16 @@ const layerPopup = (function () {
             
             // 검색 결과가 없을 때 메시지 표시
             if (entries.length === 0) {
-                container.innerHTML = `
-                    <div class="detail__empty">검색 결과가 없습니다.</div>
-                `;
+                if (paging) paging.innerHTML = '';
+                systemAc.innerHTML = '';
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'no-results-message';
+                noResultsDiv.style.textAlign = 'center';
+                noResultsDiv.style.padding = '50px 20px';
+                noResultsDiv.style.fontSize = '16px';
+                noResultsDiv.style.color = '#666';
+                noResultsDiv.textContent = '검색 결과가 없습니다';
+                systemAc.appendChild(noResultsDiv);
                 return;
             }
             
@@ -4014,7 +4073,14 @@ const layerPopup = (function () {
 
             const renderPagination = () => {
                 paginationContainer.innerHTML = "";
-                if (totalPages <= 1) return;
+                const leftBtn  = eventLayerPopup.querySelector(".search-result__paging .left");
+                const rightBtn = eventLayerPopup.querySelector(".search-result__paging .right");
+                if (leftBtn)  { leftBtn.style.display = "none";  leftBtn.onclick = null; }
+                if (rightBtn) { rightBtn.style.display = "none"; rightBtn.onclick = null; }
+
+                if (totalPages < 1) return;
+
+                currentPage = Math.min(Math.max(1, currentPage), totalPages);
 
                 const groupSize = 10;
                 const currentGroup = Math.ceil(currentPage / groupSize);
@@ -4036,59 +4102,30 @@ const layerPopup = (function () {
                     paginationContainer.appendChild(span);
                 };
 
-                // if (start > 1) {
-                //     createPage(1);
-                //     if (start > 2) {
-                //         const dots = document.createElement('span');
-                //         dots.textContent = "...";
-                //         dots.classList.add("dots");
-                //         paginationContainer.appendChild(dots);
-                //     }
-                // }
-
                 for (let i = start; i <= end; i++) {
                     createPage(i);
                 }
 
-                // if (end < totalPages) {
-                //     if (end < totalPages - 1) {
-                //         const dots = document.createElement('span');
-                //         dots.textContent = "...";
-                //         dots.classList.add("dots");
-                //         paginationContainer.appendChild(dots);
-                //     }
-                //     createPage(totalPages);
-                // }
+                const maxGroup = Math.ceil(totalPages / groupSize);
 
-                const leftBtn = eventLayerPopup.querySelector(".search-result__paging .left");
-                if (leftBtn) {
-                    if (currentGroup > 1) {
-                        leftBtn.style.display = "";
-                        leftBtn.onclick = () => {
-                            const prevGroupLastPage = (currentGroup - 1) * groupSize;
-                            currentPage = prevGroupLastPage;
-                            renderTable(currentPage);
-                            renderPagination();
-                        };
-                    } else {
-                        leftBtn.style.display = "none";
-                    }
+                if (leftBtn && currentGroup > 1) {
+                    leftBtn.style.display = "";
+                    leftBtn.onclick = () => {
+                        const prevGroupLastPage = (currentGroup - 1) * groupSize;
+                        currentPage = prevGroupLastPage;
+                        renderTable(currentPage);
+                        renderPagination();
+                    };
                 }
 
-                const rightBtn = eventLayerPopup.querySelector(".search-result__paging .right");
-                if (rightBtn) {
-                    const maxGroup = Math.ceil(totalPages / groupSize);
-                    if (currentGroup < maxGroup) {
-                        rightBtn.style.display = "";
-                        rightBtn.onclick = () => {
-                            const nextGroupFirstPage = currentGroup * groupSize + 1;
-                            currentPage = nextGroupFirstPage;
-                            renderTable(currentPage);
-                            renderPagination();
-                        };
-                    } else {
-                        rightBtn.style.display = "none";
-                    }
+                if (rightBtn && currentGroup < maxGroup) {
+                    rightBtn.style.display = "";
+                    rightBtn.onclick = () => {
+                        const nextGroupFirstPage = currentGroup * groupSize + 1;
+                        currentPage = nextGroupFirstPage;
+                        renderTable(currentPage);
+                        renderPagination();
+                    };
                 }
             };
 

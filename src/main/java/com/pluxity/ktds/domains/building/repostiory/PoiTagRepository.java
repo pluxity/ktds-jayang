@@ -21,4 +21,7 @@ public interface PoiTagRepository extends JpaRepository<PoiTag, Long> {
     @Query("SELECT pt.poi.id, pt.tagName FROM PoiTag pt WHERE pt.poi.id IN :poiIds")
     List<Object[]> findTagNamesByPoiIds(@Param("poiIds") List<Long> poiIds);
 
+    @Query("SELECT pt FROM PoiTag pt WHERE pt.poi.id IN :poiIds")
+    List<PoiTag> findByPoiIdIn(@Param("poiIds") List<Long> poiIds);
+
 } 

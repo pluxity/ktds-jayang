@@ -15,6 +15,9 @@ public interface PoiCctvRepository extends JpaRepository<PoiCctv, Long> {
     List<PoiCctv> findAllByPoi(Poi poi);
     List<PoiCctv> findAllByPoiIn(List<Poi> poiList);
 
+    @Query("SELECT pc FROM PoiCctv pc WHERE pc.poi.id IN :poiIds")
+    List<PoiCctv> findByPoiIdIn(@Param("poiIds") List<Long> poiIds);
+
     @Query("SELECT new com.pluxity.ktds.domains.cctv.dto.PoiCctvResponseDTO(p.id, p1.id) " +
             "FROM PoiCctv poiCctv " +
             "JOIN Poi p ON poiCctv.cctvName = p.name " +
@@ -46,4 +49,6 @@ public interface PoiCctvRepository extends JpaRepository<PoiCctv, Long> {
             "JOIN Poi p ON pc.cctvName = p.name " +
             "WHERE pc.cctvName = :poiName")
     String findCameraIpByPoiName(String poiName);
+
+    List<Long> poi(Poi poi);
 }

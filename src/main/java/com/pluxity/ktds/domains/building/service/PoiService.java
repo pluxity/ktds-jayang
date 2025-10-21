@@ -112,11 +112,13 @@ public class PoiService {
 
         sw.start("poiRepository.findAll");
         List<Poi> poiList = poiRepository.findAll();
+        List<Long> poiIds = poiList.stream().map(Poi::getId).toList();
         sw.stop();
 
         sw.start("poiCctvRepository.findAllByPoiIn");
-        List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
-        List<PoiTag> allTags = poiTagRepository.findAllByPoiIn(poiList);
+        List<PoiCctv> allCctvs = poiCctvRepository.findByPoiIdIn(poiIds);
+        List<PoiTag> allTags = poiTagRepository.findByPoiIdIn(poiIds);
+
 
         Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
                 .collect(Collectors.groupingBy(poiCctv -> poiCctv.getPoi().getId()));
@@ -183,13 +185,7 @@ public class PoiService {
         sw.stop();
 
         sw.start("batchCctvFetch");
-//        Map<Long, List<PoiCctv>> cctvMap = poiList.stream()
-//                .collect(Collectors.toMap(
-//                        Poi::getId,
-//                        poi -> poiCctvRepository.findAllByPoi(poi)
-//                ));
-        List<Poi> poiList = poiRepository.findAllWithPositionPresent();
-        List<PoiCctv> allCctvs = poiCctvRepository.findAllByPoiIn(poiList);
+        List<PoiCctv> allCctvs = poiCctvRepository.findByPoiIdIn(poiIds);
         Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
                 .collect(Collectors.groupingBy(cctv -> cctv.getPoi().getId()));
         sw.stop();

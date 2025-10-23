@@ -282,7 +282,12 @@ public class TagClientService {
 
         while (retryCount < maxRetries) {
             try {
-                String requestStr = objectMapper.writeValueAsString(tags);
+                String requestStr = objectMapper.writeValueAsString(
+                        tags.stream()
+                                .map(this::normalizeLiReTag)
+                                .toList()
+                );
+
                 HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
                 ResponseEntity<String> response = restTemplate.exchange(
                         baseUrl + "/?ReadTags",
@@ -466,5 +471,15 @@ public class TagClientService {
             return result.toString();
         }
         return suffix; // 3개 이하면 원본 반환
+    }
+
+    private String normalizeLiReTag(String tag) {
+        int hit = tag.indexOf("-LI-RE-");
+        if (hit < 0) return tag;
+
+        int cut = tag.lastIndexOf('-');
+        if (cut < 0) return tag;
+
+        return tag.substring(0, cut).stripTrailing();
     }
 }

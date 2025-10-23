@@ -32,7 +32,7 @@ public class PoiTagSyncService {
 
             // 2. 태그 이름들 추출
             List<String> tagNames = poiTags.stream()
-                    .map(PoiTag::getTagName)
+                    .map(PoiTag::getNormalizedTag)
                     .distinct()
                     .toList();
 

@@ -55,5 +55,14 @@ public class PoiTag {
         }
     }
 
+    public String getNormalizedTag() {
+        int hit = tagName.indexOf("-LI-RE-");
+        if (hit < 0) return tagName;
+
+        int cut = tagName.lastIndexOf('-');
+        if (cut < 0) return tagName;
+
+        return tagName.substring(0, cut).stripTrailing();
+    }
 
 }

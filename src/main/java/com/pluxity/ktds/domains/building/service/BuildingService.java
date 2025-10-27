@@ -133,6 +133,7 @@ public class BuildingService {
     }
 
     @Transactional(readOnly = true)
+    @IgnoreBuildingPermission
     public BuildingDetailResponseDTO findStoreDetail() {
 
         Building building = buildingRepository.findByCode("store")

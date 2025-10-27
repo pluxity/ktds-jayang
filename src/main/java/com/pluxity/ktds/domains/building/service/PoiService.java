@@ -106,25 +106,39 @@ public class PoiService {
 
     @Transactional(readOnly = true)
     public List<PoiDetailResponseDTO> findAllDetail() {
-        log.info("findAllDetail() start");
+        log.info("findAllDetail() start - batch processing mode");
 
         StopWatch sw = new StopWatch("findAllDetail");
+        final int BATCH_SIZE = 2000;
 
         sw.start("poiRepository.findAll");
         List<Poi> poiList = poiRepository.findAll();
         List<Long> poiIds = poiList.stream().map(Poi::getId).toList();
         sw.stop();
 
-        sw.start("poiCctvRepository.findAllByPoiIn");
-        List<PoiCctv> allCctvs = poiCctvRepository.findByPoiIdIn(poiIds);
-        List<PoiTag> allTags = poiTagRepository.findByPoiIdIn(poiIds);
+        sw.start("batchTagAndCctvFetch");
+        Map<Long, List<PoiCctv>> cctvMap = new HashMap<>();
+        Map<Long, List<PoiTag>> tagMap = new HashMap<>();
 
-
-        Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
-                .collect(Collectors.groupingBy(poiCctv -> poiCctv.getPoi().getId()));
-        Map<Long, List<PoiTag>> tagMap = allTags.stream()
-                        .collect(Collectors.groupingBy(tag -> tag.getPoi().getId()));
-
+        // 배치 단위로 태그와 CCTV 조회
+        for (int i = 0; i < poiIds.size(); i += BATCH_SIZE) {
+            int endIndex = Math.min(i + BATCH_SIZE, poiIds.size());
+            List<Long> batchIds = poiIds.subList(i, endIndex);
+            
+            log.debug("Processing batch {} to {} of {} total POIs", i, endIndex - 1, poiIds.size());
+            
+            // 태그 배치 조회
+            List<PoiTag> batchTags = poiTagRepository.findByPoiIdIn(batchIds);
+            for (PoiTag tag : batchTags) {
+                tagMap.computeIfAbsent(tag.getPoi().getId(), k -> new ArrayList<>()).add(tag);
+            }
+            
+            // CCTV 배치 조회
+            List<PoiCctv> batchCctvs = poiCctvRepository.findByPoiIdIn(batchIds);
+            for (PoiCctv cctv : batchCctvs) {
+                cctvMap.computeIfAbsent(cctv.getPoi().getId(), k -> new ArrayList<>()).add(cctv);
+            }
+        }
         sw.stop();
 
         sw.start("DTO mapping");
@@ -167,7 +181,7 @@ public class PoiService {
 
     @Transactional(readOnly = true)
     public List<PoiDetailResponseDTO> findFilteredAllDetail() {
-        log.info("findFilteredAllDetail() start");
+        log.info("findFilteredAllDetail() start - batch processing mode");
         StopWatch sw = new StopWatch();
 
         sw.start("findAll");
@@ -175,19 +189,33 @@ public class PoiService {
         sw.stop();
 
         List<Long> poiIds = result.stream().map(PoiDetailResponseDTO::id).toList();
-        sw.start("batchTagFetch");
-        List<Object[]> tagRows = poiTagRepository.findTagNamesByPoiIds(poiIds);
-        Map<Long, List<String>> tagMap = tagRows.stream()
-                .collect(Collectors.groupingBy(
-                        row -> (Long) row[0],
-                        Collectors.mapping(row -> (String) row[1], Collectors.toList())
-                ));
-        sw.stop();
-
-        sw.start("batchCctvFetch");
-        List<PoiCctv> allCctvs = poiCctvRepository.findByPoiIdIn(poiIds);
-        Map<Long, List<PoiCctv>> cctvMap = allCctvs.stream()
-                .collect(Collectors.groupingBy(cctv -> cctv.getPoi().getId()));
+        
+        sw.start("batchTagAndCctvFetch");
+        final int BATCH_SIZE = 2000;
+        Map<Long, List<String>> tagMap = new HashMap<>();
+        Map<Long, List<PoiCctv>> cctvMap = new HashMap<>();
+        
+        // 배치 단위로 태그와 CCTV 조회
+        for (int i = 0; i < poiIds.size(); i += BATCH_SIZE) {
+            int endIndex = Math.min(i + BATCH_SIZE, poiIds.size());
+            List<Long> batchIds = poiIds.subList(i, endIndex);
+            
+            log.debug("Processing batch {} to {} of {} total POIs", i, endIndex - 1, poiIds.size());
+            
+            // 태그 배치 조회 (Object[] 형태로 poiId와 tagName만 조회)
+            List<Object[]> tagRows = poiTagRepository.findTagNamesByPoiIds(batchIds);
+            for (Object[] row : tagRows) {
+                Long poiId = (Long) row[0];
+                String tagName = (String) row[1];
+                tagMap.computeIfAbsent(poiId, k -> new ArrayList<>()).add(tagName);
+            }
+            
+            // CCTV 배치 조회
+            List<PoiCctv> batchCctvs = poiCctvRepository.findByPoiIdIn(batchIds);
+            for (PoiCctv cctv : batchCctvs) {
+                cctvMap.computeIfAbsent(cctv.getPoi().getId(), k -> new ArrayList<>()).add(cctv);
+            }
+        }
         sw.stop();
 
 

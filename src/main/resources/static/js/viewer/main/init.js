@@ -32,7 +32,7 @@
     const roles = decoded ? decoded.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
-        window.open("/admin/system-setting", "_blank");
+        window.open("/admin/building/indoor", "_blank");
     })
     if (!userType.includes("ADMIN")) {
         adminButton.style.display = "none";

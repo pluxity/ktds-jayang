@@ -33,7 +33,7 @@
     const roles = decoded ? decoded.split(",") : [];
     const adminButton = document.querySelector(".profile__layer .head");
     adminButton.addEventListener("click", event => {
-        window.open("/admin/system-setting", "_blank");
+        window.open("/admin/building/indoor", "_blank");
     })
     if (!userType.includes("ADMIN")) {
         adminButton.style.display = "none";
@@ -171,12 +171,12 @@
                     Init.updateButtons(newStartIndex, totalItems, itemsPerPage, upButton, downButton);
                 }
             });
-            clickFloor();
+            clickFloor(building);
         });
 
     }
 
-    const clickFloor = () => {
+    const clickFloor = (building) => {
         const floorBtns = document.querySelectorAll('#floor-info .floor-info__detail ul li');
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
@@ -234,8 +234,7 @@
                         equipment.classList.add('active')
                     });
                 }
-
-                Px.Camera.ExtendView();
+                Px.Camera.ExtendView(false, 0, 70);
             })
         })
         // allFloor
@@ -263,7 +262,10 @@
 
             Px.Model.Visible.ShowAll();
             Px.VirtualPatrol.Clear();
-            Px.Camera.ExtendView();
+            if(building.camera3d)
+                Px.Camera.SetState(JSON.parse(building.camera3d));
+            // Px.Camera.ExtendView();
+
         })
 
         const expandBtn = document.querySelector('.floor-info__ctrl .scale');

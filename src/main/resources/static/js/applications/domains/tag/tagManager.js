@@ -952,17 +952,6 @@ const TagManager = (() => {
                     }).join('');
                 } else if (['조명', '항공장애'].includes(poiProperty.poiCategoryName)) {
 
-                    // const head = popupInfo.querySelector('.popup-info__head');
-                    // head.querySelectorAll('h2').forEach(h => h.remove());
-                    //
-                    // const h2 = document.createElement('h2');
-                    // h2.append(document.createTextNode(`${poiProperty.lightGroup || ''}`));
-                    // h2.append(document.createElement('br'));
-                    // h2.append(document.createTextNode(poiProperty.name));
-                    //
-                    // console.log("h2 : ", h2);
-                    // const hidden = head.querySelector('input.poi-id');
-                    // hidden.after(h2);
                     tbody.innerHTML = data.TAGs.map(tag => {
                         console.log("tag : ", tag);
                         const statusText = {0: 'ON', 1: 'OFF'}[tag.currentValue];
@@ -1016,6 +1005,136 @@ const TagManager = (() => {
                             </tr>
                         `;
                     }).join('');
+                } else if (poiProperty.poiCategoryName === '설비') {
+                    // 태그 매핑을 위한 JSON 데이터
+                    const tagMappingData = {
+                        "digital": {
+                            "ST": ["상태"],
+                            "AL": ["경보", "차압", "차압경보", "필터차압"],
+                            "HIAL": ["고수위경보"],
+                            "LOAL": ["저수위경보"],
+                            "SS": ["기동"],
+                            "REL": ["등급해제"],
+                            "RUN": ["자동운전"],
+                            "HC": ["냉난방"],
+                            "ENT": ["엔탈피"],
+                            "MODE": ["예열운전"]
+                        },
+                        "analog": {
+                            "LI": ["수위"],
+                            "INV": ["인버터"],
+                            "CO2": ["CO2", "CO2농도"],
+                            "SHZ": ["급기HZ"],
+                            "SDH": ["급기습도"],
+                            "SDT": ["급기온도"],
+                            "SA": ["급기정압"],
+                            "SFM": ["급기풍량"],
+                            "MIN": ["댐퍼최소치"],
+                            "DONGPA": ["동파방지설정"],
+                            "EDM": ["배기댐퍼"],
+                            "RFM": ["배기풍량"],
+                            "P": ["밸브개도"],
+                            "SET": ["설정온도"],
+                            "TEMP1": ["밸브온도1"],
+                            "TEMP2": ["밸브온도2"],
+                            "SEC": ["설정CO"],
+                            "SEH": ["설정습도"],
+                            "SEP": ["설정정압"],
+                            "SEF": ["설정풍량"],
+                            "ODM": ["외기댐퍼"],
+                            "OAENT": ["외기엔탈피"],
+                            "FLOW": ["유량"],
+                            "MDM": ["혼합댐퍼"],
+                            "MDT": ["혼합온도"],
+                            "RHZ": ["환기HZ"],
+                            "RDH": ["환기습도"],
+                            "RAENT": ["환기엔탈피"],
+                            "RDT": ["환기온도"],
+                            "PT": ["온도"],
+                            "P1INV": ["인버터출력"],
+                            "P2INV": ["인버터출력"],
+                            "P3INV": ["인버터출력"],
+                            "P4INV": ["인버터출력"],
+                            "P5INV": ["인버터출력"],
+                            "DM": ["뎀퍼"],
+                            "ODT": ["외기온도"],
+                            "TEMP": ["온도"],
+                            "BV": ["밸브"],
+                            "DM2": ["댐퍼2"],
+                            "DM1": ["댐퍼1"],
+                            "H": ["유량H"],
+                            "L": ["유량L"],
+                            "CDM": ["동파코일댐퍼"],
+                            "RT": ["실내온도"],
+                            "RH": ["실내습도"],
+                            "RCO2": ["실내CO2"],
+                            "RA": ["환기정압"]
+                        }
+                    };
+
+                    // Digital 키 패턴 정의
+                    const digitalPatterns = ['ST', 'AL', 'HIAL', 'LOAL', 'SS', 'REL', 'RUN', 'HC', 'ENT', 'MODE'];
+                    
+                    // 태그를 Digital과 Analog로 분류
+                    const digitalTags = [];
+                    const analogTags = [];
+                    
+                    data.TAGs.forEach(tag => {
+                        const tagName = tag.tagName;
+                        const lastUnderscoreIndex = tagName.lastIndexOf('_');
+                        const key = lastUnderscoreIndex !== -1 ? tagName.substring(lastUnderscoreIndex + 1) : tagName;
+                        
+                        // Digital 패턴 체크
+                        const isDigital = digitalPatterns.some(pattern => key.includes(pattern));
+                        
+                        if (isDigital) {
+                            digitalTags.push({ ...tag, key, type: 'digital' });
+                        } else {
+                            analogTags.push({ ...tag, key, type: 'analog' });
+                        }
+                    });
+                    
+                    // 태그 매핑 함수
+                    function getTagLabel(key, type) {
+                        const category = type === 'digital' ? tagMappingData.digital : tagMappingData.analog;
+                        if (category[key]) {
+                            return category[key][0]; // 첫 번째 값 사용
+                        }
+                        return key; // 매핑이 없으면 키 그대로 사용
+                    }
+                    
+                    // HTML 생성
+                    let html = '';
+                    
+                    // Digital 태그들
+                    if (digitalTags.length > 0) {
+                        // html += '<tr><td colspan="2" style="background-color: #f0f0f0; font-weight: bold;">Digital</td></tr>';
+                        digitalTags.forEach(tag => {
+                            const label = getTagLabel(tag.key, 'digital');
+                            html += `
+                                <tr>
+                                    <td>${label}</td>
+                                    <td>${tag.currentValue || '-'}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    // Analog 태그들
+                    if (analogTags.length > 0) {
+                        // html += '<tr><td colspan="2" style="background-color: #f0f0f0; font-weight: bold;">Analog</td></tr>';
+                        analogTags.forEach(tag => {
+                            const label = getTagLabel(tag.key, 'analog');
+                            html += `
+                                <tr>
+                                    <td>${label}</td>
+                                    <td>${tag.currentValue || '-'}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    tbody.innerHTML = html;
                 } else {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         const statusCell = poiProperty.poiCategoryName === '공기질'

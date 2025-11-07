@@ -1005,7 +1005,9 @@ const TagManager = (() => {
                             </tr>
                         `;
                     }).join('');
-                } else if (poiProperty.poiCategoryName === '설비') {
+                } else if (poiProperty.poiCategoryName === '설비' &&
+                    poiProperty.poiMiddleCategoryName !== '공기조화기' &&
+                    poiProperty.poiMiddleCategoryName !== '외조기') {
 
                     // Prefix 매핑 데이터
                     const prefixMapping = {
@@ -1221,6 +1223,52 @@ const TagManager = (() => {
                         table.parentNode.insertBefore(wrapper, table);
                         wrapper.appendChild(table);
                     }
+                } else if (poiProperty.poiMiddleCategoryName === '공기조화기' || poiProperty.poiMiddleCategoryName === '외조기') {
+
+                    const thead = popupInfo.querySelector('table thead');
+                    thead.innerHTML = `
+                        <tr style="position: sticky; top: 0; background: #d9dde3; z-index: 2;">
+                            <th>수집정보</th>
+                            <th>측정값</th>
+                            <th style="border-left: 1px solid;">수집정보</th>
+                            <th>측정값</th>
+                        </tr>
+                    `;
+
+                    const rows = [];
+                    for (let i = 0; i < data.TAGs.length; i += 2) {
+                        const tag1 = data.TAGs[i];
+                        const tag2 = data.TAGs[i + 1];
+
+                        const name1 = tag1 ? (tag1.tagName || tag1.name || '') : '';
+                        const meta1 = tag1 ? _ahuMeta(name1) : {};
+                        const label1 = meta1.label || name1;
+                        const value1 = tag1 ? ((meta1.type === 'DIGITAL') ? _toOnOff(tag1.currentValue) : tag1.currentValue) : '';
+
+                        const name2 = tag2 ? (tag2.tagName || tag2.name || '') : '';
+                        const meta2 = tag2 ? _ahuMeta(name2) : {};
+                        const label2 = meta2.label || name2;
+                        const value2 = tag2 ? ((meta2.type === 'DIGITAL') ? _toOnOff(tag2.currentValue) : tag2.currentValue) : '';
+
+                        rows.push(`
+                            <tr>
+                                <td>${label1}</td>
+                                <td>${value1}</td>
+                                <td style="border-left: 1px solid;">${label2}</td>
+                                <td>${value2}</td>
+                            </tr>
+                        `);
+                    }
+
+                    const tbody = popupInfo.querySelector('table tbody');
+                    tbody.innerHTML = rows.join('');
+                    const parent = tbody.parentElement;
+                    parent.style.display = 'block';
+                    parent.style.maxHeight = '400px';
+                    parent.style.overflowY = 'auto';
+                    parent.style.overflowX = 'hidden';
+                    parent.style.borderTop = '1px solid #ccc';
+
                 } else {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         const statusCell = poiProperty.poiCategoryName === '공기질'
@@ -1519,6 +1567,64 @@ const TagManager = (() => {
             return { success: false, error: error.message };
         }
     };
+
+    // 공기조화기/외조기
+    function _toOnOff(v) {
+        var n = typeof v === 'string' ? Number(v) : v;
+        return ({0: 'ON', 1: 'OFF'})[n] || String(v);
+    }
+
+// --- 유틸: 태그 → {type, label} 규칙 매핑 ---
+    function _ahuMeta(tagName) {
+        if (!tagName) return { type: 'ANALOG', label: '' };
+
+        var m = tagName.match(/(?:^|_)(SF|RF|EB|DB|SD|EHM)_(ST|AL|SS)$/);
+        if (m) {
+            var pre = { SF:'급기휀', RF:'배기휀', EB:'전기히터', DB:'필터', SD:'연감지기', EHM:'가습기' }[m[1]];
+            var suf = { ST:'상태', AL:'경보', SS:'기동' }[m[2]];
+            return { type: 'DIGITAL', label: pre + '_' + suf };
+        }
+
+        m = tagName.match(/(?:^|_)(RUN|REL|HC|ENT|MODE)$/);
+        if (m) {
+            return { type: 'DIGITAL', label: { RUN:'자동운전', REL:'등급해제', HC:'냉난방', ENT:'엔탈피', MODE:'예열운전' }[m[1]] };
+        }
+
+        m = tagName.match(/(?:^|_)(SF|RF)_INV$/);
+        if (m) {
+            return { type: 'ANALOG', label: (m[1] === 'SF' ? '급기휀' : '배기휀') + '_인버터' };
+        }
+
+        m = tagName.match(/(?:^|_)(FLOW(?:_(H|L))?)$/);
+        if (m) {
+            return { type: 'ANALOG', label: m[2] ? ('유량' + m[2]) : '유량' };
+        }
+
+        m = tagName.match(/(?:^|_)TEMP(\d+)$/);
+        if (m) {
+            return { type: 'ANALOG', label: '밸브온도' + m[1] };
+        }
+
+        var FIX = {
+            BV_P:'밸브개도', BV_SET:'밸브설정',
+            MDT:'혼합온도', SDT:'급기온도', RDT:'환기온도',
+            SDH:'급기습도', RDH:'환기습도',
+            SA:'급기정압', CO2:'CO2농도',
+            SFM:'급기풍량', RFM:'배기풍량',
+            ODM:'외기댐퍼', MDM:'혼합댐퍼', EDM:'배기댐퍼', CDM:'동파코일댐퍼',
+            DONGPA:'동파방지설정',
+            SET:'설정온도', SEH:'설정습도', SEC:'설정CO', SEP:'설정정압', SEF:'설정풍량',
+            MIN:'댐퍼최소', OAENT:'외기엔탈피', RAENT:'환기엔탈피',
+            SHZ:'급기HZ', RHZ:'환기HZ'
+        };
+        for (var key in FIX) {
+            if (tagName.toUpperCase().endsWith('_' + key)) {
+                return { type: 'ANALOG', label: FIX[key] };
+            }
+        }
+
+        return { type: 'ANALOG', label: last || tagName };
+    }
 
     return{
         addTags,

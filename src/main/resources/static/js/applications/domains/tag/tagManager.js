@@ -1009,220 +1009,66 @@ const TagManager = (() => {
                     poiProperty.poiMiddleCategoryName !== '공기조화기' &&
                     poiProperty.poiMiddleCategoryName !== '외조기') {
 
-                    // Prefix 매핑 데이터
-                    const prefixMapping = {
-                        "EFU": "환기유니트",
-                        "UV": "UV",
-                        "SF": "급기휀",
-                        "EF": "배기휀",
-                        "DM": "댐퍼"
-                    };
-                    
-                    // 태그 매핑을 위한 JSON 데이터
-                    const tagMappingData = {
-                        "digital": {
-                            "ST": ["상태"],
-                            "AL": ["경보", "차압", "차압경보", "필터차압"],
-                            "HIAL": ["고수위경보"],
-                            "LOAL": ["저수위경보"],
-                            "SS": ["기동"],
-                            "REL": ["등급해제"],
-                            "RUN": ["자동운전"],
-                            "HC": ["냉난방"],
-                            "ENT": ["엔탈피"],
-                            "MODE": ["예열운전"],
-                            "SPT" : ["공급온도"],
-                            "RPT" : ["환수온도"],
-                        },
-                        "analog": {
-                            "LI": ["수위"],
-                            "INV": ["인버터"],
-                            "CO2": ["CO2", "CO2농도"],
-                            "SHZ": ["급기HZ"],
-                            "SDH": ["급기습도"],
-                            "SDT": ["급기온도"],
-                            "SA": ["급기정압"],
-                            "SFM": ["급기풍량"],
-                            "MIN": ["댐퍼최소치"],
-                            "DONGPA": ["동파방지설정"],
-                            "EDM": ["배기댐퍼"],
-                            "RFM": ["배기풍량"],
-                            "P": ["밸브개도"],
-                            "SET": ["설정온도"],
-                            "TEMP1": ["밸브온도1"],
-                            "TEMP2": ["밸브온도2"],
-                            "SEC": ["설정CO"],
-                            "SEH": ["설정습도"],
-                            "SEP": ["설정정압"],
-                            "SEF": ["설정풍량"],
-                            "ODM": ["외기댐퍼"],
-                            "OAENT": ["외기엔탈피"],
-                            "FLOW": ["유량"],
-                            "MDM": ["혼합댐퍼"],
-                            "MDT": ["혼합온도"],
-                            "RHZ": ["환기HZ"],
-                            "RDH": ["환기습도"],
-                            "RAENT": ["환기엔탈피"],
-                            "RDT": ["환기온도"],
-                            "PT": ["온도"],
-                            "P1INV": ["인버터출력"],
-                            "P2INV": ["인버터출력"],
-                            "P3INV": ["인버터출력"],
-                            "P4INV": ["인버터출력"],
-                            "P5INV": ["인버터출력"],
-                            "DM": ["뎀퍼"],
-                            "ODT": ["외기온도"],
-                            "TEMP": ["온도"],
-                            "BV": ["밸브"],
-                            "DM2": ["댐퍼2"],
-                            "DM1": ["댐퍼1"],
-                            "H": ["유량H"],
-                            "L": ["유량L"],
-                            "CDM": ["동파코일댐퍼"],
-                            "RT": ["실내온도"],
-                            "RH": ["실내습도"],
-                            "RCO2": ["실내CO2"],
-                            "RA": ["환기정압"]
-                        }
-                    };
-
-                    // Digital 키 패턴 정의
-                    const digitalPatterns = ['ST', 'AL', 'HIAL', 'LOAL', 'SS', 'REL', 'RUN', 'HC', 'ENT', 'MODE', 'SPT', 'RPT'];
-                    
-                    // 태그를 Digital과 Analog로 분류
-                    const digitalTags = [];
-                    const analogTags = [];
-                    
-                    data.TAGs.forEach(tag => {
-                        const tagName = tag.tagName;
+                    // 설비 태그 메타 정보 함수
+                    function _equipmentMeta(tagName) {
+                        if (!tagName) return { type: 'ANALOG', label: '' };
                         
-                        // 마지막에서 두 번째 _ 부터 추출
+                        const digitalMapping = {
+                            'ST': '상태',
+                            'AL': '경보',
+                            'SS': '기동',
+                            'RUN': '자동운전',
+                            'REL': '등급해제',
+                            'HIAL':'고수위경보',
+                            'LOAL':'저수위경보'
+                        };
+                        
+                        const analogMapping = {
+                            'PT': '온도',
+                            'INV': '인버터출력',
+                            'SPT': '공급온도',
+                            'RPT': '환수온도',
+                            'SP': '전압',
+                            'LI': '수위'
+                        };
+                        
+                        // suffix 기반으로 매핑 찾기 (includes 사용)
                         const parts = tagName.split('_');
-                        const key = parts.length >= 2 
-                            ? parts.slice(-2).join('_')  // 마지막 2개 파트 (예: UV_SS)
-                            : (parts.length === 1 ? parts[0] : tagName);
-                        
-                        // Digital 패턴 체크 (suffix 기준)
                         const suffix = parts[parts.length - 1];
-                        const isDigital = digitalPatterns.some(pattern => suffix.includes(pattern));
                         
-                        if (isDigital) {
-                            digitalTags.push({ ...tag, key, type: 'digital' });
-                        } else {
-                            analogTags.push({ ...tag, key, type: 'analog' });
-                        }
-                    });
-                    
-                    // 태그 매핑 함수
-                    function getTagLabel(key, type) {
-                        const category = type === 'digital' ? tagMappingData.digital : tagMappingData.analog;
-                        
-                        // key를 _로 split
-                        const keyParts = key.split('_');
-                        
-                        if (keyParts.length >= 2) {
-                            // prefix와 suffix 분리
-                            const prefix = keyParts[0];
-                            const suffix = keyParts.slice(1).join('_');
-                            
-                            // suffix 매핑 찾기
-                            let suffixLabel = category[suffix] ? category[suffix][0] : suffix;
-                            
-                            // prefix가 매핑에 있으면 추가
-                            if (prefixMapping[prefix]) {
-                                return `${prefixMapping[prefix]}_${suffixLabel}`;
-                            } else {
-                                return suffixLabel;
+                        // Digital 매핑 체크 (긴 키부터 먼저 체크)
+                        const digitalKeys = Object.keys(digitalMapping).sort((a, b) => b.length - a.length);
+                        for (const key of digitalKeys) {
+                            if (suffix.includes(key)) {
+                                return { type: 'DIGITAL', label: digitalMapping[key] };
                             }
-                        } else {
-                            // _가 없는 경우 기존 방식
-                            if (category[key]) {
-                                return category[key][0];
-                            }
-                            return key;
                         }
+                        
+                        // Analog 매핑 체크 (긴 키부터 먼저 체크)
+                        const analogKeys = Object.keys(analogMapping).sort((a, b) => b.length - a.length);
+                        for (const key of analogKeys) {
+                            if (suffix.includes(key)) {
+                                return { type: 'ANALOG', label: analogMapping[key] };
+                            }
+                        }
+                        
+                        return { type: 'ANALOG', label: tagName };
                     }
-                    
-                    // rowList 생성 (Digital + Analog 합치기)
-                    const rowList = [];
-                    
-                    // Digital 태그들을 rowList에 추가
-                    digitalTags.forEach(tag => {
-                        const label = getTagLabel(tag.key, 'digital');
-                        rowList.push({
-                            label: label,
-                            value: tag.currentValue || '-'
-                        });
-                    });
-                    
-                    // Analog 태그들을 rowList에 추가
-                    analogTags.forEach(tag => {
-                        const label = getTagLabel(tag.key, 'analog');
-                        rowList.push({
-                            label: label,
-                            value: tag.currentValue || '-'
-                        });
-                    });
-                    
-                    
-                    if (rowList.length <= 25) {
-                        tbody.innerHTML = rowList.map(row => `
+
+                    const tbody = popupInfo.querySelector('table tbody');
+                    tbody.innerHTML = data.TAGs.map(tag => {
+                        const name = tag.tagName || tag.name || '';
+                        const meta = _equipmentMeta(name);
+                        const label = meta.label || name;
+                        const value = (meta.type === 'DIGITAL') ? _toOnOff(tag.currentValue) : tag.currentValue;
+                        
+                        return `
                             <tr>
-                                <td>${row.label}</td>
-                                <td>${row.value}</td>
-                            </tr>
-                        `).join('');
-                    } else {
-                        const thead = popupInfo.querySelector('table thead');
-                        thead.innerHTML = `
-                            <tr>
-                                <th>수집정보</th>
-                                <th>측정값</th>
-                                <th style="border-left: 1px solid;">수집정보</th>
-                                <th>측정값</th>
+                                <td>${label}</td>
+                                <td>${value}</td>
                             </tr>
                         `;
-
-                        // 전체를 좌우로 나누기 (절반씩)
-                        const midPoint = Math.ceil(rowList.length / 2);
-                        const totalRows = midPoint;
-
-                        let html = '';
-                        for (let i = 0; i < totalRows; i++) {
-                            const left = rowList[i]
-                                ? `<td>${rowList[i].label}</td><td>${rowList[i].value}</td>`
-                                : `<td>-</td><td>-</td>`;
-                            const right = rowList[i + midPoint]
-                                ? `<td style="border-left: 1px solid;">${rowList[i + midPoint].label}</td><td>${rowList[i + midPoint].value}</td>`
-                                : `<td style="border-left: 1px solid;">-</td><td>-</td>`;
-
-                            html += `<tr>${left}${right}</tr>`;
-                        }
-
-                        tbody.innerHTML = html;
-                        
-                        // table을 wrapper로 감싸서 스크롤 적용
-                        const table = popupInfo.querySelector('table');
-                        const content = popupInfo.querySelector('.popup-info__content');
-                        
-                        // 이미 wrapper가 있으면 제거
-                        const existingWrapper = content.querySelector('.table-scroll-wrapper');
-                        if (existingWrapper) {
-                            const oldTable = existingWrapper.querySelector('table');
-                            existingWrapper.replaceWith(oldTable);
-                        }
-                        
-                        // 새 wrapper 생성
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'table-scroll-wrapper';
-                        wrapper.style.maxHeight = '15.625rem';
-                        wrapper.style.overflowY = 'auto';
-                        wrapper.style.overflowX = 'hidden';
-                        
-                        // table을 wrapper로 감싸기
-                        table.parentNode.insertBefore(wrapper, table);
-                        wrapper.appendChild(table);
-                    }
+                    }).join('');
                 } else if (poiProperty.poiMiddleCategoryName === '공기조화기' || poiProperty.poiMiddleCategoryName === '외조기') {
 
                     const thead = popupInfo.querySelector('table thead');
@@ -1574,14 +1420,18 @@ const TagManager = (() => {
         return ({0: 'ON', 1: 'OFF'})[n] || String(v);
     }
 
-// --- 유틸: 태그 → {type, label} 규칙 매핑 ---
+    // --- 유틸: 태그 → {type, label} 규칙 매핑 ---
     function _ahuMeta(tagName) {
         if (!tagName) return { type: 'ANALOG', label: '' };
 
-        var m = tagName.match(/(?:^|_)(SF|RF|EB|DB|SD|EHM)_(ST|AL|SS)$/);
+        var m = tagName.match(/(?:^|_)(|SF|RF|EB|DB|SD|EHM|EH|ER|DR|EM|DM|EF|DH|DA|COIL|COIL1|COIL2)_(ST|AL|SS|DM|AL2|ST2)$/);
         if (m) {
-            var pre = { SF:'급기휀', RF:'배기휀', EB:'전기히터', DB:'필터', SD:'연감지기', EHM:'가습기' }[m[1]];
-            var suf = { ST:'상태', AL:'경보', SS:'기동' }[m[2]];
+            var pre = { SF:'급기휀', RF:'배기휀',
+                EB:'전기히터', DB:'필터', SD:'연감지기',
+                EHM:'가습기', EH: '전기히터', ER: '전기히터',
+                DR: '필터_차압', EM: '전기히터', DM: '필터_차압',
+                EF: '배기휀', COIL: '코일', COIL1:'코일1',COIL2:'코일2', DH:'필터_차압', DA:'필터_차압' }[m[1]];
+            var suf = { ST:'상태', AL:'경보', SS:'기동', DM: '댐퍼',AL2:'경보2', ST2:'상태2' }[m[2]];
             return { type: 'DIGITAL', label: pre + '_' + suf };
         }
 
@@ -1595,9 +1445,27 @@ const TagManager = (() => {
             return { type: 'ANALOG', label: (m[1] === 'SF' ? '급기휀' : '배기휀') + '_인버터' };
         }
 
+        m = tagName.match(/(?:^|_)COIL_DM_(AL|ST)(\d+)$/);
+        if (m) {
+            const sufBase = m[1] === 'AL' ? '경보' : '상태';
+            return { type: 'DIGITAL', label: `코일댐퍼_${sufBase}${m[2]}` };
+        }
+
+        m = tagName.match(/(?:^|_)(C|H)_FLOW(?:_(H|L))?$/);
+        if (m) {
+            const modeStr = m[1] === 'C' ? '냉방' : '난방';
+            return { type: 'ANALOG', label: m[2] ? (modeStr + '_유량' + m[2]) : (modeStr + '_유량') };
+        }
+
         m = tagName.match(/(?:^|_)(FLOW(?:_(H|L))?)$/);
         if (m) {
             return { type: 'ANALOG', label: m[2] ? ('유량' + m[2]) : '유량' };
+        }
+
+        m = tagName.match(/(?:^|_)(C|H)_TEMP(\d+)$/);
+        if (m) {
+            const modeStr = m[1] === 'C' ? '냉방' : '난방';
+            return { type: 'ANALOG', label: modeStr + '_밸브온도' + m[2] };
         }
 
         m = tagName.match(/(?:^|_)TEMP(\d+)$/);
@@ -1605,17 +1473,42 @@ const TagManager = (() => {
             return { type: 'ANALOG', label: '밸브온도' + m[1] };
         }
 
+        m = tagName.match(/(?:^|_)(C|H)_BV_P$/);
+        if (m) {
+            const modeStr = m[1] === 'C' ? '냉방' : '난방';
+            return { type: 'ANALOG', label: modeStr + '_밸브개도' };
+        }
+
+        if (tagName.toUpperCase().endsWith('_BV_P')) {
+            return { type: 'ANALOG', label: '밸브개도' };
+        }
+
+        m = tagName.match(/(?:^|_)(C|H)_BV_SET$/);
+        if (m) {
+            const modeStr = m[1] === 'C' ? '냉방' : '난방';
+            return { type: 'ANALOG', label: modeStr + '_밸브설정' };
+        }
+
+        if (tagName.toUpperCase().endsWith('_BV_SET')) {
+            return { type: 'ANALOG', label: '밸브설정' };
+        }
+
+
+
+
         var FIX = {
-            BV_P:'밸브개도', BV_SET:'밸브설정',
             MDT:'혼합온도', SDT:'급기온도', RDT:'환기온도',
             SDH:'급기습도', RDH:'환기습도',
             SA:'급기정압', CO2:'CO2농도',
             SFM:'급기풍량', RFM:'배기풍량',
             ODM:'외기댐퍼', MDM:'혼합댐퍼', EDM:'배기댐퍼', CDM:'동파코일댐퍼',
-            DONGPA:'동파방지설정',
+            DONGPA:'동파방지설정', DONGPA_BV:'동파방지밸브', COIL_TEMP: '코일온도',
+            COIL_DM: '코일댐퍼', COIL1_TEMP: '코일1_온도', COIL_DM2: '코일_댐퍼2',
+            COIL_DM1: '코일_댐퍼1', COIL2_TEMP: '코일2_온도',
             SET:'설정온도', SEH:'설정습도', SEC:'설정CO', SEP:'설정정압', SEF:'설정풍량',
             MIN:'댐퍼최소', OAENT:'외기엔탈피', RAENT:'환기엔탈피',
-            SHZ:'급기HZ', RHZ:'환기HZ'
+            SHZ:'급기HZ', RHZ:'환기HZ', RT: '실내온도', RH: '실내습도', RCO2: '실내CO2농도',
+            RA: '환기정압', ODT: '외기온도'
         };
         for (var key in FIX) {
             if (tagName.toUpperCase().endsWith('_' + key)) {
@@ -1623,7 +1516,7 @@ const TagManager = (() => {
             }
         }
 
-        return { type: 'ANALOG', label: last || tagName };
+        return { type: 'ANALOG', label:  tagName };
     }
 
     return{

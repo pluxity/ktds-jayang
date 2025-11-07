@@ -1006,6 +1006,16 @@ const TagManager = (() => {
                         `;
                     }).join('');
                 } else if (poiProperty.poiCategoryName === '설비') {
+
+                    // Prefix 매핑 데이터
+                    const prefixMapping = {
+                        "EFU": "환기유니트",
+                        "UV": "UV",
+                        "SF": "급기휀",
+                        "EF": "배기휀",
+                        "DM": "댐퍼"
+                    };
+                    
                     // 태그 매핑을 위한 JSON 데이터
                     const tagMappingData = {
                         "digital": {
@@ -1018,7 +1028,9 @@ const TagManager = (() => {
                             "RUN": ["자동운전"],
                             "HC": ["냉난방"],
                             "ENT": ["엔탈피"],
-                            "MODE": ["예열운전"]
+                            "MODE": ["예열운전"],
+                            "SPT" : ["공급온도"],
+                            "RPT" : ["환수온도"],
                         },
                         "analog": {
                             "LI": ["수위"],
@@ -1073,7 +1085,7 @@ const TagManager = (() => {
                     };
 
                     // Digital 키 패턴 정의
-                    const digitalPatterns = ['ST', 'AL', 'HIAL', 'LOAL', 'SS', 'REL', 'RUN', 'HC', 'ENT', 'MODE'];
+                    const digitalPatterns = ['ST', 'AL', 'HIAL', 'LOAL', 'SS', 'REL', 'RUN', 'HC', 'ENT', 'MODE', 'SPT', 'RPT'];
                     
                     // 태그를 Digital과 Analog로 분류
                     const digitalTags = [];
@@ -1081,11 +1093,16 @@ const TagManager = (() => {
                     
                     data.TAGs.forEach(tag => {
                         const tagName = tag.tagName;
-                        const lastUnderscoreIndex = tagName.lastIndexOf('_');
-                        const key = lastUnderscoreIndex !== -1 ? tagName.substring(lastUnderscoreIndex + 1) : tagName;
                         
-                        // Digital 패턴 체크
-                        const isDigital = digitalPatterns.some(pattern => key.includes(pattern));
+                        // 마지막에서 두 번째 _ 부터 추출
+                        const parts = tagName.split('_');
+                        const key = parts.length >= 2 
+                            ? parts.slice(-2).join('_')  // 마지막 2개 파트 (예: UV_SS)
+                            : (parts.length === 1 ? parts[0] : tagName);
+                        
+                        // Digital 패턴 체크 (suffix 기준)
+                        const suffix = parts[parts.length - 1];
+                        const isDigital = digitalPatterns.some(pattern => suffix.includes(pattern));
                         
                         if (isDigital) {
                             digitalTags.push({ ...tag, key, type: 'digital' });
@@ -1097,44 +1114,113 @@ const TagManager = (() => {
                     // 태그 매핑 함수
                     function getTagLabel(key, type) {
                         const category = type === 'digital' ? tagMappingData.digital : tagMappingData.analog;
-                        if (category[key]) {
-                            return category[key][0]; // 첫 번째 값 사용
+                        
+                        // key를 _로 split
+                        const keyParts = key.split('_');
+                        
+                        if (keyParts.length >= 2) {
+                            // prefix와 suffix 분리
+                            const prefix = keyParts[0];
+                            const suffix = keyParts.slice(1).join('_');
+                            
+                            // suffix 매핑 찾기
+                            let suffixLabel = category[suffix] ? category[suffix][0] : suffix;
+                            
+                            // prefix가 매핑에 있으면 추가
+                            if (prefixMapping[prefix]) {
+                                return `${prefixMapping[prefix]}_${suffixLabel}`;
+                            } else {
+                                return suffixLabel;
+                            }
+                        } else {
+                            // _가 없는 경우 기존 방식
+                            if (category[key]) {
+                                return category[key][0];
+                            }
+                            return key;
                         }
-                        return key; // 매핑이 없으면 키 그대로 사용
                     }
                     
-                    // HTML 생성
-                    let html = '';
+                    // rowList 생성 (Digital + Analog 합치기)
+                    const rowList = [];
                     
-                    // Digital 태그들
-                    if (digitalTags.length > 0) {
-                        // html += '<tr><td colspan="2" style="background-color: #f0f0f0; font-weight: bold;">Digital</td></tr>';
-                        digitalTags.forEach(tag => {
-                            const label = getTagLabel(tag.key, 'digital');
-                            html += `
-                                <tr>
-                                    <td>${label}</td>
-                                    <td>${tag.currentValue || '-'}</td>
-                                </tr>
-                            `;
+                    // Digital 태그들을 rowList에 추가
+                    digitalTags.forEach(tag => {
+                        const label = getTagLabel(tag.key, 'digital');
+                        rowList.push({
+                            label: label,
+                            value: tag.currentValue || '-'
                         });
-                    }
+                    });
                     
-                    // Analog 태그들
-                    if (analogTags.length > 0) {
-                        // html += '<tr><td colspan="2" style="background-color: #f0f0f0; font-weight: bold;">Analog</td></tr>';
-                        analogTags.forEach(tag => {
-                            const label = getTagLabel(tag.key, 'analog');
-                            html += `
-                                <tr>
-                                    <td>${label}</td>
-                                    <td>${tag.currentValue || '-'}</td>
-                                </tr>
-                            `;
+                    // Analog 태그들을 rowList에 추가
+                    analogTags.forEach(tag => {
+                        const label = getTagLabel(tag.key, 'analog');
+                        rowList.push({
+                            label: label,
+                            value: tag.currentValue || '-'
                         });
-                    }
+                    });
                     
-                    tbody.innerHTML = html;
+                    
+                    if (rowList.length <= 25) {
+                        tbody.innerHTML = rowList.map(row => `
+                            <tr>
+                                <td>${row.label}</td>
+                                <td>${row.value}</td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        const thead = popupInfo.querySelector('table thead');
+                        thead.innerHTML = `
+                            <tr>
+                                <th>수집정보</th>
+                                <th>측정값</th>
+                                <th style="border-left: 1px solid;">수집정보</th>
+                                <th>측정값</th>
+                            </tr>
+                        `;
+
+                        // 전체를 좌우로 나누기 (절반씩)
+                        const midPoint = Math.ceil(rowList.length / 2);
+                        const totalRows = midPoint;
+
+                        let html = '';
+                        for (let i = 0; i < totalRows; i++) {
+                            const left = rowList[i]
+                                ? `<td>${rowList[i].label}</td><td>${rowList[i].value}</td>`
+                                : `<td>-</td><td>-</td>`;
+                            const right = rowList[i + midPoint]
+                                ? `<td style="border-left: 1px solid;">${rowList[i + midPoint].label}</td><td>${rowList[i + midPoint].value}</td>`
+                                : `<td style="border-left: 1px solid;">-</td><td>-</td>`;
+
+                            html += `<tr>${left}${right}</tr>`;
+                        }
+
+                        tbody.innerHTML = html;
+                        
+                        // table을 wrapper로 감싸서 스크롤 적용
+                        const table = popupInfo.querySelector('table');
+                        const content = popupInfo.querySelector('.popup-info__content');
+                        
+                        // 이미 wrapper가 있으면 제거
+                        const existingWrapper = content.querySelector('.table-scroll-wrapper');
+                        if (existingWrapper) {
+                            const oldTable = existingWrapper.querySelector('table');
+                            existingWrapper.replaceWith(oldTable);
+                        }
+                        
+                        // 새 wrapper 생성
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'table-scroll-wrapper';
+                        wrapper.style.maxHeight = '15.625rem';
+                        wrapper.style.overflowY = 'auto';
+                        wrapper.style.overflowX = 'hidden';
+                        
+                        // table을 wrapper로 감싸기
+                        table.parentNode.insertBefore(wrapper, table);
+                        wrapper.appendChild(table);
+                    }
                 } else {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         const statusCell = poiProperty.poiCategoryName === '공기질'
@@ -1419,10 +1505,10 @@ const TagManager = (() => {
     const addTagsAndShowTagData = async (poiProperty, popupInfo, statusCell) => {
         try {
             // 1. 태그 추가
-            const addTagResponse = await addTags(poiProperty.id);
-            if(!addTagResponse.success){
-                return { success: false, error: addTagResponse.error || '태그 추가 실패' };
-            }
+            // const addTagResponse = await addTags(poiProperty.id);
+            // if(!addTagResponse.success){
+            //     return { success: false, error: addTagResponse.error || '태그 추가 실패' };
+            // }
 
             // 2. 태그 데이터 조회 및 팝업 렌더링
             await mapTagDataToPopup(poiProperty, popupInfo, statusCell);

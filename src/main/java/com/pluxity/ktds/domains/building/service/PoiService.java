@@ -602,7 +602,6 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
             List<PoiMiddleCategory> poiMiddleCategoryList = poiMiddleCategoryRepository.findAll();
 
             Map<String, Poi> poiMapByName = new LinkedHashMap<>();
-            Set<String> seenCodes = new HashSet<>();
 
             for(int i = 1; i < rows.size(); i++) {
                 Map<String, String> poiMap = createMapByRows(rows, headerLength, i);
@@ -610,11 +609,6 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
 
                 String code = poiMap.get(POI_CODE.value);
                 String name = poiMap.get(POI_NAME.value);
-
-                if (!seenCodes.add(code) || poiRepository.existsByCode(code)) {
-                    throw new CustomException(ErrorCode.DUPLICATED_POI_CODE, "중복된 POI 코드입니다. (" + code + ")");
-                }
-
                 List<String> tags = Arrays.stream(poiMap.get(TAG_NAME.value).split("[,\\n]"))
                         .map(String::trim)
                         .filter(StringUtils::hasText)
@@ -633,6 +627,12 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
 //                if (currentPoi.isPresent()) {
 //                    continue;
 //                }
+                if (poiRepository.existsByCode(poiMap.get(POI_CODE.value))) {
+                    throw new CustomException(
+                            ErrorCode.DUPLICATED_POI_CODE,
+                            "중복된 POI 코드입니다. (" + poiMap.get(POI_CODE.value) + ")"
+                    );
+                }
 
                 PoiCategory poiCategory = poiCategoryList.stream()
                         .filter(p -> p.getName().equalsIgnoreCase(poiMap.get(POI_CATEGORY_NAME.value)))

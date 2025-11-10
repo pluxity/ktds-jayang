@@ -43,7 +43,7 @@ public class PatrolService {
     @Transactional(readOnly = true)
     public List<PatrolResponseDTO> findAll() {
 
-        return patrolRepository.findAll().stream()
+        return patrolRepository.findAllWithPatrolPoints().stream()
                 .map(Patrol::toResponseDto)
                 .toList();
     }

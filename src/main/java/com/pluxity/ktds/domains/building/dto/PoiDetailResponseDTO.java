@@ -26,4 +26,25 @@ public record PoiDetailResponseDTO(
         String cameraIp,
         String cameraId
 ) {
+    public PoiDetailResponseDTO withRelations(List<String> tagNames, List<PoiCctvDTO> cctvList) {
+        return new PoiDetailResponseDTO(
+                this.id,
+                this.buildingId,
+                this.floorNo,
+                this.poiCategoryId,
+                this.poiMiddleCategoryId,
+                this.iconSetId,
+                this.position,
+                this.rotation,
+                this.scale,
+                this.name,
+                this.code,
+                tagNames,
+                cctvList,
+                this.isLight,
+                this.lightGroup,
+                this.cameraIp,
+                this.cameraId
+        );
+    }
 }

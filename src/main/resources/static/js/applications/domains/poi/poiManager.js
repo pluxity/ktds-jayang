@@ -25,35 +25,105 @@ const PoiManager = (() => {
         );
     };
 
-    const getPoiList = () => {
+    const getPoiListBatch = () => {
         return new Promise((resolve) => {
-            api.get(`/poi`).then((result) => {
-                const { result: data } = result.data;
+            const batchSize = 1000;
+            let allPoiData = [];
+            let currentPage = 0;
+            let hasMoreData = true;
 
-                poiList = data.map(dtoToModel);
-                resolve(poiList);
-            });
-        });
-    };
+            const fetchNextBatch = () => {
+                api.get(`/poi/paging/all`, {
+                    params: {
+                        page: currentPage,
+                        size: batchSize
+                    }
+                }).then((result) => {
+                    const { result: pageData } = result.data;
+                    const { content, totalElements, last } = pageData;
 
-    const getAllocateFilterPoiList = (buildingId, isAllocate) => {
-        return new Promise((resolve) => {
-            api.get(`/poi/allocate`, {
-                params: {
-                    buildingId: buildingId,
-                    isAllocate: isAllocate
-                }
-            }).then((result) => {
-                const { result: data } = result.data;
-                poiList = data.map(dtoToModel);
-                resolve(poiList);
-            });
+                    allPoiData = allPoiData.concat(content);
+                    hasMoreData = !last;
+                    currentPage++;
+
+                    if (hasMoreData) {
+                        // 다음 배치 요청
+                        setTimeout(fetchNextBatch, 10); // 10ms 지연으로 브라우저에게 제어권 양보
+                    } else {
+                        // 모든 데이터 수집 완료
+                        poiList = allPoiData.map(dtoToModel);
+                        resolve(poiList);
+                    }
+                }).catch((error) => {
+                    console.error('Error fetching POI batch:', error);
+                    resolve([]);
+                });
+            };
+
+            fetchNextBatch();
         });
     };
 
     const getFilteredPoiList = () => {
         return new Promise((resolve) => {
             api.get(`/poi/filter`).then((result) => {
+                const { result: data } = result.data;
+
+                poiList = data.map(dtoToModel);
+                resolve(poiList);
+            });
+        });
+    };
+
+    const getFilteredPoiListBatch = async () => {
+        const batchSize = 1000;
+        let allPoiData = [];
+        let currentPage = 0;
+        let hasMoreData = true;
+
+        try {
+            while (hasMoreData) {
+                const result = await api.get(`/poi/filter/paging`, {
+                    params: {
+                        page: currentPage,
+                        size: batchSize
+                    }
+                });
+
+                const { result: pageData } = result.data;
+                const { content, last } = pageData;
+
+                allPoiData = allPoiData.concat(content);
+                hasMoreData = !last;
+                currentPage++;
+
+                if (hasMoreData) {
+                    // 10ms 지연으로 브라우저에게 제어권 양보
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+            }
+
+            // 모든 데이터 수집 완료
+            poiList = allPoiData.map(dtoToModel);
+            return poiList;
+            
+        } catch (error) {
+            console.error(`Error fetching POI batch (page ${currentPage}):`, error);
+            console.warn(`Partially loaded ${allPoiData.length} POIs before error. Returning partial data.`);
+            
+            // 이미 받은 데이터라도 반환 (전체 실패보다는 부분 성공이 나음)
+            if (allPoiData.length > 0) {
+                poiList = allPoiData.map(dtoToModel);
+                return poiList;
+            }
+            
+            return [];
+        }
+    };
+
+    const getPoiList = () => {
+        return new Promise((resolve) => {
+            api.get(`/poi`).then((result) => {
                 const { result: data } = result.data;
 
                 poiList = data.map(dtoToModel);

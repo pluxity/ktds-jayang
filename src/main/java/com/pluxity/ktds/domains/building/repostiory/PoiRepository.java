@@ -172,4 +172,57 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
         WHERE p.position IS NOT NULL
         """)
     List<PoiDetailResponseDTO> findAllDetailProjection();
+
+    @Query("""
+    SELECT new com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO(
+        p.id,
+        p.building.id,
+        p.floorNo,
+        p.poiCategory.id,
+        p.poiMiddleCategory.id,
+        p.iconSet.id,
+        p.position,
+        p.rotation,
+        p.scale,
+        p.name,
+        p.code,
+        null,
+        null,
+        p.isLight,
+        p.lightGroup,
+        p.cameraIp,
+        p.cameraId
+    )
+    FROM Poi p
+    WHERE p.id IN :poiIds
+    AND p.position IS NOT NULL
+    """)
+    List<PoiDetailResponseDTO> findDetailProjectionByIdsWithPosition(@Param("poiIds") List<Long> poiIds);
+
+    @Query("""
+    SELECT new com.pluxity.ktds.domains.building.dto.PoiDetailResponseDTO(
+        p.id,
+        p.building.id,
+        p.floorNo,
+        p.poiCategory.id,
+        p.poiMiddleCategory.id,
+        p.iconSet.id,
+        p.position,
+        p.rotation,
+        p.scale,
+        p.name,
+        p.code,
+        null,
+        null,
+        p.isLight,
+        p.lightGroup,
+        p.cameraIp,
+        p.cameraId
+    )
+    FROM Poi p
+    WHERE p.id IN :poiIds
+    """)
+    List<PoiDetailResponseDTO> findDetailProjectionByIds(@Param("poiIds") List<Long> poiIds);
+
+
 }

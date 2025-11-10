@@ -318,6 +318,120 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
            (StringUtils.hasText(keywordType) && StringUtils.hasText(keyword));
 }
 
+    @Transactional(readOnly = true)
+    public Page<PoiDetailResponseDTO> findFilteredAllDetailPaging(int page, int size) {
+        log.info("findFilteredAllDetailPaging() start - page: {}, size: {}", page, size);
+        StopWatch sw = new StopWatch();
+
+        sw.start("findAllPaging");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Long> poiIdPage = poiRepository.findPoiIdsForPaging(pageable);
+        List<Long> poiIds = poiIdPage.getContent();
+        sw.stop();
+
+        if (poiIds.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, poiIdPage.getTotalElements());
+        }
+
+        sw.start("findDetailProjection");
+        List<PoiDetailResponseDTO> result = poiRepository.findDetailProjectionByIdsWithPosition(poiIds);
+        sw.stop();
+
+        sw.start("tagAndCctvFetch");
+        Map<Long, List<String>> tagMap = new HashMap<>();
+        Map<Long, List<PoiCctv>> cctvMap = new HashMap<>();
+
+        // 태그 조회 (한 번의 쿼리로 모든 POI의 태그 조회)
+        List<Object[]> tagRows = poiTagRepository.findTagNamesByPoiIds(poiIds);
+        for (Object[] row : tagRows) {
+            Long poiId = (Long) row[0];
+            String tagName = (String) row[1];
+            tagMap.computeIfAbsent(poiId, k -> new ArrayList<>()).add(tagName);
+        }
+
+        // CCTV 조회 (한 번의 쿼리로 모든 POI의 CCTV 조회)
+        List<PoiCctv> cctvs = poiCctvRepository.findByPoiIdIn(poiIds);
+        for (PoiCctv cctv : cctvs) {
+            cctvMap.computeIfAbsent(cctv.getPoi().getId(), k -> new ArrayList<>()).add(cctv);
+        }
+        sw.stop();
+
+        sw.start("dtoMapping");
+        List<PoiDetailResponseDTO> finalResult = result.stream()
+                .map(base -> {
+                    List<String> tagNames = tagMap.getOrDefault(base.id(), Collections.emptyList());
+                    List<PoiCctvDTO> cctvDtoList = cctvMap
+                            .getOrDefault(base.id(), Collections.emptyList())
+                            .stream()
+                            .map(PoiCctvDTO::from)
+                            .toList();
+                    
+                    return base.withRelations(tagNames, cctvDtoList);
+                })
+                .toList();
+        sw.stop();
+        log.info(sw.prettyPrint());
+
+        return new PageImpl<>(finalResult, pageable, poiIdPage.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PoiDetailResponseDTO> findAllDetailPaging(int page, int size) {
+        log.info("findFilteredAllDetailPaging() start - page: {}, size: {}", page, size);
+        StopWatch sw = new StopWatch();
+
+        sw.start("findAllPaging");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Long> poiIdPage = poiRepository.findPoiIdsForPaging(pageable);
+        List<Long> poiIds = poiIdPage.getContent();
+        sw.stop();
+
+        if (poiIds.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, poiIdPage.getTotalElements());
+        }
+
+        sw.start("findDetailProjection");
+        List<PoiDetailResponseDTO> result = poiRepository.findDetailProjectionByIds(poiIds);
+        sw.stop();
+
+        sw.start("tagAndCctvFetch");
+        Map<Long, List<String>> tagMap = new HashMap<>();
+        Map<Long, List<PoiCctv>> cctvMap = new HashMap<>();
+
+        // 태그 조회 (한 번의 쿼리로 모든 POI의 태그 조회)
+        List<Object[]> tagRows = poiTagRepository.findTagNamesByPoiIds(poiIds);
+        for (Object[] row : tagRows) {
+            Long poiId = (Long) row[0];
+            String tagName = (String) row[1];
+            tagMap.computeIfAbsent(poiId, k -> new ArrayList<>()).add(tagName);
+        }
+
+        // CCTV 조회 (한 번의 쿼리로 모든 POI의 CCTV 조회)
+        List<PoiCctv> cctvs = poiCctvRepository.findByPoiIdIn(poiIds);
+        for (PoiCctv cctv : cctvs) {
+            cctvMap.computeIfAbsent(cctv.getPoi().getId(), k -> new ArrayList<>()).add(cctv);
+        }
+        sw.stop();
+
+        sw.start("dtoMapping");
+        List<PoiDetailResponseDTO> finalResult = result.stream()
+                .map(base -> {
+                    List<String> tagNames = tagMap.getOrDefault(base.id(), Collections.emptyList());
+                    List<PoiCctvDTO> cctvDtoList = cctvMap
+                            .getOrDefault(base.id(), Collections.emptyList())
+                            .stream()
+                            .map(PoiCctvDTO::from)
+                            .toList();
+                    
+                    return base.withRelations(tagNames, cctvDtoList);
+                })
+                .toList();
+        sw.stop();
+        log.info(sw.prettyPrint());
+
+        return new PageImpl<>(finalResult, pageable, poiIdPage.getTotalElements());
+    }
+
 
     @Transactional(readOnly = true)
     public PoiAlarmDetailDTO findPoiDTOByTagName(String tagName){

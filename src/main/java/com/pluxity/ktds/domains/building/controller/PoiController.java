@@ -38,25 +38,24 @@ public class PoiController {
     private final ObjectMapper objectMapper;
     private final PoiTagSyncService poiTagSyncService;
 
-//    @GetMapping
-//    public DataResponseBody<List<PoiResponseDTO>> getPoiAll() {
-//        return DataResponseBody.of(service.findAll());
-//    }
 
-    @GetMapping
-    public DataResponseBody<List<PoiDetailResponseDTO>> getPoiAllDetail() {
-        return DataResponseBody.of(service.findAllDetail());
+    @GetMapping("/paging/all")
+    public DataResponseBody<Page<PoiDetailResponseDTO>> getPoiAllDetailPaging(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "1000") int size
+    ) {
+        return DataResponseBody.of(service.findAllDetailPaging(page, size));
     }
 
     @GetMapping("/paging")
     public DataResponseBody<Page<PoiPagingResponseDTO>> getPoiAllPaging(
-        @RequestParam(value = "page", defaultValue = "0") int page,
-        @RequestParam(value = "size", defaultValue = "10") int size,
-        @RequestParam(value = "buildingId", required = false) Long buildingId,
-        @RequestParam(value = "floorNo", required = false) Integer floorNo,
-        @RequestParam(value = "poiCategoryId", required = false) Long poiCategoryId,
-        @RequestParam(value = "keywordType", required = false) String keywordType,
-        @RequestParam(value = "keyword", required = false) String keyword
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "buildingId", required = false) Long buildingId,
+            @RequestParam(value = "floorNo", required = false) Integer floorNo,
+            @RequestParam(value = "poiCategoryId", required = false) Long poiCategoryId,
+            @RequestParam(value = "keywordType", required = false) String keywordType,
+            @RequestParam(value = "keyword", required = false) String keyword
     ) {
         return DataResponseBody.of(service.findAllPaging(page, size, buildingId, floorNo, poiCategoryId, keywordType, keyword));
     }
@@ -64,6 +63,20 @@ public class PoiController {
     @GetMapping("/filter")
     public DataResponseBody<List<PoiDetailResponseDTO>> getFilteredPoiAllDetail() {
         return DataResponseBody.of(service.findFilteredAllDetail());
+    }
+
+    @GetMapping("/filter/paging")
+    public DataResponseBody<Page<PoiDetailResponseDTO>> getFilteredPoiAllDetailPaging(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "1000") int size
+    ) {
+        return DataResponseBody.of(service.findFilteredAllDetailPaging(page, size));
+    }
+
+
+    @GetMapping
+    public DataResponseBody<List<PoiDetailResponseDTO>> getPoiAllDetail() {
+        return DataResponseBody.of(service.findAllDetail());
     }
 
     @PatchMapping("/{id}/cameraId")

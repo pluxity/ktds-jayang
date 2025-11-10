@@ -520,13 +520,13 @@ const Init = (function () {
     };
 
     const getPoiRenderingAndList = async (buildingId) => {
-        await PoiManager.getFilteredPoiList().then(() => {
-            let filteredList = PoiManager.findByBuilding(buildingId)
+        await PoiManager.getFilteredPoiList(buildingId);
 
-            if (filteredList === undefined || filteredList.length < 1) {
-                console.warn('POI 가 한 개도 없습니다.');
-            }
-        });
+        let filteredList = PoiManager.findByBuilding(buildingId)
+
+        if (filteredList === undefined || filteredList.length < 1) {
+            console.warn('POI 가 한 개도 없습니다.');
+        }
     };
 
     let selectedGroup = null;

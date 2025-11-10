@@ -678,7 +678,8 @@ const moveToPoi = (id) => {
     } else {
         poiId = id;
     }
-    const poiData = Px.Poi.GetData(poiId);
+    // const poiData = Px.Poi.GetData(poiId);
+    const poiData = PoiManager.findById(poiId);
 
     if (poiData) {
         Px.Model.Visible.Show(String(poiData.property.floorId));

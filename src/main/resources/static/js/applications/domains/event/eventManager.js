@@ -1,5 +1,6 @@
 const EventManager = (() => {
 
+    let currentBuildingId = new URLSearchParams(location.search).get('buildingId');
     let ALLOWED_EVENT_TYPES = [];
 
     const isAllowedEventType = (eventType) => {
@@ -537,33 +538,46 @@ const EventManager = (() => {
             const cctvList = alarmPoi.cctvList;
             const mainCctv = cctvList?.find(cctv => cctv.isMain === 'Y');
 
-            const poiData = Px.Poi.GetData(alarmPoi.id);
+            // const poiData = Px.Poi.GetData(alarmPoi.id);
+            const poiData = PoiManager.findById(alarmPoi.id);
+
             const isViewerPage = window.location.pathname.includes('/viewer');
 
-            if (!poiData || isViewerPage) {
+            if (poiData.property.buildingId !== Number(currentBuildingId) && isViewerPage) {
                 sessionStorage.setItem('fromEvent', 'Y');
                 sessionStorage.setItem('selectedPoiId', alarmPoi.id);
                 sessionStorage.setItem('mainCctv', JSON.stringify(mainCctv));
                 window.location.href = `/map?buildingId=${alarmPoi.buildingId}`;
             } else {
+
+                const floor = BuildingManager.findFloorsByHistory().find(
+                    (floor) => Number(floor.no) === Number(poiData.property.floorNo),
+                );
+
                 Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(Number(floor.id));
 
                 const floorNo = poiData.property.floorNo;
+                const buildingId = poiData.property.buildingId;
+
+                await PoiManager.renderPoiByFloor(buildingId, floorNo);
+
                 Init.moveToFloorPage(floorNo);
                 const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
                 if (floorElement) {
-                    floorElement.click();
+                    document.querySelectorAll('#floor-info .floor-info__detail ul li').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    floorElement.classList.add('active');
                 }
 
-                Px.Poi.HideAll();
-                Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
-                Px.Camera.MoveToPoi({
+                await Px.Camera.MoveToPoi({
                     id: alarmPoi.id,
                     isAnimation: true,
                     duration: 500,
                     heightOffset: 200,
                     onComplete: async () => {
-                        Init.renderPoiInfo(poiData);
+                        await Init.renderPoiInfo(poiData);
                         if (mainCctv) {
                             const mainCCTVTemplate = await createMainCCTVPopup(mainCctv);
                             mainCCTVTemplate.style.top = '50%';
@@ -921,13 +935,13 @@ const EventManager = (() => {
 
     function createCctvItem(cctv, index = 0, isMain = false) {
         const canvasId = `cctv-${cctv.id}`;
-        // false일 때만 width, height 지정
         const canvasStyle = isMain ? '' : 'width: 340px; height: 180px;';
+        const displayName = cctv.cctvName ?? cctv.name;
 
         return `
         <div class="${isMain ? 'main-cctv-item' : 'cctv-item'}" data-cctv-id="${cctv.id}">
             <div class="cctv-header">
-                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${cctv.name}</span>
+                <span class="cctv-title">${isMain ? '메인 CCTV' : `CCTV ${index + 1}`}  |  ${displayName}</span>
                 <button type="button" class="cctv-close">×</button>
             </div>
             <div class="cctv-content">
@@ -936,6 +950,7 @@ const EventManager = (() => {
         </div>
     `;
     }
+
 
 
     // MainCCTV 팝업 생성
@@ -1495,6 +1510,7 @@ const EventManager = (() => {
         eventState,
         createMainCCTVPopup,
         createSubCCTVPopup,
+        warningPopup,
         initializeAlarms,
         initializeLatest24HoursList,
         initializeProcessChart,

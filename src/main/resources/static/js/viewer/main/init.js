@@ -598,7 +598,8 @@ const Init = (function () {
         } else {
             poiId = id;
         }
-        const poiData = Px.Poi.GetData(poiId);
+        // const poiData = Px.Poi.GetData(poiId);
+        const poiData = PoiManager.findById(poiId);
 
         if (poiData) {
             const floor = BuildingManager.findFloorsByHistory().find(

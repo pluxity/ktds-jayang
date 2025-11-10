@@ -932,11 +932,13 @@ const renderCctvList = (data) => {
 
     let rowsHtml = '';
     data.forEach((value, key) => {
-        const cctvPoiData = Px.Poi.GetData(Number(key));
+        // const cctvPoiData = Px.Poi.GetData(Number(key));
+        const cctvPoiData = PoiManager.findById(Number(key));
         console.log("cctvPoiData:", cctvPoiData);
 
         const poiCells = value.map(poiId => {
-            const poiData = Px.Poi.GetData(Number(poiId));
+            // const poiData = Px.Poi.GetData(Number(poiId));
+            const poiData = PoiManager.findById(Number(poiId));
             return `<div data-poi-id="${poiId}">${poiData.property.name}</div>`;
         }).join('');
 

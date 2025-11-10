@@ -2,6 +2,7 @@
 
 const layerPopup = (function () {
     const systemPop = document.getElementById("systemPopup");
+    let currentBuildingId = new URLSearchParams(location.search).get('buildingId');
     // 센서
     let cctvConfig = {};
     api.get('/cctv/config').then((result) => {
@@ -2574,7 +2575,7 @@ const layerPopup = (function () {
 
         const buildingList = BuildingManager.findAll();
         const parkingMap = (buildingList || []).find(building => building?.name?.includes('주차장'));
-        const currentId = new URLSearchParams(location.search).get('buildingId');
+
         document.querySelectorAll('.item__link').forEach(item => {
             item.addEventListener('click', () => {
                 document.getElementById('systemPopup').style.display = 'none';
@@ -2582,7 +2583,7 @@ const layerPopup = (function () {
                 document.getElementById('parkingTab').classList.remove('active');
 
                 const label = item.dataset.label;
-                if (String(currentId) !== String(parkingMap.id)) {
+                if (String(currentBuildingId) !== String(parkingMap.id)) {
                     sessionStorage.setItem('parkingFloor', label);
                     window.location.href = `/map?buildingId=${parkingMap.id}`;
                 }
@@ -3408,20 +3409,14 @@ const layerPopup = (function () {
             poiId = id;
         }
         // 현재 building의 POI 확인
-        let poiData = Px.Poi.GetData(poiId);
-    
-        // 현재 building에서 POI를 찾을 수 없는 경우
-        if (!poiData) {
-            // POI 정보를 서버에서 가져오기
-            const poi = await PoiManager.findById(Number(poiId));
-            if (!poi) {
-                alertSwal('POI 정보를 찾을 수 없습니다.');
-                return;
-            }
-            // 다른 building으로 이동
-            sessionStorage.setItem('selectedPoiId', poi.id);
+        let poiData = PoiManager.findById(poiId);
 
-            window.location.href = `/map?buildingId=${poi.buildingId}`;
+        // 현재 building에서 POI를 찾을 수 없는 경우
+        if (poiData.property.buildingId !== Number(currentBuildingId) ) {
+            // 다른 building으로 이동
+            sessionStorage.setItem('selectedPoiId', poiData.id);
+
+            window.location.href = `/map?buildingId=${poiData.property.buildingId}`;
             return;
         }
         const floor = BuildingManager.findFloorsByHistory().find(
@@ -3430,25 +3425,26 @@ const layerPopup = (function () {
     
         // 같은 building 내에서의 이동
         Px.Model.Visible.HideAll();
-        const building = BuildingManager.findById(poiData.property.buildingId);
-        if (building.isIndoor === 'N') {
-            Px.Model.Visible.ShowAll();
-            Px.Poi.HideAll();
-        } else {
-            Px.Model.Visible.Show(Number(floor.id));
-            Px.Poi.HideAll();
-            Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
-        }
+        Px.Model.Visible.Show(Number(floor.id));
 
         const floorNo = poiData.property.floorNo;
+        const buildingId = poiData.property.buildingId;
+
+        await PoiManager.renderPoiByFloor(buildingId, floorNo);
+
         Init.moveToFloorPage(floorNo);
         const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
         if (floorElement) {
-            floorElement.click(); // 클릭 이벤트 실행
+            // UI만 업데이트 (active 클래스 등)
+            document.querySelectorAll('#floor-info .floor-info__detail ul li').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            floorElement.classList.add('active');
         }
 
-        Px.Camera.MoveToPoi({
-            id: poiId,
+
+        await Px.Camera.MoveToPoi({
+            id: Number(poiId),
             isAnimation: true,
             duration: 500,
             heightOffset:200
@@ -3553,7 +3549,6 @@ const layerPopup = (function () {
         const buildingSelect = document.getElementById("eventBuildingSelect");
         const buildingBtn = buildingSelect.querySelector(".select-box__btn");
         const buildingContent = buildingSelect.querySelector(".select-box__content ul");
-        const currentBuildingId = new URLSearchParams(window.location.search).get("buildingId");
         buildingContent.innerHTML = '';
 
         const allFloors = buildingList.reduce((acc, building) => {
@@ -3574,7 +3569,7 @@ const layerPopup = (function () {
             const li = document.createElement('li');
             li.textContent = building.name;
 
-            if (currentBuildingId == building.id) {
+            if (Number(currentBuildingId) === building.id) {
                 buildingBtn.textContent = building.name;
                 updateFloorSelectBox(building.floors);
             }

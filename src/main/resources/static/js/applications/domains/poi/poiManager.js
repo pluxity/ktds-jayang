@@ -371,6 +371,39 @@ const PoiManager = (() => {
         });
     };
 
+
+    const renderPoiByFloor = (buildingId, floorNo) => {
+        return new Promise((resolve) => {
+            const poiData = [];
+
+            poiList.filter((poi) => {
+                return poi.property.buildingId === Number(buildingId)
+                    && poi.property.floorNo === Number(floorNo)
+                    && poi.position !== null;
+            }).forEach((poi) => {
+                poiData.push(poi.poiOptions);
+            });
+
+            Px.Poi.Clear();
+
+            Px.Poi.AddFromDataArray(poiData, () => {
+                Px.Poi.GetDataAll().forEach((poi) => {
+                    Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
+                    Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
+                    const isAdmin = window.location.href.includes('admin');
+                    if (poi.property.isLight) {
+                        Px.Poi.SetIconSize(poi.id, 50);
+                        if (!isAdmin)
+                            Px.Poi.SetTextSize(poi.id, 1);
+                    }
+                });
+                resolve();
+            });
+        });
+    };
+
+
+
     const renderPoiByIdAddByMouse = (id) => {
         const poiDataEngine = PoiManager.findById(id).poiOptions;
 
@@ -456,6 +489,8 @@ const PoiManager = (() => {
         getFilteredPoiList,
         initPlayer,
         patchPoiCameraId,
-        getAllocateFilterPoiList
+        getPoiListBatch,
+        getFilteredPoiListBatch,
+        renderPoiByFloor
     };
 })();

@@ -183,7 +183,7 @@
         const allCheck = document.getElementById('equipmentCheckBox');
         floorBtns.forEach(floorBtn => {
             floorBtn.style.cursor = 'pointer';
-            floorBtn.addEventListener('click', event => {
+            floorBtn.addEventListener('click', async event => {
                 allCheck.checked = true;
 
                 floorBtns.forEach(btn => {
@@ -205,7 +205,8 @@
                 if (allPopups) {
                     allPopups.forEach(popup => {
                         const popupPoiId = popup.querySelector('.poi-id').value;
-                        const poiInfo = Px.Poi.GetData(popupPoiId);
+                        // const poiInfo = Px.Poi.GetData(popupPoiId);
+                        const poiInfo = PoiManager.findById(popupPoiId);
                         if (poiInfo.property.floorNo !== Number(floorNo)) {
                             popup.remove();
                             layerPopup.closePlayers();
@@ -224,12 +225,15 @@
                     Px.Evac.HideAll();
                     Px.Evac.ShowByProperty('floorId', String(floor.id));
                     allCheck.checked = false;
-                }else{
-                    let allPois = PoiManager.findByBuilding(buildingId);
-                    allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-                    allPois.forEach(poi => {
-                        Px.Poi.Show(Number(poi.id));
-                    })
+                } else {
+
+                    await PoiManager.renderPoiByFloor(buildingId, floorNo);
+
+                    // let allPois = PoiManager.findByBuilding(buildingId);
+                    // allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
+                    // allPois.forEach(poi => {
+                    //     Px.Poi.Show(Number(poi.id));
+                    // })
                     equipmentGroup.forEach(equipment => {
                         equipment.classList.add('active')
                     });
@@ -257,7 +261,8 @@
                 equipmentGroup.forEach(equipment => {
                     equipment.classList.remove('active')
                 });
-                Px.Poi.HideAll();
+                // Px.Poi.HideAll();
+                Px.Poi.Clear();
             }
 
             Px.Model.Visible.ShowAll();
@@ -465,7 +470,7 @@ const Init = (function () {
                         Px.Util.SetBackgroundColor('#333333');
                         Px.Camera.FPS.SetHeightOffset(15);
                         Px.Camera.FPS.SetMoveSpeed(500);
-                        PoiManager.renderAllPoiToEngineByBuildingId(firstBuildingId);
+                        // PoiManager.renderAllPoiToEngineByBuildingId(firstBuildingId);
                         Px.Lod.SetLodData(lod);
                         if (floors.length > 1) {
                             Px.Model.Expand({
@@ -516,7 +521,7 @@ const Init = (function () {
 
     const initPoi = async (buildingId) => {
         await getPoiRenderingAndList(buildingId);
-        await PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
+        // await PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
     };
 
     const getPoiRenderingAndList = async (buildingId) => {
@@ -648,10 +653,11 @@ const Init = (function () {
 
     const moveToPoiFromUrl = () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const poiId = urlParams.get('poiId');
+        const poiId = Number(urlParams.get('poiId'));
     
         if (poiId) {
-            const poiData = Px.Poi.GetData(poiId);
+            // const poiData = Px.Poi.GetData(poiId);
+            const poiData = PoiManager.findById(poiId);
             if (poiData) {
                 Px.Model.Visible.Show(String(poiData.property.floorNo));
                 Px.Camera.MoveToPoi({
@@ -786,7 +792,9 @@ const Init = (function () {
         }
 
         if (selectedPoiId) {
-            const poiData = Px.Poi.GetData(selectedPoiId);
+            // const poiData = Px.Poi.GetData(selectedPoiId);
+            const poiData = PoiManager.findById(selectedPoiId);
+
             const floorNo = poiData?.property.floorNo;
             Init.moveToFloorPage(floorNo);
             const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
@@ -794,7 +802,7 @@ const Init = (function () {
                 floorElement.click(); // 클릭 이벤트 실행
             }
 
-            moveToPoi(selectedPoiId);
+            await moveToPoi(selectedPoiId);
             Px.Poi.Show(selectedPoiId);
 
             // fromEvent가 Y일 때만 팝업 띄우기
@@ -817,31 +825,36 @@ const Init = (function () {
         sessionStorage.removeItem('fromEvent');
     }
 
-    const moveToPoi = (id) => {
+    const moveToPoi = async (id) => {
         let poiId;
         if (id.constructor.name === 'PointerEvent') {
             poiId = id.currentTarget.getAttribute('poiid');
         } else {
             poiId = id;
         }
-        const poiData = Px.Poi.GetData(poiId);
 
-        if (poiData) {
+
+        // const poiData = Px.Poi.GetData(poiId);
+        const findPoi = PoiManager.findById(poiId);
+
+        if (findPoi) {
 
             const floor = BuildingManager.findFloorsByHistory().find(
-                (floor) => Number(floor.no) === Number(poiData.property.floorNo),
+                (floor) => Number(floor.no) === Number(findPoi.property.floorNo),
             );
 
             Px.Model.Visible.HideAll();
             // Px.Model.Visible.Show(Number(poiData.property.floorNo));
             Px.Model.Visible.Show(Number(floor.id));
-            Px.Poi.HideAll();
-            Px.Poi.ShowByProperty("floorNo", Number(poiData.property.floorNo));
-            Px.Camera.MoveToPoi({
+
+            Px.Poi.ShowByProperty("floorNo", Number(findPoi.property.floorNo));
+            await PoiManager.renderPoiByFloor(findPoi.property.buildingId, findPoi.property.floorNo);
+
+            await Px.Camera.MoveToPoi({
                 id: poiId,
                 isAnimation: true,
                 duration: 500,
-                heightOffset:200
+                heightOffset: 200
             });
         } else {
             console.warn("POI 데이터가 없습니다. ID:", poiId);
@@ -1025,8 +1038,9 @@ const Init = (function () {
             closeBtn.addEventListener('click', (event) => {
 
                 // 조명 poi일 때는 선택도 풀리게
-                const poiId = document.querySelector('.popup-info .poi-id')?.value || null;
-                const poiData = Px.Poi.GetData(Number(poiId));
+                const poiId = Number(document.querySelector('.popup-info .poi-id')?.value) || null;
+                // const poiData = Px.Poi.GetData(Number(poiId));
+                const poiData = PoiManager.findById(poiId);
                 if (poiData.property.poiCategoryName == '조명') {
                     Px.Poi.RestoreColorAll();
                     selectedGroup = null;
@@ -1179,7 +1193,8 @@ const Init = (function () {
             // PTZ 컨트롤 표시/숨김 관리 (하나로 묶어서)
             if (ptzControls) {
                 const canvasId = popupInfo.querySelector('canvas').id;
-                const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                // const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                const poiInfo = PoiManager.findById(canvasId.slice(5));
                 const isPTZ = poiInfo?.property?.poiMiddleCategoryName === 'PTZ';
 
                 if (mode === 'live' && isPTZ) {
@@ -1293,7 +1308,8 @@ const Init = (function () {
                     if(player){
                         cameraIp = player.cameraIp;
                     }else{
-                        const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                        // const poiInfo = Px.Poi.GetData(canvasId.slice(5));
+                        const poiInfo = PoiManager.findById(canvasId.slice(5));
                         cameraIp = poiInfo.property.cameraIp;
                     }
 
@@ -1408,7 +1424,8 @@ const Init = (function () {
 
         if (!player.cameraIp) {
             const poiId = canvasId.slice(5);
-            const poiInfo = Px.Poi.GetData(poiId);
+            // const poiInfo = Px.Poi.GetData(poiId);
+            const poiInfo = PoiManager.findById(poiId);
             player.cameraIp = poiInfo.property.cameraIp;
 
         }
@@ -1858,7 +1875,7 @@ const Init = (function () {
     const changeFloor = (floorName, onComplete) => {
         const {floors, camera3d} = BuildingManager.findById(BUILDING_ID);
         if (floorName === '') {
-            Px.Poi.ShowAll();
+            // Px.Poi.ShowAll();
             Px.Model.Visible.ShowAll();
             Px.Model.Expand({
                 duration: 200,
@@ -1873,13 +1890,15 @@ const Init = (function () {
         } else {
             Px.Model.Collapse({
                 duration: 0,
-                onComplete: () => {
+                onComplete: async () => {
                     Px.Model.Visible.HideAll();
                     Px.Model.Visible.Show(floorName);
 
-                    Px.Poi.HideAll();
+                    await PoiManager.renderPoiByFloor(BUILDING_ID, floorNo);
+                    Px.Camera.SetState(JSON.parse(camera3d));
 
-                    const {id: floorNo} = floors.find(floor => floor.floorName === floorName);
+                    // Px.Poi.HideAll();
+                    // const {id: floorNo} = floors.find(floor => floor.floorName === floorName);
                     Px.Poi.ShowByProperty("floorNo", floorNo);
 
                     if (onComplete) onComplete();

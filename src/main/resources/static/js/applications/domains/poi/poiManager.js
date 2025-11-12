@@ -318,7 +318,7 @@ const PoiManager = (() => {
     };
 
     const findById = (id) => {
-        return poiList.find((poi) => poi.id === id);
+        return poiList.find((poi) => poi.id === Number(id));
     };
 
     const findByCode = (code) => {

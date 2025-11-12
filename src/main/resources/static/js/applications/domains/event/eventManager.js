@@ -541,12 +541,12 @@ const EventManager = (() => {
             // const poiData = Px.Poi.GetData(alarmPoi.id);
             const poiData = PoiManager.findById(alarmPoi.id);
 
-            const isViewerPage = window.location.pathname.includes('/viewer');
-
-            if (poiData.property.buildingId !== Number(currentBuildingId) && isViewerPage) {
+            if (poiData.property.buildingId !== Number(currentBuildingId)) {
                 sessionStorage.setItem('fromEvent', 'Y');
                 sessionStorage.setItem('selectedPoiId', alarmPoi.id);
-                sessionStorage.setItem('mainCctv', JSON.stringify(mainCctv));
+                if(mainCctv) {
+                    sessionStorage.setItem('mainCctv', JSON.stringify(mainCctv));
+                }
                 window.location.href = `/map?buildingId=${alarmPoi.buildingId}`;
             } else {
 

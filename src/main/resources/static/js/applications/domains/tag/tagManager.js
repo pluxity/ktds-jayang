@@ -1399,12 +1399,15 @@ const TagManager = (() => {
     const addTagsAndShowTagData = async (poiProperty, popupInfo, statusCell) => {
         try {
             // 1. 태그 추가
-            // const addTagResponse = await addTags(poiProperty.id);
-            // if(!addTagResponse.success){
-            //     return { success: false, error: addTagResponse.error || '태그 추가 실패' };
-            // }
+            const addTagResponse = await addTags(poiProperty.id);
+            if(!addTagResponse.success) {
+                return {success: false, error: addTagResponse.error || '태그 추가 실패'};
+            }
 
-            // 2. 태그 데이터 조회 및 팝업 렌더링
+            // 2. 태그 추가 후 SI 서버 처리를 위한 대기 (0.5)
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // 3. 태그 데이터 조회 및 팝업 렌더링
             await mapTagDataToPopup(poiProperty, popupInfo, statusCell);
 
             return { success: true };

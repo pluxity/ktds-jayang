@@ -11,7 +11,6 @@ import com.pluxity.ktds.domains.tag.dto.TagResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.*;
@@ -56,13 +55,14 @@ public class TagClientService {
     public ResponseEntity<String> addTags(List<String> tags) {
         int retryCount = 0;
         int tagSize = tags.size();
+        ResponseEntity<String> response = null;
 
         while (retryCount < maxRetries) {
             try {
                 String requestStr = objectMapper.writeValueAsString(tags);
                 HttpEntity<String> request = new HttpEntity<>(requestStr, setHeaders());
 
-                ResponseEntity<String> response = restTemplate.exchange(
+                response = restTemplate.exchange(
                         baseUrl + "/?AddTags",
                         HttpMethod.POST,
                         request,
@@ -94,8 +94,7 @@ public class TagClientService {
             } catch (RestClientException e) {
                 retryCount++;
                 if (retryCount >= maxRetries) {
-                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                            .body("Service Unavailable after " + maxRetries + " retries: " + e.getMessage());
+                    return response;
                 }
                 // 재시도 간격
                 try {
@@ -112,8 +111,9 @@ public class TagClientService {
         }
 
         // 최대 재시도 횟수 초과
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body("Maximum retry attempts (" + maxRetries + ") exceeded. Expected: " + tagSize + " tags to be added");
+//        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//                .body("Maximum retry attempts (" + maxRetries + ") exceeded. Expected: " + tagSize + " tags to be added");
+        return response;
     }
 
     // 태그 값 읽기
@@ -281,6 +281,7 @@ public class TagClientService {
         int retryCount = 0;
 
         while (retryCount < maxRetries) {
+            log.info("readTags 재시도 회수 : {}", retryCount);
             try {
                 String requestStr = objectMapper.writeValueAsString(
                         tags.stream()
@@ -300,15 +301,30 @@ public class TagClientService {
                     return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No data");
                 }
                 TagResponseDTO rawResponse = objectMapper.readValue(response.getBody(), TagResponseDTO.class);
+                log.info("readTags response :{}", rawResponse);
+
+                if(rawResponse.tagCnt() == 0){
+                    // 태그 개수가 0이면 재시도
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        try {
+                            Thread.sleep(1000 * retryCount); // 재시도 간격을 점진적으로 증가
+                            log.info("testReadTags retryCount = {}, tagCnt = 0", retryCount);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body("Interrupted during retry");
+                        }
+                    }
+                    continue; // 다음 재시도로 이동
+                }
 
                 List<TagData> processedTags = new ArrayList<>();
-                boolean hasAbnormalStatus = false;
 
                 for (TagData td : rawResponse.tags()) {
 
-                    if (td.tagStatus() != TagStatus.NORMAL) {
-                        hasAbnormalStatus = true;
-                        break;
+                    if (td.tagStatus() != TagStatus.NORMAL ) {
+                        continue;
                     }
 
                     String tagName = td.tagName();
@@ -353,28 +369,14 @@ public class TagClientService {
                 }
 
                 // 모든 태그가 normal 상태인 경우에만 성공으로 처리
-                if (!hasAbnormalStatus) {
-                    TagResponseDTO processedDto = new TagResponseDTO(
-                            processedTags.size(),
-                            rawResponse.timestamp(),
-                            processedTags
-                    );
+                TagResponseDTO processedDto = new TagResponseDTO(
+                        processedTags.size(),
+                        rawResponse.timestamp(),
+                        processedTags
+                );
 
-                    String resultJson = objectMapper.writeValueAsString(processedDto);
-                    return ResponseEntity.ok(resultJson);
-                }
-
-                // abnormal 상태가 있는 경우 재시도
-                retryCount++;
-                if (retryCount < maxRetries) {
-                    try {
-                        Thread.sleep(1000 * retryCount); // 재시도 간격을 점진적으로 증가
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Interrupted during retry");
-                    }
-                }
+                String resultJson = objectMapper.writeValueAsString(processedDto);
+                return ResponseEntity.ok(resultJson);
 
             } catch (RestClientException e) {
                 retryCount++;
@@ -385,6 +387,7 @@ public class TagClientService {
                 // 재시도 간격
                 try {
                     Thread.sleep(1000 * retryCount);
+                    log.info("testReadTags RestClientException retryCount = {}", retryCount);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -398,7 +401,8 @@ public class TagClientService {
 
         // 최대 재시도 횟수 초과
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body("Maximum retry attempts (" + maxRetries + ") exceeded due to abnormal tag status");
+                .body("Maximum retry attempts (" + maxRetries + ") exceeded");
+
     }
 
     public ResponseEntity<String> testReadAlarm(List<String> tags) {
@@ -482,3 +486,4 @@ public class TagClientService {
         return tagName.replaceFirst("-\\d+$", "").stripTrailing();
     }
 }
+

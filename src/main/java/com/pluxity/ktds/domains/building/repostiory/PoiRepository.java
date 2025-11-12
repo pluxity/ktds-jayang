@@ -224,5 +224,7 @@ public interface PoiRepository extends BaseRepository<Poi, Long> {
     """)
     List<PoiDetailResponseDTO> findDetailProjectionByIds(@Param("poiIds") List<Long> poiIds);
 
+    @Query("SELECT p.cameraIp FROM Poi p WHERE p.name = :poiName")
+    List<String> findCameraIpByPoiName(String poiName);
 
 }

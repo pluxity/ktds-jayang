@@ -441,7 +441,19 @@ private boolean hasSearchConditions(Long buildingId, Integer floorNo, Long poiCa
                 .orElseThrow(() -> new CustomException(NOT_FOUND_POI, "Not Found Poi with tagName: " + tagName));
 
         for(PoiCctv pc : poi.getPoiCctvs()){
-            String cameraIp = poiCctvRepository.findCameraIpByPoiName(pc.getCctvName());
+            List<String> cameraIps = poiRepository.findCameraIpByPoiName(pc.getCctvName());
+
+            if (cameraIps.isEmpty()) {
+                throw new CustomException(NOT_FOUND_CCTV_POI,
+                        "Not Found CCTV Poi with cctvName: " + pc.getCctvName());
+            }
+
+            if (cameraIps.size() > 1) {
+                log.warn("Multiple CCTV POI found with name {}: {}", pc.getCctvName(), cameraIps);
+            }
+
+            String cameraIp = cameraIps.get(0);
+
             PoiCctvDTO dto = PoiCctvDTO.builder()
                     .id(pc.getId())
                     .cctvName(pc.getCctvName())

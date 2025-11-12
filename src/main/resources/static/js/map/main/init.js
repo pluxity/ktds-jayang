@@ -525,7 +525,7 @@ const Init = (function () {
     };
 
     const getPoiRenderingAndList = async (buildingId) => {
-        await PoiManager.getFilteredPoiList(buildingId);
+        await PoiManager.getFilteredPoiListBatch(buildingId);
 
         let filteredList = PoiManager.findByBuilding(buildingId)
 

@@ -88,7 +88,7 @@
         });
     }
 
-    await PoiManager.getFilteredPoiList();
+    await PoiManager.getFilteredPoiListBatch();
     await PatrolManager.getPatrolList();
     const updateCurrentTime = () => {
         const dateElement = document.querySelector('.header__info .date');

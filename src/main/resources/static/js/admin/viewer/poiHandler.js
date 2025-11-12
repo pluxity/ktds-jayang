@@ -1,5 +1,5 @@
 const initPoi = async () => {
-    await PoiManager.getPoiList();
+    await PoiManager.getPoiListBatch();
     await getPoiRenderingAndList();
     PoiManager.renderAllPoiToEngineByBuildingId(BUILDING_ID);
 

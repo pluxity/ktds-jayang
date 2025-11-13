@@ -805,6 +805,16 @@ const Init = (function () {
             await moveToPoi(selectedPoiId);
             Px.Poi.Show(selectedPoiId);
 
+            if (poiData.isLight) {
+                await Px.Poi.RestoreColorAll();
+                await Px.Poi.SetColorByProperty('lightGroup', poiData.property.lightGroup, '#f80606');
+            } else {
+                await Px.Poi.SetIconSize(
+                    Number(selectedPoiId),
+                    SystemSettingManager.find().poiIconSizeRatio * 2
+                );
+            }
+
             // fromEvent가 Y일 때만 팝업 띄우기
             if (fromEvent === 'Y') {
                 renderPoiInfo(poiData);

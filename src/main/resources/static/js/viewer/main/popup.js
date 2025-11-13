@@ -3465,6 +3465,8 @@ const layerPopup = (function () {
                 selectedLightGroup = poiData.property.lightGroup;
                 selectedLightId = poiData.id;
             }
+        } else {
+            Px.Poi.SetIconSize(id, SystemSettingManager.find().poiIconSizeRatio * 2);
         }
     };
 

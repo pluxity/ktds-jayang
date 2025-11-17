@@ -185,7 +185,13 @@
             floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', async event => {
                 allCheck.checked = true;
-
+                
+                const equipmentAllBtn = document.querySelector('.poi-menu__all .all');
+                const equipmentAllPopup = document.getElementById('equipmentListPop');
+                if (!equipmentAllBtn.classList.contains('active')) {
+                    equipmentAllBtn.classList.add('active');
+                    equipmentAllPopup.style.display = 'inline-block';
+                }
                 floorBtns.forEach(btn => {
                     btn.classList.remove('active');
                     const innerBtn = btn.querySelector('button');

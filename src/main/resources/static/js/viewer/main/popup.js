@@ -3402,6 +3402,11 @@ const layerPopup = (function () {
     let selectedLightGroup = null;
     let selectedLightId = null;
     const movePoi = async (id) => {
+
+        Px.VirtualPatrol.Clear();
+        Px.Model.Visible.HideAll();
+        Px.Poi.HideAll();
+
         let poiId;
         if (id.constructor.name === 'PointerEvent') {
             poiId = id.currentTarget.getAttribute('poiid');
@@ -3424,7 +3429,6 @@ const layerPopup = (function () {
         );
     
         // 같은 building 내에서의 이동
-        Px.Model.Visible.HideAll();
         Px.Model.Visible.Show(Number(floor.id));
 
         const floorNo = poiData.property.floorNo;
@@ -3433,11 +3437,11 @@ const layerPopup = (function () {
         await PoiManager.renderPoiByFloor(buildingId, floorNo);
 
         Init.moveToFloorPage(floorNo);
-        const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
+        const floorElement = document.querySelector(`li[floor-id="${floorNo}"] button`);
         if (floorElement) {
             // UI만 업데이트 (active 클래스 등)
-            document.querySelectorAll('#floor-info .floor-info__detail ul li').forEach(btn => {
-                btn.classList.remove('active');
+            document.querySelectorAll('#floor-info .floor-info__detail ul li').forEach(li => {
+                li.querySelector('button').classList.remove('active');
             });
             floorElement.classList.add('active');
         }

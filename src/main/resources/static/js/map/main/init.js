@@ -527,7 +527,6 @@ const Init = (function () {
 
     const initPoi = async (buildingId) => {
         await getPoiRenderingAndList(buildingId);
-        // await PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
     };
 
     const getPoiRenderingAndList = async (buildingId) => {
@@ -572,16 +571,14 @@ const Init = (function () {
             Px.Loader.LoadSbmUrlArray({
                 urlDataList: sbmDataArray,
                 center: "",
-                onLoad: function() {
-                    initPoi(buildingId).then(() => {
-                        moveToPoiFromSession();
-                        moveFloor();
-                    });
+                onLoad: async function () {
+                    await initPoi(buildingId);
+                    await moveToPoiFromSession();
+                    await moveFloor();
                     Px.Util.SetBackgroundColor('#111316');
                     Px.Camera.FPS.SetHeightOffset(15);
                     Px.Camera.FPS.SetMoveSpeed(500);
                     Px.Camera.EnableScreenPanning();
-                    // PoiManager.renderAllPoiToEngineByBuildingId(buildingId);
                     Px.Event.On();
                     Px.Lod.SetLodData(building.lod);
                     Px.Event.AddEventListener('pointerup', 'poi', (poiInfo) => {
@@ -808,8 +805,9 @@ const Init = (function () {
                 floorElement.click(); // 클릭 이벤트 실행
             }
 
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             await moveToPoi(selectedPoiId);
-            Px.Poi.Show(selectedPoiId);
 
             if (poiData.isLight) {
                 await Px.Poi.RestoreColorAll();
@@ -823,7 +821,7 @@ const Init = (function () {
 
             // fromEvent가 Y일 때만 팝업 띄우기
             if (fromEvent === 'Y') {
-                renderPoiInfo(poiData);
+                await renderPoiInfo(poiData);
 
                 if (mainCctv) {
                     const mainCCTVTemplate = await EventManager.createMainCCTVPopup(mainCctv);
@@ -860,11 +858,27 @@ const Init = (function () {
             );
 
             Px.Model.Visible.HideAll();
-            // Px.Model.Visible.Show(Number(poiData.property.floorNo));
             Px.Model.Visible.Show(Number(floor.id));
 
-            Px.Poi.ShowByProperty("floorNo", Number(findPoi.property.floorNo));
-            await PoiManager.renderPoiByFloor(findPoi.property.buildingId, findPoi.property.floorNo);
+            const floorNo = findPoi.property.floorNo;
+            const buildingId = findPoi.property.buildingId;
+
+            await PoiManager.renderPoiByFloor(buildingId, floorNo);
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            Init.moveToFloorPage(floorNo);
+
+            const floorElement = document.querySelector(`li[floor-id="${floorNo}"] button`);
+
+            if (floorElement) {
+                // UI만 업데이트 (active 클래스 등)
+                document.querySelectorAll('#floor-info .floor-info__detail ul li').forEach(li => {
+                    li.querySelector('button').classList.remove('active');
+                });
+                floorElement.classList.add('active');
+            }
+
 
             await Px.Camera.MoveToPoi({
                 id: poiId,

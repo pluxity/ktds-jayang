@@ -181,6 +181,10 @@ const renderPoi = async (rawData = []) => {
         sort: false,
         fixedHeader: true,
         style: {
+            th: {
+                'text-align': 'center',
+                'vertical-align': 'middle'
+            },
             td: {
                 'text-align': 'center',
                 'vertical-align': 'middle',

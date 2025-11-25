@@ -295,6 +295,36 @@ const Init = (function () {
         })
     }
 
+    const outlineTargets = new Map();
+
+    function rebuildOutlineTargets() {
+        outlineTargets.clear();
+        const hierarchy = Px.Model.GetHierarchy();
+        hierarchy.forEach(({ name, target }) => {
+            const displayName = target?.userData?.DisplayName;
+            if (!displayName) return;
+            const list = outlineTargets.get(displayName) || [];
+            list.push(name);
+            outlineTargets.set(displayName, list);
+        });
+    }
+
+    function bindSystemTabHoverOutline() {
+        const tabs = document.querySelectorAll('#systemTab ul li');
+        tabs.forEach((tab) => {
+            tab.addEventListener('mouseenter', () => {
+                const name = tab.textContent.trim();
+                const ids = outlineTargets.get(name);
+                Px.Effect.Outline.Clear();
+                if (!ids) return;
+                ids.forEach((id) => Px.Effect.Outline.Add(id));
+            });
+            tab.addEventListener('mouseleave', () => {
+                Px.Effect.Outline.Clear();
+            });
+        });
+    }
+
     const initializeOutdoorBuilding = async (onComplete) => {
         try {
             const container = document.getElementById('webGLContainer');
@@ -417,6 +447,10 @@ const Init = (function () {
                         });
 
                         contents.style.position = 'static';
+
+                        rebuildOutlineTargets();
+                        bindSystemTabHoverOutline();
+
                         if (onComplete) onComplete();
 
                     }

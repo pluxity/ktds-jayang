@@ -127,6 +127,27 @@ const EventManager = (() => {
         }
     }
 
+    const alertAudio = new Audio('/static/audio/audio.mp3');
+    alertAudio.preload = 'auto';
+    // 볼륨 조절 필요할때
+    // alertAudio.muted = false;
+    // alertAudio.volume = 1.0;
+
+    const playAlertSound = () => {
+        try {
+            alertAudio.currentTime = 0;
+            alertAudio.play()
+                .then(() => {
+                    console.log('alert audio play success',
+                        'muted:', alertAudio.muted,
+                        'volume:', alertAudio.volume);
+                })
+                .catch(err => console.warn('alert audio play failed:', err));
+        } catch (err) {
+            console.warn('alert audio play threw:', err);
+        }
+    };
+
     const connectToSSE = () => {
         // 이미 연결 중이면 중복 실행 방지
         if (eventSource && (eventSource.readyState === EventSource.CONNECTING || eventSource.readyState === EventSource.OPEN)) {
@@ -172,6 +193,7 @@ const EventManager = (() => {
                 popup.style.zIndex = '999';
 
                 layerPopup.pagingNotice([notice], 1);
+                playAlertSound();
             });
 
             // vms 이벤트 발생
@@ -320,6 +342,7 @@ const EventManager = (() => {
                     Px.VirtualPatrol.Clear();
                     // Px.Poi.ShowAll();
                     warningPopup(alarm);
+                    playAlertSound();
                 } catch (error) {
                     console.error('알람 데이터 파싱 오류:', error);
                 }
@@ -1503,9 +1526,6 @@ const EventManager = (() => {
         layerPopup.closePlayers();
     };
 
-
-
-
     return {
         eventState,
         createMainCCTVPopup,
@@ -1524,7 +1544,7 @@ const EventManager = (() => {
         resetCamera,
         stopZoom,
         stopFocus,
-        stopIris
+        stopIris,
     }
 })();
 

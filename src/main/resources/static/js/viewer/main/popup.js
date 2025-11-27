@@ -707,12 +707,11 @@ const layerPopup = (function () {
     }
 
     // category list click > popup mapping
-    function setCategoryData(title, pois, clickedItem = null, refresh = false) {
+    function setCategoryData(title, poiList, clickedItem = null, refresh = false) {
         document.body.style.overflow = 'hidden';
         const titleElement = document.querySelector('#layerPopup .popup-basic__head .name');
         const popup = document.getElementById('layerPopup');
         const currentTitle = titleElement.textContent;
-        const totalElement = document.querySelector('.search-result__contents .title');
         const newTitle = title.toUpperCase();
         const accordionContainer = document.querySelector('.accordion');
         
@@ -721,7 +720,7 @@ const layerPopup = (function () {
         }
 
         // pois가 없을 때 빈 상태 처리
-        if (pois.length === 0) {
+        if (poiList.length === 0) {
             const noPoiDiv = document.createElement('div');
             noPoiDiv.className = 'no-poi-message';
             noPoiDiv.style.textAlign = 'center';
@@ -741,13 +740,13 @@ const layerPopup = (function () {
         const floorSet = new Set();
 
         const lightGroupCount = new Set(
-            pois
-                .filter(poi => poi.poiMiddleCategoryDetail?.name === '전등')
-                .map(poi => poi.property.lightGroup)
+            poiList
+                .filter(poi => poi.poiMiddleCategoryName === '전등')
+                .map(poi => poi.lightGroup)
         ).size;
 
-        const categoryCounts = pois.reduce((acc, poi) => {
-            const category = poi.poiMiddleCategoryDetail?.name || '기타';
+        const categoryCounts = poiList.reduce((acc, poi) => {
+            const category = poi.poiMiddleCategoryName || '기타';
             if (category !== '전등') {
                 acc[category] = (acc[category] || 0) + 1;
             }
@@ -767,10 +766,10 @@ const layerPopup = (function () {
 
         const seenLightGroups = new Set();
         // accordion data set
-        pois.forEach(poi => {
-            const category = poi.poiMiddleCategoryDetail?.name || '기타';
+        poiList.forEach(poi => {
+            const category = poi.poiMiddleCategoryName || '기타';
             if (category === '전등') {
-                const groupKey = poi.property.lightGroup;
+                const groupKey = poi.lightGroup;
                 if (!seenLightGroups.has(groupKey)) {
                     seenLightGroups.add(groupKey);
 
@@ -826,20 +825,17 @@ const layerPopup = (function () {
         popup.style.position = 'absolute';
         popup.style.top = '50%';
         popup.style.transform = 'translate(25%, -50%)';
-        // popup.style.zIndex = '50';
-        // total count
-        // totalElement.innerHTML = `총 ${pois.length.toLocaleString()} <button id="resultRefreshBtn" type="button" class="reflesh"><span class="hide">새로고침</span></button>`;
         if (newTitle == '조명') {
             document.getElementById("totalEqCount").textContent =
-                new Set(pois.map(poi => poi.property.lightGroup)).size.toLocaleString();
+                new Set(poiList.map(poi => poi.lightGroup)).size.toLocaleString();
         } else {
-            document.getElementById("totalEqCount").textContent = pois.length.toLocaleString();
+            document.getElementById("totalEqCount").textContent = poiList.length.toLocaleString();
         }
     }
 
     function createAccordion2(poi, categoryCount) {
         const accordionElement = document.getElementById('mainAccordion');
-        const categoryName = poi.poiMiddleCategoryDetail?.name || '기타';
+        const categoryName = poi.poiMiddleCategoryName || '기타';
 
         let existingBtn = accordionElement.querySelector(`.accordion__btn[data-category="${categoryName}"]`);
         let accordionDetail;
@@ -917,7 +913,7 @@ const layerPopup = (function () {
     // accordion data set
     function createAccordion(poi, categoryCount) {
         const accordionElement = document.getElementById('mainAccordion');
-        const categoryName = poi.poiMiddleCategoryDetail?.name || '기타';
+        const categoryName = poi.poiMiddleCategoryName || '기타';
 
         let accordionBtn = accordionElement.querySelector(`.accordion__btn[data-category="${categoryName}"]`);
         let accordionDetail;
@@ -986,12 +982,11 @@ const layerPopup = (function () {
         tdEquipment.setAttribute('data-poi-id', poi.id);
         tdEquipment.style.cursor = 'pointer';
 
-        if (poi.property.poiCategoryName == '조명') {
-            tdEquipment.innerHTML = `${poi.property.lightGroup}`;
+        if (poi.poiCategoryName == '조명') {
+            tdEquipment.innerHTML = `${poi.lightGroup}`;
         } else {
             tdEquipment.innerHTML = `${poi.name}`;
         }
-        // tdEquipment.innerHTML = `${poi.poiMiddleCategoryDetail.name} ${poi.name}`;
         tr.appendChild(tdBuilding);
         tr.appendChild(tdFloor);
         tr.appendChild(tdEquipment);
@@ -3405,7 +3400,6 @@ const layerPopup = (function () {
 
         Px.VirtualPatrol.Clear();
         Px.Model.Visible.HideAll();
-        Px.Poi.HideAll();
 
         let poiId;
         if (id.constructor.name === 'PointerEvent') {
@@ -3445,6 +3439,13 @@ const layerPopup = (function () {
             });
             floorElement.classList.add('active');
         }
+
+        const allCheck = document.getElementById('equipmentCheckBox');
+        allCheck.checked = true;
+        const equipmentGroup = document.querySelectorAll('.equip-group a');
+        equipmentGroup.forEach(equipment => {
+            equipment.classList.add('active')
+        });
 
 
         await Px.Camera.MoveToPoi({
@@ -3668,9 +3669,6 @@ const layerPopup = (function () {
         } else {
             poiBtn.classList.remove("select__btn--disabled");
 
-            // const poiCategories = Array.from(
-            //     new Map(poiList.map(poi => [poi.poiCategoryDetail.id, poi.poiCategoryDetail])).values()
-            // );
             const poiCategories = Array.from(
                 new Map(poiList.map(poi => [poi.poiMiddleCategoryDetail.id, poi.poiMiddleCategoryDetail])).values()
             );
@@ -4442,12 +4440,10 @@ const layerPopup = (function () {
         setPoiEvent,
         createEventPopup,
         pagingNotice,
-        addClosePopup,
         setTab,
         setLight,
         setAirTab,
         setEscalator,
-        clearAllIntervals,
         setParking,
         resetParkingFilterUI,
         loadAircons

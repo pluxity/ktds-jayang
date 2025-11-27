@@ -591,9 +591,9 @@ const EventManager = (() => {
                 const floorElement = document.querySelector(`li[floor-id="${floorNo}"]`);
                 if (floorElement) {
                     document.querySelectorAll('#floor-info .floor-info__detail ul li').forEach(btn => {
-                        btn.classList.remove('active');
+                        btn.querySelector('button').classList.remove('active');
                     });
-                    floorElement.classList.add('active');
+                    floorElement.querySelector('button').classList.add('active');
                 }
 
                 await Px.Camera.MoveToPoi({

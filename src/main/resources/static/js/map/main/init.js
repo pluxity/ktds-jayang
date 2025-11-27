@@ -11,9 +11,7 @@
         const {result: data} = result.data;
         document.querySelector('.header__info .head__name').innerHTML = data.name;
         document.querySelector('.header__info .head__level').innerHTML = data.groupName;
-        // if (data.role !== 'ADMIN') {
-        //     document.querySelector("#userBox > div.user-content-wrap > button.admin-button").style.display = 'none';
-        // }
+
     });
 
     function getCookie(name) {
@@ -51,7 +49,6 @@
 
     function setCategoryId(elements, categoryIds) {
         const params = new URLSearchParams(window.location.search);
-        let buildingId = params.get('buildingId');
         elements.forEach(element => {
             // const elementClasses = element.className.split(' ').map(className => className.toLowerCase());
             let elementText = "";
@@ -181,30 +178,39 @@
         const params = new URLSearchParams(window.location.search);
         let buildingId = params.get('buildingId');
         const allCheck = document.getElementById('equipmentCheckBox');
+
+        allCheck.checked = false;
+        const equipmentGroup = document.querySelectorAll('.equip-group a');
+        equipmentGroup.forEach(equipment => {
+            equipment.classList.remove('active')
+        });
+
         floorBtns.forEach(floorBtn => {
             floorBtn.style.cursor = 'pointer';
             floorBtn.addEventListener('click', async event => {
-                allCheck.checked = true;
-                
                 const equipmentAllBtn = document.querySelector('.poi-menu__all .all');
                 const equipmentAllPopup = document.getElementById('equipmentListPop');
                 if (!equipmentAllBtn.classList.contains('active')) {
                     equipmentAllBtn.classList.add('active');
                     equipmentAllPopup.style.display = 'inline-block';
                 }
+
+                allCheck.checked = false;
+                const equipmentGroup = document.querySelectorAll('.equip-group a');
+                equipmentGroup.forEach(equipment => {
+                    equipment.classList.remove('active')
+                });
+
                 floorBtns.forEach(btn => {
-                    btn.classList.remove('active');
+                    btn.querySelector('button').classList.remove('active');
                     const innerBtn = btn.querySelector('button');
                     if (innerBtn) innerBtn.classList.remove('active');
                 });
 
-                floorBtn.classList.add('active');
-                const btnInLi = floorBtn.querySelector('button');
-                if (btnInLi) btnInLi.classList.add('active');
+                floorBtn.querySelector('button').classList.add('active');
 
-                Px.VirtualPatrol.Clear();
-                Px.Model.Visible.HideAll();
-                Px.Poi.HideAll();
+                Px.Poi.Clear();
+
                 let floorNo = floorBtn.getAttribute('floor-id');
                 // 다른 층 클릭하면 기존 poi popup 제거
                 const allPopups = document.querySelectorAll('.popup-info');
@@ -224,26 +230,14 @@
                     (floor) => Number(floor.no) === Number(floorNo),
                 );
 
-                Px.Model.Visible.Show(floor.id);
-
                 if (document.querySelector('.shelter').classList.contains('active')) {
                     Px.Poi.HideAll();
                     Px.Evac.HideAll();
                     Px.Evac.ShowByProperty('floorId', String(floor.id));
-                    allCheck.checked = false;
-                } else {
-
-                    await PoiManager.renderPoiByFloor(buildingId, floorNo);
-
-                    // let allPois = PoiManager.findByBuilding(buildingId);
-                    // allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-                    // allPois.forEach(poi => {
-                    //     Px.Poi.Show(Number(poi.id));
-                    // })
-                    equipmentGroup.forEach(equipment => {
-                        equipment.classList.add('active')
-                    });
                 }
+                Px.VirtualPatrol.Clear();
+                Px.Model.Visible.HideAll();
+                Px.Model.Visible.Show(floor.id);
                 Px.Camera.ExtendView(false, 0, 70);
             })
         })
@@ -370,51 +364,24 @@
     const allCheck = document.getElementById('equipmentCheckBox');
     const equipmentGroup = document.querySelectorAll('.equip-group a');
     allCheck.addEventListener('change', () => {
-        const activeFloor = document.querySelector('.floor-info__detail ul li.active');
-        const floorNo = activeFloor?.getAttribute('floor-id');
-        let allPois = PoiManager.findByBuilding(buildingId);
+        const activeFloorLi = document.querySelector('.floor-info__detail ul li button.active')?.closest('li');
+        const floorNo = activeFloorLi?.getAttribute('floor-id');
         if (allCheck.checked) {
             if(floorNo) {
-                allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-                allPois.forEach(poi => {
-                    Px.Poi.Show(Number(poi.id));
-                });
+                PoiManager.renderPoiByFloor(buildingId, floorNo);
             }else{
                 Px.Poi.ShowAll();
             }
-            equipmentGroup.forEach(equipment => {
+                equipmentGroup.forEach(equipment => {
                 equipment.classList.add('active')
             });
         } else {
             equipmentGroup.forEach(equipment => {
                 equipment.classList.remove('active')
             });
-            Px.Poi.HideAll();
+            Px.Poi.Clear();
         }
     })
-
-    // const equipmentCategoryActiveHover = (floorNo) => {
-    //     const params = new URLSearchParams(window.location.search);
-    //     const buildingId = params.get('buildingId');
-    //     const categoryIdSet = new Set();
-    //     let allPois = PoiManager.findByBuilding(buildingId);
-    //     if(floorNo) {
-    //         allPois = allPois.filter(poi => poi.floorNo === Number(floorNo));
-    //     }
-    //     allPois.forEach(poi => {
-    //         Px.Poi.Show(Number(poi.id));
-    //         categoryIdSet.add(Number(poi.property.poiCategoryId));
-    //     });
-    //
-    //     equipmentGroup.forEach(equipment => {
-    //         const categoryId = Number(equipment.getAttribute('data-category-id'));
-    //         if (categoryIdSet.has(categoryId)) {
-    //             equipment.classList.add('active');
-    //         } else {
-    //             equipment.classList.remove('active');
-    //         }
-    //     })
-    // }
 
     initFloors();
     initCategory();

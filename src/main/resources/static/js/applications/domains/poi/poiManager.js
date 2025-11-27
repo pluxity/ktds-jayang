@@ -169,7 +169,7 @@ const PoiManager = (() => {
     const getPoi = (id) => {
         return new Promise((resolve) => {
             api.get(`/poi/${id}`).then((result) => {
-                const { data } = result;
+                const { result: data } = result.data;
                 const poi = dtoToModel(data);
                 resolve(poi);
             });
@@ -402,6 +402,36 @@ const PoiManager = (() => {
         });
     };
 
+    const renderPoiByFloorAndCategory = (buildingId, floorNo, categoryId) => {
+        return new Promise((resolve) => {
+            const poiData = [];
+
+            poiList.filter((poi) => {
+                return poi.property.buildingId === Number(buildingId)
+                    && poi.property.floorNo === Number(floorNo)
+                    && poi.property.poiCategoryId === Number(categoryId)
+                    && poi.position !== null;
+            }).forEach((poi) => {
+                poiData.push(poi.poiOptions);
+            });
+
+            Px.Poi.AddFromDataArray(poiData, () => {
+                Px.Poi.GetDataAll().forEach((poi) => {
+                    Px.Poi.SetIconSize(poi.id, SystemSettingManager.find().poiIconSizeRatio);
+                    Px.Poi.SetTextSize(poi.id, SystemSettingManager.find().poiTextSizeRatio);
+                    const isAdmin = window.location.href.includes('admin');
+                    if (poi.property.isLight) {
+                        Px.Poi.SetIconSize(poi.id, 50);
+                        if (!isAdmin)
+                            Px.Poi.SetTextSize(poi.id, 1);
+                    }
+                    Px.Poi.ShowByProperty("poiCategoryId", categoryId);
+                });
+                resolve();
+            });
+        });
+    };
+
 
 
     const renderPoiByIdAddByMouse = (id) => {
@@ -491,6 +521,7 @@ const PoiManager = (() => {
         patchPoiCameraId,
         getPoiListBatch,
         getFilteredPoiListBatch,
-        renderPoiByFloor
+        renderPoiByFloor,
+        renderPoiByFloorAndCategory
     };
 })();

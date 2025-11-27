@@ -101,10 +101,11 @@
     const handleEquipmentClick = (event) => {
         event.preventDefault();
         const categoryId = Number(event.target.getAttribute('data-category-id'));
-        const floor = document.querySelector('#floor-info .floor-info__detail ul li.active');
-        const floorNo = floor ? Number(floor.getAttribute('floor-id')) : null;
+        const activeFloorLi = document.querySelector('.floor-info__detail ul li button.active')?.closest('li');
+        const floorNo = activeFloorLi?.getAttribute('floor-id');
         const isActive = event.target.classList.toggle('active');
         const checkBox = document.querySelector('#equipmentCheckBox');
+        const buildingId = new URLSearchParams(window.location.search).get('buildingId');
 
         const equipments = document.querySelectorAll('#equipmentGroup a');
 
@@ -121,9 +122,9 @@
 
         if (floorNo !== null) {
             if (isActive) {
-                Px.Poi.ShowByPropertyArray({ "floorNo": floorNo, "poiCategoryId": categoryId });
+                PoiManager.renderPoiByFloorAndCategory(buildingId, floorNo, categoryId);
             } else {
-                Px.Poi.HideByPropertyArray({ "floorNo": floorNo, "poiCategoryId": categoryId });
+                Px.Poi.HideByProperty("poiCategoryId", categoryId);
             }
         } else {
             if (isActive) {
@@ -376,10 +377,7 @@
         }
     }
 
-    // side
-    let _lastPoiCategoryId = null;
     const handlePoiMenuClick = (event) => {
-        // event.preventDefault();
 
         const popups = document.querySelectorAll('.popup-info');
         popups.forEach(popup => popup.remove());
@@ -392,8 +390,6 @@
         if (searchText && searchText.value.trim() !== '') {
             searchText.value = '';
         }
-
-        // poiMenuList.forEach(li => li.classList.remove('active'));
 
         selectBtn.forEach(btn => {
             if (btn.classList.contains('select-box__btn--active')) {

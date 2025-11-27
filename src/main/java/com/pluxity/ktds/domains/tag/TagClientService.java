@@ -328,8 +328,19 @@ public class TagClientService {
                     }
 
                     String tagName = td.tagName();
-                    String[] parts = tagName.split("-");
                     String rawValue = td.currentValue();
+
+                    if (tagName.toLowerCase().contains("dimmer")) {
+                        processedTags.add(new TagData(
+                                tagName,
+                                rawValue,
+                                td.tagStatus(),
+                                td.alarmStatus()
+                        ));
+                        continue;
+                    }
+
+                    String[] parts = tagName.split("-");
                     String enumName = parts[parts.length - 1];
                     String desc = null;
                     String prefix = parts[0];

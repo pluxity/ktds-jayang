@@ -955,10 +955,23 @@ const TagManager = (() => {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         console.log("tag : ", tag);
                         const statusText = {0: 'ON', 1: 'OFF'}[tag.currentValue];
+
+                        let finalText = statusText;
+
+                        if (tag.tagName && tag.tagName.toLowerCase().includes('dimmer')) {
+                            if (tag.tagName.toLowerCase().includes('dimmer.l')) {
+                                if (tag.currentValue == 0) finalText = '소등';
+                                else if (tag.currentValue == 1) finalText = '점등';
+                                else if (tag.currentValue == 2) finalText = '고장(LED램프)';
+                                else if (tag.currentValue == 3) finalText = '소등(센서)';
+                            } else if (tag.tagName.toLowerCase().includes('dimmer.d')) {
+                                if (tag.currentValue == 1) finalText = '고장(디머)';
+                            }
+                        }
                         return `
                             <tr>
                                 <td>상태</td>
-                                <td>${statusText}</td>
+                                <td>${finalText}</td>
                             </tr>
                         `;
                     }).join('');

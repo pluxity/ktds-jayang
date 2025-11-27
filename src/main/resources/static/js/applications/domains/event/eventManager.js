@@ -129,23 +129,25 @@ const EventManager = (() => {
 
     const alertAudio = new Audio('/static/audio/audio.mp3');
     alertAudio.preload = 'auto';
+    let alertStopTimer = null;
     // 볼륨 조절 필요할때
     // alertAudio.muted = false;
     // alertAudio.volume = 1.0;
 
     const playAlertSound = () => {
-        try {
-            alertAudio.currentTime = 0;
-            alertAudio.play()
-                .then(() => {
-                    console.log('alert audio play success',
-                        'muted:', alertAudio.muted,
-                        'volume:', alertAudio.volume);
-                })
-                .catch(err => console.warn('alert audio play failed:', err));
-        } catch (err) {
-            console.warn('alert audio play threw:', err);
-        }
+        if (alertStopTimer) clearTimeout(alertStopTimer);
+        alertAudio.muted = false;
+        alertAudio.volume = 1.0;
+        alertAudio.currentTime = 0;
+
+        alertAudio.play()
+            .then(() => {
+                alertStopTimer = setTimeout(() => {
+                    alertAudio.pause();
+                    alertAudio.currentTime = 0;
+                }, 2000);
+            })
+            .catch(err => console.warn('alert audio play failed:', err));
     };
 
     const connectToSSE = () => {

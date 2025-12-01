@@ -91,10 +91,10 @@
 										<th>이름</th>
 										<td ><input type="text" name="name" id="registNickname" class="form-control input-sm" maxlength="16" title="이름" required data-rules="required" data-tagname="이름"></td>
 									</tr>
-									<tr>
+									<tr style="display: none">
 										<th>관리자 여부</th>
 										<td >
-											<input class="form-check-input" type="checkbox" id="resgistRole" name="role" value="ADMIN">
+											<input class="form-check-input" type="checkbox" id="resgistRole" name="role" value="ADMIN" checked>
 										</td>
 									</tr>
 								</tbody>
@@ -152,7 +152,7 @@
 									<th>이름</th>
 									<td ><input type="text" name="name" id="modifyNickname" class="form-control input-sm" maxlength="16" title="이름" required data-rules="required" data-tagname="이름"></td>
 								</tr>
-								<tr>
+								<tr style="display: none">
 									<th>관리자 여부</th>
 									<td >
 										<input class="form-check-input" type="checkbox" id="modifyRole" name="role" value="ADMIN">

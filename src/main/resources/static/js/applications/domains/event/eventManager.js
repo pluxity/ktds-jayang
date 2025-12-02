@@ -127,6 +127,7 @@ const EventManager = (() => {
         }
     }
 
+    // const alertAudio = new Audio('/static/audio/audio.mp3');
     const alertAudio = new Audio('/static/audio/audio.mp3');
     alertAudio.preload = 'auto';
     let alertStopTimer = null;
@@ -141,13 +142,16 @@ const EventManager = (() => {
         alertAudio.currentTime = 0;
 
         alertAudio.play()
-            .then(() => {
-                alertStopTimer = setTimeout(() => {
-                    alertAudio.pause();
-                    alertAudio.currentTime = 0;
-                }, 2000);
-            })
             .catch(err => console.warn('alert audio play failed:', err));
+
+        // alertAudio.play()
+        //     .then(() => {
+        //         alertStopTimer = setTimeout(() => {
+        //             alertAudio.pause();
+        //             alertAudio.currentTime = 0;
+        //         }, 3000);
+        //     })
+        //     .catch(err => console.warn('alert audio play failed:', err));
     };
 
     const connectToSSE = () => {
@@ -195,7 +199,7 @@ const EventManager = (() => {
                 popup.style.zIndex = '999';
 
                 layerPopup.pagingNotice([notice], 1);
-                playAlertSound();
+                // playAlertSound();
             });
 
             // vms 이벤트 발생
@@ -334,9 +338,10 @@ const EventManager = (() => {
                 try {
                     const alarm = JSON.parse(event.data);
                     console.log("alarm : ", alarm);
-                    
+                    console.log("event : ", event);
+
                     // 허용되지 않은 이벤트 타입은 무시
-                    if(!isAllowedEventType(alarm.event)){
+                    if (!isAllowedEventType(alarm.event)) {
                         console.log('허용되지 않은 이벤트: ', alarm.event);
                         return;
                     }
@@ -344,7 +349,16 @@ const EventManager = (() => {
                     Px.VirtualPatrol.Clear();
                     // Px.Poi.ShowAll();
                     warningPopup(alarm);
-                    playAlertSound();
+                    const alertEventMap = {
+                        FI: ['경보'],
+                        BL: ['alarm'],
+                    };
+
+                    if (alertEventMap[alarm.process]?.includes(alarm.event.toLowerCase())) {
+                        console.log("playAlertSound : ", playAlertSound);
+                        playAlertSound();
+                    }
+
                 } catch (error) {
                     console.error('알람 데이터 파싱 오류:', error);
                 }
@@ -537,8 +551,18 @@ const EventManager = (() => {
 
             // 이벤트 해제, 3d맵 이동 이벤트
             const buttons = warningTemplate.querySelector('.buttons');
-            buttons.querySelector('.button--ghost-middle').onclick = () => handleAlarmConfirm(alarm.id);
-            buttons.querySelector('.button--solid-middle').onclick = () => handle3DMapMove(alarmedPoi);
+            buttons.querySelector('.button--ghost-middle').onclick = () => {
+                handleAlarmConfirm(alarm.id);
+                console.log("alertAudio : ", alertAudio);
+                alertAudio.pause();
+                alertAudio.currentTime = 0;
+            };
+
+            buttons.querySelector('.button--solid-middle').onclick = () => {
+                handle3DMapMove(alarmedPoi);
+                alertAudio.pause();
+                alertAudio.currentTime = 0;
+            };
         } catch (error) {
             console.log('팝업 생성 실패', error);
         }

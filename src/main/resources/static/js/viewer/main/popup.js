@@ -982,7 +982,7 @@ const layerPopup = (function () {
         tdEquipment.setAttribute('data-poi-id', poi.id);
         tdEquipment.style.cursor = 'pointer';
 
-        if (poi.poiCategoryName == '조명') {
+        if (poi.poiCategoryDetail.name == '조명') {
             tdEquipment.innerHTML = `${poi.lightGroup}`;
         } else {
             tdEquipment.innerHTML = `${poi.name}`;

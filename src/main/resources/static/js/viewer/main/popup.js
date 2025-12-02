@@ -741,12 +741,12 @@ const layerPopup = (function () {
 
         const lightGroupCount = new Set(
             poiList
-                .filter(poi => poi.poiMiddleCategoryName === '전등')
+                .filter(poi => poi.poiMiddleCategoryDetail?.name === '전등')
                 .map(poi => poi.lightGroup)
         ).size;
 
         const categoryCounts = poiList.reduce((acc, poi) => {
-            const category = poi.poiMiddleCategoryName || '기타';
+            const category = poi.poiMiddleCategoryDetail?.name || '기타';
             if (category !== '전등') {
                 acc[category] = (acc[category] || 0) + 1;
             }
@@ -767,7 +767,7 @@ const layerPopup = (function () {
         const seenLightGroups = new Set();
         // accordion data set
         poiList.forEach(poi => {
-            const category = poi.poiMiddleCategoryName || '기타';
+            const category = poi.poiMiddleCategoryDetail?.name || '기타';
             if (category === '전등') {
                 const groupKey = poi.lightGroup;
                 if (!seenLightGroups.has(groupKey)) {
@@ -913,7 +913,7 @@ const layerPopup = (function () {
     // accordion data set
     function createAccordion(poi, categoryCount) {
         const accordionElement = document.getElementById('mainAccordion');
-        const categoryName = poi.poiMiddleCategoryName || '기타';
+        const categoryName = poi.poiMiddleCategoryDetail?.name || '기타';
 
         let accordionBtn = accordionElement.querySelector(`.accordion__btn[data-category="${categoryName}"]`);
         let accordionDetail;
@@ -3455,7 +3455,7 @@ const layerPopup = (function () {
             heightOffset:200
         });
 
-        if (poiData.property.lightGroup) {
+        if (poiData.property.poiCategoryName == '조명') {
             if (selectedLightGroup === poiData.property.lightGroup) {
                 if (selectedLightId === poiData.id) {
                     Px.Poi.RestoreColorAll();
@@ -3466,7 +3466,12 @@ const layerPopup = (function () {
                 }
             } else {
                 Px.Poi.RestoreColorAll();
-                Px.Poi.SetColorByProperty('lightGroup', poiData.property.lightGroup, '#f80606');
+                if (poiData.property.lightGroup) {
+                    Px.Poi.SetColorByProperty('lightGroup', poiData.property.lightGroup, '#f80606');
+                } else {
+                    Px.Poi.SetColorByProperty('name', poiData.property.name, '#f80606');
+                }
+
                 selectedLightGroup = poiData.property.lightGroup;
                 selectedLightId = poiData.id;
             }

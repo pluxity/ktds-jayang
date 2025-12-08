@@ -305,7 +305,7 @@ const TagManager = (() => {
                         })
                         .filter(row => row.trim() !== '')
                         .join('');
-                } else if (['소방', '출입통제', '누수', '비상벨'].includes(poiProperty.poiCategoryName)) {
+                } else if (['소방', '누수', '비상벨'].includes(poiProperty.poiCategoryName)) {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         const statusText = {0: '정상', 1: '경보'}[tag.currentValue];
                         return `
@@ -953,7 +953,6 @@ const TagManager = (() => {
                 } else if (['조명', '항공장애'].includes(poiProperty.poiCategoryName)) {
 
                     tbody.innerHTML = data.TAGs.map(tag => {
-                        console.log("tag : ", tag);
                         const tagName = tag.tagName || '';
                         const lowerTag = tagName.toLowerCase();
                         const statusText = {0: 'ON', 1: 'OFF'}[tag.currentValue];
@@ -976,6 +975,8 @@ const TagManager = (() => {
                                 if (tag.currentValue == 1) finalText = '고장(디머)';
                             }
                         }
+
+                        if (finalText === undefined) return '';
 
                         return `
                             <tr>
@@ -1137,6 +1138,25 @@ const TagManager = (() => {
                     parent.style.overflowX = 'hidden';
                     parent.style.borderTop = '1px solid #ccc';
 
+                } else if(poiProperty.poiCategoryName === '출입통제') {
+                    const statusMap = {
+                        1: '잠금',
+                        2: '스케줄 개방',
+                        3: '스케줄 잠금',
+                        4: '수동 개방',
+                        5: '수동 잠금',
+                        6: '화재 개방',
+                        7: '임시 개방',
+                    }
+                    tbody.innerHTML = data.TAGs.map(tag => {
+                        const statusText = statusMap[tag.currentValue]
+                        return `
+                            <tr>
+                                <td>상태</td>
+                                <td>${statusText}</td>
+                            </tr>
+                        `;
+                    }).join('');
                 } else {
                     tbody.innerHTML = data.TAGs.map(tag => {
                         const statusCell = poiProperty.poiCategoryName === '공기질'

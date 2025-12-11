@@ -83,12 +83,12 @@ const modifySetting = () => {
             alertSwal('POI 라인 길이는 10이상 999이하여야 합니다.').then(() => lineInput.focus());
             return;
         }
-        if (!(poiIconSizeRatio >= 10.0 && poiIconSizeRatio <= 100.0)) {
-            alertSwal('POI 아이콘 비율은 10이상 100이하여야합니다.').then(() => iconInput?.focus());
+        if (!(poiIconSizeRatio >= 10.0 && poiIconSizeRatio <= 999.0)) {
+            alertSwal('POI 아이콘 비율은 10이상 999이하여야합니다.').then(() => iconInput?.focus());
             return;
         }
-        if (!(poiTextSizeRatio >= 10.0 && poiTextSizeRatio <= 100.0)) {
-            alertSwal('POI 텍스트 비율은 10이상 100이하여야합니다.').then(() => textInput?.focus());
+        if (!(poiTextSizeRatio >= 10.0 && poiTextSizeRatio <= 999.0)) {
+            alertSwal('POI 텍스트 비율은 10이상 999이하여야합니다.').then(() => textInput?.focus());
             return;
         }
 
